@@ -33,7 +33,7 @@ func (c *Client) SubmitTemplate(ctx context.Context, account *Account, template 
 	isUpdate := template.MetaTemplateID != ""
 	var url string
 	if isUpdate {
-		url = fmt.Sprintf("%s/%s", c.baseURL, template.MetaTemplateID)
+		url = fmt.Sprintf("%s/%s/%s", c.getBaseURL(), account.APIVersion, template.MetaTemplateID)
 	} else {
 		url = c.buildTemplatesURL(account)
 	}

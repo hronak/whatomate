@@ -12,6 +12,8 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+
+	"github.com/shridarpatil/whatomate/pkg/whatsapp"
 )
 
 // Config holds all configuration for the application
@@ -268,7 +270,7 @@ func setDefaults(cfg *Config) {
 		cfg.JWT.RefreshExpiryDays = 1
 	}
 	if cfg.WhatsApp.APIVersion == "" {
-		cfg.WhatsApp.APIVersion = "v18.0"
+		cfg.WhatsApp.APIVersion = whatsapp.DefaultAPIVersion
 	}
 	if cfg.WhatsApp.BaseURL == "" {
 		cfg.WhatsApp.BaseURL = "https://graph.facebook.com"

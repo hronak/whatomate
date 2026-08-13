@@ -110,7 +110,7 @@ async function fetchWhatsAppConfig() {
     whatsappConfig.value = {
       app_id: response.data.data.whatsapp_app_id,
       config_id: response.data.data.whatsapp_config_id,
-      api_version: response.data.data.whatsapp_api_version || 'v21.0'
+      api_version: response.data.data.whatsapp_api_version || 'v26.0'
     }
     if (whatsappConfig.value.app_id && whatsappConfig.value.config_id) {
       loadFacebookSDK()

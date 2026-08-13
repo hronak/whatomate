@@ -115,7 +115,7 @@ const form = ref({
   access_token: '',
   app_secret: '',
   webhook_verify_token: '',
-  api_version: 'v21.0',
+  api_version: 'v26.0',
   is_default_incoming: false,
   is_default_outgoing: false,
   auto_read_receipt: false,
