@@ -933,6 +933,18 @@ func (a *App) fetchAPIContext(apiConfig models.JSONB, session *models.ChatbotSes
 	return string(respBody), nil
 }
 
+// isOpenAIReasoningModel reports whether model is a reasoning-family model
+// (GPT-5.x, o1/o3/o4) that requires max_completion_tokens instead of
+// max_tokens and rejects a non-default temperature.
+func isOpenAIReasoningModel(model string) bool {
+	for _, prefix := range []string{"gpt-5", "o1", "o3", "o4"} {
+		if strings.HasPrefix(model, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 // generateOpenAIResponse generates a response using OpenAI API
 func (a *App) generateOpenAIResponse(settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
 	url := "https://api.openai.com/v1/chat/completions"
@@ -980,13 +992,19 @@ func (a *App) generateOpenAIResponse(settings *models.ChatbotSettings, session *
 	})
 
 	payload := map[string]any{
-		"model":      settings.AI.Model,
-		"messages":   messages,
-		"max_tokens": settings.AI.MaxTokens,
+		"model":    settings.AI.Model,
+		"messages": messages,
 	}
 
-	if settings.AI.Temperature > 0 {
-		payload["temperature"] = settings.AI.Temperature
+	if isOpenAIReasoningModel(settings.AI.Model) {
+		// Reasoning models (GPT-5.x, o-series) reject max_tokens and
+		// non-default temperature.
+		payload["max_completion_tokens"] = settings.AI.MaxTokens
+	} else {
+		payload["max_tokens"] = settings.AI.MaxTokens
+		if settings.AI.Temperature > 0 {
+			payload["temperature"] = settings.AI.Temperature
+		}
 	}
 
 	jsonPayload, err := json.Marshal(payload)
@@ -1038,6 +1056,19 @@ func (a *App) generateOpenAIResponse(settings *models.ChatbotSettings, session *
 	return "", fmt.Errorf("no response from OpenAI")
 }
 
+// anthropicRejectsSamplingParams reports whether model returns a 400 when
+// temperature (or other sampling params) is set. Claude Opus 5, Sonnet 5,
+// Fable/Mythos, and Opus 4.7+ reject sampling params entirely; Haiku 4.5 and
+// Sonnet 4.6 still accept them.
+func anthropicRejectsSamplingParams(model string) bool {
+	for _, prefix := range []string{"claude-opus-5", "claude-sonnet-5", "claude-fable", "claude-mythos", "claude-opus-4-7", "claude-opus-4-8"} {
+		if strings.HasPrefix(model, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 // generateAnthropicResponse generates a response using Anthropic API
 func (a *App) generateAnthropicResponse(settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
 	url := "https://api.anthropic.com/v1/messages"
@@ -1087,7 +1118,7 @@ func (a *App) generateAnthropicResponse(settings *models.ChatbotSettings, sessio
 		payload["system"] = systemPrompt
 	}
 
-	if settings.AI.Temperature > 0 {
+	if settings.AI.Temperature > 0 && !anthropicRejectsSamplingParams(settings.AI.Model) {
 		payload["temperature"] = settings.AI.Temperature
 	}
 
