@@ -694,7 +694,7 @@ func (a *App) discoverWABAAndPhone(ctx context.Context, orgID uuid.UUID, accessT
 
 	appAccessToken := fmt.Sprintf("%s|%s", appID, appSecret)
 
-	debugInfo, err := a.WhatsApp.GetTokenDebugInfo(ctx, accessToken, appAccessToken)
+	debugInfo, err := a.WhatsApp.GetTokenDebugInfo(ctx, accessToken, appAccessToken, a.defaultAPIVersion())
 	if err != nil {
 		a.Log.Error("Failed to debug token", "error", err)
 		return "", "", "", fmt.Errorf("failed to validate token details: %w", err)
@@ -713,7 +713,7 @@ func (a *App) discoverWABAAndPhone(ctx context.Context, orgID uuid.UUID, accessT
 
 	if discoveredWABAID == "" {
 		a.Log.Warn("No WABA ID found in granular scopes, falling back to /me/accounts strategy")
-		sharedInfo, err := a.WhatsApp.GetSharedWABA(ctx, accessToken)
+		sharedInfo, err := a.WhatsApp.GetSharedWABA(ctx, accessToken, a.defaultAPIVersion())
 		if err == nil && len(sharedInfo.Data) > 0 {
 			discoveredWABAID = sharedInfo.Data[0].ID
 		}
@@ -727,7 +727,7 @@ func (a *App) discoverWABAAndPhone(ctx context.Context, orgID uuid.UUID, accessT
 	a.Log.Info("Discovered WABA ID", "waba_id", wabaID)
 
 	if phoneID == "" {
-		phonesResp, err := a.WhatsApp.GetWABAPhoneNumbers(ctx, wabaID, accessToken)
+		phonesResp, err := a.WhatsApp.GetWABAPhoneNumbers(ctx, wabaID, accessToken, a.defaultAPIVersion())
 		if err != nil {
 			a.Log.Error("Failed to fetch phone numbers from Meta", "error", err)
 			return "", "", "", fmt.Errorf("failed to fetch phone numbers from WABA: %w", err)
@@ -960,7 +960,7 @@ func (a *App) defaultAPIVersion() string {
 	if a.Config.WhatsApp.APIVersion != "" {
 		return a.Config.WhatsApp.APIVersion
 	}
-	return "v21.0"
+	return whatsapp.DefaultAPIVersion
 }
 
 func (a *App) encryptAccountSecrets(account *models.WhatsAppAccount) error {

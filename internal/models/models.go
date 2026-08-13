@@ -300,7 +300,7 @@ type WhatsAppAccount struct {
 	AccessToken        string    `gorm:"type:text;not null" json:"-"` // encrypted
 	AppSecret          string    `gorm:"size:255" json:"-"`           // Meta App Secret for webhook signature verification
 	WebhookVerifyToken string    `gorm:"size:255" json:"webhook_verify_token"`
-	APIVersion         string    `gorm:"size:20;default:'v21.0'" json:"api_version"`
+	APIVersion         string    `gorm:"size:20;default:'v26.0'" json:"api_version"` // keep in sync with whatsapp.DefaultAPIVersion
 	IsDefaultIncoming  bool      `gorm:"default:false" json:"is_default_incoming"`
 	IsDefaultOutgoing  bool      `gorm:"default:false" json:"is_default_outgoing"`
 	AutoReadReceipt    bool      `gorm:"default:false" json:"auto_read_receipt"`

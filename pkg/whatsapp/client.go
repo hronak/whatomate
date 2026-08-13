@@ -17,6 +17,10 @@ const (
 	DefaultTimeout = 30 * time.Second
 	// BaseURL for Meta Graph API
 	BaseURL = "https://graph.facebook.com"
+	// DefaultAPIVersion is the Meta Graph API version used when an account or
+	// config does not specify one. Keep the gorm default tag on
+	// models.WhatsAppAccount.APIVersion in sync (struct tags must be literals).
+	DefaultAPIVersion = "v26.0"
 )
 
 // Client is the WhatsApp Cloud API client
@@ -700,8 +704,11 @@ type TokenDebugInfo struct {
 }
 
 // GetTokenDebugInfo retrieves information about an access token
-func (c *Client) GetTokenDebugInfo(ctx context.Context, inputToken, accessToken string) (*TokenDebugInfo, error) {
-	url := fmt.Sprintf("%s/debug_token?input_token=%s", c.getBaseURL(), inputToken)
+func (c *Client) GetTokenDebugInfo(ctx context.Context, inputToken, accessToken, apiVersion string) (*TokenDebugInfo, error) {
+	if apiVersion == "" {
+		apiVersion = DefaultAPIVersion
+	}
+	url := fmt.Sprintf("%s/%s/debug_token?input_token=%s", c.getBaseURL(), apiVersion, inputToken)
 
 	// debug_token requires an app access token or a user access token
 	respBody, err := c.doRequest(ctx, http.MethodGet, url, nil, accessToken)
@@ -736,11 +743,14 @@ type SharedWABAResponse struct {
 
 // GetSharedWABA discovers the WABA and Phone Number shared with the app
 // This is useful when the embedded signup only returns a code and we need to find the connected account
-func (c *Client) GetSharedWABA(ctx context.Context, accessToken string) (*SharedWABAResponse, error) {
+func (c *Client) GetSharedWABA(ctx context.Context, accessToken, apiVersion string) (*SharedWABAResponse, error) {
+	if apiVersion == "" {
+		apiVersion = DefaultAPIVersion
+	}
 	// Query /me/accounts to find the WABA and its phone numbers
 	// granular_scopes might be needed to filter this if the user has many accounts,
 	// but for embedded signup, usually only the shared account is accessible or relevant.
-	url := fmt.Sprintf("%s/me/accounts?fields=id,name,phone_numbers{id,display_phone_number,verified_name}", c.getBaseURL())
+	url := fmt.Sprintf("%s/%s/me/accounts?fields=id,name,phone_numbers{id,display_phone_number,verified_name}", c.getBaseURL(), apiVersion)
 
 	respBody, err := c.doRequest(ctx, http.MethodGet, url, nil, accessToken)
 	if err != nil {
@@ -766,8 +776,11 @@ type WABAPhoneNumbersResponse struct {
 }
 
 // GetWABAPhoneNumbers retrieves all phone numbers associated with a WABA
-func (c *Client) GetWABAPhoneNumbers(ctx context.Context, wabaID, accessToken string) (*WABAPhoneNumbersResponse, error) {
-	url := fmt.Sprintf("%s/%s/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating", c.getBaseURL(), wabaID)
+func (c *Client) GetWABAPhoneNumbers(ctx context.Context, wabaID, accessToken, apiVersion string) (*WABAPhoneNumbersResponse, error) {
+	if apiVersion == "" {
+		apiVersion = DefaultAPIVersion
+	}
+	url := fmt.Sprintf("%s/%s/%s/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating", c.getBaseURL(), apiVersion, wabaID)
 
 	respBody, err := c.doRequest(ctx, http.MethodGet, url, nil, accessToken)
 	if err != nil {
