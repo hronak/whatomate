@@ -89,7 +89,7 @@ import {
   RotateCw,
   Filter,
   StickyNote
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { getInitials, getAvatarGradient } from '@/lib/utils'
 import { useColorMode } from '@/composables/useColorMode'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
@@ -104,7 +104,7 @@ import { useNotesStore } from '@/stores/notes'
 import { useHeaderMedia } from '@/composables/useHeaderMedia'
 import { CreateContactDialog } from '@/components/shared'
 import HeaderMediaUpload from '@/components/shared/HeaderMediaUpload.vue'
-import { Info } from 'lucide-vue-next'
+import { Info } from '@lucide/vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -361,7 +361,7 @@ async function executeCustomAction(action: CustomAction) {
   executingActionId.value = action.id
   try {
     const response = await customActionsService.execute(action.id, contactsStore.currentContact.id)
-    let result: ActionResult = (response.data as any).data || response.data
+    const result: ActionResult = (response.data as any).data || response.data
 
     // JavaScript actions are now executed server-side via goja.
     // The response already contains structured result fields (toast, clipboard, redirect_url, message).
@@ -1695,16 +1695,16 @@ async function sendMediaMessage() {
 <template>
   <div class="flex h-full bg-[#0a0a0b] light:bg-gray-50">
     <!-- Contacts List -->
-    <div class="w-80 border-r border-white/[0.08] light:border-gray-200 flex flex-col bg-[#0a0a0b] light:bg-white">
+    <div class="w-80 border-r border-white/8 light:border-gray-200 flex flex-col bg-[#0a0a0b] light:bg-white">
       <!-- Search Header -->
-      <div class="p-2 border-b border-white/[0.08] light:border-gray-200">
+      <div class="p-2 border-b border-white/8 light:border-gray-200">
         <div class="flex items-center gap-2">
           <div class="relative flex-1">
             <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40 light:text-gray-400" />
             <Input
               v-model="contactsStore.searchQuery"
               :placeholder="$t('chat.searchContacts') + '...'"
-              class="pl-8 h-8 text-sm bg-white/[0.04] border-white/[0.1] text-white placeholder:text-white/40 light:bg-gray-50 light:border-gray-200 light:text-gray-900 light:placeholder:text-gray-400"
+              class="pl-8 h-8 text-sm bg-white/4 border-white/10 text-white placeholder:text-white/40 light:bg-gray-50 light:border-gray-200 light:text-gray-900 light:placeholder:text-gray-400"
             />
           </div>
           <!-- Add Contact -->
@@ -1714,7 +1714,7 @@ async function sendMediaMessage() {
                 variant="ghost"
                 size="icon"
                 :aria-label="$t('chat.addContact')"
-                class="h-8 w-8 shrink-0 text-white/40 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100"
+                class="h-8 w-8 shrink-0 text-white/40 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100"
                 @click="openAddContactDialog"
               >
                 <UserPlus class="h-4 w-4" />
@@ -1729,7 +1729,7 @@ async function sendMediaMessage() {
                 variant="ghost"
                 size="icon"
                 class="h-8 w-8 shrink-0 relative"
-                :class="contactsStore.selectedTags.length > 0 ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/40 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100'"
+                :class="contactsStore.selectedTags.length > 0 ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/40 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100'"
               >
                 <Filter class="h-4 w-4" />
                 <span v-if="contactsStore.selectedTags.length > 0" class="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-emerald-500 text-[10px] text-white flex items-center justify-center">
@@ -1759,8 +1759,8 @@ async function sendMediaMessage() {
                   <button
                     v-for="tag in tagsStore.tags"
                     :key="tag.name"
-                    class="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-white/[0.08] light:hover:bg-gray-100 transition-colors"
-                    :class="contactsStore.selectedTags.includes(tag.name) && 'bg-white/[0.08] light:bg-gray-100'"
+                    class="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-white/8 hover:light:bg-gray-100 transition-colors"
+                    :class="contactsStore.selectedTags.includes(tag.name) && 'bg-white/8 light:bg-gray-100'"
                     @click="toggleTagFilter(tag.name)"
                   >
                     <span :class="['w-2 h-2 rounded-full shrink-0', getTagColorClass(tag.color).split(' ')[0]]" />
@@ -1797,14 +1797,14 @@ async function sendMediaMessage() {
             v-for="contact in contactsStore.sortedContacts"
             :key="contact.id"
             :class="[
-              'flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/[0.04] light:hover:bg-gray-50 transition-colors',
-              contactsStore.currentContact?.id === contact.id && 'bg-white/[0.08] light:bg-gray-100'
+              'flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/4 hover:light:bg-gray-50 transition-colors',
+              contactsStore.currentContact?.id === contact.id && 'bg-white/8 light:bg-gray-100'
             ]"
             @click="handleContactClick(contact)"
           >
-            <Avatar class="h-9 w-9 ring-2 ring-white/[0.1] light:ring-gray-200">
+            <Avatar class="h-9 w-9 ring-2 ring-white/10 light:ring-gray-200">
               <AvatarImage :src="contact.avatar_url" />
-              <AvatarFallback :class="'text-xs bg-gradient-to-br text-white ' + getAvatarGradient(contact.name || contact.phone_number)">
+              <AvatarFallback :class="'text-xs bg-linear-to-br text-white ' + getAvatarGradient(contact.name || contact.phone_number)">
                 {{ getInitials(contact.name || contact.phone_number) }}
               </AvatarFallback>
             </Avatar>
@@ -1816,7 +1816,7 @@ async function sendMediaMessage() {
                 >
                   {{ contact.name || contact.phone_number }}
                 </p>
-                <span class="flex-shrink-0 text-[11px] text-white/40 light:text-gray-500">
+                <span class="shrink-0 text-[11px] text-white/40 light:text-gray-500">
                   {{ formatContactTime(contact.last_message_at) }}
                 </span>
               </div>
@@ -1824,7 +1824,7 @@ async function sendMediaMessage() {
                 <p class="flex-1 min-w-0 text-xs text-white/50 light:text-gray-500 truncate">
                   {{ contact.phone_number }}
                 </p>
-                <Badge v-if="contact.unread_count > 0" class="flex-shrink-0 h-5 text-[10px] bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700">
+                <Badge v-if="contact.unread_count > 0" class="shrink-0 h-5 text-[10px] bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700">
                   {{ contact.unread_count }}
                 </Badge>
               </div>
@@ -1852,7 +1852,7 @@ async function sendMediaMessage() {
         class="flex-1 flex items-center justify-center text-white/40 light:text-gray-500"
       >
         <div class="text-center">
-          <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
+          <div class="h-16 w-16 rounded-2xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
             <Send class="h-8 w-8 text-white" />
           </div>
           <h3 class="font-medium text-lg mb-1 text-white light:text-gray-900">{{ $t('chat.selectConversation') }}</h3>
@@ -1863,11 +1863,11 @@ async function sendMediaMessage() {
       <!-- Chat Interface -->
       <template v-else>
         <!-- Chat Header -->
-        <div class="h-14 flex-shrink-0 px-4 border-b border-white/[0.08] light:border-gray-200 flex items-center justify-between bg-[#0f0f10] light:bg-white">
+        <div class="h-14 shrink-0 px-4 border-b border-white/8 light:border-gray-200 flex items-center justify-between bg-[#0f0f10] light:bg-white">
           <div class="flex items-center gap-2">
-            <Avatar class="h-8 w-8 ring-2 ring-white/[0.1] light:ring-gray-200">
+            <Avatar class="h-8 w-8 ring-2 ring-white/10 light:ring-gray-200">
               <AvatarImage :src="contactsStore.currentContact.avatar_url" />
-              <AvatarFallback :class="'text-xs bg-gradient-to-br text-white ' + getAvatarGradient(contactsStore.currentContact.name || contactsStore.currentContact.phone_number)">
+              <AvatarFallback :class="'text-xs bg-linear-to-br text-white ' + getAvatarGradient(contactsStore.currentContact.name || contactsStore.currentContact.phone_number)">
                 {{ getInitials(contactsStore.currentContact.name || contactsStore.currentContact.phone_number) }}
               </AvatarFallback>
             </Avatar>
@@ -1898,7 +1898,7 @@ async function sendMediaMessage() {
             />
             <Tooltip v-if="canAssignContacts">
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100" @click="isAssignDialogOpen = true">
+                <Button variant="ghost" size="icon" class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100" @click="isAssignDialogOpen = true">
                   <UserPlus class="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -1906,7 +1906,7 @@ async function sendMediaMessage() {
             </Tooltip>
             <Tooltip v-if="activeTransferId">
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100" :disabled="isResuming" @click="resumeChatbot">
+                <Button variant="ghost" size="icon" class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100" :disabled="isResuming" @click="resumeChatbot">
                   <Play class="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -1918,7 +1918,7 @@ async function sendMediaMessage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100"
+                  class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100"
                   :disabled="executingActionId === action.id"
                   @click="executeCustomAction(action)"
                 >
@@ -1934,7 +1934,7 @@ async function sendMediaMessage() {
                   variant="ghost"
                   size="icon"
                   id="notes-button"
-                  class="h-8 w-8 relative text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100"
+                  class="h-8 w-8 relative text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100"
                   :class="isNotesPanelOpen && 'bg-amber-500/10 text-amber-400 light:bg-amber-50 light:text-amber-600'"
                   @click="isNotesPanelOpen = !isNotesPanelOpen"
                 >
@@ -1956,8 +1956,8 @@ async function sendMediaMessage() {
                   variant="ghost"
                   size="icon"
                   id="info-button"
-                  class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100"
-                  :class="isInfoPanelOpen && 'bg-white/[0.08] text-white light:bg-gray-100 light:text-gray-900'"
+                  class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100"
+                  :class="isInfoPanelOpen && 'bg-white/8 text-white light:bg-gray-100 light:text-gray-900'"
                   @click="isInfoPanelOpen = !isInfoPanelOpen"
                 >
                   <Info class="h-4 w-4" />
@@ -1967,7 +1967,7 @@ async function sendMediaMessage() {
             </Tooltip>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100">
+                <Button variant="ghost" size="icon" class="h-8 w-8 text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100">
                   <MoreVertical class="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -1998,17 +1998,17 @@ async function sendMediaMessage() {
         <!-- Account Tabs (shown when contact has messages from multiple WhatsApp accounts) -->
         <div
           v-if="orgAccounts.length > 1 && selectedAccount"
-          class="flex-shrink-0 px-4 py-2 border-b border-white/[0.08] light:border-gray-200 bg-[#0a0a0b] light:bg-gray-50"
+          class="shrink-0 px-4 py-2 border-b border-white/8 light:border-gray-200 bg-[#0a0a0b] light:bg-gray-50"
         >
-          <div class="inline-flex items-center gap-1 rounded-lg bg-white/[0.06] light:bg-gray-100 p-1">
+          <div class="inline-flex items-center gap-1 rounded-lg bg-white/6 light:bg-gray-100 p-1">
             <button
               v-for="acct in orgAccounts"
               :key="acct.name"
               :class="[
                 'rounded-md px-3 py-1 text-xs font-medium whitespace-nowrap transition-all',
                 acct.name === selectedAccount
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-white/[0.08] text-white/70 hover:text-white/90 hover:bg-white/[0.12] light:bg-gray-200 light:text-gray-600 light:hover:text-gray-800 light:hover:bg-gray-300'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-white/8 text-white/70 hover:text-white/90 hover:bg-white/12 light:bg-gray-200 light:text-gray-600 hover:light:text-gray-800 hover:light:bg-gray-300'
               ]"
               @click="switchAccount(acct.name)"
             >
@@ -2026,7 +2026,7 @@ async function sendMediaMessage() {
           <Transition name="sticky-date">
             <div
               v-if="showStickyDate"
-              class="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-white/[0.08] light:bg-gray-200 backdrop-blur-sm rounded-full text-[11px] text-white/50 light:text-gray-600 font-medium shadow-sm"
+              class="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-white/8 light:bg-gray-200 backdrop-blur-sm rounded-full text-[11px] text-white/50 light:text-gray-600 font-medium shadow-xs"
             >
               {{ stickyDate }}
             </div>
@@ -2051,7 +2051,7 @@ async function sendMediaMessage() {
                   class="flex items-center justify-center my-4"
                   :data-date-separator="getDateLabel(message.created_at)"
                 >
-                  <div class="px-3 py-1 bg-white/[0.06] light:bg-gray-200 rounded-full text-[11px] text-white/40 light:text-gray-600 font-medium">
+                  <div class="px-3 py-1 bg-white/6 light:bg-gray-200 rounded-full text-[11px] text-white/40 light:text-gray-600 font-medium">
                     {{ getDateLabel(message.created_at) }}
                   </div>
                 </div>
@@ -2062,7 +2062,7 @@ async function sendMediaMessage() {
                   v-if="newMessagesCount > 0 && message.id === firstUnreadId"
                   class="flex items-center justify-center my-4"
                 >
-                  <div class="px-3 py-1 bg-white/[0.06] light:bg-gray-200 rounded-full text-[11px] text-white/40 light:text-gray-600 font-medium">
+                  <div class="px-3 py-1 bg-white/6 light:bg-gray-200 rounded-full text-[11px] text-white/40 light:text-gray-600 font-medium">
                     {{ newMessagesCount }} {{ newMessagesCount === 1 ? $t('chat.unreadMessage', 'unread message') : $t('chat.unreadMessages', 'unread messages') }}
                   </div>
                 </div>
@@ -2246,11 +2246,11 @@ async function sendMediaMessage() {
                 </div>
                 <!-- Button reply - WhatsApp style -->
                 <div v-if="message.message_type === 'button_reply'" class="button-reply-bubble">
-                  <span class="whitespace-pre-wrap break-words">{{ getMessageContent(message) }}</span>
+                  <span class="whitespace-pre-wrap wrap-break-word">{{ getMessageContent(message) }}</span>
                   <span class="chat-bubble-time"><span>{{ formatMessageTime(message.created_at) }}</span></span>
                 </div>
                 <!-- Text content (for text messages or captions) -->
-                <span v-else-if="getMessageContent(message)" class="whitespace-pre-wrap break-words">{{ getMessageContent(message) }}<span class="chat-bubble-time"><span>{{ formatMessageTime(message.created_at) }}</span><component v-if="message.direction === 'outgoing'" :is="getMessageStatusIcon(message.status)" :class="['h-4 w-4 status-icon', getMessageStatusClass(message.status)]" /></span></span>
+                <span v-else-if="getMessageContent(message)" class="whitespace-pre-wrap wrap-break-word">{{ getMessageContent(message) }}<span class="chat-bubble-time"><span>{{ formatMessageTime(message.created_at) }}</span><component v-if="message.direction === 'outgoing'" :is="getMessageStatusIcon(message.status)" :class="['h-4 w-4 status-icon', getMessageStatusClass(message.status)]" /></span></span>
                 <!-- Fallback for media without URL -->
                 <span v-else-if="isMediaMessage(message) && !message.media_url" class="text-muted-foreground italic">[{{ message.message_type.charAt(0).toUpperCase() + message.message_type.slice(1) }}]<span class="chat-bubble-time"><span>{{ formatMessageTime(message.created_at) }}</span><component v-if="message.direction === 'outgoing'" :is="getMessageStatusIcon(message.status)" :class="['h-4 w-4 status-icon', getMessageStatusClass(message.status)]" /></span></span>
                 <!-- Interactive buttons - WhatsApp style -->
@@ -2443,7 +2443,7 @@ async function sendMediaMessage() {
         <!-- Reply indicator -->
         <div
           v-if="contactsStore.replyingTo"
-          class="px-4 py-2 border-t border-white/[0.08] light:border-gray-200 bg-white/[0.04] light:bg-gray-50 flex items-center justify-between"
+          class="px-4 py-2 border-t border-white/8 light:border-gray-200 bg-white/4 light:bg-gray-50 flex items-center justify-between"
         >
           <div class="flex-1 min-w-0">
             <p class="text-xs font-medium text-white/50 light:text-gray-500">
@@ -2453,20 +2453,20 @@ async function sendMediaMessage() {
               {{ getMessageContent(contactsStore.replyingTo) || '[Media]' }}
             </p>
           </div>
-          <button class="w-6 h-6 rounded hover:bg-white/[0.08] light:hover:bg-gray-200 flex items-center justify-center shrink-0 transition-colors" @click="contactsStore.clearReplyingTo">
+          <button class="w-6 h-6 rounded hover:bg-white/8 hover:light:bg-gray-200 flex items-center justify-center shrink-0 transition-colors" @click="contactsStore.clearReplyingTo">
             <X class="h-4 w-4 text-white/50 light:text-gray-500" />
           </button>
         </div>
 
         <!-- Message Input -->
-        <div class="p-4 border-t border-white/[0.08] light:border-gray-200 bg-[#0f0f10] light:bg-white">
-          <form @submit.prevent="sendMessage" class="flex items-center gap-2 p-2 rounded-xl bg-white/[0.06] light:bg-gray-100 border border-white/[0.08] light:border-gray-200">
+        <div class="p-4 border-t border-white/8 light:border-gray-200 bg-[#0f0f10] light:bg-white">
+          <form @submit.prevent="sendMessage" class="flex items-center gap-2 p-2 rounded-xl bg-white/6 light:bg-gray-100 border border-white/8 light:border-gray-200">
             <Tooltip>
               <TooltipTrigger as-child>
                 <span>
                   <Popover v-model:open="emojiPickerOpen">
                     <PopoverTrigger as-child>
-                      <button type="button" class="w-9 h-9 rounded-lg hover:bg-white/[0.08] light:hover:bg-gray-200 flex items-center justify-center transition-colors">
+                      <button type="button" class="w-9 h-9 rounded-lg hover:bg-white/8 hover:light:bg-gray-200 flex items-center justify-center transition-colors">
                         <Smile class="w-[18px] h-[18px] text-white/40 light:text-gray-500" />
                       </button>
                     </PopoverTrigger>
@@ -2509,7 +2509,7 @@ async function sendMediaMessage() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger as-child>
-                <button type="button" class="w-9 h-9 rounded-lg hover:bg-white/[0.08] light:hover:bg-gray-200 flex items-center justify-center transition-colors" @click="openFilePicker">
+                <button type="button" class="w-9 h-9 rounded-lg hover:bg-white/8 hover:light:bg-gray-200 flex items-center justify-center transition-colors" @click="openFilePicker">
                   <Paperclip class="w-[18px] h-[18px] text-white/40 light:text-gray-500" />
                 </button>
               </TooltipTrigger>
@@ -2527,11 +2527,11 @@ async function sendMediaMessage() {
               v-model="messageInput"
               :placeholder="$t('chat.typeMessage') + '...'"
               rows="1"
-              class="flex-1 bg-transparent text-[14px] text-white light:text-gray-900 placeholder:text-white/30 light:placeholder:text-gray-400 focus:outline-none resize-none min-h-[36px] max-h-[120px] py-2 overflow-y-auto"
+              class="flex-1 bg-transparent text-[14px] text-white light:text-gray-900 placeholder:text-white/30 light:placeholder:text-gray-400 focus:outline-hidden resize-none min-h-[36px] max-h-[120px] py-2 overflow-y-auto"
               @keydown.enter.exact.prevent="sendMessage"
               @input="autoResizeTextarea"
             />
-            <button type="submit" class="w-9 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-500 light:bg-emerald-500 light:hover:bg-emerald-600 flex items-center justify-center transition-colors disabled:opacity-50" :disabled="!messageInput.trim() || isSending">
+            <button type="submit" class="w-9 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-500 light:bg-emerald-500 hover:light:bg-emerald-600 flex items-center justify-center transition-colors disabled:opacity-50" :disabled="!messageInput.trim() || isSending">
               <Send class="w-4 h-4 text-white" />
             </button>
           </form>
@@ -2611,7 +2611,7 @@ async function sendMediaMessage() {
             <label class="text-xs font-medium text-muted-foreground">{{ $t('chat.preview') }}</label>
             <div class="chat-bubble chat-bubble-outgoing ml-auto" style="max-width: 100%;">
               <img v-if="templateHeaderPreview" :src="templateHeaderPreview" class="rounded-lg mb-2 max-h-40 w-full object-cover" />
-              <span class="whitespace-pre-wrap break-words text-sm">{{ templatePreview }}</span>
+              <span class="whitespace-pre-wrap wrap-break-word text-sm">{{ templatePreview }}</span>
               <div
                 v-if="selectedTemplate?.buttons?.length"
                 class="interactive-buttons mt-2 -mx-2 -mb-1.5 border-t"
@@ -2662,7 +2662,7 @@ async function sendMediaMessage() {
           <div v-if="cannedPreview || cannedPreviewButtons.length" class="space-y-1">
             <label class="text-xs font-medium text-muted-foreground">{{ $t('chat.preview') }}</label>
             <div id="canned-response-preview" class="chat-bubble chat-bubble-outgoing ml-auto" style="max-width: 100%;">
-              <span v-if="cannedPreview" class="whitespace-pre-wrap break-words text-sm">{{ cannedPreview }}</span>
+              <span v-if="cannedPreview" class="whitespace-pre-wrap wrap-break-word text-sm">{{ cannedPreview }}</span>
               <PreviewButtonGroup
                 v-if="cannedPreviewButtons.length"
                 :buttons="cannedPreviewButtons"

@@ -75,7 +75,7 @@ import {
   FileSpreadsheet,
   ChevronDown,
   Download,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 interface Campaign {
   id: string
@@ -950,7 +950,7 @@ onUnmounted(() => {
   <DetailPageLayout
     :title="isNew ? $t('campaigns.newCampaign', 'New Campaign') : (campaign?.name || '')"
     :icon="Megaphone"
-    icon-gradient="bg-gradient-to-br from-pink-500 to-rose-600 shadow-pink-500/20"
+    icon-gradient="bg-linear-to-br from-pink-500 to-rose-600 shadow-pink-500/20"
     back-link="/campaigns"
     :breadcrumbs="breadcrumbs"
     :is-loading="isLoading"
@@ -1195,7 +1195,7 @@ onUnmounted(() => {
       <Collapsible :default-open="recipients.length > 0 && recipients.length <= 20">
         <CardHeader class="pb-3 flex flex-row items-center justify-between">
           <CollapsibleTrigger class="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <ChevronDown class="h-4 w-4 text-muted-foreground transition-transform [[data-state=closed]_&]:rotate-[-90deg]" />
+            <ChevronDown class="h-4 w-4 text-muted-foreground transition-transform in-data-[state=closed]:-rotate-90" />
             <CardTitle class="text-sm font-medium">
               {{ $t('campaigns.recipients', 'Recipients') }} ({{ recipients.length }})
             </CardTitle>

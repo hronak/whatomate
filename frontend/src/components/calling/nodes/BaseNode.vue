@@ -34,12 +34,12 @@ const headerGradient = computed(() => gradientMap[props.headerClass] || props.he
       id="input"
       type="target"
       :position="Position.Top"
-      class="!w-3.5 !h-3.5 !rounded-full !bg-slate-400 !border-2 !border-background hover:!bg-slate-300 !transition-colors"
+      class="w-3.5! h-3.5! rounded-full! bg-slate-400! border-2! border-background! hover:bg-slate-300! transition-colors!"
       style="z-index: 10;"
     />
 
     <!-- Header -->
-    <div :class="['px-3 py-2 rounded-t-lg text-white text-xs font-semibold flex items-center gap-2 overflow-hidden bg-gradient-to-r', headerGradient]">
+    <div :class="['px-3 py-2 rounded-t-lg text-white text-xs font-semibold flex items-center gap-2 overflow-hidden bg-linear-to-r', headerGradient]">
       <slot name="icon" />
       <span class="truncate">{{ label }}</span>
     </div>
@@ -62,7 +62,7 @@ const headerGradient = computed(() => gradientMap[props.headerClass] || props.he
           left: outputHandles.length === 1 ? '50%' : `${((idx + 1) / (outputHandles.length + 1)) * 100}%`,
           zIndex: 10,
         }"
-        class="!w-3.5 !h-3.5 !rounded-full !bg-primary !border-2 !border-background hover:!bg-primary/80 !transition-colors"
+        class="w-3.5! h-3.5! rounded-full! bg-primary! border-2! border-background! hover:bg-primary/80! transition-colors!"
       />
       <span
         v-for="(handle, idx) in outputHandles"
@@ -80,7 +80,7 @@ const headerGradient = computed(() => gradientMap[props.headerClass] || props.he
         id="default"
         type="source"
         :position="Position.Bottom"
-        class="!w-3.5 !h-3.5 !rounded-full !bg-primary !border-2 !border-background hover:!bg-primary/80 !transition-colors"
+        class="w-3.5! h-3.5! rounded-full! bg-primary! border-2! border-background! hover:bg-primary/80! transition-colors!"
         style="z-index: 10;"
       />
     </template>

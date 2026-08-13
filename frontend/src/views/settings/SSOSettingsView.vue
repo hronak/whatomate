@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PageHeader, ConfirmDialog, ErrorState } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { ShieldCheck, Settings2, ExternalLink, Info, Copy, Check, Loader2 } from 'lucide-vue-next'
+import { ShieldCheck, Settings2, ExternalLink, Info, Copy, Check, Loader2 } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const { t } = useI18n()
@@ -236,7 +236,7 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('sso.title')" :subtitle="$t('sso.subtitle')" :icon="ShieldCheck" icon-gradient="bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20" />
+    <PageHeader :title="$t('sso.title')" :subtitle="$t('sso.subtitle')" :icon="ShieldCheck" icon-gradient="bg-linear-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20" />
 
     <ErrorState
       v-if="fetchError && !isLoading"

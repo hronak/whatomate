@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Send, Mic } from 'lucide-vue-next'
+import { Send, Mic } from '@lucide/vue'
 
 const props = defineProps<{
   inputType: string | null
@@ -78,7 +78,7 @@ function handleKeydown(event: KeyboardEvent) {
         v-model="inputValue"
         :type="inputTypeAttr"
         :placeholder="inputPlaceholder"
-        class="w-full text-sm bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder:text-gray-400"
+        class="w-full text-sm bg-transparent border-none outline-hidden text-gray-800 dark:text-gray-200 placeholder:text-gray-400"
         @keydown="handleKeydown"
       />
       <p v-else class="text-sm text-gray-400">

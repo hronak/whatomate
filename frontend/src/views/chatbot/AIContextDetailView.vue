@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Sparkles, Save } from 'lucide-vue-next'
+import { Sparkles, Save } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -186,7 +186,7 @@ onMounted(async () => {
   <DetailPageLayout
     :title="isNew ? $t('aiContexts.newContext', 'New AI Context') : (contextData?.name || '')"
     :icon="Sparkles"
-    icon-gradient="bg-gradient-to-br from-violet-500 to-purple-600 shadow-violet-500/20"
+    icon-gradient="bg-linear-to-br from-violet-500 to-purple-600 shadow-violet-500/20"
     back-link="/chatbot/ai"
     :breadcrumbs="breadcrumbs"
     :is-loading="isLoading"

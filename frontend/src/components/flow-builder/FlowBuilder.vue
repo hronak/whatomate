@@ -29,7 +29,7 @@ import {
   ArrowRight,
   Settings2,
   Layers
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 // Component types available in WhatsApp Flows
 const componentTypes = [
@@ -350,7 +350,7 @@ defineExpose({
 <template>
   <div class="flex h-full gap-4">
     <!-- Screens Panel -->
-    <Card class="w-64 flex-shrink-0 flex flex-col overflow-hidden">
+    <Card class="w-64 shrink-0 flex flex-col overflow-hidden">
       <CardHeader class="py-3 px-4">
         <div class="flex items-center justify-between">
           <CardTitle class="text-sm font-medium flex items-center gap-2">
@@ -398,7 +398,7 @@ defineExpose({
 
     <!-- Screen Editor -->
     <Card class="flex-1 flex flex-col overflow-hidden">
-      <CardHeader class="py-3 px-4 flex-shrink-0">
+      <CardHeader class="py-3 px-4 shrink-0">
         <div class="flex items-center justify-between">
           <div v-if="selectedScreen" class="flex items-center gap-2">
             <Input
@@ -415,7 +415,7 @@ defineExpose({
 
       <div v-if="selectedScreen" class="flex-1 flex overflow-hidden">
         <!-- Component Palette -->
-        <ScrollArea class="w-48 border-r flex-shrink-0">
+        <ScrollArea class="w-48 border-r shrink-0">
           <div class="p-3">
             <p class="text-xs font-medium text-muted-foreground mb-2">Add Components</p>
             <div class="grid grid-cols-2 gap-1">
@@ -589,8 +589,8 @@ defineExpose({
     </Card>
 
     <!-- Properties Panel -->
-    <Card class="w-72 flex-shrink-0 flex flex-col overflow-hidden">
-      <CardHeader class="py-3 px-4 flex-shrink-0">
+    <Card class="w-72 shrink-0 flex flex-col overflow-hidden">
+      <CardHeader class="py-3 px-4 shrink-0">
         <CardTitle class="text-sm font-medium flex items-center gap-2">
           <Settings2 class="h-4 w-4" />
           Properties
@@ -696,7 +696,7 @@ defineExpose({
                 <Button
                   variant="ghost"
                   size="icon"
-                  class="h-9 w-9 flex-shrink-0"
+                  class="h-9 w-9 shrink-0"
                   @click="removeOption(index)"
                 >
                   <Trash2 class="h-3 w-3" />

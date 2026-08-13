@@ -5,7 +5,7 @@ import { useCallingStore } from '@/stores/calling'
 import { outgoingCallsService } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Phone, Loader2, Clock, X } from 'lucide-vue-next'
+import { Phone, Loader2, Clock, X } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
 const props = defineProps<{
@@ -109,8 +109,8 @@ async function handleCall() {
         class="h-8 w-8 relative"
         :class="[
           permission?.status === 'accepted'
-            ? 'text-green-500 hover:text-green-400 hover:bg-green-500/10 light:text-green-600 light:hover:text-green-700 light:hover:bg-green-50'
-            : 'text-white/50 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100'
+            ? 'text-green-500 hover:text-green-400 hover:bg-green-500/10 light:text-green-600 hover:light:text-green-700 hover:light:bg-green-50'
+            : 'text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100'
         ]"
         :disabled="store.isOnCall || isInitiating"
         @click="handleCall"

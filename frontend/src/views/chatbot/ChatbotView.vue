@@ -20,7 +20,7 @@ import {
   Users,
   MessageSquare,
   Clock
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const { t } = useI18n()
 
@@ -129,12 +129,12 @@ const statCards = computed(() => [
       :title="$t('chatbot.title')"
       :description="$t('chatbot.subtitle')"
       :icon="Bot"
-      icon-gradient="bg-gradient-to-br from-purple-500 to-pink-600 shadow-purple-500/20"
+      icon-gradient="bg-linear-to-br from-purple-500 to-pink-600 shadow-purple-500/20"
     >
       <template #actions>
         <div class="flex items-center gap-3">
           <Badge
-            :class="settings.enabled ? 'bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700' : 'bg-white/[0.08] text-white/50 light:bg-gray-100 light:text-gray-500'"
+            :class="settings.enabled ? 'bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700' : 'bg-white/8 text-white/50 light:bg-gray-100 light:text-gray-500'"
           >
             {{ settings.enabled ? $t('chatbot.active') : $t('chatbot.inactive') }}
           </Badge>
@@ -180,19 +180,19 @@ const statCards = computed(() => [
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <!-- Skeleton Loading State -->
           <template v-if="isLoading">
-            <div v-for="i in 4" :key="i" class="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 light:bg-white light:border-gray-200">
+            <div v-for="i in 4" :key="i" class="rounded-xl border border-white/8 bg-white/2 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton class="h-4 w-24 bg-white/[0.08] light:bg-gray-200" />
-                <Skeleton class="h-10 w-10 rounded-lg bg-white/[0.08] light:bg-gray-200" />
+                <Skeleton class="h-4 w-24 bg-white/8 light:bg-gray-200" />
+                <Skeleton class="h-10 w-10 rounded-lg bg-white/8 light:bg-gray-200" />
               </div>
               <div class="pt-2">
-                <Skeleton class="h-8 w-16 bg-white/[0.08] light:bg-gray-200" />
+                <Skeleton class="h-8 w-16 bg-white/8 light:bg-gray-200" />
               </div>
             </div>
           </template>
           <!-- Actual Stats -->
           <template v-else>
-            <div v-for="card in statCards" :key="card.key" class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div v-for="card in statCards" :key="card.key" class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ card.title }}</span>
                 <div :class="[
@@ -222,10 +222,10 @@ const statCards = computed(() => [
 
         <!-- Quick Actions -->
         <div class="grid gap-4 md:grid-cols-3">
-          <RouterLink to="/chatbot/keywords" class="card-interactive rounded-xl border border-white/[0.08] bg-white/[0.02] h-full light:bg-white light:border-gray-200">
+          <RouterLink to="/chatbot/keywords" class="card-interactive rounded-xl border border-white/8 bg-white/2 h-full light:bg-white light:border-gray-200">
             <div class="p-6">
               <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <div class="h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                   <Key class="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -241,10 +241,10 @@ const statCards = computed(() => [
             </div>
           </RouterLink>
 
-          <RouterLink to="/chatbot/flows" class="card-interactive rounded-xl border border-white/[0.08] bg-white/[0.02] h-full light:bg-white light:border-gray-200">
+          <RouterLink to="/chatbot/flows" class="card-interactive rounded-xl border border-white/8 bg-white/2 h-full light:bg-white light:border-gray-200">
             <div class="p-6">
               <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <div class="h-10 w-10 rounded-lg bg-linear-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
                   <Workflow class="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -260,10 +260,10 @@ const statCards = computed(() => [
             </div>
           </RouterLink>
 
-          <RouterLink to="/chatbot/ai" class="card-interactive rounded-xl border border-white/[0.08] bg-white/[0.02] h-full light:bg-white light:border-gray-200">
+          <RouterLink to="/chatbot/ai" class="card-interactive rounded-xl border border-white/8 bg-white/2 h-full light:bg-white light:border-gray-200">
             <div class="p-6">
               <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <div class="h-10 w-10 rounded-lg bg-linear-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
                   <Sparkles class="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -281,7 +281,7 @@ const statCards = computed(() => [
         </div>
 
         <!-- Current Settings -->
-        <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] light:bg-white light:border-gray-200">
+        <div class="rounded-xl border border-white/8 bg-white/2 light:bg-white light:border-gray-200">
           <div class="p-6">
             <div class="flex items-center justify-between">
               <div>
@@ -300,13 +300,13 @@ const statCards = computed(() => [
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
                 <h4 class="font-medium text-sm text-white/70 light:text-gray-700">{{ $t('chatbot.greetingMessage') }}</h4>
-                <p class="text-sm text-white/50 light:text-gray-600 bg-white/[0.04] light:bg-gray-100 p-3 rounded-lg">
+                <p class="text-sm text-white/50 light:text-gray-600 bg-white/4 light:bg-gray-100 p-3 rounded-lg">
                   {{ settings.greeting_message || $t('chatbot.notConfigured') }}
                 </p>
               </div>
               <div class="space-y-2">
                 <h4 class="font-medium text-sm text-white/70 light:text-gray-700">{{ $t('chatbot.fallbackMessage') }}</h4>
-                <p class="text-sm text-white/50 light:text-gray-600 bg-white/[0.04] light:bg-gray-100 p-3 rounded-lg">
+                <p class="text-sm text-white/50 light:text-gray-600 bg-white/4 light:bg-gray-100 p-3 rounded-lg">
                   {{ settings.fallback_message || $t('chatbot.notConfigured') }}
                 </p>
               </div>
@@ -323,7 +323,7 @@ const statCards = computed(() => [
                   <Badge v-if="settings.ai_enabled" class="bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700">
                     {{ settings.ai_provider || $t('chatbot.notConfigured') }}
                   </Badge>
-                  <Badge v-else class="bg-white/[0.08] text-white/50 light:bg-gray-100 light:text-gray-500">{{ $t('chatbot.disabled') }}</Badge>
+                  <Badge v-else class="bg-white/8 text-white/50 light:bg-gray-100 light:text-gray-500">{{ $t('chatbot.disabled') }}</Badge>
                 </div>
               </div>
             </div>

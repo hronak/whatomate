@@ -27,7 +27,7 @@ import {
   ChevronsUpDown,
   Check,
   Coffee
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 // Centralized Chart.js setup (registered once)
 import { Line, Bar, Doughnut } from '@/lib/charts'
 import { useDateRange } from '@/composables/useDateRange'
@@ -307,7 +307,7 @@ void _displayStats.value // Suppress unused warning
       :title="$t('agentAnalytics.title')"
       :description="isAdminOrManager ? $t('agentAnalytics.subtitle') : $t('agentAnalytics.myMetrics')"
       :icon="BarChart3"
-      icon-gradient="bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
+      icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
     >
       <template #actions>
         <!-- Agent Filter (Admin/Manager only) -->
@@ -376,20 +376,20 @@ void _displayStats.value // Suppress unused warning
         <!-- Stats Cards -->
         <div v-if="!error" class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <template v-if="isLoading">
-            <div v-for="i in 5" :key="i" class="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 light:bg-white light:border-gray-200">
+            <div v-for="i in 5" :key="i" class="rounded-xl border border-white/8 bg-white/2 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton class="h-4 w-24 bg-white/[0.08] light:bg-gray-200" />
-                <Skeleton class="h-10 w-10 rounded-lg bg-white/[0.08] light:bg-gray-200" />
+                <Skeleton class="h-4 w-24 bg-white/8 light:bg-gray-200" />
+                <Skeleton class="h-10 w-10 rounded-lg bg-white/8 light:bg-gray-200" />
               </div>
               <div class="pt-2">
-                <Skeleton class="h-8 w-20 mb-2 bg-white/[0.08] light:bg-gray-200" />
-                <Skeleton class="h-3 w-32 bg-white/[0.08] light:bg-gray-200" />
+                <Skeleton class="h-8 w-20 mb-2 bg-white/8 light:bg-gray-200" />
+                <Skeleton class="h-3 w-32 bg-white/8 light:bg-gray-200" />
               </div>
             </div>
           </template>
           <template v-else-if="analytics">
             <!-- Transfers Handled -->
-            <div class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.transfersHandled') }}</span>
                 <div class="h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
@@ -407,7 +407,7 @@ void _displayStats.value // Suppress unused warning
             </div>
 
             <!-- Active Conversations -->
-            <div class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.activeConversations') }}</span>
                 <div class="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
@@ -425,7 +425,7 @@ void _displayStats.value // Suppress unused warning
             </div>
 
             <!-- Avg Resolution Time -->
-            <div class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.avgResolutionTime') }}</span>
                 <div class="h-10 w-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
@@ -443,7 +443,7 @@ void _displayStats.value // Suppress unused warning
             </div>
 
             <!-- Messages Sent (for specific agent) or Queue Time (for all agents) -->
-            <div v-if="isAdminOrManager && selectedAgentId === 'all'" class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div v-if="isAdminOrManager && selectedAgentId === 'all'" class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.avgQueueTime') }}</span>
                 <div class="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -457,7 +457,7 @@ void _displayStats.value // Suppress unused warning
                 <p class="text-xs text-white/40 light:text-gray-500 mt-1">{{ $t('agentAnalytics.waitBeforeAssignment') }}</p>
               </div>
             </div>
-            <div v-else class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div v-else class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.messagesSent') }}</span>
                 <div class="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -473,7 +473,7 @@ void _displayStats.value // Suppress unused warning
             </div>
 
             <!-- Break Time -->
-            <div class="card-depth rounded-xl border border-white/[0.08] bg-white/[0.04] p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.breakTime') }}</span>
                 <div class="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center">

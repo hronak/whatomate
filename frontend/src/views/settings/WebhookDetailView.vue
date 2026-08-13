@@ -34,7 +34,7 @@ import {
   Save,
   Play,
   Plus,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -224,7 +224,7 @@ onMounted(async () => {
     <DetailPageLayout
       :title="isNew ? $t('webhooks.newWebhook', 'New Webhook') : (webhook?.name || '')"
       :icon="WebhookIcon"
-      icon-gradient="bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20"
+      icon-gradient="bg-linear-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20"
       back-link="/settings/webhooks"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"
@@ -289,9 +289,9 @@ onMounted(async () => {
             <Label class="text-xs">{{ $t('webhooks.customHeaders') }}</Label>
             <div class="space-y-2">
               <div v-for="(value, key) in form.headers" :key="key" class="flex items-center gap-2">
-                <Badge variant="secondary" class="flex-shrink-0">{{ key }}</Badge>
+                <Badge variant="secondary" class="shrink-0">{{ key }}</Badge>
                 <span class="text-sm truncate flex-1">{{ value }}</span>
-                <Button v-if="canWrite" variant="ghost" size="icon" class="h-6 w-6 flex-shrink-0" @click="removeHeader(key as string)">
+                <Button v-if="canWrite" variant="ghost" size="icon" class="h-6 w-6 shrink-0" @click="removeHeader(key as string)">
                   <Trash2 class="h-3 w-3" />
                 </Button>
               </div>

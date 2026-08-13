@@ -42,7 +42,7 @@ import {
   UserCog,
   Trash2,
   Save,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -179,7 +179,7 @@ onMounted(async () => {
     <DetailPageLayout
       :title="user?.full_name || ''"
       :icon="UserIcon"
-      icon-gradient="bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
+      icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
       back-link="/settings/users"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

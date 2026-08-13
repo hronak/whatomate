@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Globe } from 'lucide-vue-next'
+import { Globe } from '@lucide/vue'
 
 const { locale } = useI18n()
 

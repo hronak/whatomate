@@ -16,7 +16,7 @@ import {
   Clock,
   StopCircle,
   Variable,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const props = defineProps<{
   steps: FlowStep[]
@@ -95,7 +95,7 @@ const localListPickerOpen = computed({
           size="sm"
           class="h-7 px-3 rounded-md transition-all"
           :class="{
-            'bg-white dark:bg-gray-700 shadow-sm': mode === 'edit',
+            'bg-white dark:bg-gray-700 shadow-xs': mode === 'edit',
             'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'edit'
           }"
           @click="mode = 'edit'"
@@ -108,7 +108,7 @@ const localListPickerOpen = computed({
           size="sm"
           class="h-7 px-3 rounded-md transition-all"
           :class="{
-            'bg-white dark:bg-gray-700 shadow-sm': mode === 'preview',
+            'bg-white dark:bg-gray-700 shadow-xs': mode === 'preview',
             'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'preview'
           }"
           @click="mode = 'preview'"
@@ -159,7 +159,7 @@ const localListPickerOpen = computed({
               <!-- Phone Frame -->
               <div class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] relative">
                 <!-- Chat Header -->
-                <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
+                <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0">
                   <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                     <MessageSquare class="h-5 w-5" />
                   </div>
@@ -175,7 +175,7 @@ const localListPickerOpen = computed({
                   <!-- Bot Message Bubble -->
                   <div class="flex justify-start">
                     <div class="max-w-[85%]">
-                      <div class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none shadow-sm p-3">
+                      <div class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none shadow-xs p-3">
                         <p v-if="selectedStep.message" class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ selectedStep.message }}</p>
                         <p v-else class="text-sm text-gray-400 italic">No message configured</p>
                         <p class="text-[10px] text-gray-400 text-right mt-1">12:00 PM</p>
@@ -186,7 +186,7 @@ const localListPickerOpen = computed({
                         <button
                           v-for="(btn, idx) in selectedStep.buttons"
                           :key="idx"
-                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-sm border-0 flex items-center justify-center gap-1.5"
+                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
                         >
                           <ExternalLink v-if="btn.type === 'url'" class="h-4 w-4" />
                           {{ btn.title || `Option ${idx + 1}` }}
@@ -196,7 +196,7 @@ const localListPickerOpen = computed({
                       <!-- List Button (more than 3 options) -->
                       <div v-if="selectedStep.message_type === 'buttons' && selectedStep.buttons.length > 3" class="mt-1">
                         <button
-                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-sm border-0 flex items-center justify-center gap-2"
+                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
                           @click="localListPickerOpen = !localListPickerOpen"
                         >
                           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -208,7 +208,7 @@ const localListPickerOpen = computed({
 
                       <!-- WhatsApp Flow Button -->
                       <div v-if="selectedStep.message_type === 'whatsapp_flow'" class="mt-1">
-                        <button class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-sm border-0">
+                        <button class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0">
                           {{ selectedStep.input_config?.flow_cta || 'Open Form' }}
                         </button>
                       </div>
@@ -218,7 +218,7 @@ const localListPickerOpen = computed({
                   <!-- User Response Placeholder -->
                   <div v-if="selectedStep.message_type !== 'transfer'" class="flex justify-end">
                     <div class="max-w-[85%]">
-                      <div class="bg-[#005c4b] light:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-sm p-3">
+                      <div class="bg-[#005c4b] light:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3">
                         <p class="text-sm text-gray-200 light:text-gray-800 italic">
                           <template v-if="selectedStep.input_type === 'none'">
                             (No response needed)
@@ -269,7 +269,7 @@ const localListPickerOpen = computed({
                 </ScrollArea>
 
                 <!-- Input Bar -->
-                <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 flex-shrink-0">
+                <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0">
                   <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
                     <p class="text-sm text-gray-400">Type a message</p>
                   </div>
@@ -303,10 +303,10 @@ const localListPickerOpen = computed({
                         class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer flex items-center gap-3"
                         @click="localListPickerOpen = false"
                       >
-                        <div v-if="btn.type === 'url'" class="w-5 h-5 flex items-center justify-center flex-shrink-0 text-[#00a884]">
+                        <div v-if="btn.type === 'url'" class="w-5 h-5 flex items-center justify-center shrink-0 text-[#00a884]">
                           <ExternalLink class="h-4 w-4" />
                         </div>
-                        <div v-else class="w-5 h-5 rounded-full border-2 border-[#00a884] flex items-center justify-center flex-shrink-0">
+                        <div v-else class="w-5 h-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0">
                           <span class="text-[10px] text-[#00a884] font-medium">{{ idx + 1 }}</span>
                         </div>
                         <span class="text-sm text-gray-800 dark:text-gray-200 flex-1">{{ btn.title || `Option ${idx + 1}` }}</span>
@@ -321,7 +321,7 @@ const localListPickerOpen = computed({
             <div v-else class="w-full max-w-sm flex flex-col items-center justify-center">
               <!-- Empty State Phone Frame -->
               <div class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] w-full">
-                <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
+                <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0">
                   <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                     <MessageSquare class="h-5 w-5" />
                   </div>
@@ -333,7 +333,7 @@ const localListPickerOpen = computed({
                 <div class="flex-1 flex items-center justify-center">
                   <p class="text-sm text-gray-500 dark:text-gray-400">Select a step to view preview</p>
                 </div>
-                <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 flex-shrink-0">
+                <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0">
                   <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
                     <p class="text-sm text-gray-400">Type a message</p>
                   </div>

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import DetailPageLayout from '@/components/shared/DetailPageLayout.vue'
 import { auditLogsService, type AuditLogEntry } from '@/services/api'
 import { formatDateTime, formatLabel } from '@/lib/utils'
-import { ScrollText, Info, ExternalLink, ArrowRight } from 'lucide-vue-next'
+import { ScrollText, Info, ExternalLink, ArrowRight } from '@lucide/vue'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -118,16 +118,16 @@ onMounted(async () => {
             <div class="mt-1 text-sm">
               <template v-if="log.action === 'updated'">
                 <div class="flex items-start gap-2 text-muted-foreground">
-                  <span class="text-red-400 line-through break-words">{{ formatValue(change.old_value) }}</span>
+                  <span class="text-red-400 line-through wrap-break-word">{{ formatValue(change.old_value) }}</span>
                   <ArrowRight class="h-4 w-4 shrink-0 mt-0.5" />
-                  <span class="text-green-400 break-words">{{ formatValue(change.new_value) }}</span>
+                  <span class="text-green-400 wrap-break-word">{{ formatValue(change.new_value) }}</span>
                 </div>
               </template>
               <template v-else-if="log.action === 'created'">
-                <span class="text-muted-foreground break-words">{{ formatValue(change.new_value) }}</span>
+                <span class="text-muted-foreground wrap-break-word">{{ formatValue(change.new_value) }}</span>
               </template>
               <template v-else>
-                <span class="text-red-400 break-words">{{ formatValue(change.old_value) }}</span>
+                <span class="text-red-400 wrap-break-word">{{ formatValue(change.old_value) }}</span>
               </template>
             </div>
           </div>

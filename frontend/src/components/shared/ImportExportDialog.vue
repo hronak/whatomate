@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { dataService, type ExportColumn, type ImportResult } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { Loader2, Upload, Download, FileSpreadsheet, Check, AlertCircle } from 'lucide-vue-next'
+import { Loader2, Upload, Download, FileSpreadsheet, Check, AlertCircle } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const { t, te } = useI18n()

@@ -28,21 +28,24 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core Vue ecosystem
-          'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          // UI primitives
-          'reka-ui': ['reka-ui'],
-          // Charts (heavy)
-          'charts': ['chart.js', 'vue-chartjs'],
-          // Grid layout (heavy)
-          'grid-layout': ['grid-layout-plus'],
-          // Emoji picker (heavy)
-          'emoji-picker': ['vue3-emoji-picker'],
-          // Form validation
-          'validation': ['vee-validate', '@vee-validate/zod', 'zod'],
-          // Utilities
-          'utils': ['@vueuse/core', 'axios', 'clsx', 'tailwind-merge', 'class-variance-authority']
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          const chunks: Record<string, string[]> = {
+            'vue-vendor': ['vue', 'vue-router', 'pinia'],
+            'reka-ui': ['reka-ui'],
+            'charts': ['chart.js', 'vue-chartjs'],
+            'grid-layout': ['grid-layout-plus'],
+            'emoji-picker': ['vue3-emoji-picker'],
+            'validation': ['vee-validate', '@vee-validate/zod', 'zod'],
+            'utils': ['@vueuse/core', 'axios', 'clsx', 'tailwind-merge', 'class-variance-authority']
+          }
+          for (const [chunk, pkgs] of Object.entries(chunks)) {
+            for (const pkg of pkgs) {
+              if (id.includes(`/node_modules/${pkg}/`) || id.includes(`\\node_modules\\${pkg}\\`)) {
+                return chunk
+              }
+            }
+          }
         }
       }
     },

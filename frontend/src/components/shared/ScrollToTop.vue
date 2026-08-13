@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { ArrowUp } from 'lucide-vue-next'
+import { ArrowUp } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 
 const props = withDefaults(defineProps<{
@@ -41,7 +41,7 @@ onUnmounted(() => {
       v-show="isVisible"
       variant="secondary"
       size="icon"
-      class="fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full shadow-lg shadow-black/20 ring-1 ring-white/[0.1] light:ring-gray-200 light:shadow-gray-300/30"
+      class="fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full shadow-lg shadow-black/20 ring-1 ring-white/10 light:ring-gray-200 light:shadow-gray-300/30"
       aria-label="Scroll to top"
       @click="scrollToTop"
     >

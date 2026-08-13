@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Globe, AlertCircle } from 'lucide-vue-next'
+import { Globe, AlertCircle } from '@lucide/vue'
 
 const props = defineProps<{
   open: boolean

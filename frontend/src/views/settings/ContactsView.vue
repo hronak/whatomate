@@ -9,7 +9,7 @@ import { TagBadge } from '@/components/ui/tag-badge'
 import { PageHeader, SearchInput, DataTable, DeleteConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { contactsService, accountsService, type ImportResult } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { Plus, Users, Pencil, Trash2, MessageSquare, Download } from 'lucide-vue-next'
+import { Plus, Users, Pencil, Trash2, MessageSquare, Download } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useSearchPagination } from '@/composables/useSearchPagination'
@@ -155,7 +155,7 @@ function getDisplayName(contact: Contact): string {
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('contacts.title')" :subtitle="$t('contacts.subtitle')" :icon="Users" icon-gradient="bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/20" back-link="/settings">
+    <PageHeader :title="$t('contacts.title')" :subtitle="$t('contacts.subtitle')" :icon="Users" icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20" back-link="/settings">
       <template v-if="canWriteContacts || canImportContacts || canExportContacts" #actions>
         <Button v-if="canImportContacts || canExportContacts" variant="outline" size="sm" @click="isImportExportOpen = true">
           <Download class="h-4 w-4 mr-2" />{{ $t('common.import') }}/{{ $t('common.export') }}

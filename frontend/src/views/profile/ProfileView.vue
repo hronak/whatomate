@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'vue-sonner'
-import { User, Eye, EyeOff, Loader2 } from 'lucide-vue-next'
+import { User, Eye, EyeOff, Loader2 } from '@lucide/vue'
 import { usersService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { PageHeader } from '@/components/shared'
@@ -66,7 +66,7 @@ async function changePassword() {
       :title="$t('profile.title')"
       :description="$t('profile.description')"
       :icon="User"
-      icon-gradient="bg-gradient-to-br from-gray-500 to-gray-600 shadow-gray-500/20"
+      icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20"
     />
 
     <!-- Content -->

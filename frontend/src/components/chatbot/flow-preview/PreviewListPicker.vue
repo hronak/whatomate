@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { ButtonConfig } from '@/types/flow-preview'
-import { ExternalLink, X, List } from 'lucide-vue-next'
+import { ExternalLink, X, List } from '@lucide/vue'
 
 defineProps<{
   buttons: ButtonConfig[]
@@ -24,7 +24,7 @@ function handleSelect(button: ButtonConfig) {
   <div class="mt-1">
     <!-- Trigger Button -->
     <button
-      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 px-4 rounded-lg shadow-sm border-0 flex items-center justify-center gap-2 transition-colors"
+      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2 transition-colors"
       :class="{
         'hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer': !disabled,
         'opacity-50 cursor-not-allowed': disabled
@@ -72,13 +72,13 @@ function handleSelect(button: ButtonConfig) {
             >
               <div
                 v-if="btn.type === 'url'"
-                class="w-5 h-5 flex items-center justify-center flex-shrink-0 text-[#00a884]"
+                class="w-5 h-5 flex items-center justify-center shrink-0 text-[#00a884]"
               >
                 <ExternalLink class="h-4 w-4" />
               </div>
               <div
                 v-else
-                class="w-5 h-5 rounded-full border-2 border-[#00a884] flex items-center justify-center flex-shrink-0"
+                class="w-5 h-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
               >
                 <span class="text-[10px] text-[#00a884] font-medium">{{ idx + 1 }}</span>
               </div>

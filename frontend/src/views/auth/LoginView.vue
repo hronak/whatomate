@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'vue-sonner'
-import { MessageSquare, Loader2 } from 'lucide-vue-next'
+import { MessageSquare, Loader2 } from '@lucide/vue'
 
 const { t } = useI18n()
 
@@ -38,11 +38,11 @@ const providerIcons: Record<string, string> = {
 
 // Dark-first: default is dark mode, light: prefix for light mode
 const providerColors: Record<string, string> = {
-  google: 'hover:bg-red-950 border-red-800 light:hover:bg-red-50 light:border-red-200',
-  microsoft: 'hover:bg-blue-950 border-blue-800 light:hover:bg-blue-50 light:border-blue-200',
-  github: 'hover:bg-gray-800 border-gray-600 light:hover:bg-gray-100 light:border-gray-300',
-  facebook: 'hover:bg-blue-950 border-blue-800 light:hover:bg-blue-50 light:border-blue-200',
-  custom: 'hover:bg-purple-950 border-purple-800 light:hover:bg-purple-50 light:border-purple-200'
+  google: 'hover:bg-red-950 border-red-800 hover:light:bg-red-50 light:border-red-200',
+  microsoft: 'hover:bg-blue-950 border-blue-800 hover:light:bg-blue-50 light:border-blue-200',
+  github: 'hover:bg-gray-800 border-gray-600 hover:light:bg-gray-100 light:border-gray-300',
+  facebook: 'hover:bg-blue-950 border-blue-800 hover:light:bg-blue-50 light:border-blue-200',
+  custom: 'hover:bg-purple-950 border-purple-800 hover:light:bg-purple-50 light:border-purple-200'
 }
 
 onMounted(async () => {
@@ -92,11 +92,11 @@ const initiateSSO = (provider: string) => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#0a0a0b] light:bg-gradient-to-br light:from-gray-50 light:to-gray-100 p-4">
-    <div class="w-full max-w-md rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur light:bg-white light:border-gray-200 light:shadow-xl">
+  <div class="min-h-screen flex items-center justify-center bg-[#0a0a0b] light:bg-linear-to-br light:from-gray-50 light:to-gray-100 p-4">
+    <div class="w-full max-w-md rounded-2xl border border-white/8 bg-white/2 backdrop-blur-sm light:bg-white light:border-gray-200 light:shadow-xl">
       <div class="p-8 space-y-1 text-center">
         <div class="flex justify-center mb-4">
-          <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div class="h-12 w-12 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <MessageSquare class="h-7 w-7 text-white" />
           </div>
         </div>
@@ -130,7 +130,7 @@ const initiateSSO = (provider: string) => {
               autocomplete="current-password"
             />
           </div>
-          <Button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20" :disabled="isLoading">
+          <Button type="submit" class="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20" :disabled="isLoading">
             <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
             {{ $t('auth.signIn') }}
           </Button>
@@ -140,7 +140,7 @@ const initiateSSO = (provider: string) => {
       <!-- SSO Section -->
       <div v-if="ssoProviders.length > 0" class="px-8 pb-4 space-y-3">
         <div class="relative my-2">
-          <Separator class="bg-white/[0.08] light:bg-gray-200" />
+          <Separator class="bg-white/8 light:bg-gray-200" />
           <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0a0a0b] light:bg-white px-2 text-xs text-white/40 light:text-gray-500">
             {{ $t('auth.orContinueWith') }}
           </span>
@@ -150,7 +150,7 @@ const initiateSSO = (provider: string) => {
           v-for="provider in ssoProviders"
           :key="provider.provider"
           variant="outline"
-          class="w-full justify-start gap-3 transition-colors bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50"
+          class="w-full justify-start gap-3 transition-colors bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50"
           :class="providerColors[provider.provider] || providerColors.custom"
           @click="initiateSSO(provider.provider)"
         >

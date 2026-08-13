@@ -21,10 +21,10 @@ import {
   Phone,
   Check,
   Loader2,
-  Facebook,
+  Link2,
   Smartphone,
   Network
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 declare global {
   interface Window {
@@ -256,7 +256,7 @@ async function confirmDelete() {
     <PageHeader
       :title="$t('accounts.title')"
       :icon="Phone"
-      icon-gradient="bg-gradient-to-br from-emerald-500 to-green-600 shadow-emerald-500/20"
+      icon-gradient="bg-linear-to-br from-emerald-500 to-green-600 shadow-emerald-500/20"
       back-link="/settings"
       :breadcrumbs="breadcrumbs"
     >
@@ -267,10 +267,10 @@ async function confirmDelete() {
             size="sm"
             @click="showOnboardingDialog = true"
             :disabled="isConnectingFB"
-            class="bg-gradient-to-br from-facebook to-facebook-dark hover:from-facebook-hover hover:to-facebook-hoverDark text-white border-none shadow-none"
+            class="bg-linear-to-br from-facebook to-facebook-dark hover:from-facebook-hover hover:to-facebook-hoverDark text-white border-none shadow-none"
           >
             <Loader2 v-if="isConnectingFB" class="h-4 w-4 mr-2 animate-spin" />
-            <Facebook v-else class="h-4 w-4 mr-2" />
+            <Link2 v-else class="h-4 w-4 mr-2" />
             {{ $t('accounts.connectFacebook') }}
           </Button>
           <RouterLink to="/settings/accounts/new">
@@ -321,9 +321,9 @@ async function confirmDelete() {
                       size="lg"
                       @click="showOnboardingDialog = true"
                       :disabled="isConnectingFB || !isFBSDKLoaded"
-                      class="bg-gradient-to-br from-facebook to-facebook-dark hover:from-facebook-hover hover:to-facebook-hoverDark text-white border-none shadow-none"
+                      class="bg-linear-to-br from-facebook to-facebook-dark hover:from-facebook-hover hover:to-facebook-hoverDark text-white border-none shadow-none"
                     >
-                      <Facebook v-if="!isConnectingFB" class="mr-2 h-5 w-5" />
+                      <Link2 v-if="!isConnectingFB" class="mr-2 h-5 w-5" />
                       <Loader2 v-else class="mr-2 h-5 w-5 animate-spin" />
                       {{ $t('accounts.connectFacebook') }}
                     </Button>
@@ -337,7 +337,7 @@ async function confirmDelete() {
                 </template>
                 <template #cell-account="{ item: account }">
                   <RouterLink :to="`/settings/accounts/${account.id}`" class="flex items-center gap-3 text-inherit no-underline hover:opacity-80">
-                    <div class="h-9 w-9 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                    <div class="h-9 w-9 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
                       <Phone class="h-4 w-4 text-emerald-500" />
                     </div>
                     <p class="font-medium truncate">{{ account.name }}</p>
@@ -410,7 +410,7 @@ async function confirmDelete() {
     <Dialog v-model:open="showOnboardingDialog">
       <DialogContent class="sm:max-w-2xl bg-[#0e0e11] border-[#222227] text-white light:bg-white light:border-gray-200 light:text-gray-900 p-6 shadow-2xl rounded-xl">
         <DialogHeader class="mb-4">
-          <DialogTitle class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 light:from-emerald-600 light:to-green-600 bg-clip-text text-transparent flex items-center gap-2">
+          <DialogTitle class="text-xl font-bold bg-linear-to-r from-emerald-400 to-green-400 light:from-emerald-600 light:to-green-600 bg-clip-text text-transparent flex items-center gap-2">
             {{ $t('accounts.connectTitle') }}
           </DialogTitle>
           <DialogDescription class="text-gray-400 light:text-gray-500 mt-1">
@@ -422,7 +422,7 @@ async function confirmDelete() {
           <!-- Coexistence Option Card -->
           <div
             @click="launchWhatsAppSignup(true)"
-            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-emerald-500/20 bg-[#141419] hover:bg-[#181822] hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] light:bg-gray-50/50 light:border-emerald-200 light:hover:bg-gray-100/70 light:hover:border-emerald-400 light:hover:shadow-[0_0_20px_rgba(16,185,129,0.05)] transition-all duration-300 overflow-hidden"
+            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-emerald-500/20 bg-[#141419] hover:bg-[#181822] hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] light:bg-gray-50/50 light:border-emerald-200 hover:light:bg-gray-100/70 hover:light:border-emerald-400 hover:light:shadow-[0_0_20px_rgba(16,185,129,0.05)] transition-all duration-300 overflow-hidden"
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
@@ -435,10 +435,10 @@ async function confirmDelete() {
               <Smartphone class="h-5 w-5 text-emerald-400 light:text-emerald-600" />
             </div>
 
-            <h3 class="text-base font-semibold text-white light:text-gray-900 group-hover:text-emerald-400 light:group-hover:text-emerald-600 transition-colors duration-200">
+            <h3 class="text-base font-semibold text-white light:text-gray-900 group-hover:text-emerald-400 group-hover:light:text-emerald-600 transition-colors duration-200">
               {{ $t('accounts.coexistenceTitle') }}
             </h3>
-            <p class="text-xs text-gray-400 light:text-gray-600 mt-2 flex-grow leading-relaxed">
+            <p class="text-xs text-gray-400 light:text-gray-600 mt-2 grow leading-relaxed">
               {{ $t('accounts.coexistenceDesc') }}
             </p>
 
@@ -451,7 +451,7 @@ async function confirmDelete() {
           <!-- Classic Option Card -->
           <div
             @click="launchWhatsAppSignup(false)"
-            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-[#222227] bg-[#141419] hover:bg-[#181822] hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] light:bg-gray-50/50 light:border-gray-200 light:hover:bg-gray-100/70 light:hover:border-blue-400 light:hover:shadow-[0_0_20px_rgba(59,130,246,0.05)] transition-all duration-300 overflow-hidden"
+            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-[#222227] bg-[#141419] hover:bg-[#181822] hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] light:bg-gray-50/50 light:border-gray-200 hover:light:bg-gray-100/70 hover:light:border-blue-400 hover:light:shadow-[0_0_20px_rgba(59,130,246,0.05)] transition-all duration-300 overflow-hidden"
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
@@ -464,10 +464,10 @@ async function confirmDelete() {
               <Network class="h-5 w-5 text-blue-400 light:text-blue-600" />
             </div>
 
-            <h3 class="text-base font-semibold text-white light:text-gray-900 group-hover:text-blue-400 light:group-hover:text-blue-600 transition-colors duration-200">
+            <h3 class="text-base font-semibold text-white light:text-gray-900 group-hover:text-blue-400 group-hover:light:text-blue-600 transition-colors duration-200">
               {{ $t('accounts.classicTitle') }}
             </h3>
-            <p class="text-xs text-gray-400 light:text-gray-600 mt-2 flex-grow leading-relaxed">
+            <p class="text-xs text-gray-400 light:text-gray-600 mt-2 grow leading-relaxed">
               {{ $t('accounts.classicDesc') }}
             </p>
 

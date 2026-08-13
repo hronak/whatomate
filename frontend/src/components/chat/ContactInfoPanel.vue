@@ -22,7 +22,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command'
-import { X, ChevronDown, Phone, User, Plus, Check, Tags, Loader2 } from 'lucide-vue-next'
+import { X, ChevronDown, Phone, User, Plus, Check, Tags, Loader2 } from '@lucide/vue'
 import { TagBadge } from '@/components/ui/tag-badge'
 import MetadataSection from '@/components/chat/MetadataSection.vue'
 import { getInitials, getAvatarGradient, formatLabel } from '@/lib/utils'
@@ -266,7 +266,7 @@ async function updateContactTags(tags: string[]) {
         <div class="flex flex-col items-center text-center pb-4 border-b">
           <Avatar class="h-16 w-16 mb-3">
             <AvatarImage :src="contact.avatar_url" />
-            <AvatarFallback :class="'text-lg bg-gradient-to-br text-white ' + getAvatarGradient(contact.name || contact.phone_number)">
+            <AvatarFallback :class="'text-lg bg-linear-to-br text-white ' + getAvatarGradient(contact.name || contact.phone_number)">
               {{ getInitials(contact.name || contact.phone_number) }}
             </AvatarFallback>
           </Avatar>
@@ -423,7 +423,7 @@ async function updateContactTags(tags: string[]) {
                       {{ getFieldValue(field.key) }}
                     </span>
                     <!-- Default text display -->
-                    <p v-else class="text-sm font-semibold break-words mt-0.5">{{ getFieldValue(field.key) }}</p>
+                    <p v-else class="text-sm font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -459,7 +459,7 @@ async function updateContactTags(tags: string[]) {
                     {{ getFieldValue(field.key) }}
                   </span>
                   <!-- Default text display -->
-                  <p v-else class="text-sm font-semibold break-words mt-0.5">{{ getFieldValue(field.key) }}</p>
+                  <p v-else class="text-sm font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
                 </div>
               </div>
             </div>

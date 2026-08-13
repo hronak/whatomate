@@ -10,7 +10,7 @@ import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { PageHeader, SearchInput, DataTable, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { getErrorMessage } from '@/lib/api-utils'
-import { Plus, Pencil, Trash2, Key } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, Key } from '@lucide/vue'
 import { useSearchPagination } from '@/composables/useSearchPagination'
 
 const { t } = useI18n()
@@ -124,7 +124,7 @@ const emptyDescription = computed(() => {
     <PageHeader
       :title="$t('keywords.title')"
       :icon="Key"
-      icon-gradient="bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
+      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
       back-link="/chatbot"
       :breadcrumbs="[{ label: $t('keywords.backToChatbot'), href: '/chatbot' }, { label: $t('nav.keywords') }]"
     >
