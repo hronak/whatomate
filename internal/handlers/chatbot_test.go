@@ -147,7 +147,7 @@ func TestApp_UpdateChatbotSettings(t *testing.T) {
 			"fallback_message":        "Sorry, I did not understand that.",
 			"ai_enabled":              true,
 			"ai_provider":             "openai",
-			"ai_model":                "gpt-4",
+			"ai_model":                "gpt-5.6-terra",
 			"ai_max_tokens":           1000,
 			"ai_system_prompt":        "You are a helpful assistant.",
 			"sla_enabled":             true,
@@ -190,7 +190,7 @@ func TestApp_UpdateChatbotSettings(t *testing.T) {
 		assert.Equal(t, "Sorry, I did not understand that.", getResp.Data.Settings.FallbackMessage)
 		assert.True(t, getResp.Data.Settings.AIEnabled)
 		assert.Equal(t, models.AIProvider("openai"), getResp.Data.Settings.AIProvider)
-		assert.Equal(t, "gpt-4", getResp.Data.Settings.AIModel)
+		assert.Equal(t, "gpt-5.6-terra", getResp.Data.Settings.AIModel)
 		assert.Equal(t, 1000, getResp.Data.Settings.AIMaxTokens)
 		assert.True(t, getResp.Data.Settings.SLAEnabled)
 		assert.Equal(t, 10, getResp.Data.Settings.SLAResponseMinutes)
@@ -1039,7 +1039,7 @@ func TestApp_GetChatbotSettings_ExistingSettings(t *testing.T) {
 			AI: models.AIConfig{
 				Enabled:  true,
 				Provider: models.AIProviderOpenAI,
-				Model:    "gpt-4o",
+				Model:    "gpt-5.6-terra",
 			},
 		}
 		require.NoError(t, app.DB.Create(settings).Error)
@@ -1065,7 +1065,7 @@ func TestApp_GetChatbotSettings_ExistingSettings(t *testing.T) {
 		assert.Equal(t, 45, resp.Data.Settings.SessionTimeoutMinutes)
 		assert.True(t, resp.Data.Settings.AIEnabled)
 		assert.Equal(t, models.AIProviderOpenAI, resp.Data.Settings.AIProvider)
-		assert.Equal(t, "gpt-4o", resp.Data.Settings.AIModel)
+		assert.Equal(t, "gpt-5.6-terra", resp.Data.Settings.AIModel)
 	})
 
 	t.Run("stats reflect actual data counts", func(t *testing.T) {
