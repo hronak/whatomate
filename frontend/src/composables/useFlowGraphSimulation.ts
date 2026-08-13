@@ -638,7 +638,7 @@ function evalCondition(expression: string, vars: Record<string, any>): boolean {
       .replace(/\bnot\b/gi, '!')
       .replace(/\bcontains\b/gi, '.includes')
     const keys = Object.keys(vars)
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+     
     const fn = new Function(...keys, `try { return !!(${js}); } catch (_) { return false; }`)
     return !!fn(...keys.map((k) => vars[k]))
   } catch {

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader, AuditLogPanel } from '@/components/shared'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { toast } from 'vue-sonner'
-import { Settings, Bell, Loader2, Globe, Phone, Upload, Play, Pause, Music } from 'lucide-vue-next'
+import { Settings, Bell, Loader2, Globe, Phone, Upload, Play, Pause, Music } from '@lucide/vue'
 import { usersService, organizationService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
@@ -243,20 +243,20 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" :icon="Settings" icon-gradient="bg-gradient-to-br from-gray-500 to-gray-600 shadow-gray-500/20" />
+    <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" :icon="Settings" icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20" />
     <ScrollArea class="flex-1">
       <div class="p-6 space-y-4 max-w-4xl mx-auto">
         <Tabs default-value="general" class="w-full">
-          <TabsList class="grid w-full grid-cols-3 mb-6 bg-white/[0.04] border border-white/[0.08] light:bg-gray-100 light:border-gray-200">
-            <TabsTrigger value="general" class="data-[state=active]:bg-white/[0.08] data-[state=active]:text-white text-white/50 light:data-[state=active]:bg-white light:data-[state=active]:text-gray-900 light:text-gray-500">
+          <TabsList class="grid w-full grid-cols-3 mb-6 bg-white/4 border border-white/8 light:bg-gray-100 light:border-gray-200">
+            <TabsTrigger value="general" class="data-[state=active]:bg-white/8 data-[state=active]:text-white text-white/50 data-[state=active]:light:bg-white data-[state=active]:light:text-gray-900 light:text-gray-500">
               <Settings class="h-4 w-4 mr-2" />
               {{ $t('settings.general') }}
             </TabsTrigger>
-            <TabsTrigger value="notifications" class="data-[state=active]:bg-white/[0.08] data-[state=active]:text-white text-white/50 light:data-[state=active]:bg-white light:data-[state=active]:text-gray-900 light:text-gray-500">
+            <TabsTrigger value="notifications" class="data-[state=active]:bg-white/8 data-[state=active]:text-white text-white/50 data-[state=active]:light:bg-white data-[state=active]:light:text-gray-900 light:text-gray-500">
               <Bell class="h-4 w-4 mr-2" />
               {{ $t('settings.notifications') }}
             </TabsTrigger>
-            <TabsTrigger value="calling" class="data-[state=active]:bg-white/[0.08] data-[state=active]:text-white text-white/50 light:data-[state=active]:bg-white light:data-[state=active]:text-gray-900 light:text-gray-500">
+            <TabsTrigger value="calling" class="data-[state=active]:bg-white/8 data-[state=active]:text-white text-white/50 data-[state=active]:light:bg-white data-[state=active]:light:text-gray-900 light:text-gray-500">
               <Phone class="h-4 w-4 mr-2" />
               {{ $t('settings.calling') }}
             </TabsTrigger>
@@ -264,7 +264,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
 
           <!-- General Settings Tab -->
           <TabsContent value="general">
-            <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] light:bg-white light:border-gray-200">
+            <div class="rounded-xl border border-white/8 bg-white/2 light:bg-white light:border-gray-200">
               <div class="p-6 pb-3">
                 <h3 class="text-lg font-semibold text-white light:text-gray-900">{{ $t('settings.generalSettings') }}</h3>
                 <p class="text-sm text-white/40 light:text-gray-500">{{ $t('settings.generalSettingsDesc') }}</p>
@@ -282,28 +282,28 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   <div class="space-y-2">
                     <Label for="timezone" class="text-white/70 light:text-gray-700">{{ $t('settings.defaultTimezone') }}</Label>
                     <Select v-model="generalSettings.default_timezone">
-                      <SelectTrigger class="bg-white/[0.04] border-white/[0.1] text-white/70 light:bg-white light:border-gray-200 light:text-gray-700">
+                      <SelectTrigger class="bg-white/4 border-white/10 text-white/70 light:bg-white light:border-gray-200 light:text-gray-700">
                         <SelectValue :placeholder="$t('settings.selectTimezone')" />
                       </SelectTrigger>
-                      <SelectContent class="bg-[#141414] border-white/[0.08] light:bg-white light:border-gray-200">
-                        <SelectItem value="UTC" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">UTC</SelectItem>
-                        <SelectItem value="America/New_York" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">Eastern Time</SelectItem>
-                        <SelectItem value="America/Los_Angeles" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">Pacific Time</SelectItem>
-                        <SelectItem value="Europe/London" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">London</SelectItem>
-                        <SelectItem value="Asia/Tokyo" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">Tokyo</SelectItem>
+                      <SelectContent class="bg-[#141414] border-white/8 light:bg-white light:border-gray-200">
+                        <SelectItem value="UTC" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">UTC</SelectItem>
+                        <SelectItem value="America/New_York" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">Eastern Time</SelectItem>
+                        <SelectItem value="America/Los_Angeles" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">Pacific Time</SelectItem>
+                        <SelectItem value="Europe/London" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">London</SelectItem>
+                        <SelectItem value="Asia/Tokyo" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">Tokyo</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div class="space-y-2">
                     <Label for="date_format" class="text-white/70 light:text-gray-700">{{ $t('settings.dateFormat') }}</Label>
                     <Select v-model="generalSettings.date_format">
-                      <SelectTrigger class="bg-white/[0.04] border-white/[0.1] text-white/70 light:bg-white light:border-gray-200 light:text-gray-700">
+                      <SelectTrigger class="bg-white/4 border-white/10 text-white/70 light:bg-white light:border-gray-200 light:text-gray-700">
                         <SelectValue :placeholder="$t('settings.selectFormat')" />
                       </SelectTrigger>
-                      <SelectContent class="bg-[#141414] border-white/[0.08] light:bg-white light:border-gray-200">
-                        <SelectItem value="YYYY-MM-DD" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">YYYY-MM-DD</SelectItem>
-                        <SelectItem value="DD/MM/YYYY" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">DD/MM/YYYY</SelectItem>
-                        <SelectItem value="MM/DD/YYYY" class="text-white/70 focus:bg-white/[0.08] focus:text-white light:text-gray-700 light:focus:bg-gray-100">MM/DD/YYYY</SelectItem>
+                      <SelectContent class="bg-[#141414] border-white/8 light:bg-white light:border-gray-200">
+                        <SelectItem value="YYYY-MM-DD" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">YYYY-MM-DD</SelectItem>
+                        <SelectItem value="DD/MM/YYYY" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">DD/MM/YYYY</SelectItem>
+                        <SelectItem value="MM/DD/YYYY" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">MM/DD/YYYY</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -316,7 +316,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   <LanguageSwitcher class="max-w-xs" />
                   <p class="text-xs text-white/40 light:text-gray-500">{{ $t('settings.languageDesc') }}</p>
                 </div>
-                <Separator class="bg-white/[0.08] light:bg-gray-200" />
+                <Separator class="bg-white/8 light:bg-gray-200" />
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-white light:text-gray-900">{{ $t('settings.maskPhoneNumbers') }}</p>
@@ -328,7 +328,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   />
                 </div>
                 <div class="flex justify-end">
-                  <Button variant="outline" size="sm" class="bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50" @click="saveGeneralSettings" :disabled="isSubmitting">
+                  <Button variant="outline" size="sm" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50" @click="saveGeneralSettings" :disabled="isSubmitting">
                     <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
                     {{ $t('settings.save') }}
                   </Button>
@@ -337,7 +337,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
             </div>
 
             <!-- Meta App Credentials Card (Gated on canWriteAccounts) -->
-            <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.02] light:bg-white light:border-gray-200">
+            <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-white/8 bg-white/2 light:bg-white light:border-gray-200">
               <div class="p-6 pb-3">
                 <h3 class="text-lg font-semibold text-white light:text-gray-900">{{ $t('settings.metaAppCredentials') }}</h3>
                 <p class="text-sm text-white/40 light:text-gray-500">{{ $t('settings.metaAppCredentialsDesc') }}</p>
@@ -371,7 +371,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   />
                 </div>
                 <div class="flex justify-end">
-                  <Button variant="outline" size="sm" class="bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50" @click="saveGeneralSettings" :disabled="isSubmitting">
+                  <Button variant="outline" size="sm" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50" @click="saveGeneralSettings" :disabled="isSubmitting">
                     <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
                     {{ $t('settings.save') }}
                   </Button>
@@ -385,7 +385,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
 
           <!-- Notification Settings Tab -->
           <TabsContent value="notifications">
-            <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] light:bg-white light:border-gray-200">
+            <div class="rounded-xl border border-white/8 bg-white/2 light:bg-white light:border-gray-200">
               <div class="p-6 pb-3">
                 <h3 class="text-lg font-semibold text-white light:text-gray-900">{{ $t('settings.notifications') }}</h3>
                 <p class="text-sm text-white/40 light:text-gray-500">{{ $t('settings.notificationsDesc') }}</p>
@@ -401,7 +401,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     @update:checked="notificationSettings.email_notifications = $event"
                   />
                 </div>
-                <Separator class="bg-white/[0.08] light:bg-gray-200" />
+                <Separator class="bg-white/8 light:bg-gray-200" />
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-white light:text-gray-900">{{ $t('settings.newMessageAlerts') }}</p>
@@ -412,7 +412,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     @update:checked="notificationSettings.new_message_alerts = $event"
                   />
                 </div>
-                <Separator class="bg-white/[0.08] light:bg-gray-200" />
+                <Separator class="bg-white/8 light:bg-gray-200" />
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-white light:text-gray-900">{{ $t('settings.campaignUpdates') }}</p>
@@ -424,7 +424,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   />
                 </div>
                 <div class="flex justify-end pt-4">
-                  <Button variant="outline" size="sm" class="bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50" @click="saveNotificationSettings" :disabled="isSubmitting">
+                  <Button variant="outline" size="sm" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50" @click="saveNotificationSettings" :disabled="isSubmitting">
                     <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
                     {{ $t('settings.save') }}
                   </Button>
@@ -438,7 +438,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
 
           <!-- Calling Settings Tab -->
           <TabsContent value="calling">
-            <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] light:bg-white light:border-gray-200">
+            <div class="rounded-xl border border-white/8 bg-white/2 light:bg-white light:border-gray-200">
               <div class="p-6 pb-3">
                 <h3 class="text-lg font-semibold text-white light:text-gray-900">{{ $t('settings.callingSettings') }}</h3>
                 <p class="text-sm text-white/40 light:text-gray-500">{{ $t('settings.callingSettingsDesc') }}</p>
@@ -454,7 +454,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     @update:checked="callingSettings.calling_enabled = $event"
                   />
                 </div>
-                <Separator class="bg-white/[0.08] light:bg-gray-200" />
+                <Separator class="bg-white/8 light:bg-gray-200" />
                 <div class="grid grid-cols-2 gap-4" :class="{ 'opacity-50 pointer-events-none': !callingSettings.calling_enabled }">
                   <div class="space-y-2">
                     <Label for="max_call_duration" class="text-white/70 light:text-gray-700">{{ $t('settings.maxCallDuration') }}</Label>
@@ -479,7 +479,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     <p class="text-xs text-white/40 light:text-gray-500">{{ $t('settings.transferTimeoutDesc') }}</p>
                   </div>
                 </div>
-                <Separator class="bg-white/[0.08] light:bg-gray-200" />
+                <Separator class="bg-white/8 light:bg-gray-200" />
                 <!-- Hold Music Upload -->
                 <div class="space-y-3" :class="{ 'opacity-50 pointer-events-none': !callingSettings.calling_enabled }">
                   <div>
@@ -497,7 +497,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                       v-if="callingSettings.hold_music_file"
                       variant="ghost"
                       size="sm"
-                      class="h-8 w-8 p-0 text-white/50 hover:text-white light:text-gray-500 light:hover:text-gray-900"
+                      class="h-8 w-8 p-0 text-white/50 hover:text-white light:text-gray-500 hover:light:text-gray-900"
                       @click="togglePlayAudio('hold_music')"
                     >
                       <Pause v-if="playingHoldMusic" class="h-4 w-4" />
@@ -506,7 +506,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   </div>
                   <div class="flex items-center gap-2">
                     <input ref="holdMusicInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('hold_music', $event)" />
-                    <Button variant="outline" size="sm" class="bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50" @click="holdMusicInput?.click()" :disabled="isUploadingHoldMusic">
+                    <Button variant="outline" size="sm" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50" @click="holdMusicInput?.click()" :disabled="isUploadingHoldMusic">
                       <Loader2 v-if="isUploadingHoldMusic" class="mr-2 h-4 w-4 animate-spin" />
                       <Upload v-else class="mr-2 h-4 w-4" />
                       {{ $t('settings.uploadAudio') }}
@@ -531,7 +531,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                       v-if="callingSettings.ringback_file"
                       variant="ghost"
                       size="sm"
-                      class="h-8 w-8 p-0 text-white/50 hover:text-white light:text-gray-500 light:hover:text-gray-900"
+                      class="h-8 w-8 p-0 text-white/50 hover:text-white light:text-gray-500 hover:light:text-gray-900"
                       @click="togglePlayAudio('ringback')"
                     >
                       <Pause v-if="playingRingback" class="h-4 w-4" />
@@ -540,7 +540,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   </div>
                   <div class="flex items-center gap-2">
                     <input ref="ringbackInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('ringback', $event)" />
-                    <Button variant="outline" size="sm" class="bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50" @click="ringbackInput?.click()" :disabled="isUploadingRingback">
+                    <Button variant="outline" size="sm" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50" @click="ringbackInput?.click()" :disabled="isUploadingRingback">
                       <Loader2 v-if="isUploadingRingback" class="mr-2 h-4 w-4 animate-spin" />
                       <Upload v-else class="mr-2 h-4 w-4" />
                       {{ $t('settings.uploadAudio') }}
@@ -549,7 +549,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   </div>
                 </div>
                 <div class="flex justify-end pt-4">
-                  <Button variant="outline" size="sm" class="bg-white/[0.04] border-white/[0.1] text-white/70 hover:bg-white/[0.08] hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 light:hover:bg-gray-50" @click="saveCallingSettings" :disabled="isSubmitting">
+                  <Button variant="outline" size="sm" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50" @click="saveCallingSettings" :disabled="isSubmitting">
                     <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
                     {{ $t('settings.save') }}
                   </Button>

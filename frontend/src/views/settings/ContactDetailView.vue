@@ -61,7 +61,7 @@ import {
   Check,
   ChevronsUpDown,
   X,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -232,7 +232,7 @@ onMounted(async () => {
     <DetailPageLayout
       :title="contact?.profile_name || contact?.name || contact?.phone_number || ''"
       :icon="Users"
-      icon-gradient="bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
+      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
       back-link="/settings/contacts"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

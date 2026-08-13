@@ -15,7 +15,7 @@ const props = defineProps<{
     :decorative="decorative"
     :class="cn(
       'shrink-0 bg-border',
-      orientation === 'vertical' ? 'h-full w-[1px]' : 'h-[1px] w-full',
+      orientation === 'vertical' ? 'h-full w-px' : 'h-px w-full',
       props.class
     )"
   />

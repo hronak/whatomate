@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { Plus, Trash2, Pencil, Webhook as WebhookIcon, Play } from 'lucide-vue-next'
+import { Plus, Trash2, Pencil, Webhook as WebhookIcon, Play } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useDebounceFn } from '@vueuse/core'
@@ -133,7 +133,7 @@ onMounted(() => fetchWebhooks())
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('webhooks.title')" :subtitle="$t('webhooks.subtitle')" :icon="WebhookIcon" icon-gradient="bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20" back-link="/settings">
+    <PageHeader :title="$t('webhooks.title')" :subtitle="$t('webhooks.subtitle')" :icon="WebhookIcon" icon-gradient="bg-linear-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20" back-link="/settings">
       <template #actions>
         <RouterLink v-if="canWrite" to="/settings/webhooks/new">
           <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('webhooks.addWebhook') }}</Button>

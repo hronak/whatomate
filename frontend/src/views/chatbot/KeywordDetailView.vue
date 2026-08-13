@@ -40,7 +40,7 @@ import {
   Trash2,
   Save,
   Plus,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const route = useRoute()
@@ -208,7 +208,7 @@ onMounted(async () => {
   <DetailPageLayout
     :title="isNew ? $t('keywords.newKeyword', 'New Keyword Rule') : (keyword?.name || form.keywords.split(',')[0]?.trim() || '')"
     :icon="Key"
-    icon-gradient="bg-gradient-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20"
+    icon-gradient="bg-linear-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20"
     back-link="/chatbot/keywords"
     :breadcrumbs="breadcrumbs"
     :is-loading="isLoading"

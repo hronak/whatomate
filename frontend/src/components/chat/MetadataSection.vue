@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown } from '@lucide/vue'
 import { formatLabel } from '@/lib/utils'
 
 const props = defineProps<{
@@ -75,7 +75,7 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
           >
             {{ val ? 'Yes' : 'No' }}
           </Badge>
-          <span v-else class="text-xs font-medium text-right max-w-[60%] break-words ml-2">
+          <span v-else class="text-xs font-medium text-right max-w-[60%] wrap-break-word ml-2">
             {{ formatValue(val) }}
           </span>
         </div>
@@ -131,7 +131,7 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
           >
             {{ data ? 'Yes' : 'No' }}
           </Badge>
-          <span v-else class="text-xs font-medium text-right max-w-[60%] break-words ml-2">
+          <span v-else class="text-xs font-medium text-right max-w-[60%] wrap-break-word ml-2">
             {{ formatValue(data) }}
           </span>
         </div>

@@ -11,7 +11,7 @@ import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { PageHeader, DataTable, DeleteConfirmDialog, SearchInput, IconButton, ErrorState, type Column } from '@/components/shared'
 import { getErrorMessage } from '@/lib/api-utils'
-import { Plus, Pencil, Trash2, Workflow } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, Workflow } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
 
 const { t } = useI18n()
@@ -136,7 +136,7 @@ async function confirmDeleteFlow() {
     <PageHeader
       :title="$t('chatbotFlows.title')"
       :icon="Workflow"
-      icon-gradient="bg-gradient-to-br from-purple-500 to-pink-600 shadow-purple-500/20"
+      icon-gradient="bg-linear-to-br from-purple-500 to-pink-600 shadow-purple-500/20"
       back-link="/chatbot"
       :breadcrumbs="[{ label: $t('chatbotFlows.backToChatbot'), href: '/chatbot' }, { label: $t('nav.flows') }]"
     >

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Clock } from 'lucide-vue-next'
+import { Clock } from '@lucide/vue'
 import BaseNode from './BaseNode.vue'
 
 defineOptions({ inheritAttrs: false })

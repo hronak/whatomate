@@ -46,7 +46,7 @@ import {
   UserPlus,
   UserMinus,
   Shield,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -236,7 +236,7 @@ onMounted(async () => {
   <DetailPageLayout
     :title="isNew ? $t('teams.newTeam', 'New Team') : (team?.name || '')"
     :icon="Users"
-    icon-gradient="bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20"
+    icon-gradient="bg-linear-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20"
     back-link="/settings/teams"
     :breadcrumbs="breadcrumbs"
     :is-loading="isLoading"

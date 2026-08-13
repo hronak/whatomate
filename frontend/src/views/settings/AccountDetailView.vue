@@ -45,7 +45,7 @@ import {
   TestTube2,
   Check,
   X,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 interface WhatsAppAccount {
   id: string
@@ -275,7 +275,7 @@ onMounted(async () => {
   <DetailPageLayout
     :title="isNew ? $t('accounts.newAccount', 'New Account') : (account?.name || '')"
     :icon="Phone"
-    icon-gradient="bg-gradient-to-br from-emerald-500 to-green-600 shadow-emerald-500/20"
+    icon-gradient="bg-linear-to-br from-emerald-500 to-green-600 shadow-emerald-500/20"
     back-link="/settings/accounts"
     :breadcrumbs="breadcrumbs"
     :is-loading="isLoading"

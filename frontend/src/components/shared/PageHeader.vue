@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft } from '@lucide/vue'
 import type { Component } from 'vue'
 
 defineProps<{
@@ -22,7 +22,7 @@ defineProps<{
 </script>
 
 <template>
-  <header class="border-b border-white/[0.08] light:border-gray-200 bg-[#0a0a0b]/95 light:bg-white/95 backdrop-blur">
+  <header class="border-b border-white/8 light:border-gray-200 bg-[#0a0a0b]/95 light:bg-white/95 backdrop-blur-sm">
     <div class="flex h-16 items-center px-6">
       <RouterLink v-if="backLink" :to="backLink">
         <Button variant="ghost" size="icon" class="mr-3">
@@ -32,7 +32,7 @@ defineProps<{
       <div
         v-if="icon"
         class="h-8 w-8 rounded-lg flex items-center justify-center mr-3 shadow-lg"
-        :class="iconGradient || 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20'"
+        :class="iconGradient || 'bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20'"
       >
         <component :is="icon" class="h-4 w-4 text-white" />
       </div>

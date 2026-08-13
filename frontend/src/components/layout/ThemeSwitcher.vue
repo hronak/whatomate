@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { Sun, Moon, Monitor } from 'lucide-vue-next'
+import { Sun, Moon, Monitor } from '@lucide/vue'
 import { useColorMode } from '@/composables/useColorMode'
 
 const { colorMode, setColorMode } = useColorMode()

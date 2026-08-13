@@ -29,7 +29,7 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { formatDate } from '@/lib/utils'
 import { useSearchPagination } from '@/composables/useSearchPagination'
 import { useDateRange } from '@/composables/useDateRange'
@@ -247,7 +247,7 @@ function getProgressPercentage(campaign: Campaign): number {
       :title="$t('campaigns.title')"
       :subtitle="$t('campaigns.subtitle')"
       :icon="Megaphone"
-      icon-gradient="bg-gradient-to-br from-rose-500 to-pink-600 shadow-rose-500/20"
+      icon-gradient="bg-linear-to-br from-rose-500 to-pink-600 shadow-rose-500/20"
     >
       <template #actions>
         <RouterLink to="/campaigns/new">

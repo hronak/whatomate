@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Shield, Lock, Star, Save, Trash2, Loader2 } from 'lucide-vue-next'
+import { Shield, Lock, Star, Save, Trash2, Loader2 } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -162,7 +162,7 @@ onMounted(async () => {
     <DetailPageLayout
       :title="isNew ? t('roles.createRole') : (role?.name || '')"
       :icon="Shield"
-      icon-gradient="bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20"
+      icon-gradient="bg-linear-to-br from-purple-500 to-indigo-600 shadow-purple-500/20"
       back-link="/settings/roles"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

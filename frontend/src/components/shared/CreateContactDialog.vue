@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { contactsService, accountsService, type Tag } from '@/services/api'
 import { useTagsStore } from '@/stores/tags'
 import { toast } from 'vue-sonner'
-import { Loader2, Check, ChevronsUpDown, X } from 'lucide-vue-next'
+import { Loader2, Check, ChevronsUpDown, X } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { getTagColorClass } from '@/lib/constants'
 

@@ -11,7 +11,7 @@ import { PageHeader, SearchInput, DeleteConfirmDialog, DataTable, IconButton, Er
 import { cannedResponsesService, type CannedResponse } from '@/services/api'
 import { useCrudState } from '@/composables/useCrudState'
 import { toast } from 'vue-sonner'
-import { Plus, MessageSquareText, Pencil, Trash2, Copy } from 'lucide-vue-next'
+import { Plus, MessageSquareText, Pencil, Trash2, Copy } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { CANNED_RESPONSE_CATEGORIES, getLabelFromValue } from '@/lib/constants'
 import { useSearchPagination } from '@/composables/useSearchPagination'
@@ -99,7 +99,7 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('cannedResponses.title')" :icon="MessageSquareText" icon-gradient="bg-gradient-to-br from-teal-500 to-emerald-600 shadow-teal-500/20" back-link="/settings" :breadcrumbs="breadcrumbs">
+    <PageHeader :title="$t('cannedResponses.title')" :icon="MessageSquareText" icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20" back-link="/settings" :breadcrumbs="breadcrumbs">
       <template #actions>
         <Button variant="outline" size="sm" @click="openCreate"><Plus class="h-4 w-4 mr-2" />{{ $t('cannedResponses.addResponse') }}</Button>
       </template>

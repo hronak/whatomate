@@ -13,7 +13,7 @@ import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import { getInitials, getAvatarGradient } from '@/lib/utils'
 import {
   StickyNote, Pencil, Trash2, X, Check, Loader2, Send
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const props = defineProps<{
   contactId: string
@@ -160,9 +160,9 @@ function formatNoteTime(dateStr: string) {
 </script>
 
 <template>
-  <div id="notes-panel" class="w-80 border-l border-white/[0.08] light:border-gray-200 bg-[#111113] light:bg-white flex flex-col">
+  <div id="notes-panel" class="w-80 border-l border-white/8 light:border-gray-200 bg-[#111113] light:bg-white flex flex-col">
     <!-- Header -->
-    <div class="px-4 py-3 border-b border-white/[0.08] light:border-gray-200 flex items-center justify-between">
+    <div class="px-4 py-3 border-b border-white/8 light:border-gray-200 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <div class="h-7 w-7 rounded-lg bg-amber-500/15 flex items-center justify-center">
           <StickyNote class="h-4 w-4 text-amber-400 light:text-amber-600" />
@@ -175,7 +175,7 @@ function formatNoteTime(dateStr: string) {
       <Button
         variant="ghost"
         size="icon"
-        class="h-7 w-7 text-white/40 hover:text-white hover:bg-white/[0.08] light:text-gray-500 light:hover:text-gray-900 light:hover:bg-gray-100"
+        class="h-7 w-7 text-white/40 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100"
         @click="emit('close')"
       >
         <X class="h-4 w-4" />
@@ -200,16 +200,16 @@ function formatNoteTime(dateStr: string) {
           <div
             v-for="note in notesStore.notes"
             :key="note.id"
-            class="group relative rounded-xl p-3 backdrop-blur-sm border border-white/[0.06] light:border-gray-200 bg-gradient-to-br from-white/[0.04] to-white/[0.02] light:from-gray-50 light:to-white hover:from-white/[0.06] hover:to-white/[0.03] light:hover:from-gray-100 light:hover:to-gray-50 transition-all duration-200"
+            class="group relative rounded-xl p-3 backdrop-blur-sm border border-white/6 light:border-gray-200 bg-linear-to-br from-white/4 to-white/2 light:from-gray-50 light:to-white hover:from-white/6 hover:to-white/3 hover:light:from-gray-100 hover:light:to-gray-50 transition-all duration-200"
           >
             <!-- Gradient accent line -->
-            <div class="absolute top-0 left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-amber-500/60 via-orange-500/40 to-transparent" />
+            <div class="absolute top-0 left-3 right-3 h-[2px] rounded-full bg-linear-to-r from-amber-500/60 via-orange-500/40 to-transparent" />
 
             <!-- Editing mode -->
             <template v-if="editingNoteId === note.id">
               <Textarea
                 v-model="editingContent"
-                class="min-h-[60px] max-h-[100px] resize-none text-sm bg-white/[0.04] light:bg-gray-50 border-amber-500/20 light:border-amber-200 mt-1"
+                class="min-h-[60px] max-h-[100px] resize-none text-sm bg-white/4 light:bg-gray-50 border-amber-500/20 light:border-amber-200 mt-1"
                 :rows="2"
                 @keydown.meta.enter.prevent="saveEdit(note.id)"
                 @keydown.ctrl.enter.prevent="saveEdit(note.id)"
@@ -234,8 +234,8 @@ function formatNoteTime(dateStr: string) {
             <!-- Display mode -->
             <template v-else>
               <div class="flex items-start gap-2.5 mt-1">
-                <Avatar class="h-6 w-6 shrink-0 ring-1 ring-white/[0.08] light:ring-gray-200">
-                  <AvatarFallback :class="'text-[10px] bg-gradient-to-br text-white ' + getAvatarGradient(note.created_by_name)">
+                <Avatar class="h-6 w-6 shrink-0 ring-1 ring-white/8 light:ring-gray-200">
+                  <AvatarFallback :class="'text-[10px] bg-linear-to-br text-white ' + getAvatarGradient(note.created_by_name)">
                     {{ getInitials(note.created_by_name) }}
                   </AvatarFallback>
                 </Avatar>
@@ -249,13 +249,13 @@ function formatNoteTime(dateStr: string) {
                         class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5"
                       >
                         <button
-                          class="h-5 w-5 rounded-md flex items-center justify-center hover:bg-white/[0.08] light:hover:bg-gray-200 text-white/30 hover:text-white/60 light:text-gray-400 light:hover:text-gray-600 transition-colors"
+                          class="h-5 w-5 rounded-md flex items-center justify-center hover:bg-white/8 hover:light:bg-gray-200 text-white/30 hover:text-white/60 light:text-gray-400 hover:light:text-gray-600 transition-colors"
                           @click="startEditing(note.id, note.content)"
                         >
                           <Pencil class="h-3 w-3" />
                         </button>
                         <button
-                          class="h-5 w-5 rounded-md flex items-center justify-center hover:bg-red-500/10 text-white/30 hover:text-red-400 light:text-gray-400 light:hover:text-red-500 transition-colors"
+                          class="h-5 w-5 rounded-md flex items-center justify-center hover:bg-red-500/10 text-white/30 hover:text-red-400 light:text-gray-400 hover:light:text-red-500 transition-colors"
                           @click="deleteNote(note.id)"
                         >
                           <Trash2 class="h-3 w-3" />
@@ -264,7 +264,7 @@ function formatNoteTime(dateStr: string) {
                       <span class="text-[10px] text-white/30 light:text-gray-400">{{ formatNoteTime(note.created_at) }}</span>
                     </div>
                   </div>
-                  <p class="text-[13px] text-white/60 light:text-gray-600 leading-relaxed whitespace-pre-wrap break-words">{{ note.content }}</p>
+                  <p class="text-[13px] text-white/60 light:text-gray-600 leading-relaxed whitespace-pre-wrap wrap-break-word">{{ note.content }}</p>
                 </div>
               </div>
             </template>
@@ -286,17 +286,17 @@ function formatNoteTime(dateStr: string) {
     </ScrollArea>
 
     <!-- Add note input -->
-    <div class="p-4 border-t border-white/[0.08] light:border-gray-200">
-      <div class="flex items-center gap-2 p-2 rounded-xl bg-white/[0.06] light:bg-gray-100 border border-white/[0.08] light:border-gray-200">
+    <div class="p-4 border-t border-white/8 light:border-gray-200">
+      <div class="flex items-center gap-2 p-2 rounded-xl bg-white/6 light:bg-gray-100 border border-white/8 light:border-gray-200">
         <textarea
           v-model="newNoteContent"
           :placeholder="t('chat.writeNote') + '...'"
-          class="flex-1 bg-transparent text-[14px] text-white light:text-gray-900 placeholder:text-white/30 light:placeholder:text-gray-400 focus:outline-none resize-none min-h-[36px] max-h-[120px] py-2 overflow-y-auto"
+          class="flex-1 bg-transparent text-[14px] text-white light:text-gray-900 placeholder:text-white/30 light:placeholder:text-gray-400 focus:outline-hidden resize-none min-h-[36px] max-h-[120px] py-2 overflow-y-auto"
           rows="1"
           @keydown.enter.exact.prevent="addNote"
         />
         <button
-          class="w-9 h-9 rounded-lg bg-amber-600 hover:bg-amber-500 light:bg-amber-500 light:hover:bg-amber-600 flex items-center justify-center transition-colors disabled:opacity-50"
+          class="w-9 h-9 rounded-lg bg-amber-600 hover:bg-amber-500 light:bg-amber-500 hover:light:bg-amber-600 flex items-center justify-center transition-colors disabled:opacity-50"
           :disabled="!newNoteContent.trim() || isSaving"
           @click="addNote"
         >

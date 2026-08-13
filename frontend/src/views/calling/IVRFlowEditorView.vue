@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Save, Volume2, Grid3X3, Hash, Globe, Users, ExternalLink, Clock, PhoneOff } from 'lucide-vue-next'
+import { ArrowLeft, Save, Volume2, Grid3X3, Hash, Globe, Users, ExternalLink, Clock, PhoneOff } from '@lucide/vue'
 import AuditLogPanel from '@/components/shared/AuditLogPanel.vue'
 import MetadataPanel from '@/components/shared/MetadataPanel.vue'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -485,7 +485,7 @@ onMounted(() => {
         </div>
 
         <!-- Metadata + Activity Log (when no node is selected) -->
-        <ScrollArea v-else class="flex-1 [&>div>div]:!overflow-x-hidden">
+        <ScrollArea v-else class="flex-1 [&>div>div]:overflow-x-hidden!">
           <div class="p-4 space-y-4 overflow-hidden">
             <MetadataPanel
               :created-at="flowCreatedAt"

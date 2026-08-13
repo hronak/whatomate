@@ -21,7 +21,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Switch } from '@/components/ui/switch'
-import { Key, Trash2, Save, Copy, AlertTriangle } from 'lucide-vue-next'
+import { Key, Trash2, Save, Copy, AlertTriangle } from '@lucide/vue'
 import { IconButton } from '@/components/shared'
 
 interface APIKey {
@@ -156,7 +156,7 @@ onMounted(async () => {
     <DetailPageLayout
       :title="isNew ? $t('apiKeys.newApiKey', 'New API Key') : (apiKey?.name || '')"
       :icon="Key"
-      icon-gradient="bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20"
+      icon-gradient="bg-linear-to-br from-amber-500 to-orange-600 shadow-amber-500/20"
       back-link="/settings/api-keys"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"
@@ -202,7 +202,7 @@ onMounted(async () => {
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
+            <div class="h-10 w-10 rounded-full bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
               <Key class="h-5 w-5 text-white" />
             </div>
             <div class="min-w-0">

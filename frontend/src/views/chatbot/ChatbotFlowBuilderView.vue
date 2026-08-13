@@ -36,7 +36,7 @@ import {
   Plus,
   Trash2,
   Play,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 import AuditLogPanel from '@/components/shared/AuditLogPanel.vue'
 import MetadataPanel from '@/components/shared/MetadataPanel.vue'
@@ -693,7 +693,7 @@ onMounted(async () => {
 <template>
   <div class="flex flex-col h-screen bg-muted/30">
     <!-- Header -->
-    <header class="border-b bg-background px-4 py-3 flex-shrink-0">
+    <header class="border-b bg-background px-4 py-3 shrink-0">
       <div class="flex items-center gap-4">
         <Button variant="ghost" size="icon" @click="handleCancel">
           <ArrowLeft class="h-5 w-5" />

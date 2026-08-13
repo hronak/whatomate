@@ -20,7 +20,7 @@ import {
   Braces,
   ListTree,
   CircleDot
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -187,7 +187,7 @@ function handlePlayPause() {
                   :key="key"
                   class="flex items-start gap-2 text-xs py-1"
                 >
-                  <span class="font-mono text-purple-600 dark:text-purple-400 flex-shrink-0">{{ key }}:</span>
+                  <span class="font-mono text-purple-600 dark:text-purple-400 shrink-0">{{ key }}:</span>
                   <span class="text-gray-700 dark:text-gray-300 break-all">
                     {{ typeof value === 'object' ? JSON.stringify(value) : value }}
                   </span>

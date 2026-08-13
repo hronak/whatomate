@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { SimulationMessage } from '@/types/flow-preview'
-import { Bug, Info } from 'lucide-vue-next'
+import { Bug, Info } from '@lucide/vue'
 
 const props = defineProps<{
   message: SimulationMessage
@@ -68,7 +68,7 @@ const isDebug = computed(() => props.message.type === 'debug')
   <!-- Debug Message -->
   <div v-else-if="isDebug" class="flex justify-center">
     <div class="bg-purple-100 dark:bg-purple-900/30 text-xs text-purple-700 dark:text-purple-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5 max-w-[90%]">
-      <Bug class="h-3 w-3 flex-shrink-0" />
+      <Bug class="h-3 w-3 shrink-0" />
       <span class="break-all">{{ message.content }}</span>
     </div>
   </div>

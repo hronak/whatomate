@@ -38,7 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { MessageSquareText, Trash2, Save } from 'lucide-vue-next'
+import { MessageSquareText, Trash2, Save } from '@lucide/vue'
 import { CANNED_RESPONSE_CATEGORIES } from '@/lib/constants'
 
 const route = useRoute()
@@ -289,7 +289,7 @@ onMounted(() => { loadResponse() })
     <DetailPageLayout
       :title="pageTitle"
       :icon="MessageSquareText"
-      icon-gradient="bg-gradient-to-br from-teal-500 to-emerald-600 shadow-teal-500/20"
+      icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20"
       back-link="/settings/canned-responses"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

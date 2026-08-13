@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/services/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-vue-next'
+import { Loader2, AlertCircle, CheckCircle } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
 const { t } = useI18n()
@@ -43,7 +43,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 light:from-violet-50 light:to-violet-100 p-4">
+  <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 to-gray-800 light:from-violet-50 light:to-violet-100 p-4">
     <Card class="w-full max-w-md">
       <CardHeader class="text-center">
         <div class="flex justify-center mb-4">

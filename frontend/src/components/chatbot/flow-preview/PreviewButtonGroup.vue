@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ButtonConfig } from '@/types/flow-preview'
-import { ExternalLink, Phone, PhoneCall } from 'lucide-vue-next'
+import { ExternalLink, Phone, PhoneCall } from '@lucide/vue'
 
 defineProps<{
   buttons: ButtonConfig[]
@@ -21,7 +21,7 @@ function handleClick(button: ButtonConfig) {
     <button
       v-for="btn in buttons"
       :key="btn.id"
-      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 px-4 rounded-lg shadow-sm border-0 flex items-center justify-center gap-1.5 transition-colors"
+      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5 transition-colors"
       :class="{
         'hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer': !disabled,
         'opacity-50 cursor-not-allowed': disabled

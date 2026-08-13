@@ -17,7 +17,7 @@ import {
   Image as ImageIcon,
   AlertTriangle,
   Pencil
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 interface Props {
   open: boolean

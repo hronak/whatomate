@@ -266,7 +266,7 @@ export class ChatPage extends BasePage {
 
   // Account tabs helpers
   get accountTabsContainer(): Locator {
-    return this.page.locator('[class*="flex-shrink-0"]').filter({ has: this.page.locator('button') }).filter({ hasText: /.+/ }).last()
+    return this.page.locator('[class*="shrink-0"]').filter({ has: this.page.locator('button') }).filter({ hasText: /.+/ }).last()
   }
 
   getAccountTab(accountName: string): Locator {

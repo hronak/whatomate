@@ -15,7 +15,7 @@ import { PageHeader, DataTable, DateRangePicker, type Column } from '@/component
 import { auditLogsService, type AuditLogEntry } from '@/services/api'
 import { useUsersStore } from '@/stores/users'
 import { useDateRange } from '@/composables/useDateRange'
-import { ScrollText } from 'lucide-vue-next'
+import { ScrollText } from '@lucide/vue'
 import { formatDate, formatLabel } from '@/lib/utils'
 
 const { t } = useI18n()
@@ -120,7 +120,7 @@ onMounted(async () => {
       :title="t('auditLogs.title')"
       :description="t('auditLogs.description')"
       :icon="ScrollText"
-      icon-gradient="bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20"
+      icon-gradient="bg-linear-to-br from-amber-500 to-orange-600 shadow-amber-500/20"
     />
 
     <ScrollArea class="flex-1">

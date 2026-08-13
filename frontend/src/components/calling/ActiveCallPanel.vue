@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCallingStore } from '@/stores/calling'
 import { Button } from '@/components/ui/button'
-import { Phone, PhoneOff, PhoneIncoming, Mic, MicOff, ArrowRightLeft, Pause, Play } from 'lucide-vue-next'
+import { Phone, PhoneOff, PhoneIncoming, Mic, MicOff, ArrowRightLeft, Pause, Play } from '@lucide/vue'
 import CallTransferPicker from '@/components/calling/CallTransferPicker.vue'
 import { toast } from 'vue-sonner'
 
@@ -109,11 +109,11 @@ async function handleAccept(id: string) {
           v-if="store.isOnCall"
           size="sm"
           variant="ghost"
-          class="h-10 w-10 rounded-full p-0 border !text-zinc-300"
-          :class="store.isMuted ? '!bg-red-900/30 !border-red-700 hover:!bg-red-900/50' : '!bg-zinc-800 !border-zinc-600 hover:!bg-zinc-700'"
+          class="h-10 w-10 rounded-full p-0 border text-zinc-300!"
+          :class="store.isMuted ? 'bg-red-900/30! border-red-700! hover:bg-red-900/50!' : 'bg-zinc-800! border-zinc-600! hover:bg-zinc-700!'"
           @click="store.toggleMute()"
         >
-          <MicOff v-if="store.isMuted" class="h-4 w-4 !text-red-400" />
+          <MicOff v-if="store.isMuted" class="h-4 w-4 text-red-400!" />
           <Mic v-else class="h-4 w-4" />
         </Button>
 
@@ -122,12 +122,12 @@ async function handleAccept(id: string) {
           v-if="store.isOnCall"
           size="sm"
           variant="ghost"
-          class="h-10 w-10 rounded-full p-0 border !text-zinc-300"
-          :class="store.isOnHold ? '!bg-amber-900/30 !border-amber-700 hover:!bg-amber-900/50' : '!bg-zinc-800 !border-zinc-600 hover:!bg-zinc-700'"
+          class="h-10 w-10 rounded-full p-0 border text-zinc-300!"
+          :class="store.isOnHold ? 'bg-amber-900/30! border-amber-700! hover:bg-amber-900/50!' : 'bg-zinc-800! border-zinc-600! hover:bg-zinc-700!'"
           :title="store.isOnHold ? t('calling.resume') : t('calling.hold')"
           @click="store.isOnHold ? store.resumeCall() : store.holdCall()"
         >
-          <Play v-if="store.isOnHold" class="h-4 w-4 !text-amber-400" />
+          <Play v-if="store.isOnHold" class="h-4 w-4 text-amber-400!" />
           <Pause v-else class="h-4 w-4" />
         </Button>
 
@@ -136,7 +136,7 @@ async function handleAccept(id: string) {
           v-if="store.isOnCall"
           size="sm"
           variant="ghost"
-          class="h-10 w-10 rounded-full p-0 border !bg-zinc-800 !border-zinc-600 !text-zinc-300 hover:!bg-zinc-700"
+          class="h-10 w-10 rounded-full p-0 border bg-zinc-800! border-zinc-600! text-zinc-300! hover:bg-zinc-700!"
           :title="t('callTransfers.transfer')"
           @click="showTransferPicker = true"
         >
@@ -148,7 +148,7 @@ async function handleAccept(id: string) {
           v-if="firstWaiting"
           variant="ghost"
           size="sm"
-          class="h-10 w-10 rounded-full p-0 !bg-green-600 !text-white hover:!bg-green-500"
+          class="h-10 w-10 rounded-full p-0 bg-green-600! text-white! hover:bg-green-500!"
           :disabled="acceptingId === firstWaiting.id"
           @click="handleAccept(firstWaiting.id)"
         >
@@ -160,7 +160,7 @@ async function handleAccept(id: string) {
           v-if="store.isOnCall"
           variant="ghost"
           size="sm"
-          class="h-10 w-10 rounded-full p-0 !bg-red-600 !text-white hover:!bg-red-500"
+          class="h-10 w-10 rounded-full p-0 bg-red-600! text-white! hover:bg-red-500!"
           @click="store.endCall()"
         >
           <PhoneOff class="h-4 w-4" />

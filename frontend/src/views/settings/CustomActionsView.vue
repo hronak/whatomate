@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { Plus, Trash2, Pencil, Zap, Loader2, Globe, Webhook, Code, Ticket, User, BarChart, Link, Phone, Mail, FileText, ExternalLink } from 'lucide-vue-next'
+import { Plus, Trash2, Pencil, Zap, Loader2, Globe, Webhook, Code, Ticket, User, BarChart, Link, Phone, Mail, FileText, ExternalLink } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useDebounceFn } from '@vueuse/core'
@@ -189,7 +189,7 @@ onMounted(() => fetchActions())
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('customActions.title')" :subtitle="$t('customActions.subtitle')" :icon="Zap" icon-gradient="bg-gradient-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20">
+    <PageHeader :title="$t('customActions.title')" :subtitle="$t('customActions.subtitle')" :icon="Zap" icon-gradient="bg-linear-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20">
       <template #actions>
         <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('customActions.addAction') }}</Button>
       </template>
@@ -279,8 +279,8 @@ onMounted(() => fetchActions())
                 <Label>{{ $t('customActions.headers') }}</Label>
                 <div class="space-y-2">
                   <div v-for="(value, key) in formData.config.headers" :key="key" class="flex items-center gap-2">
-                    <Badge variant="secondary" class="flex-shrink-0">{{ key }}</Badge><span class="text-sm truncate flex-1">{{ value }}</span>
-                    <Button variant="ghost" size="icon" class="h-6 w-6 flex-shrink-0" @click="removeHeader(key as string)"><Trash2 class="h-3 w-3" /></Button>
+                    <Badge variant="secondary" class="shrink-0">{{ key }}</Badge><span class="text-sm truncate flex-1">{{ value }}</span>
+                    <Button variant="ghost" size="icon" class="h-6 w-6 shrink-0" @click="removeHeader(key as string)"><Trash2 class="h-3 w-3" /></Button>
                   </div>
                   <div class="flex gap-2"><Input v-model="newHeaderKey" :placeholder="$t('webhooks.headerName')" class="flex-1" /><Input v-model="newHeaderValue" :placeholder="$t('webhooks.headerValue')" class="flex-1" /><Button variant="outline" size="sm" @click="addHeader">{{ $t('common.add') }}</Button></div>
                 </div>

@@ -46,7 +46,7 @@ import {
   X,
   ChevronDown,
   Info,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { getQualityBadgeClass, getQualityRatingLabel } from '@/lib/utils'
 
@@ -665,7 +665,7 @@ onMounted(async () => {
   <DetailPageLayout
     :title="isNew ? $t('templates.newTemplate', 'New Template') : (template?.display_name || template?.name || '')"
     :icon="FileText"
-    icon-gradient="bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
+    icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
     back-link="/templates"
     :breadcrumbs="breadcrumbs"
     :is-loading="isLoading"
@@ -1214,7 +1214,7 @@ onMounted(async () => {
       </AlertDialogHeader>
       <div v-if="template" class="py-2">
         <div class="bg-gray-800 light:bg-[#e5ddd5] rounded-lg p-4">
-          <div class="bg-gray-700 light:bg-white rounded-lg shadow max-w-[280px] overflow-hidden">
+          <div class="bg-gray-700 light:bg-white rounded-lg shadow-sm max-w-[280px] overflow-hidden">
             <div v-if="template.header_type && template.header_type !== 'NONE'" class="p-3 border-b">
               <div v-if="template.header_type === 'TEXT'" class="font-semibold">{{ previewHeader }}</div>
               <div v-else class="h-32 bg-gray-600 light:bg-gray-200 rounded flex items-center justify-center">
@@ -1229,7 +1229,7 @@ onMounted(async () => {
             </div>
             <div v-if="template.buttons && template.buttons.length > 0" class="border-t">
               <div v-for="(btn, idx) in template.buttons" :key="idx" class="border-b last:border-b-0">
-                <button class="w-full py-2 text-sm text-blue-500 hover:bg-gray-600 light:hover:bg-gray-50">
+                <button class="w-full py-2 text-sm text-blue-500 hover:bg-gray-600 hover:light:bg-gray-50">
                   {{ btn.text || btn.title || 'Button' }}
                 </button>
               </div>

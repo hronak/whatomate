@@ -12,7 +12,7 @@ import {
   XCircle,
   Flag,
   AlertCircle
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const props = defineProps<{
   entries: ExecutionLogEntry[]
@@ -125,7 +125,7 @@ const formattedEntries = computed(() => {
     >
       <component
         :is="entry.icon"
-        class="h-3.5 w-3.5 flex-shrink-0 mt-0.5"
+        class="h-3.5 w-3.5 shrink-0 mt-0.5"
         :class="entry.color"
       />
       <div class="flex-1 min-w-0">

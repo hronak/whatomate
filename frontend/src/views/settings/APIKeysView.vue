@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { Plus, Trash2, Pencil, Key } from 'lucide-vue-next'
+import { Plus, Trash2, Pencil, Key } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useSearchPagination } from '@/composables/useSearchPagination'
@@ -106,7 +106,7 @@ onMounted(() => fetchItems())
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('apiKeys.title')" :subtitle="$t('apiKeys.subtitle')" :icon="Key" icon-gradient="bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20" back-link="/settings">
+    <PageHeader :title="$t('apiKeys.title')" :subtitle="$t('apiKeys.subtitle')" :icon="Key" icon-gradient="bg-linear-to-br from-amber-500 to-orange-600 shadow-amber-500/20" back-link="/settings">
       <template #actions>
         <RouterLink v-if="canWrite" to="/settings/api-keys/new">
           <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('apiKeys.createApiKey') }}</Button>

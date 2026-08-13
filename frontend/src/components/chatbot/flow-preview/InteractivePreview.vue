@@ -10,7 +10,7 @@ import PreviewListPicker from './PreviewListPicker.vue'
 import PreviewInputBar from './PreviewInputBar.vue'
 import DebugPanel from './DebugPanel.vue'
 import ApiMockDialog from './ApiMockDialog.vue'
-import { MessageSquare } from 'lucide-vue-next'
+import { MessageSquare } from '@lucide/vue'
 
 const props = defineProps<{
   graph: ChatFlowGraph | null
@@ -150,7 +150,7 @@ function handleGoToStep(stepName: string) {
           <!-- Screen -->
           <div class="flex-1 rounded-[32px] overflow-hidden flex flex-col bg-[#efeae2] dark:bg-[#0b141a]">
             <!-- iOS-ish status bar -->
-            <div class="bg-[#008069] dark:bg-[#202c33] text-white px-5 py-1 flex items-center justify-between text-[11px] font-medium flex-shrink-0">
+            <div class="bg-[#008069] dark:bg-[#202c33] text-white px-5 py-1 flex items-center justify-between text-[11px] font-medium shrink-0">
               <span>9:41</span>
               <div class="flex items-center gap-1">
                 <!-- signal -->
@@ -161,8 +161,8 @@ function handleGoToStep(stepName: string) {
             </div>
 
             <!-- Chat Header -->
-            <div class="bg-[#008069] dark:bg-[#202c33] text-white px-3 py-2 flex items-center gap-3 flex-shrink-0">
-              <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+            <div class="bg-[#008069] dark:bg-[#202c33] text-white px-3 py-2 flex items-center gap-3 shrink-0">
+              <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                 <MessageSquare class="h-4 w-4" />
               </div>
               <div class="flex-1 min-w-0">
@@ -244,7 +244,7 @@ function handleGoToStep(stepName: string) {
     </div>
 
     <!-- Debug Panel -->
-    <div class="w-64 flex-shrink-0">
+    <div class="w-64 shrink-0">
       <DebugPanel
         :state="state"
         :steps="debugSteps as any"

@@ -11,7 +11,7 @@ import { useOrganizationsStore } from '@/stores/organizations'
 import { useAuthStore } from '@/stores/auth'
 import type { Role } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { Plus, Pencil, Trash2, Shield, Users, Lock, Star } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, Shield, Users, Lock, Star } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useSearchPagination } from '@/composables/useSearchPagination'
@@ -103,7 +103,7 @@ function editTooltip(role: Role): string {
 
 <template>
   <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
-    <PageHeader :title="$t('roles.title')" :subtitle="$t('roles.subtitle')" :icon="Shield" icon-gradient="bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20" back-link="/settings">
+    <PageHeader :title="$t('roles.title')" :subtitle="$t('roles.subtitle')" :icon="Shield" icon-gradient="bg-linear-to-br from-purple-500 to-indigo-600 shadow-purple-500/20" back-link="/settings">
       <template #actions>
         <RouterLink v-if="canWrite" to="/settings/roles/new">
           <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('roles.addRole') }}</Button>

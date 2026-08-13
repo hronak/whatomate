@@ -251,7 +251,7 @@ test.describe('Multi-Account Tabs', () => {
     await page.waitForTimeout(500)
 
     // Get the chat header and account tabs bounding boxes
-    const header = page.locator('.h-14.flex-shrink-0').first()
+    const header = page.locator('.h-14.shrink-0').first()
     const tabsContainer = chatPage.getAccountTab('account-1').locator('..')
 
     const headerBox = await header.boundingBox()
