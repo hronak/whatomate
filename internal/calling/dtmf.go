@@ -36,10 +36,17 @@ func decodeDTMFEvent(eventID byte, endBit bool, lastEvent *byte, lastEndBit *boo
 }
 
 // sendDTMFDigit sends a decoded digit to the session's DTMF buffer (non-blocking).
+// The buffer is read through the session accessor rather than the field: teardown
+// nils it under the lock, and a send on a nil channel simply falls through to the
+// default arm.
 func sendDTMFDigit(session *CallSession, digit byte, log logf.Logger) {
+	buf := session.dtmfChan()
 	select {
-	case session.DTMFBuffer <- digit:
+	case buf <- digit:
 	default:
+		if buf == nil {
+			return // session torn down; nothing is listening
+		}
 		log.Warn("DTMF buffer full, dropping digit",
 			"call_id", session.ID,
 			"digit", string(digit),
@@ -63,9 +70,22 @@ func (m *Manager) handleDTMFTrack(session *CallSession, track *webrtc.TrackRemot
 	var lastEvent byte = 0xFF // impossible event ID as sentinel
 	var lastEndBit bool
 
+	done := session.doneChan()
 	for {
+		select {
+		case <-done:
+			return
+		default:
+		}
+
+		if !readRTPDeadline(track, session, m) {
+			return
+		}
 		n, _, err := track.Read(buf)
 		if err != nil {
+			if isTimeout(err) {
+				continue
+			}
 			m.log.Debug("DTMF track read ended", "call_id", session.ID, "error", err)
 			return
 		}

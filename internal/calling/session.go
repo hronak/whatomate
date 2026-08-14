@@ -22,6 +22,42 @@ import (
 	"gorm.io/gorm"
 )
 
+// signal is a one-shot broadcast used for the call lifecycle events that more
+// than one goroutine watches (bridge handover, transfer acceptance, session
+// teardown).
+//
+// Fire is idempotent, so the rotation paths that race to end a transfer can no
+// longer double-close and panic. Every method tolerates a nil receiver: Done
+// then yields a nil channel, which blocks forever in a select — exactly the
+// behaviour of the nil channel fields these replaced.
+//
+// Reassigning a session's signal (transfer rotation mints a fresh one per
+// attempt) hands any existing waiter the previous instance, so a goroutine
+// parked on a superseded signal is released by that instance's own Fire rather
+// than leaking.
+type signal struct {
+	ch   chan struct{}
+	once sync.Once
+}
+
+func newSignal() *signal { return &signal{ch: make(chan struct{})} }
+
+// Fire closes the signal. Safe to call repeatedly and from any goroutine.
+func (s *signal) Fire() {
+	if s == nil {
+		return
+	}
+	s.once.Do(func() { close(s.ch) })
+}
+
+// Done returns a channel closed on the first Fire, or nil if s is nil.
+func (s *signal) Done() <-chan struct{} {
+	if s == nil {
+		return nil
+	}
+	return s.ch
+}
+
 // CallSession represents an active call with its WebRTC state
 type CallSession struct {
 	ID             string // WhatsApp call_id
@@ -57,11 +93,11 @@ type CallSession struct {
 	Bridge            *AudioBridge
 	HoldPlayer        *AudioPlayer
 	TransferCancel    context.CancelFunc
-	BridgeStarted     chan struct{} // closed when bridge takes over caller track
-	TransferAccepted  chan struct{} // closed when an agent accepts the transfer (rotation signal)
-	TransferDone      chan string   // outcome sent when transfer ends; nil = terminal
-	LastRTPSeq        uint16        // last RTP seq from bridge, for post-transfer player
-	LastRTPTimestamp  uint32        // last RTP timestamp from bridge
+	BridgeStarted     *signal     // fired when bridge takes over caller track
+	TransferAccepted  *signal     // fired when an agent accepts the transfer (rotation signal)
+	TransferDone      chan string // outcome sent when transfer ends; nil = terminal
+	LastRTPSeq        uint16      // last RTP seq from bridge, for post-transfer player
+	LastRTPTimestamp  uint32      // last RTP timestamp from bridge
 
 	// Ringback (outgoing calls)
 	RingbackPlayer *AudioPlayer
@@ -82,7 +118,75 @@ type CallSession struct {
 	WARemoteTrack  *webrtc.TrackRemote         // WhatsApp's remote audio track
 	SDPAnswerReady chan string                 // webhook delivers SDP answer here
 
+	// done is fired once by cleanupSession. It is how consumer goroutines
+	// (DTMF waiters, RTP readers) learn the session is gone. It replaces
+	// closing DTMFBuffer, which raced with dtmf.go's send.
+	done *signal
+
 	mu sync.Mutex
+}
+
+// --- Guarded accessors ---
+//
+// The fields below are written by the transfer/teardown paths while consumer
+// goroutines read them, so every access goes through session.mu. Callers take
+// a snapshot and then select on it outside the lock; a stale snapshot is safe
+// because each signal is fired exactly once by whoever supersedes it.
+
+// bridgeStarted returns the current BridgeStarted signal, which may be nil.
+func (s *CallSession) bridgeStarted() *signal {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.BridgeStarted
+}
+
+// fireBridgeStarted releases anything waiting on the bridge handover.
+func (s *CallSession) fireBridgeStarted() {
+	s.mu.Lock()
+	sig := s.BridgeStarted
+	s.mu.Unlock()
+	sig.Fire()
+}
+
+// newTransferAccepted installs a fresh TransferAccepted signal and returns it.
+func (s *CallSession) newTransferAccepted() *signal {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.TransferAccepted = newSignal()
+	return s.TransferAccepted
+}
+
+// transferAccepted returns the current TransferAccepted signal, which may be nil.
+func (s *CallSession) transferAccepted() *signal {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.TransferAccepted
+}
+
+// dtmfChan returns the session's DTMF buffer, or nil once the session has been
+// torn down. The channel is never closed, so every receive must also select on
+// doneChan to avoid blocking past the end of the call.
+func (s *CallSession) dtmfChan() chan byte {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.DTMFBuffer
+}
+
+// callID returns the WhatsApp call ID, which is empty until the outgoing-call
+// flow has actually placed the call. Read under the lock because the pion
+// callbacks registered before that point consult it.
+func (s *CallSession) callID() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.ID
+}
+
+// doneChan returns a channel closed when the session is cleaned up.
+func (s *CallSession) doneChan() <-chan struct{} {
+	s.mu.Lock()
+	sig := s.done
+	s.mu.Unlock()
+	return sig.Done()
 }
 
 // IVRNodeType identifies the kind of applet in an IVR flow graph.
@@ -199,8 +303,9 @@ func (m *Manager) HandleIncomingCall(account *models.WhatsAppAccount, contact *m
 		Status:         models.CallStatusRinging,
 		DTMFBuffer:     make(chan byte, 32),
 		StartedAt:      time.Now(),
-		BridgeStarted:  make(chan struct{}),
+		BridgeStarted:  newSignal(),
 		StickyAgentID:  stickyAgentID,
+		done:           newSignal(),
 	}
 
 	// Load IVR flow if assigned (cached). Skipped for sticky-routed calls —
@@ -267,6 +372,47 @@ func (m *Manager) HandleCallEvent(callID, event string) {
 // EndCall terminates a call session and cleans up resources
 func (m *Manager) EndCall(callID string) {
 	m.cleanupSession(callID)
+}
+
+// Shutdown ends every active call and returns once their sessions are cleaned
+// up, or when ctx expires.
+//
+// Without this, process shutdown simply dropped live calls: peer connections
+// were never closed, in-progress recordings were never finalized or uploaded,
+// and the corresponding CallLog rows stayed stuck in their last status.
+func (m *Manager) Shutdown(ctx context.Context) {
+	m.mu.RLock()
+	callIDs := make([]string, 0, len(m.sessions))
+	for id := range m.sessions {
+		callIDs = append(callIDs, id)
+	}
+	m.mu.RUnlock()
+
+	if len(callIDs) == 0 {
+		return
+	}
+
+	m.log.Info("Ending active calls for shutdown", "count", len(callIDs))
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for _, id := range callIDs {
+			// The session may already be gone if it ended between the snapshot
+			// above and now.
+			if s := m.GetSession(id); s != nil {
+				m.terminateCallBySession(s)
+			}
+			m.cleanupSession(id)
+		}
+	}()
+
+	select {
+	case <-done:
+		m.log.Info("All active calls ended")
+	case <-ctx.Done():
+		m.log.Warn("Timed out ending active calls", "remaining", len(m.sessions))
+	}
 }
 
 // GetSession returns a call session by ID
@@ -373,7 +519,6 @@ func (m *Manager) cleanupSession(callID string) {
 	session.WAPeerConn = nil
 	peerConn := session.PeerConnection
 	session.PeerConnection = nil
-	dtmfBuffer := session.DTMFBuffer
 	session.DTMFBuffer = nil
 	callerRec := session.CallerRecorder
 	session.CallerRecorder = nil
@@ -381,8 +526,19 @@ func (m *Manager) cleanupSession(callID string) {
 	session.AgentRecorder = nil
 	transferDone := session.TransferDone
 	session.TransferDone = nil
+	// Release anything still parked on a transfer handshake before the
+	// session's resources go away.
+	bridgeStarted := session.BridgeStarted
+	transferAccepted := session.TransferAccepted
+	doneSig := session.done
 
 	session.mu.Unlock()
+
+	// Fire done first: consumer goroutines observe teardown before the
+	// resources they hold are torn down under them.
+	doneSig.Fire()
+	bridgeStarted.Fire()
+	transferAccepted.Fire()
 
 	// Close TransferDone to unblock any waiting IVR goroutine
 	if transferDone != nil {
@@ -444,10 +600,9 @@ func (m *Manager) cleanupSession(callID string) {
 		}
 	}
 
-	// Close DTMF buffer channel
-	if dtmfBuffer != nil {
-		close(dtmfBuffer)
-	}
+	// DTMFBuffer is deliberately not closed: dtmf.go sends into it from the
+	// WebRTC read loop, and closing under it panicked the process. Nilling it
+	// under the lock (above) plus firing done releases every consumer.
 
 	// Finalize recording (async — don't block cleanup)
 	if callerRec != nil || agentRec != nil {
@@ -494,15 +649,6 @@ func (m *Manager) setupAudioBridge(session *CallSession) *AudioBridge {
 	session.AgentRecorder = agentRec
 	session.mu.Unlock()
 	return bridge
-}
-
-// safeClose closes a channel only if it hasn't already been closed.
-func safeClose(ch chan struct{}) {
-	select {
-	case <-ch:
-	default:
-		close(ch)
-	}
 }
 
 // terminateCall terminates an active call via the WhatsApp API.
@@ -683,4 +829,14 @@ func mergeRecordings(file1, file2 string) (string, error) {
 	}
 
 	return outPath, nil
+}
+
+// logWrite reports a failed database write at a site that has no error path to
+// return to. Call-log and transfer-state transitions are best-effort from the
+// media path's point of view, but a silent failure leaves the row showing a
+// status the call is no longer in.
+func (m *Manager) logWrite(op string, tx *gorm.DB, kv ...any) {
+	if tx.Error != nil {
+		m.log.Error("Database write failed", append([]any{"op", op, "error", tx.Error}, kv...)...)
+	}
 }

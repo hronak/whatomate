@@ -1,6 +1,8 @@
 package contactutil
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"gorm.io/gorm"
@@ -25,27 +27,34 @@ func GetOrCreateContact(db *gorm.DB, orgID uuid.UUID, phoneNumber, profileName s
 	// Try to find existing contact with normalized phone (including soft-deleted)
 	var contact models.Contact
 	if err := db.Unscoped().Where("organization_id = ? AND phone_number = ?", orgID, normalizedPhone).First(&contact).Error; err == nil {
-		// Restore if soft-deleted
+		// Restore if soft-deleted. A failed restore must not be swallowed:
+		// the caller would treat the returned contact as live while every
+		// subsequent scoped query keeps filtering it out.
 		if contact.DeletedAt.Valid {
-			db.Unscoped().Model(&contact).Update("deleted_at", nil)
+			if err := db.Unscoped().Model(&contact).Update("deleted_at", nil).Error; err != nil {
+				return nil, false, fmt.Errorf("failed to restore soft-deleted contact: %w", err)
+			}
 			contact.DeletedAt.Valid = false
 		}
-		// Update profile name if changed
+		// Update profile name if changed. Best-effort: a stale display name is
+		// not worth failing message ingest over.
 		if profileName != "" && contact.ProfileName != profileName {
-			db.Model(&contact).Update("profile_name", profileName)
+			_ = db.Model(&contact).Update("profile_name", profileName).Error
 		}
 		return &contact, false, nil
 	}
 
 	// Also try with + prefix (contacts may have been stored with it)
 	if err := db.Unscoped().Where("organization_id = ? AND phone_number = ?", orgID, "+"+normalizedPhone).First(&contact).Error; err == nil {
-		// Restore if soft-deleted
+		// Restore if soft-deleted (see above).
 		if contact.DeletedAt.Valid {
-			db.Unscoped().Model(&contact).Update("deleted_at", nil)
+			if err := db.Unscoped().Model(&contact).Update("deleted_at", nil).Error; err != nil {
+				return nil, false, fmt.Errorf("failed to restore soft-deleted contact: %w", err)
+			}
 			contact.DeletedAt.Valid = false
 		}
 		if profileName != "" && contact.ProfileName != profileName {
-			db.Model(&contact).Update("profile_name", profileName)
+			_ = db.Model(&contact).Update("profile_name", profileName).Error
 		}
 		return &contact, false, nil
 	}
@@ -60,9 +69,11 @@ func GetOrCreateContact(db *gorm.DB, orgID uuid.UUID, phoneNumber, profileName s
 	if err := db.Create(&contact).Error; err != nil {
 		// Race condition: another goroutine may have created the contact
 		if err2 := db.Unscoped().Where("organization_id = ? AND phone_number = ?", orgID, normalizedPhone).First(&contact).Error; err2 == nil {
-			// Restore if soft-deleted
+			// Restore if soft-deleted (see above).
 			if contact.DeletedAt.Valid {
-				db.Unscoped().Model(&contact).Update("deleted_at", nil)
+				if err := db.Unscoped().Model(&contact).Update("deleted_at", nil).Error; err != nil {
+					return nil, false, fmt.Errorf("failed to restore soft-deleted contact: %w", err)
+				}
 				contact.DeletedAt.Valid = false
 			}
 			return &contact, false, nil

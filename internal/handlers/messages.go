@@ -427,10 +427,10 @@ func (a *App) finalizeMessageSend(msg *models.Message, req OutgoingMessageReques
 	if err != nil {
 		errMsg := err.Error()
 
-		a.DB.Model(&models.Message{}).Where("id = ?", msg.ID).Updates(map[string]any{
+		a.logWrite("message status", a.DB.Model(&models.Message{}).Where("id = ?", msg.ID).Updates(map[string]any{
 			"status":        models.MessageStatusFailed,
 			"error_message": errMsg,
-		})
+		}))
 		a.Log.Error("Failed to send message", "error", err, "message_id", msg.ID, "type", msg.MessageType)
 
 		// Broadcast failure status via WebSocket so frontend updates immediately
@@ -448,10 +448,10 @@ func (a *App) finalizeMessageSend(msg *models.Message, req OutgoingMessageReques
 		return
 	}
 
-	a.DB.Model(&models.Message{}).Where("id = ?", msg.ID).Updates(map[string]any{
+	a.logWrite("message status", a.DB.Model(&models.Message{}).Where("id = ?", msg.ID).Updates(map[string]any{
 		"status":               models.MessageStatusSent,
 		"whats_app_message_id": wamid,
-	})
+	}))
 	a.Log.Info("Message sent", "message_id", msg.ID, "wa_message_id", wamid, "type", msg.MessageType)
 
 	// Dispatch webhook for successful send
@@ -578,10 +578,10 @@ func (a *App) dispatchMessageSentWebhook(account *models.WhatsAppAccount, contac
 
 // updateContactLastMessage updates contact's last_message_at and preview
 func (a *App) updateContactLastMessage(contact *models.Contact, preview string) {
-	a.DB.Model(contact).Updates(map[string]any{
+	a.logWrite("contact last message", a.DB.Model(contact).Updates(map[string]any{
 		"last_message_at":      time.Now(),
 		"last_message_preview": preview,
-	})
+	}))
 }
 
 // getMessagePreview returns a preview string for the message

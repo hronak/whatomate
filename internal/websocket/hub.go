@@ -22,6 +22,12 @@ type Hub struct {
 	// unregister channel for disconnecting clients
 	unregister chan *Client
 
+	// quit signals Run to exit; closed once by Stop
+	quit chan struct{}
+
+	// stopOnce keeps Stop idempotent
+	stopOnce sync.Once
+
 	// mutex for thread-safe access to clients map
 	mu sync.RWMutex
 
@@ -36,11 +42,12 @@ func NewHub(log logf.Logger) *Hub {
 		broadcast:  make(chan BroadcastMessage, 256),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
+		quit:       make(chan struct{}),
 		log:        log,
 	}
 }
 
-// Run starts the hub's main loop
+// Run starts the hub's main loop. It returns when Stop is called.
 func (h *Hub) Run() {
 	for {
 		select {
@@ -52,119 +59,176 @@ func (h *Hub) Run() {
 
 		case message := <-h.broadcast:
 			h.broadcastMessage(message)
+
+		case <-h.quit:
+			h.closeAllClients()
+			return
 		}
 	}
+}
+
+// Stop shuts the hub down: Run returns and every connected client's send
+// channel is closed, which unblocks its WritePump. Safe to call more than once
+// and safe to call when Run was never started.
+func (h *Hub) Stop() {
+	h.stopOnce.Do(func() { close(h.quit) })
+}
+
+// closeAllClients drops every registered client. Closing send is what
+// terminates each client's WritePump; ReadPump ends when its connection does.
+func (h *Hub) closeAllClients() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	count := 0
+	for orgID, orgClients := range h.clients {
+		for userID, userClients := range orgClients {
+			for client := range userClients {
+				close(client.send)
+				count++
+			}
+			delete(orgClients, userID)
+		}
+		delete(h.clients, orgID)
+	}
+
+	h.log.Info("WebSocket hub stopped", "clients_closed", count)
 }
 
 // registerClient adds a client to the hub
 func (h *Hub) registerClient(client *Client) {
 	h.mu.Lock()
-	defer h.mu.Unlock()
 
-	orgClients, ok := h.clients[client.organizationID]
+	orgClients, ok := h.clients[client.OrgID()]
 	if !ok {
 		orgClients = make(map[uuid.UUID]map[*Client]struct{})
-		h.clients[client.organizationID] = orgClients
+		h.clients[client.OrgID()] = orgClients
 	}
 
-	userClients, ok := orgClients[client.userID]
+	userClients, ok := orgClients[client.UserID()]
 	if !ok {
 		userClients = make(map[*Client]struct{})
-		orgClients[client.userID] = userClients
+		orgClients[client.UserID()] = userClients
 	}
 
 	// Add this client to the set (allows multiple tabs)
 	userClients[client] = struct{}{}
 
+	// Snapshot the counts, then log outside the write lock: the full walk in
+	// countClients is O(clients) and blocked every broadcast while it ran.
+	userConns, total := len(userClients), h.countClients()
+	h.mu.Unlock()
+
 	h.log.Info("WebSocket client registered",
-		"user_id", client.userID,
-		"org_id", client.organizationID,
-		"user_connections", len(userClients),
-		"total_clients", h.countClients())
+		"user_id", client.UserID(),
+		"org_id", client.OrgID(),
+		"user_connections", userConns,
+		"total_clients", total)
 }
 
 // unregisterClient removes a client from the hub
 func (h *Hub) unregisterClient(client *Client) {
 	h.mu.Lock()
-	defer h.mu.Unlock()
 
-	if orgClients, ok := h.clients[client.organizationID]; ok {
-		if userClients, ok := orgClients[client.userID]; ok {
+	if orgClients, ok := h.clients[client.OrgID()]; ok {
+		if userClients, ok := orgClients[client.UserID()]; ok {
 			if _, exists := userClients[client]; exists {
 				delete(userClients, client)
 				close(client.send)
 
 				// Clean up empty user map
 				if len(userClients) == 0 {
-					delete(orgClients, client.userID)
+					delete(orgClients, client.UserID())
 				}
 
 				// Clean up empty org map
 				if len(orgClients) == 0 {
-					delete(h.clients, client.organizationID)
+					delete(h.clients, client.OrgID())
 				}
 			}
 		}
 	}
 
+	total := h.countClients()
+	h.mu.Unlock()
+
 	h.log.Info("WebSocket client unregistered",
-		"user_id", client.userID,
-		"org_id", client.organizationID,
-		"total_clients", h.countClients())
+		"user_id", client.UserID(),
+		"org_id", client.OrgID(),
+		"total_clients", total)
 }
 
-// broadcastMessage sends a message to all relevant clients
+// maxSendDrops is how many consecutive full-buffer drops a client may incur
+// before the hub gives up on it. A client that cannot keep up is not merely
+// missing one event — its view is already inconsistent, and silently dropping
+// more leaves it wrong indefinitely. Disconnecting forces a reconnect and a
+// fresh fetch.
+const maxSendDrops = 32
+
+// broadcastMessage sends a message to all relevant clients.
 func (h *Hub) broadcastMessage(msg BroadcastMessage) {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-
-	orgClients, ok := h.clients[msg.OrgID]
-	if !ok {
-		return
-	}
-
 	data, err := json.Marshal(msg.Message)
 	if err != nil {
 		h.log.Error("Failed to marshal broadcast message", "error", err)
 		return
 	}
 
-	// If UserID is specified, only send to that user's clients
-	if msg.UserID != uuid.Nil {
-		userClients, ok := orgClients[msg.UserID]
-		if !ok {
-			return
-		}
-		for client := range userClients {
-			select {
-			case client.send <- data:
-			default:
-				h.log.Warn("Client send buffer full, skipping",
-					"user_id", client.userID,
-					"org_id", client.organizationID)
-			}
-		}
+	h.mu.RLock()
+	orgClients, ok := h.clients[msg.OrgID]
+	if !ok {
+		h.mu.RUnlock()
 		return
 	}
 
-	// Iterate through all users in the organization
-	for _, userClients := range orgClients {
-		// Iterate through all clients (tabs) for each user
-		for client := range userClients {
-			// If ContactID is specified, only send to clients viewing that contact
-			if msg.ContactID != uuid.Nil && client.currentContact != nil && *client.currentContact != msg.ContactID {
-				continue
-			}
-
-			select {
-			case client.send <- data:
-			default:
-				// Client buffer full, skip
-				h.log.Warn("Client send buffer full, skipping",
-					"user_id", client.userID,
-					"org_id", client.organizationID)
+	var stalled []*Client
+	if msg.UserID != uuid.Nil {
+		// Only send to that user's clients
+		for client := range orgClients[msg.UserID] {
+			if !h.deliver(client, data) {
+				stalled = append(stalled, client)
 			}
 		}
+	} else {
+		for _, userClients := range orgClients {
+			for client := range userClients {
+				// If ContactID is specified, only send to clients viewing that contact
+				if msg.ContactID != uuid.Nil && client.viewingOtherContact(msg.ContactID) {
+					continue
+				}
+				if !h.deliver(client, data) {
+					stalled = append(stalled, client)
+				}
+			}
+		}
+	}
+	h.mu.RUnlock()
+
+	// Drop hopeless clients after releasing the read lock — unregisterClient
+	// takes the write lock.
+	for _, client := range stalled {
+		h.log.Warn("Dropping unresponsive WebSocket client",
+			"user_id", client.UserID(),
+			"org_id", client.OrgID(),
+			"consecutive_drops", maxSendDrops)
+		h.unregisterClient(client)
+		client.closeConn()
+	}
+}
+
+// deliver queues data for one client, reporting false when the client has
+// stalled past maxSendDrops and should be disconnected.
+func (h *Hub) deliver(client *Client, data []byte) bool {
+	select {
+	case client.send <- data:
+		client.resetDrops()
+		return true
+	default:
+		drops := client.recordDrop()
+		h.log.Warn("Client send buffer full, skipping",
+			"user_id", client.UserID(),
+			"org_id", client.OrgID(),
+			"consecutive_drops", drops)
+		return drops < maxSendDrops
 	}
 }
 
@@ -281,11 +345,21 @@ func (h *Hub) FilterOnlineUsers(orgID uuid.UUID, userIDs []uuid.UUID) []uuid.UUI
 }
 
 // Register adds a client to the hub via the register channel
+// Both sends select on quit: once Run has returned nothing drains these
+// unbuffered channels, and a bare send would park the caller's goroutine
+// forever. After Stop the hub has already closed every client's send channel,
+// so dropping the request is correct.
 func (h *Hub) Register(client *Client) {
-	h.register <- client
+	select {
+	case h.register <- client:
+	case <-h.quit:
+	}
 }
 
 // Unregister removes a client from the hub via the unregister channel
 func (h *Hub) Unregister(client *Client) {
-	h.unregister <- client
+	select {
+	case h.unregister <- client:
+	case <-h.quit:
+	}
 }

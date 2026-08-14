@@ -154,10 +154,10 @@ func (a *App) processCallWebhook(phoneNumberID string, call any) {
 		}
 
 		// Update call status to answered
-		a.DB.Model(callLog).Updates(map[string]any{
+		a.logWrite("call log status", a.DB.Model(callLog).Updates(map[string]any{
 			"status":      models.CallStatusAnswered,
 			"answered_at": now,
-		})
+		}))
 
 		// Delegate to CallManager with the SDP offer. Resolve the sticky
 		// agent again here — Meta echoes biz_opaque_callback_data on every
@@ -181,10 +181,10 @@ func (a *App) processCallWebhook(phoneNumberID string, call any) {
 
 	case "in_call":
 		// Update call status to answered
-		a.DB.Model(callLog).Updates(map[string]any{
+		a.logWrite("call log status", a.DB.Model(callLog).Updates(map[string]any{
 			"status":      models.CallStatusAnswered,
 			"answered_at": now,
-		})
+		}))
 
 		// Notify CallManager if session exists
 		if a.IsCallingEnabledForOrg(account.OrganizationID) {
@@ -227,7 +227,7 @@ func (a *App) processCallWebhook(phoneNumberID string, call any) {
 		if callLog.DisconnectedBy == "" {
 			updates["disconnected_by"] = models.DisconnectedByClient
 		}
-		a.DB.Model(callLog).Updates(updates)
+		a.logWrite("call log status", a.DB.Model(callLog).Updates(updates))
 
 		// Notify CallManager to clean up
 		if a.CallManager != nil {
@@ -248,11 +248,11 @@ func (a *App) processCallWebhook(phoneNumberID string, call any) {
 		})
 
 	case "missed", "unanswered":
-		a.DB.Model(callLog).Updates(map[string]any{
+		a.logWrite("call log status", a.DB.Model(callLog).Updates(map[string]any{
 			"status":          models.CallStatusMissed,
 			"ended_at":        now,
 			"disconnected_by": models.DisconnectedByClient,
-		})
+		}))
 
 		a.broadcastCallEvent(account.OrganizationID, websocket.TypeCallEnded, map[string]any{
 			"call_id":    ce.ID,
@@ -346,7 +346,7 @@ func (a *App) handleOrphanedOutgoingCallEvent(callID, event string, duration int
 		if callLog.DisconnectedBy == "" {
 			updates["disconnected_by"] = models.DisconnectedByClient
 		}
-		a.DB.Model(&callLog).Updates(updates)
+		a.logWrite("call log status", a.DB.Model(&callLog).Updates(updates))
 
 		a.broadcastCallEvent(callLog.OrganizationID, websocket.TypeOutgoingCallEnded, map[string]any{
 			"call_log_id": callLog.ID.String(),
@@ -469,7 +469,7 @@ func (a *App) processCallPermissionReply(phoneNumberID, fromPhone string, reply 
 		if expiresAt != nil {
 			updates["expires_at"] = *expiresAt
 		}
-		a.DB.Model(&permission).Updates(updates)
+		a.logWrite("call permission", a.DB.Model(&permission).Updates(updates))
 	}
 
 	// Broadcast permission update to agents via WebSocket

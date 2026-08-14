@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -71,6 +72,12 @@ func (w *Worker) HandleRecipientJob(ctx context.Context, job *queue.RecipientJob
 	var campaign models.BulkMessageCampaign
 	if err := w.DB.Where("id = ?", job.CampaignID).Preload("Template").First(&campaign).Error; err != nil {
 		w.Log.Error("Failed to load campaign", "error", err, "campaign_id", job.CampaignID)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// The campaign is gone; redelivering can never succeed. This used
+			// to return a plain error and come back every 5 minutes forever.
+			return queue.Permanent(fmt.Errorf("campaign %s not found", job.CampaignID))
+		}
+		// A DB outage is transient — let it retry.
 		return fmt.Errorf("failed to load campaign: %w", err)
 	}
 
@@ -144,7 +151,17 @@ func (w *Worker) HandleRecipientJob(ctx context.Context, job *queue.RecipientJob
 	}
 
 	if err != nil {
-		w.Log.Error("Failed to send message", "error", err, "recipient", job.PhoneNumber)
+		attempt := queue.AttemptFromContext(ctx)
+		// Retry a transient send failure rather than recording it as final on
+		// the first try. Nothing is written here on a retryable attempt, so the
+		// recipient is not counted failed twice when the retry also fails.
+		if attempt < queue.MaxDeliveries && isRetryableSendError(err) {
+			w.Log.Warn("Send failed, will retry",
+				"error", err, "recipient", job.PhoneNumber, "attempt", attempt)
+			return fmt.Errorf("send to %s failed: %w", job.PhoneNumber, err)
+		}
+
+		w.Log.Error("Failed to send message", "error", err, "recipient", job.PhoneNumber, "attempt", attempt)
 		message.Status = models.MessageStatusFailed
 		message.ErrorMessage = err.Error()
 		w.updateRecipientStatus(job.RecipientID, models.MessageStatusFailed, "", err.Error())
@@ -167,6 +184,30 @@ func (w *Worker) HandleRecipientJob(ctx context.Context, job *queue.RecipientJob
 	return nil
 }
 
+// isRetryableSendError reports whether a failed send is worth another attempt.
+//
+// Anything that never reached Meta — DNS, dial, TLS, timeouts, connection
+// resets — is transient by definition. A response from Meta, on the other hand,
+// is a considered verdict: an invalid number or a rejected template will fail
+// identically every time, and retrying only burns quota.
+//
+// The check is by message prefix because pkg/whatsapp currently flattens Meta's
+// structured error into a string. Phase 2 of the refactor gives it a real
+// *MetaAPIError with sentinels, at which point this becomes errors.As on the
+// code and the rate-limit codes can be retried too.
+func isRetryableSendError(err error) bool {
+	if err == nil {
+		return false
+	}
+	// Deadline/cancellation of our own context: the send may well have been
+	// in flight, but a retry is the safer of the two failure modes here.
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	msg := err.Error()
+	return !strings.Contains(msg, "API error ") && !strings.Contains(msg, "API returned status ")
+}
+
 // updateRecipientStatus updates the recipient's status in the database
 func (w *Worker) updateRecipientStatus(recipientID uuid.UUID, status models.MessageStatus, waMessageID, errorMsg string) {
 	updates := map[string]any{
@@ -179,7 +220,7 @@ func (w *Worker) updateRecipientStatus(recipientID uuid.UUID, status models.Mess
 	if errorMsg != "" {
 		updates["error_message"] = errorMsg
 	}
-	w.DB.Model(&models.BulkMessageRecipient{}).Where("id = ?", recipientID).Updates(updates)
+	w.logWrite("recipient status", w.DB.Model(&models.BulkMessageRecipient{}).Where("id = ?", recipientID).Updates(updates))
 }
 
 // incrementCampaignCount increments a campaign counter atomically
@@ -228,10 +269,10 @@ func (w *Worker) checkCampaignCompletion(ctx context.Context, campaignID, organi
 		}
 
 		now := time.Now()
-		w.DB.Model(&campaign).Updates(map[string]any{
+		w.logWrite("campaign counter", w.DB.Model(&campaign).Updates(map[string]any{
 			"status":       models.CampaignStatusCompleted,
 			"completed_at": now,
-		})
+		}))
 
 		w.Log.Info("Campaign completed", "campaign_id", campaignID, "sent", campaign.SentCount, "failed", campaign.FailedCount)
 
@@ -316,4 +357,13 @@ func (w *Worker) Close() error {
 		return w.Consumer.Close()
 	}
 	return nil
+}
+
+// logWrite reports a failed database write at a site with no error path to
+// return to. Recipient status and campaign counters are bookkeeping, but a
+// silent failure makes a campaign's totals permanently wrong.
+func (w *Worker) logWrite(op string, tx *gorm.DB, kv ...any) {
+	if tx.Error != nil {
+		w.Log.Error("Database write failed", append([]any{"op", op, "error", tx.Error}, kv...)...)
+	}
 }

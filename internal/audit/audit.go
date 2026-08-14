@@ -110,7 +110,13 @@ func ComputeChanges(oldData, newData any) []map[string]any {
 	return changes
 }
 
-// LogAudit creates an audit log entry asynchronously.
+// LogAudit writes an audit log entry.
+//
+// It is synchronous. Callers decide whether to run it in the background: the
+// handlers layer does so via App.logAudit, which uses a bounded, WaitGroup-
+// tracked goroutine. The fire-and-forget goroutine that used to live in here
+// was unbounded under load and silently discarded on shutdown.
+//
 // Optional extraChanges are appended to the computed diff (useful for masked sensitive fields).
 func LogAudit(
 	db *gorm.DB,
@@ -144,11 +150,9 @@ func LogAudit(
 		Changes:        changesArr,
 	}
 
-	go func() {
-		if err := db.Create(&entry).Error; err != nil {
-			slog.Error("failed to create audit log", "error", err)
-		}
-	}()
+	if err := db.Create(&entry).Error; err != nil {
+		slog.Error("failed to create audit log", "error", err)
+	}
 }
 
 func extractSubField(val any, key string) any {

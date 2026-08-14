@@ -164,7 +164,7 @@ func (a *App) processIncomingMessageFull(phoneNumberID string, msg IncomingTextM
 
 	// Store BSUID if provided and not already set
 	if msg.FromUserID != "" && contact.BSUID != msg.FromUserID {
-		a.DB.Model(contact).Update("bsuid", msg.FromUserID)
+		a.logWrite("contact bsuid", a.DB.Model(contact).Update("bsuid", msg.FromUserID))
 		contact.BSUID = msg.FromUserID
 	}
 
@@ -665,7 +665,7 @@ func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountName, phoneN
 
 	if result.Error == nil {
 		// Update last activity
-		a.DB.Model(&session).Update("last_activity_at", now)
+		a.logWrite("session activity", a.DB.Model(&session).Update("last_activity_at", now))
 		return &session, false // existing session
 	}
 
@@ -725,12 +725,12 @@ func (a *App) matchFlowTrigger(orgID uuid.UUID, messageText string) *models.Chat
 // startFlow initiates a chatbot flow for a user
 func (a *App) exitFlow(session *models.ChatbotSession) {
 	now := time.Now()
-	a.DB.Model(session).Updates(map[string]any{
+	a.logWrite("session state", a.DB.Model(session).Updates(map[string]any{
 		"current_step": "",
 		"step_retries": 0,
 		"status":       models.SessionStatusCompleted,
 		"completed_at": now,
-	})
+	}))
 
 	// Clear chatbot tracking so SLA doesn't fire after flow exit
 	a.ClearContactChatbotTracking(session.ContactID)
@@ -1631,13 +1631,13 @@ func (a *App) saveIncomingMessage(account *models.WhatsAppAccount, contact *mode
 		preview = "[" + msgType + "]"
 	}
 
-	a.DB.Model(contact).Updates(map[string]any{
+	a.logWrite("contact chatbot state", a.DB.Model(contact).Updates(map[string]any{
 		"last_message_at":      now,
 		"last_message_preview": preview,
 		"is_read":              false,
 		"whats_app_account":    account.Name,
 		"last_inbound_at":      now,
-	})
+	}))
 
 	a.Log.Info("Saved incoming message", "message_id", message.ID, "contact_id", contact.ID, "media_url", message.MediaURL)
 

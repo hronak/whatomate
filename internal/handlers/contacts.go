@@ -472,7 +472,7 @@ func (a *App) markMessagesAsRead(orgID uuid.UUID, contactID uuid.UUID, contact *
 		Where("contact_id = ? AND direction = ?", contactID, models.DirectionIncoming).
 		Update("status", models.MessageStatusRead)
 
-	a.DB.Model(contact).Update("is_read", true)
+	a.logWrite("contact read flag", a.DB.Model(contact).Update("is_read", true))
 
 	if len(unreadMessages) > 0 && contact.WhatsAppAccount != "" {
 		if account, err := a.resolveWhatsAppAccount(orgID, contact.WhatsAppAccount); err == nil {
@@ -1033,7 +1033,10 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 	}
 
 	// Send reaction to WhatsApp API
-	go a.sendWhatsAppReaction(account, &contact, &message, req.Emoji)
+	emoji := req.Emoji
+	a.spawn("send_reaction", func(context.Context) {
+		a.sendWhatsAppReaction(account, &contact, &message, emoji)
+	})
 
 	// Broadcast via WebSocket
 	a.broadcastReactionUpdate(orgID, message.ID, contact.ID, newReactions)
@@ -1357,7 +1360,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 		// Contact exists
 		if existingContact.DeletedAt.Valid {
 			// Restore soft-deleted contact
-			a.DB.Unscoped().Model(&existingContact).Update("deleted_at", nil)
+			a.logWrite("contact undelete", a.DB.Unscoped().Model(&existingContact).Update("deleted_at", nil))
 			existingContact.DeletedAt.Valid = false
 			// Update fields
 			updates := map[string]any{}
@@ -1378,7 +1381,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 				updates["metadata"] = models.JSONB(req.Metadata)
 			}
 			if len(updates) > 0 {
-				a.DB.Model(&existingContact).Updates(updates)
+				a.logWrite("contact import update", a.DB.Model(&existingContact).Updates(updates))
 			}
 			// Reload contact
 			a.DB.First(&existingContact, existingContact.ID)

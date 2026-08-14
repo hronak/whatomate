@@ -338,7 +338,7 @@ func (a *App) CallbackSSO(r *fastglue.Request) error {
 		if user.SSOProvider == "" {
 			user.SSOProvider = provider
 			user.SSOProviderID = userInfo.ID
-			a.DB.Save(&user)
+			a.logWrite("sso user", a.DB.Save(&user))
 		}
 
 		// Check if user is active

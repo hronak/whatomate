@@ -2,20 +2,21 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
-
-	"fmt"
 
 	"github.com/dop251/goja"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
@@ -65,15 +66,35 @@ type ToastConfig struct {
 	Type    string `json:"type"` // success, error, info, warning
 }
 
-// Redirect token storage (in production, use Redis)
-var (
-	redirectTokens     = make(map[string]redirectToken)
-	redirectTokenMutex sync.RWMutex
+const (
+	// redirectTokenPrefix namespaces one-time URL-action redirect tokens in Redis.
+	redirectTokenPrefix = "whatomate:redirect_token:"
+
+	// redirectTokenTTL is how long a redirect token stays redeemable. Redis
+	// expires it automatically, which is the point: the previous in-memory map
+	// only deleted a token when someone happened to redeem it, so every
+	// unredeemed token leaked for the lifetime of the process.
+	redirectTokenTTL = 30 * time.Second
 )
 
-type redirectToken struct {
-	URL       string
-	ExpiresAt time.Time
+// redirectTokenKey returns the Redis key for a redirect token.
+func redirectTokenKey(token string) string { return redirectTokenPrefix + token }
+
+// mintRedirectToken stores url under a fresh one-time token and returns the
+// relative redirect path clients should follow.
+func (a *App) mintRedirectToken(url string) (string, error) {
+	tokenBytes := make([]byte, 16)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		return "", fmt.Errorf("failed to generate redirect token: %w", err)
+	}
+	token := hex.EncodeToString(tokenBytes)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := a.Redis.Set(ctx, redirectTokenKey(token), url, redirectTokenTTL).Err(); err != nil {
+		return "", fmt.Errorf("failed to store redirect token: %w", err)
+	}
+	return "/api/custom-actions/redirect/" + token, nil
 }
 
 // ListCustomActions returns all custom actions for the organization
@@ -343,31 +364,27 @@ func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 
 // CustomActionRedirect handles redirect tokens for URL actions
 func (a *App) CustomActionRedirect(r *fastglue.Request) error {
-	token := r.RequestCtx.UserValue("token").(string)
-
-	redirectTokenMutex.RLock()
-	rt, exists := redirectTokens[token]
-	redirectTokenMutex.RUnlock()
-
-	if !exists {
+	token, _ := r.RequestCtx.UserValue("token").(string)
+	if token == "" {
 		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Invalid or expired redirect token", nil, "")
 	}
 
-	if time.Now().After(rt.ExpiresAt) {
-		// Clean up expired token
-		redirectTokenMutex.Lock()
-		delete(redirectTokens, token)
-		redirectTokenMutex.Unlock()
-		return r.SendErrorEnvelope(fasthttp.StatusGone, "Redirect token has expired", nil, "")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// GETDEL redeems the token atomically, so two concurrent requests cannot
+	// both follow a one-time redirect. Expiry is Redis's job now, so an expired
+	// token is simply absent.
+	url, err := a.Redis.GetDel(ctx, redirectTokenKey(token)).Result()
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			a.Log.Error("Failed to read redirect token", "error", err)
+		}
+		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Invalid or expired redirect token", nil, "")
 	}
 
-	// Delete token (one-time use)
-	redirectTokenMutex.Lock()
-	delete(redirectTokens, token)
-	redirectTokenMutex.Unlock()
-
 	// Redirect to the actual URL
-	r.RequestCtx.Redirect(rt.URL, fasthttp.StatusFound)
+	r.RequestCtx.Redirect(url, fasthttp.StatusFound)
 	return nil
 }
 
@@ -467,21 +484,16 @@ func (a *App) executeURLAction(action models.CustomAction, context map[string]an
 	// Replace variables in URL
 	finalURL := replaceVariables(config.URL, context)
 
-	// Generate a random token
-	tokenBytes := make([]byte, 16)
-	_, _ = rand.Read(tokenBytes)
-	token := hex.EncodeToString(tokenBytes)
-
-	// Store the redirect token (expires in 30 seconds)
-	redirectTokenMutex.Lock()
-	redirectTokens[token] = redirectToken{
-		URL:       finalURL,
-		ExpiresAt: time.Now().Add(30 * time.Second),
+	// Store the redirect token in Redis with a TTL.
+	//
+	// This used to be a process-local map, which broke in two ways: unredeemed
+	// tokens were never reclaimed, and behind more than one instance the
+	// redirect only worked if it happened to land on the instance that minted
+	// the token.
+	redirectURL, err := a.mintRedirectToken(finalURL)
+	if err != nil {
+		return nil, err
 	}
-	redirectTokenMutex.Unlock()
-
-	// Return the redirect URL
-	redirectURL := "/api/custom-actions/redirect/" + token
 
 	return &ActionResult{
 		Success:     true,
@@ -552,16 +564,12 @@ func (a *App) executeJavaScriptAction(action models.CustomAction, context map[st
 				result.Clipboard = clip
 			}
 			if url, ok := jsResult["url"].(string); ok {
-				tokenBytes := make([]byte, 16)
-				_, _ = rand.Read(tokenBytes)
-				token := hex.EncodeToString(tokenBytes)
-				redirectTokenMutex.Lock()
-				redirectTokens[token] = redirectToken{
-					URL:       url,
-					ExpiresAt: time.Now().Add(30 * time.Second),
+				redirectURL, err := a.mintRedirectToken(url)
+				if err != nil {
+					a.Log.Error("Failed to mint redirect token for JS action", "error", err)
+				} else {
+					result.RedirectURL = redirectURL
 				}
-				redirectTokenMutex.Unlock()
-				result.RedirectURL = "/api/custom-actions/redirect/" + token
 			}
 			if msg, ok := jsResult["message"].(string); ok {
 				result.Message = msg

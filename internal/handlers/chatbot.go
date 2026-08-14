@@ -505,27 +505,27 @@ func (a *App) UpdateChatbotSettings(r *fastglue.Request) error {
 	// Emit per-tab audit entries. LogAudit is a no-op when no fields changed.
 	userName := audit.GetUserName(a.DB, userID)
 	if messagesTouched {
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsChatbotMessages, orgID, models.AuditActionUpdated,
 			oldMessages, chatbotMessagesSnapshot(&settings))
 	}
 	if agentsTouched {
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsChatbotAgents, orgID, models.AuditActionUpdated,
 			oldAgents, chatbotAgentsSnapshot(&settings))
 	}
 	if hoursTouched {
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsChatbotHours, orgID, models.AuditActionUpdated,
 			oldHours, chatbotHoursSnapshot(&settings))
 	}
 	if slaTouched {
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsChatbotSLA, orgID, models.AuditActionUpdated,
 			oldSLA, chatbotSLASnapshot(&settings))
 	}
 	if aiTouched {
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsChatbotAI, orgID, models.AuditActionUpdated,
 			oldAI, chatbotAISnapshot(&settings))
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -27,6 +28,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"github.com/zerodha/logf"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -267,12 +269,15 @@ func runServer(args []string) {
 		Name:               "Whatomate",
 	}
 
-	// Start server in goroutine
+	// Start server in goroutine. A listen failure signals the shutdown path
+	// rather than calling lo.Fatal: os.Exit from here would skip every cleanup
+	// step below, dropping in-flight requests, live calls and queued work.
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	serverFailed := make(chan error, 1)
 	go func() {
 		lo.Info("Server listening", "address", addr)
 		if err := server.ListenAndServe(addr); err != nil {
-			lo.Fatal("Server failed", "error", err)
+			serverFailed <- err
 		}
 	}()
 
@@ -282,14 +287,14 @@ func runServer(args []string) {
 	go slaProcessor.Start(slaCtx)
 	lo.Info("SLA processor started")
 
-	// Start embedded workers
+	// Start embedded workers under an errgroup so shutdown can actually await
+	// them. Previously they were cancelled but never waited for, so an
+	// in-flight job was abandoned mid-send.
 	var workers []*worker.Worker
-	var workerCancel context.CancelFunc
+	workerCtx, workerCancel := context.WithCancel(context.Background())
+	workerGroup, workerGroupCtx := errgroup.WithContext(workerCtx)
 	if *numWorkers > 0 {
-		var workerCtx context.Context
-		workerCtx, workerCancel = context.WithCancel(context.Background())
-
-		for i := 0; i < *numWorkers; i++ {
+		for i := range *numWorkers {
 			w, err := worker.New(cfg, db, rdb, lo)
 			if err != nil {
 				lo.Fatal("Failed to create worker", "error", err, "worker_num", i+1)
@@ -297,12 +302,14 @@ func runServer(args []string) {
 			workers = append(workers, w)
 
 			workerNum := i + 1
-			go func() {
+			workerGroup.Go(func() error {
 				lo.Info("Worker started", "worker_num", workerNum)
-				if err := w.Run(workerCtx); err != nil && err != context.Canceled {
+				if err := w.Run(workerGroupCtx); err != nil && !errors.Is(err, context.Canceled) {
 					lo.Error("Worker error", "error", err, "worker_num", workerNum)
+					return err
 				}
-			}()
+				return nil
+			})
 		}
 		lo.Info("Embedded workers started", "count", *numWorkers)
 	} else {
@@ -312,38 +319,75 @@ func runServer(args []string) {
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	lo.Info("Shutting down...")
-
-	// Stop campaign stats subscriber
-	lo.Info("Stopping campaign stats subscriber...")
-	app.StopCampaignStatsSubscriber()
-	lo.Info("Campaign stats subscriber stopped")
-
-	// Stop SLA processor
-	lo.Info("Stopping SLA processor...")
-	slaCancel()
-	slaProcessor.Stop()
-	lo.Info("SLA processor stopped")
-
-	// Stop workers first
-	if workerCancel != nil {
-		lo.Info("Stopping workers...", "count", len(workers))
-		workerCancel()
-		for _, w := range workers {
-			_ = w.Close()
-		}
-		lo.Info("Workers stopped")
+	select {
+	case <-quit:
+		lo.Info("Shutting down...")
+	case err := <-serverFailed:
+		lo.Error("Server failed, shutting down", "error", err)
 	}
 
-	// Then stop server
+	// Order matters. Each step must stop producing work for the step after it,
+	// so nothing is left half-done:
+	//
+	//  1. stop accepting requests and drain the in-flight ones — they may still
+	//     enqueue jobs and spawn background tasks;
+	//  2. stop the SLA processor, the other producer of transfer work;
+	//  3. cancel and *await* the workers, which consume that queue;
+	//  4. wait for App's background tasks (webhook dispatch, async sends,
+	//     audit writes) that steps 1-3 may have spawned;
+	//  5. close the Redis subscriber, whose only job was feeding the hub;
+	//  6. end live calls cleanly so recordings finalize and upload;
+	//  7. stop the hub last — everything above may broadcast to it.
+
 	lo.Info("Stopping server...")
 	if err := server.Shutdown(); err != nil {
 		lo.Error("Server shutdown error", "error", err)
 	}
 	lo.Info("Server stopped")
+
+	lo.Info("Stopping SLA processor...")
+	slaCancel()
+	slaProcessor.Stop()
+	lo.Info("SLA processor stopped")
+
+	lo.Info("Stopping workers...", "count", len(workers))
+	workerCancel()
+	if err := workerGroup.Wait(); err != nil {
+		lo.Error("Worker group exited with error", "error", err)
+	}
+	for _, w := range workers {
+		if err := w.Close(); err != nil {
+			lo.Error("Worker close error", "error", err)
+		}
+	}
+	lo.Info("Workers stopped")
+
+	lo.Info("Waiting for background tasks...")
+	app.WaitForBackgroundTasks()
+	lo.Info("Background tasks complete")
+
+	lo.Info("Stopping campaign stats subscriber...")
+	app.StopCampaignStatsSubscriber()
+	lo.Info("Campaign stats subscriber stopped")
+
+	if app.CallManager != nil {
+		lo.Info("Ending active calls...")
+		callCtx, callCancel := context.WithTimeout(context.Background(), shutdownCallTimeout)
+		app.CallManager.Shutdown(callCtx)
+		callCancel()
+		lo.Info("Active calls ended")
+	}
+
+	lo.Info("Stopping WebSocket hub...")
+	wsHub.Stop()
+	lo.Info("WebSocket hub stopped")
+
+	lo.Info("Shutdown complete")
 }
+
+// shutdownCallTimeout bounds how long shutdown waits for live calls to end
+// cleanly (peer connections closed, recordings finalized and uploaded).
+const shutdownCallTimeout = 30 * time.Second
 
 // ============================================================================
 // WORKER COMMAND
@@ -403,21 +447,26 @@ func runWorker(args []string) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// Create and run workers
+	// Create and run workers under an errgroup, so shutdown awaits the
+	// in-flight job instead of abandoning it mid-send.
 	workers := make([]*worker.Worker, *workerCount)
+	group, groupCtx := errgroup.WithContext(ctx)
 	errCh := make(chan error, *workerCount)
 
-	for i := 0; i < *workerCount; i++ {
+	for i := range *workerCount {
 		w, err := worker.New(cfg, db, rdb, lo)
 		if err != nil {
 			lo.Fatal("Failed to create worker", "error", err, "worker_num", i+1)
 		}
 		workers[i] = w
 
-		go func(workerNum int) {
+		workerNum := i + 1
+		group.Go(func() error {
 			lo.Info("Worker started", "worker_num", workerNum)
-			errCh <- w.Run(ctx)
-		}(i + 1)
+			err := w.Run(groupCtx)
+			errCh <- err
+			return err
+		})
 	}
 
 	lo.Info("Workers started", "count", *workerCount)
@@ -428,14 +477,17 @@ func runWorker(args []string) {
 		lo.Info("Received shutdown signal", "signal", sig)
 		cancel()
 	case err := <-errCh:
-		if err != nil && err != context.Canceled {
+		if err != nil && !errors.Is(err, context.Canceled) {
 			lo.Error("Worker error", "error", err)
-			cancel()
 		}
+		cancel()
 	}
 
 	// Cleanup
 	lo.Info("Shutting down workers...")
+	if err := group.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+		lo.Error("Worker group exited with error", "error", err)
+	}
 	for _, w := range workers {
 		if w != nil {
 			if err := w.Close(); err != nil {

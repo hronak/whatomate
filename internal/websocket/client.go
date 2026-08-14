@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
+	"sync"
 	"time"
 
 	"github.com/fasthttp/websocket"
@@ -28,7 +29,11 @@ const (
 // AuthenticateFn validates a JWT token and returns user ID and organization ID.
 type AuthenticateFn func(token string) (uuid.UUID, uuid.UUID, error)
 
-// Client represents a WebSocket client connection
+// Client represents a WebSocket client connection.
+//
+// Three goroutines touch a Client: ReadPump (which authenticates and handles
+// set_contact), WritePump, and the hub's Run loop. mu guards every field they
+// share; conn, send, hub and authFn are write-once at construction.
 type Client struct {
 	hub *Hub
 
@@ -38,6 +43,12 @@ type Client struct {
 	// Buffered channel of outbound messages
 	send chan []byte
 
+	// Function to validate JWT tokens
+	authFn AuthenticateFn
+
+	// mu guards the fields below.
+	mu sync.RWMutex
+
 	// User information (set after authentication)
 	userID         uuid.UUID
 	organizationID uuid.UUID
@@ -45,11 +56,62 @@ type Client struct {
 	// Whether the client has authenticated
 	authenticated bool
 
-	// Function to validate JWT tokens
-	authFn AuthenticateFn
-
 	// Current contact being viewed (nil if none)
 	currentContact *uuid.UUID
+
+	// consecutive full-buffer drops; reset on every successful send
+	sendDrops int
+}
+
+// recordDrop counts one full-buffer drop and returns the running total.
+func (c *Client) recordDrop() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.sendDrops++
+	return c.sendDrops
+}
+
+// resetDrops clears the drop counter after a successful send.
+func (c *Client) resetDrops() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.sendDrops = 0
+}
+
+// closeConn tears down the underlying connection, which ends ReadPump.
+func (c *Client) closeConn() {
+	if c.conn != nil {
+		_ = c.conn.Close()
+	}
+}
+
+// UserID returns the authenticated user's ID.
+func (c *Client) UserID() uuid.UUID {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.userID
+}
+
+// OrgID returns the authenticated user's organization ID.
+func (c *Client) OrgID() uuid.UUID {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.organizationID
+}
+
+// isAuthenticated reports whether the message-based handshake has completed.
+func (c *Client) isAuthenticated() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.authenticated
+}
+
+// viewingContact reports whether the client is focused on a contact other than
+// the one given. The hub uses it to skip clients viewing a different chat.
+func (c *Client) viewingOtherContact(contactID uuid.UUID) bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.currentContact != nil && *c.currentContact != contactID
 }
 
 // NewClient creates a new unauthenticated Client instance.
@@ -80,10 +142,10 @@ func NewUnauthenticatedClient(hub *Hub, conn *websocket.Conn, authFn Authenticat
 func (c *Client) ReadPump() {
 	defer func() {
 		if r := recover(); r != nil {
-			c.hub.log.Error("Recovered from panic in ReadPump", "error", r, "user_id", c.userID)
+			c.hub.log.Error("Recovered from panic in ReadPump", "error", r, "user_id", c.UserID())
 		}
-		if c.authenticated {
-			c.hub.unregister <- c // Hub will close c.send
+		if c.isAuthenticated() {
+			c.hub.Unregister(c) // Hub will close c.send; no-op after Hub.Stop
 		} else {
 			close(c.send) // Signal WritePump to exit for unauthenticated clients
 		}
@@ -95,7 +157,7 @@ func (c *Client) ReadPump() {
 	c.conn.SetReadLimit(maxMessageSize)
 
 	// If not yet authenticated, enforce auth timeout for the first message
-	if !c.authenticated {
+	if !c.isAuthenticated() {
 		_ = c.conn.SetReadDeadline(time.Now().Add(authTimeout))
 
 		_, message, err := c.conn.ReadMessage()
@@ -121,7 +183,7 @@ func (c *Client) ReadPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				c.hub.log.Error("WebSocket read error", "error", err, "user_id", c.userID)
+				c.hub.log.Error("WebSocket read error", "error", err, "user_id", c.UserID())
 			}
 			break
 		}
@@ -135,7 +197,7 @@ func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		if r := recover(); r != nil {
-			c.hub.log.Error("Recovered from panic in WritePump", "error", r, "user_id", c.userID)
+			c.hub.log.Error("Recovered from panic in WritePump", "error", r, "user_id", c.UserID())
 		}
 		ticker.Stop()
 		if c.conn != nil {
@@ -155,7 +217,7 @@ func (c *Client) WritePump() {
 			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
 			// Only forward messages if authenticated
-			if !c.authenticated {
+			if !c.isAuthenticated() {
 				continue
 			}
 
@@ -218,9 +280,11 @@ func (c *Client) handleAuthMessage(data []byte) bool {
 		return false
 	}
 
+	c.mu.Lock()
 	c.userID = userID
 	c.organizationID = orgID
 	c.authenticated = true
+	c.mu.Unlock()
 
 	// Register with hub now that we're authenticated
 	c.hub.Register(c)
@@ -259,16 +323,20 @@ func (c *Client) handleSetContact(payload any) {
 	}
 
 	if setContact.ContactID == "" {
+		c.mu.Lock()
 		c.currentContact = nil
-		c.hub.log.Debug("Client cleared current contact", "user_id", c.userID)
+		c.mu.Unlock()
+		c.hub.log.Debug("Client cleared current contact", "user_id", c.UserID())
 	} else {
 		contactID, err := uuid.Parse(setContact.ContactID)
 		if err != nil {
 			return
 		}
+		c.mu.Lock()
 		c.currentContact = &contactID
+		c.mu.Unlock()
 		c.hub.log.Debug("Client set current contact",
-			"user_id", c.userID,
+			"user_id", c.UserID(),
 			"contact_id", contactID)
 	}
 }

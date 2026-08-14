@@ -3,7 +3,9 @@ package queue
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"time"
 
@@ -23,6 +25,32 @@ const (
 
 	// ClaimMinIdleTime is the minimum idle time before claiming a pending message
 	ClaimMinIdleTime = 5 * time.Minute
+
+	// ClaimInterval is how often stale pending messages are reclaimed. This
+	// used to run only at startup, so a message orphaned by a crashed worker
+	// waited for the next process restart.
+	ClaimInterval = time.Minute
+
+	// MaxDeliveries is how many times a job may be delivered before it is
+	// treated as poison and moved to DeadLetterStream. Without this a job that
+	// fails deterministically is redelivered forever.
+	MaxDeliveries = 5
+
+	// DeadLetterStream holds jobs that exhausted MaxDeliveries, so they can be
+	// inspected instead of being silently dropped or retried indefinitely.
+	DeadLetterStream = "whatomate:campaigns:dead"
+
+	// errorBackoff is the pause after a stream read error.
+	errorBackoff = time.Second
+
+	// jobTimeout bounds one job's execution. The handler's context is detached
+	// from shutdown cancellation so an in-flight send completes, and this keeps
+	// that from becoming an unbounded wait.
+	jobTimeout = 2 * time.Minute
+
+	// ackTimeout bounds the bookkeeping calls (ACK, dead-letter) that must
+	// still succeed while the consumer's own context is being cancelled.
+	ackTimeout = 10 * time.Second
 )
 
 // RedisQueue implements the Queue interface using Redis Streams
@@ -137,20 +165,29 @@ func NewRedisConsumer(client *redis.Client, log logf.Logger) (*RedisConsumer, er
 	return consumer, nil
 }
 
-// Consume starts consuming jobs from the queue
+// Consume starts consuming jobs from the queue. It returns when ctx is
+// cancelled, after the job currently being handled has finished.
 func (c *RedisConsumer) Consume(ctx context.Context, handler JobHandler) error {
 	c.log.Info("Starting to consume jobs", "consumer_id", c.consumerID)
 
-	// First, try to claim any stale pending messages from crashed workers
+	// Reclaim stale pending messages from crashed workers, then keep doing so
+	// on a ticker rather than only at startup.
 	if err := c.claimPendingMessages(ctx, handler); err != nil {
 		c.log.Warn("Failed to claim pending messages", "error", err)
 	}
+	claimTicker := time.NewTicker(ClaimInterval)
+	defer claimTicker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			c.log.Info("Consumer shutting down")
 			return ctx.Err()
+		case <-claimTicker.C:
+			if err := c.claimPendingMessages(ctx, handler); err != nil {
+				c.log.Warn("Failed to claim pending messages", "error", err)
+			}
+			continue
 		default:
 		}
 
@@ -164,7 +201,7 @@ func (c *RedisConsumer) Consume(ctx context.Context, handler JobHandler) error {
 		}).Result()
 
 		if err != nil {
-			if err == redis.Nil {
+			if errors.Is(err, redis.Nil) {
 				// No messages available, continue waiting
 				continue
 			}
@@ -172,24 +209,84 @@ func (c *RedisConsumer) Consume(ctx context.Context, handler JobHandler) error {
 				return ctx.Err()
 			}
 			c.log.Error("Failed to read from stream", "error", err)
-			time.Sleep(time.Second) // Back off on error
+			// Context-aware backoff: a bare Sleep here delayed shutdown.
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(errorBackoff):
+			}
 			continue
 		}
 
 		for _, stream := range streams {
 			for _, msg := range stream.Messages {
-				if err := c.processMessage(ctx, msg, handler); err != nil {
-					c.log.Error("Failed to process message", "error", err, "message_id", msg.ID)
-					// Don't ACK failed messages - they'll be reclaimed later
-					continue
-				}
-
-				// Acknowledge the message
-				if err := c.client.XAck(ctx, StreamName, ConsumerGroup, msg.ID).Err(); err != nil {
-					c.log.Error("Failed to ACK message", "error", err, "message_id", msg.ID)
-				}
+				c.handleDelivery(ctx, msg, handler, 1)
 			}
 		}
+	}
+}
+
+// handleDelivery runs one job and decides its fate: acknowledge on success or
+// permanent failure, dead-letter once deliveries are exhausted, otherwise leave
+// it pending for redelivery. See ErrPermanent for the handler contract.
+func (c *RedisConsumer) handleDelivery(ctx context.Context, msg redis.XMessage, handler JobHandler, attempt int) {
+	// The handler runs with a context detached from cancellation so an
+	// in-flight job completes during shutdown instead of being abandoned
+	// mid-send, but still bounded so it cannot hang shutdown forever.
+	jobCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), jobTimeout)
+	defer cancel()
+
+	err := c.processMessage(WithAttempt(jobCtx, attempt), msg, handler)
+	switch {
+	case err == nil:
+		c.ack(ctx, msg.ID)
+
+	case errors.Is(err, ErrPermanent):
+		c.log.Error("Permanent job failure, not retrying",
+			"error", err, "message_id", msg.ID, "attempt", attempt)
+		c.ack(ctx, msg.ID)
+
+	case attempt >= MaxDeliveries:
+		c.log.Error("Job exhausted retries, moving to dead-letter stream",
+			"error", err, "message_id", msg.ID, "attempts", attempt)
+		c.deadLetter(ctx, msg, err)
+		c.ack(ctx, msg.ID)
+
+	default:
+		// Leave unacknowledged; claimPendingMessages redelivers it.
+		c.log.Warn("Job failed, will retry",
+			"error", err, "message_id", msg.ID, "attempt", attempt, "max", MaxDeliveries)
+	}
+}
+
+// ack acknowledges a message, removing it from the pending entries list.
+func (c *RedisConsumer) ack(ctx context.Context, msgID string) {
+	// Use a detached context: during shutdown ctx is already cancelled, and
+	// failing to ACK a completed job means doing its work twice.
+	ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), ackTimeout)
+	defer cancel()
+	if err := c.client.XAck(ackCtx, StreamName, ConsumerGroup, msgID).Err(); err != nil {
+		c.log.Error("Failed to ACK message", "error", err, "message_id", msgID)
+	}
+}
+
+// deadLetter copies a poison message to the dead-letter stream with the reason
+// it failed, so it is inspectable rather than silently dropped.
+func (c *RedisConsumer) deadLetter(ctx context.Context, msg redis.XMessage, cause error) {
+	dlCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), ackTimeout)
+	defer cancel()
+
+	values := make(map[string]any, len(msg.Values)+3)
+	maps.Copy(values, msg.Values)
+	values["original_id"] = msg.ID
+	values["error"] = cause.Error()
+	values["failed_at"] = time.Now().UTC().Format(time.RFC3339)
+
+	if err := c.client.XAdd(dlCtx, &redis.XAddArgs{
+		Stream: DeadLetterStream,
+		Values: values,
+	}).Err(); err != nil {
+		c.log.Error("Failed to write dead-letter entry", "error", err, "message_id", msg.ID)
 	}
 }
 
@@ -232,15 +329,9 @@ func (c *RedisConsumer) claimPendingMessages(ctx context.Context, handler JobHan
 		}
 
 		for _, msg := range messages {
-			if err := c.processMessage(ctx, msg, handler); err != nil {
-				c.log.Error("Failed to process claimed message", "error", err, "message_id", msg.ID)
-				continue
-			}
-
-			// Acknowledge the message
-			if err := c.client.XAck(ctx, StreamName, ConsumerGroup, msg.ID).Err(); err != nil {
-				c.log.Error("Failed to ACK claimed message", "error", err, "message_id", msg.ID)
-			}
+			// RetryCount is Redis's own delivery counter for this entry, so a
+			// poison message is recognised across worker restarts.
+			c.handleDelivery(ctx, msg, handler, int(p.RetryCount))
 		}
 	}
 
