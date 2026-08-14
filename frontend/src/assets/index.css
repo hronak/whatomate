@@ -44,6 +44,13 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
+  /* App shell surfaces — three steps of the same neutral, darkest at the nav
+     rail and lightest under the page content, so neither theme bottoms out on
+     pure white / near-black. Cards keep using --card and lift off --shell. */
+  --color-sidebar: var(--sidebar);
+  --color-subnav: var(--subnav);
+  --color-shell: var(--shell);
+
   /* Status tokens — not yet consumed; badge/alert pick these up when re-synced with upstream */
   --color-success: hsl(var(--success));
   --color-success-foreground: hsl(var(--success-foreground));
@@ -152,6 +159,10 @@
     --input: oklch(0.922 0 0);
     --ring: oklch(0.696 0.17 162.48);
     --radius: 0.75rem;
+
+    --sidebar: oklch(0.968 0 0);
+    --subnav: oklch(0.978 0 0);
+    --shell: oklch(0.985 0 0);
   }
 
   .dark {
@@ -191,6 +202,10 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.696 0.17 162.48);
+
+    --sidebar: oklch(0.2 0 0);
+    --subnav: oklch(0.185 0 0);
+    --shell: oklch(0.165 0 0);
   }
 }
 
@@ -205,6 +220,13 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    /* Base UI text scale. Set here rather than on `html` on purpose: rem-based
+       spacing, sizing and radii stay anchored to 16px, so this moves type only
+       and does not shrink the whole layout by 12.5%. Almost all app text
+       inherits from here (see the vertical-rhythm note below); the small
+       tracking bump keeps 14px Inter legible at that size. */
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
     line-height: 1.65;
     font-weight: 400;
     /* Subtle gradient for depth like Linear/Vercel */
@@ -216,6 +238,9 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium;
     margin-top: 0;
+    /* Positive tracking is a small-text remedy — headings still want the
+       font's natural fit, so they opt out of the body letter-spacing. */
+    letter-spacing: normal;
   }
   h1 {
     @apply text-2xl;
@@ -294,12 +319,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
+  /* oklch() token — see the note on .nav-active-indicator::before */
+  background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
 }
 
 /* Static card with depth - use for non-clickable stat cards */
@@ -685,7 +711,9 @@
   height: 50%;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: hsl(var(--primary));
+  /* --primary is an oklch() value, not HSL channels — wrapping it in hsl()
+     produced an invalid color and the indicator never painted. */
+  background: var(--primary);
   opacity: 0;
   transform: scaleY(0);
   transition: opacity 0.2s ease, transform 0.2s ease;

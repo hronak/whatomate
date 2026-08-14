@@ -32,6 +32,12 @@ export interface NavItem {
   permission?: string
   childPermissions?: string[]
   children?: NavItem[]
+  /**
+   * i18n key for the heading a child is filed under in the sub-nav column.
+   * Only read for children rendered in the second column (see AppLayout);
+   * children without one fall into an unlabelled leading group.
+   */
+  group?: string
 }
 
 export interface NavSection {
@@ -139,20 +145,20 @@ export const navigationSections: NavSection[] = [
         permission: 'settings.general',
         childPermissions: ['settings.general', 'settings.chatbot', 'accounts', 'contacts', 'canned_responses', 'tags', 'teams', 'users', 'roles', 'api_keys', 'webhooks', 'custom_actions', 'settings.sso', 'audit_logs'],
         children: [
-          { name: 'nav.general', path: '/settings', icon: Settings, permission: 'settings.general' },
-          { name: 'nav.chatbot', path: '/settings/chatbot', icon: Bot, permission: 'settings.chatbot' },
-          { name: 'nav.accounts', path: '/settings/accounts', icon: Users, permission: 'accounts' },
-          { name: 'nav.contacts', path: '/settings/contacts', icon: Contact, permission: 'contacts' },
-          { name: 'nav.cannedResponses', path: '/settings/canned-responses', icon: MessageSquareText, permission: 'canned_responses' },
-          { name: 'nav.tags', path: '/settings/tags', icon: Tags, permission: 'tags' },
-          { name: 'nav.teams', path: '/settings/teams', icon: Users, permission: 'teams' },
-          { name: 'nav.users', path: '/settings/users', icon: Users, permission: 'users' },
-          { name: 'nav.roles', path: '/settings/roles', icon: Shield, permission: 'roles' },
-          { name: 'nav.apiKeys', path: '/settings/api-keys', icon: Key, permission: 'api_keys' },
-          { name: 'nav.webhooks', path: '/settings/webhooks', icon: Webhook, permission: 'webhooks' },
-          { name: 'nav.customActions', path: '/settings/custom-actions', icon: Zap, permission: 'custom_actions' },
-          { name: 'nav.sso', path: '/settings/sso', icon: ShieldCheck, permission: 'settings.sso' },
-          { name: 'nav.auditLogs', path: '/settings/audit-logs', icon: ScrollText, permission: 'audit_logs' }
+          { name: 'nav.general', path: '/settings', icon: Settings, permission: 'settings.general', group: 'nav.groupWorkspace' },
+          { name: 'nav.chatbot', path: '/settings/chatbot', icon: Bot, permission: 'settings.chatbot', group: 'nav.groupWorkspace' },
+          { name: 'nav.accounts', path: '/settings/accounts', icon: Users, permission: 'accounts', group: 'nav.groupWorkspace' },
+          { name: 'nav.contacts', path: '/settings/contacts', icon: Contact, permission: 'contacts', group: 'nav.groupInbox' },
+          { name: 'nav.cannedResponses', path: '/settings/canned-responses', icon: MessageSquareText, permission: 'canned_responses', group: 'nav.groupInbox' },
+          { name: 'nav.tags', path: '/settings/tags', icon: Tags, permission: 'tags', group: 'nav.groupInbox' },
+          { name: 'nav.teams', path: '/settings/teams', icon: Users, permission: 'teams', group: 'nav.groupPeople' },
+          { name: 'nav.users', path: '/settings/users', icon: Users, permission: 'users', group: 'nav.groupPeople' },
+          { name: 'nav.roles', path: '/settings/roles', icon: Shield, permission: 'roles', group: 'nav.groupPeople' },
+          { name: 'nav.sso', path: '/settings/sso', icon: ShieldCheck, permission: 'settings.sso', group: 'nav.groupPeople' },
+          { name: 'nav.apiKeys', path: '/settings/api-keys', icon: Key, permission: 'api_keys', group: 'nav.groupDeveloper' },
+          { name: 'nav.webhooks', path: '/settings/webhooks', icon: Webhook, permission: 'webhooks', group: 'nav.groupDeveloper' },
+          { name: 'nav.customActions', path: '/settings/custom-actions', icon: Zap, permission: 'custom_actions', group: 'nav.groupDeveloper' },
+          { name: 'nav.auditLogs', path: '/settings/audit-logs', icon: ScrollText, permission: 'audit_logs', group: 'nav.groupSystem' }
         ]
       }
     ]
