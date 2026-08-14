@@ -26,21 +26,21 @@ import (
 // fakeAnalyticsServer simulates Meta's analytics endpoint for tests.
 type fakeAnalyticsServer struct {
 	server *httptest.Server
-	hits   int64
+	hits   atomic.Int64
 }
 
 func newFakeAnalyticsServer(t *testing.T, response string) *fakeAnalyticsServer {
 	t.Helper()
 	f := &fakeAnalyticsServer{}
 	f.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt64(&f.hits, 1)
+		f.hits.Add(1)
 		_, _ = w.Write([]byte(response))
 	}))
 	t.Cleanup(f.server.Close)
 	return f
 }
 
-func (f *fakeAnalyticsServer) Hits() int64 { return atomic.LoadInt64(&f.hits) }
+func (f *fakeAnalyticsServer) Hits() int64 { return f.hits.Load() }
 
 func newAppForMetaAnalytics(t *testing.T, fakeURL string) *handlers.App {
 	t.Helper()

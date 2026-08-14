@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"sort"
+	"slices"
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
@@ -19,7 +19,7 @@ func roleAuditSnapshot(role *models.CustomRole) map[string]any {
 	for i, p := range role.Permissions {
 		perms[i] = p.Resource + ":" + p.Action
 	}
-	sort.Strings(perms)
+	slices.Sort(perms)
 	return map[string]any{
 		"name":        role.Name,
 		"description": role.Description,
@@ -501,7 +501,7 @@ func (a *App) loadRolePermissions(roles ...*models.CustomRole) error {
 
 // splitPermissionKey splits "resource:action" into ["resource", "action"]
 func splitPermissionKey(key string) []string {
-	for i := 0; i < len(key); i++ {
+	for i := range len(key) {
 		if key[i] == ':' {
 			return []string{key[:i], key[i+1:]}
 		}

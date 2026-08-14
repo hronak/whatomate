@@ -7,12 +7,12 @@ import (
 
 // Stub handlers - not yet implemented
 
-// Message handlers
+// MarkMessageRead is not yet implemented and always returns 501.
 func (a *App) MarkMessageRead(r *fastglue.Request) error {
 	return r.SendErrorEnvelope(fasthttp.StatusNotImplemented, "Not implemented yet", nil, "")
 }
 
-// Analytics handlers
+// GetMessageAnalytics is not yet implemented and always returns 501.
 func (a *App) GetMessageAnalytics(r *fastglue.Request) error {
 	return r.SendErrorEnvelope(fasthttp.StatusNotImplemented, "Not implemented yet", nil, "")
 }

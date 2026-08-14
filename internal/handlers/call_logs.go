@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/shridarpatil/whatomate/internal/utils"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
@@ -87,10 +87,10 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 	// Mask phone numbers if enabled for this organization
 	if a.ShouldMaskPhoneNumbers(orgID) {
 		for i := range callLogs {
-			callLogs[i].CallerPhone = utils.MaskPhoneNumber(callLogs[i].CallerPhone)
+			callLogs[i].CallerPhone = privacy.MaskPhoneNumber(callLogs[i].CallerPhone)
 			if callLogs[i].Contact != nil {
-				callLogs[i].Contact.PhoneNumber = utils.MaskPhoneNumber(callLogs[i].Contact.PhoneNumber)
-				callLogs[i].Contact.ProfileName = utils.MaskIfPhoneNumber(callLogs[i].Contact.ProfileName)
+				callLogs[i].Contact.PhoneNumber = privacy.MaskPhoneNumber(callLogs[i].Contact.PhoneNumber)
+				callLogs[i].Contact.ProfileName = privacy.MaskIfPhoneNumber(callLogs[i].Contact.ProfileName)
 			}
 		}
 	}
@@ -122,10 +122,10 @@ func (a *App) GetCallLog(r *fastglue.Request) error {
 	}
 
 	if a.ShouldMaskPhoneNumbers(orgID) {
-		callLog.CallerPhone = utils.MaskPhoneNumber(callLog.CallerPhone)
+		callLog.CallerPhone = privacy.MaskPhoneNumber(callLog.CallerPhone)
 		if callLog.Contact != nil {
-			callLog.Contact.PhoneNumber = utils.MaskPhoneNumber(callLog.Contact.PhoneNumber)
-			callLog.Contact.ProfileName = utils.MaskIfPhoneNumber(callLog.Contact.ProfileName)
+			callLog.Contact.PhoneNumber = privacy.MaskPhoneNumber(callLog.Contact.PhoneNumber)
+			callLog.Contact.ProfileName = privacy.MaskIfPhoneNumber(callLog.Contact.ProfileName)
 		}
 	}
 

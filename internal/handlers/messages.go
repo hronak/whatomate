@@ -12,8 +12,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/shridarpatil/whatomate/internal/templateutil"
-	"github.com/shridarpatil/whatomate/internal/utils"
 	"github.com/shridarpatil/whatomate/internal/websocket"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
 	"github.com/valyala/fasthttp"
@@ -233,15 +233,13 @@ func (a *App) SendOutgoingMessage(ctx context.Context, req OutgoingMessageReques
 
 	// 3. Execute send (async or sync)
 	if opts.Async {
-		a.wg.Add(1)
-		go func() {
-			defer a.wg.Done()
+		a.wg.Go(func() {
 			asyncCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
 			wamid, sendErr := sendFn(asyncCtx)
 			a.finalizeMessageSend(msg, req, opts, wamid, sendErr)
-		}()
+		})
 	} else {
 		wamid, err := sendFn(ctx)
 		a.finalizeMessageSend(msg, req, opts, wamid, err)
@@ -494,7 +492,7 @@ func (a *App) broadcastNewMessage(orgID uuid.UUID, msg *models.Message, contact 
 	}
 	profileName := contact.ProfileName
 	if a.ShouldMaskPhoneNumbers(orgID) {
-		profileName = utils.MaskIfPhoneNumber(profileName)
+		profileName = privacy.MaskIfPhoneNumber(profileName)
 	}
 
 	payload := map[string]any{

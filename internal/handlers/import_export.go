@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/shridarpatil/whatomate/internal/utils"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"gorm.io/gorm"
@@ -323,9 +323,9 @@ func (a *App) ExportData(r *fastglue.Request) error {
 			for i, col := range safeColumns {
 				switch col {
 				case "phone_number":
-					csvRow[i] = utils.MaskPhoneNumber(csvRow[i])
+					csvRow[i] = privacy.MaskPhoneNumber(csvRow[i])
 				case "profile_name":
-					csvRow[i] = utils.MaskIfPhoneNumber(csvRow[i])
+					csvRow[i] = privacy.MaskIfPhoneNumber(csvRow[i])
 				}
 			}
 		}

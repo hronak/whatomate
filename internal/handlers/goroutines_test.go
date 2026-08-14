@@ -139,7 +139,7 @@ func TestApp_DispatchWebhook_ConcurrencyLimit(t *testing.T) {
 	defer server.Close()
 
 	// Create 15 webhooks (more than the max concurrent limit of 10)
-	for i := 0; i < 15; i++ {
+	for range 15 {
 		webhook := &models.Webhook{
 			BaseModel:      models.BaseModel{ID: uuid.New()},
 			OrganizationID: org.ID,

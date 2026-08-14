@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -70,11 +71,8 @@ func processForLoops(template string, data map[string]any) string {
 		// Process each item in the array
 		switch arr := arrayValue.(type) {
 		case []any:
-			iterations := len(arr)
-			if iterations > maxLoopIterations {
-				iterations = maxLoopIterations
-			}
-			for i := 0; i < iterations; i++ {
+			iterations := min(len(arr), maxLoopIterations)
+			for i := range iterations {
 				// Create a new data context with the loop variable
 				loopData := copyMap(data)
 				loopData[itemVar] = arr[i]
@@ -87,11 +85,8 @@ func processForLoops(template string, data map[string]any) string {
 			}
 
 		case []map[string]any:
-			iterations := len(arr)
-			if iterations > maxLoopIterations {
-				iterations = maxLoopIterations
-			}
-			for i := 0; i < iterations; i++ {
+			iterations := min(len(arr), maxLoopIterations)
+			for i := range iterations {
 				loopData := copyMap(data)
 				loopData[itemVar] = arr[i]
 				loopData[itemVar+"_index"] = i
@@ -130,10 +125,10 @@ func processConditionals(template string, data map[string]any) string {
 		ifPart := body
 		elsePart := ""
 
-		elseIndex := strings.Index(body, "{{else}}")
-		if elseIndex != -1 {
-			ifPart = body[:elseIndex]
-			elsePart = body[elseIndex+8:] // len("{{else}}") == 8
+		before, after, ok := strings.Cut(body, "{{else}}")
+		if ok {
+			ifPart = before
+			elsePart = after // len("{{else}}") == 8
 		}
 
 		// Evaluate condition
@@ -232,6 +227,8 @@ func splitPath(path string) []string {
 	var parts []string
 	var current strings.Builder
 
+	// NOT range-over-int: the '[' case below advances i to consume the index,
+	// and that mutation must carry to the next iteration.
 	for i := 0; i < len(path); i++ {
 		ch := path[i]
 
@@ -438,9 +435,7 @@ func formatValue(value any) string {
 // copyMap creates a shallow copy of a map
 func copyMap(m map[string]any) map[string]any {
 	result := make(map[string]any, len(m))
-	for k, v := range m {
-		result[k] = v
-	}
+	maps.Copy(result, m)
 	return result
 }
 

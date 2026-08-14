@@ -196,7 +196,7 @@ func TestApp_ListAgentTransfers_Pagination(t *testing.T) {
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 	// Create multiple transfers
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		createTestTransfer(t, app, org.ID, contact.ID, account.Name, models.TransferStatusActive, nil)
 	}
 

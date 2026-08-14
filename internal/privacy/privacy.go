@@ -1,15 +1,15 @@
-package utils
+// Package privacy holds PII redaction helpers used when contact data crosses
+// a trust boundary — logs, exports, audit diffs and analytics payloads.
+package privacy
+
+import "strings"
 
 // MaskPhoneNumber masks a phone number showing only last 4 digits.
 func MaskPhoneNumber(phone string) string {
 	if len(phone) <= 4 {
 		return phone
 	}
-	masked := ""
-	for i := 0; i < len(phone)-4; i++ {
-		masked += "*"
-	}
-	return masked + phone[len(phone)-4:]
+	return strings.Repeat("*", len(phone)-4) + phone[len(phone)-4:]
 }
 
 // LooksLikePhoneNumber checks if a string looks like a phone number

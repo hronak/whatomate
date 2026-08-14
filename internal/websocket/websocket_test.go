@@ -271,7 +271,7 @@ func TestHub_GetClientCount_AfterRegisterAndUnregister(t *testing.T) {
 	assert.Equal(t, 5, hub.GetClientCount())
 
 	// Unregister 3
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		hub.Unregister(clients[i])
 	}
 	waitForClientCount(t, hub, 2)

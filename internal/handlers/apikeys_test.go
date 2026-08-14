@@ -425,7 +425,7 @@ func TestApp_CreateAPIKey_UniqueKeys(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithEmail(testutil.UniqueEmail("create-unique")), testutil.WithRoleID(&role.ID))
 
 	keys := make(map[string]bool)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name": "Unique Key",
 		})

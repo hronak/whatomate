@@ -1,8 +1,10 @@
 package calling
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"time"
@@ -277,7 +279,7 @@ func (m *Manager) executeMenu(session *CallSession, node *IVRNode, ctx *IVRConte
 		fullPath = filepath.Join(m.config.AudioDir, audioFile)
 	}
 
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := range maxRetries {
 		m.drainDTMF(session)
 
 		var digit byte
@@ -336,9 +338,7 @@ func (m *Manager) executeGather(session *CallSession, node *IVRNode, ctx *IVRCon
 	audioFile, _ := node.Config["audio_file"].(string)
 	maxDigits := getConfigInt(node.Config, "max_digits", 10)
 	terminator, _ := node.Config["terminator"].(string)
-	if terminator == "" {
-		terminator = "#"
-	}
+	terminator = cmp.Or(terminator, "#")
 	timeoutSecs := getConfigInt(node.Config, "timeout_seconds", 10)
 	maxRetries := getConfigInt(node.Config, "max_retries", 3)
 	storeAs, _ := node.Config["store_as"].(string)
@@ -354,7 +354,7 @@ func (m *Manager) executeGather(session *CallSession, node *IVRNode, ctx *IVRCon
 	}
 
 	// Collect digits
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := range maxRetries {
 		collected := m.collectDTMFDigits(session, maxDigits, terminator, time.Duration(timeoutSecs)*time.Second)
 		if collected != "" {
 			if storeAs != "" {
@@ -396,9 +396,7 @@ func (m *Manager) collectDTMFDigits(session *CallSession, maxDigits int, termina
 func (m *Manager) executeHTTPCallback(session *CallSession, node *IVRNode, ctx *IVRContext) string {
 	url, _ := node.Config["url"].(string)
 	method, _ := node.Config["method"].(string)
-	if method == "" {
-		method = "GET"
-	}
+	method = cmp.Or(method, http.MethodGet)
 	bodyTemplate, _ := node.Config["body_template"].(string)
 	timeoutSecs := getConfigInt(node.Config, "timeout_seconds", 10)
 	responseStoreAs, _ := node.Config["response_store_as"].(string)
@@ -643,7 +641,7 @@ func (m *Manager) drainDTMF(session *CallSession) {
 
 // waitForDTMF waits for a DTMF digit with timeout and retries.
 func (m *Manager) waitForDTMF(session *CallSession, timeout time.Duration, maxRetries int) (byte, bool) {
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := range maxRetries {
 		select {
 		case digit, ok := <-session.DTMFBuffer:
 			if !ok {

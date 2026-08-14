@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -417,13 +418,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 
 	// Validate provider
 	validProviders := []string{"google", "microsoft", "github", "facebook", "custom"}
-	isValid := false
-	for _, p := range validProviders {
-		if p == provider {
-			isValid = true
-			break
-		}
-	}
+	isValid := slices.Contains(validProviders, provider)
 	if !isValid {
 		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid provider", nil, "")
 	}

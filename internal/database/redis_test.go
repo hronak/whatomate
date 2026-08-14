@@ -33,9 +33,9 @@ func parseTestRedisConfig(t *testing.T) *config.RedisConfig {
 	if at := strings.LastIndex(raw, "@"); at != -1 {
 		userinfo := raw[:at]
 		raw = raw[at+1:]
-		if colon := strings.Index(userinfo, ":"); colon != -1 {
-			cfg.Username = userinfo[:colon]
-			cfg.Password = userinfo[colon+1:]
+		if before, after, ok := strings.Cut(userinfo, ":"); ok {
+			cfg.Username = before
+			cfg.Password = after
 		} else {
 			cfg.Username = userinfo
 		}

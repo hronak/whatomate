@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/shridarpatil/whatomate/internal/queue"
-	"github.com/shridarpatil/whatomate/internal/utils"
 	"github.com/shridarpatil/whatomate/internal/websocket"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
@@ -745,8 +745,8 @@ func (a *App) GetCampaignRecipients(r *fastglue.Request) error {
 
 	if a.ShouldMaskPhoneNumbers(orgID) {
 		for i := range recipients {
-			recipients[i].PhoneNumber = utils.MaskPhoneNumber(recipients[i].PhoneNumber)
-			recipients[i].RecipientName = utils.MaskIfPhoneNumber(recipients[i].RecipientName)
+			recipients[i].PhoneNumber = privacy.MaskPhoneNumber(recipients[i].PhoneNumber)
+			recipients[i].RecipientName = privacy.MaskIfPhoneNumber(recipients[i].RecipientName)
 		}
 	}
 

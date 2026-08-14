@@ -68,7 +68,7 @@ func TestApp_ExchangeToken_Success_AutoRegistration(t *testing.T) {
 	// Override WhatsApp client to use test server
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "test_auth_code_123",
 		"phone_id": phoneID,
 		"waba_id":  wabaID,
@@ -80,12 +80,12 @@ func TestApp_ExchangeToken_Success_AutoRegistration(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data map[string]interface{} `json:"data"`
+		Data map[string]any `json:"data"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	accountMap, ok := resp.Data["account"].(map[string]interface{})
+	accountMap, ok := resp.Data["account"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "active", accountMap["status"])
 	assert.Equal(t, phoneID, accountMap["phone_id"])
@@ -170,7 +170,7 @@ func TestApp_ExchangeToken_Success_PendingRegistration(t *testing.T) {
 
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "test_code",
 		"phone_id": phoneID,
 		"waba_id":  wabaID,
@@ -181,12 +181,12 @@ func TestApp_ExchangeToken_Success_PendingRegistration(t *testing.T) {
 	require.NoError(t, err)
 
 	var resp struct {
-		Data map[string]interface{} `json:"data"`
+		Data map[string]any `json:"data"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	accountMap, ok := resp.Data["account"].(map[string]interface{})
+	accountMap, ok := resp.Data["account"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "pending_registration", accountMap["status"])
 	assert.Nil(t, resp.Data["pin"]) // No PIN when pending
@@ -223,7 +223,7 @@ func TestApp_ExchangeToken_InvalidCode(t *testing.T) {
 
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "invalid_code",
 		"phone_id": "123456789",
 		"waba_id":  "987654321",
@@ -258,7 +258,7 @@ func TestApp_ExchangeToken_Success_CodeOnly_Discovery(t *testing.T) {
 			})
 		case strings.Contains(path, "/debug_token"):
 			w.WriteHeader(http.StatusOK)
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"data": whatsapp.TokenDebugInfo{
 					AppID:   "test_app",
 					IsValid: true,
@@ -315,7 +315,7 @@ func TestApp_ExchangeToken_Success_CodeOnly_Discovery(t *testing.T) {
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
 	// Omit phone_id and waba_id
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"code": "test_code_only",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -325,12 +325,12 @@ func TestApp_ExchangeToken_Success_CodeOnly_Discovery(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data map[string]interface{} `json:"data"`
+		Data map[string]any `json:"data"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	accountMap, ok := resp.Data["account"].(map[string]interface{})
+	accountMap, ok := resp.Data["account"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "active", accountMap["status"])
 	assert.Equal(t, phoneID, accountMap["phone_id"])
@@ -345,7 +345,7 @@ func TestApp_ExchangeToken_MissingFields(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := createAdminUser(t, app, org.ID)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"phone_id": "123",
 		"waba_id":  "456",
 	}) // missing code
@@ -361,7 +361,7 @@ func TestApp_ExchangeToken_Unauthorized(t *testing.T) {
 
 	app := newTestApp(t)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "test",
 		"phone_id": "123",
 		"waba_id":  "456",
@@ -420,7 +420,7 @@ func TestApp_RegisterPhoneNumber_Success_WithPIN(t *testing.T) {
 
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "654321",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -431,7 +431,7 @@ func TestApp_RegisterPhoneNumber_Success_WithPIN(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data map[string]interface{} `json:"data"`
+		Data map[string]any `json:"data"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
@@ -493,7 +493,7 @@ func TestApp_RegisterPhoneNumber_Success_GeneratedPIN(t *testing.T) {
 
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		// No PIN provided - should generate one
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -503,7 +503,7 @@ func TestApp_RegisterPhoneNumber_Success_GeneratedPIN(t *testing.T) {
 	require.NoError(t, err)
 
 	var resp struct {
-		Data map[string]interface{} `json:"data"`
+		Data map[string]any `json:"data"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
@@ -568,7 +568,7 @@ func TestApp_RegisterPhoneNumber_RegistrationFailed(t *testing.T) {
 
 	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "123456",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -594,7 +594,7 @@ func TestApp_RegisterPhoneNumber_AccountNotFound(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := createAdminUser(t, app, org.ID)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "123456",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -612,7 +612,7 @@ func TestApp_RegisterPhoneNumber_InvalidID(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := createAdminUser(t, app, org.ID)
 
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "123456",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -644,7 +644,7 @@ func TestApp_RegisterPhoneNumber_CrossOrgIsolation(t *testing.T) {
 	require.NoError(t, app.DB.Create(account).Error)
 
 	// User from org2 tries to register org1's account
-	req := testutil.NewJSONRequest(t, map[string]interface{}{
+	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "123456",
 	})
 	testutil.SetAuthContext(req, org2.ID, user2.ID)

@@ -9,7 +9,7 @@ import (
 	"github.com/shridarpatil/whatomate/internal/crypto"
 	"github.com/shridarpatil/whatomate/internal/database"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/shridarpatil/whatomate/internal/utils"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
@@ -308,7 +308,7 @@ func callingConfigDefault(val, fallback int) int {
 // if phone masking is enabled for the given organization.
 func (a *App) MaskContactFields(orgID any, profileName, phoneNumber string) (string, string) {
 	if a.ShouldMaskPhoneNumbers(orgID) {
-		return utils.MaskIfPhoneNumber(profileName), utils.MaskPhoneNumber(phoneNumber)
+		return privacy.MaskIfPhoneNumber(profileName), privacy.MaskPhoneNumber(phoneNumber)
 	}
 	return profileName, phoneNumber
 }

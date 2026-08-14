@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -516,17 +517,17 @@ func (a *App) Logout(r *fastglue.Request) error {
 
 func generateSlug(name string) string {
 	// Simple slug generation - in production, use a proper slugify library
-	slug := ""
+	var slug strings.Builder
 	for _, c := range name {
 		if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') {
-			slug += string(c)
+			slug.WriteString(string(c))
 		} else if c >= 'A' && c <= 'Z' {
-			slug += string(c + 32)
+			slug.WriteString(string(c + 32))
 		} else if c == ' ' || c == '-' {
-			slug += "-"
+			slug.WriteString("-")
 		}
 	}
-	return slug + "-" + uuid.New().String()[:8]
+	return slug.String() + "-" + uuid.New().String()[:8]
 }
 
 // GetWSToken returns a short-lived single-use JWT for WebSocket authentication.

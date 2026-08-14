@@ -166,7 +166,7 @@ func (c *Client) WritePump() {
 
 			// Send any queued messages as separate frames
 			n := len(c.send)
-			for i := 0; i < n; i++ {
+			for range n {
 				if err := c.conn.WriteMessage(websocket.TextMessage, <-c.send); err != nil {
 					return
 				}
