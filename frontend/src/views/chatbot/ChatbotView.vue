@@ -192,7 +192,7 @@ const statCards = computed(() => [
           </template>
           <!-- Actual Stats -->
           <template v-else>
-            <div v-for="card in statCards" :key="card.key" class="card-depth rounded-xl border border-border bg-card p-6">
+            <div v-for="card in statCards" :key="card.key" data-testid="stat-card" class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <span class="font-medium text-foreground/50">{{ card.title }}</span>
                 <div :class="[

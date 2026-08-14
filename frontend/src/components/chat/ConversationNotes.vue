@@ -200,6 +200,7 @@ function formatNoteTime(dateStr: string) {
           <div
             v-for="note in notesStore.notes"
             :key="note.id"
+            data-testid="note-card"
             class="group relative rounded-xl p-3 backdrop-blur-sm border border-border bg-linear-to-br from-gray-50 to-white dark:from-white/4 dark:to-white/2 hover:from-gray-100 hover:to-gray-50 dark:hover:from-white/6 dark:hover:to-white/3 transition-all duration-200"
           >
             <!-- Gradient accent line -->
@@ -249,12 +250,14 @@ function formatNoteTime(dateStr: string) {
                         class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5"
                       >
                         <button
+                          data-testid="note-edit"
                           class="size-5 rounded-md flex items-center justify-center hover:bg-accent text-foreground/30 hover:text-foreground/60 transition-colors"
                           @click="startEditing(note.id, note.content)"
                         >
                           <Pencil class="size-3" />
                         </button>
                         <button
+                          data-testid="note-delete"
                           class="size-5 rounded-md flex items-center justify-center hover:bg-red-500/10 text-foreground/30 hover:text-destructive transition-colors"
                           @click="deleteNote(note.id)"
                         >

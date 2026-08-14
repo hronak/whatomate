@@ -1796,10 +1796,37 @@ async function sendMediaMessage() {
                 </DropdownMenuItem>
                 <DropdownMenuItem @click="isInfoPanelOpen = !isInfoPanelOpen">
                   <Info class="mr-2 size-4" />
-                  <span>{{ isInfoPanelOpen ? $t('chat.hideContactDetails') : $t('chat.viewContactDetails') }}</span> </DropdownMenuItem> </DropdownMenuContent> </DropdownMenu> </div> </div> <!-- Account Tabs (shown when contact has messages from multiple WhatsApp accounts) --> <div v-if="orgAccounts.length > 1 && selectedAccount" class="shrink-0 px-4 py-2 border-b border-border bg-background" > <div class="inline-flex items-center gap-1 rounded-lg bg-muted p-1"> <button v-for="acct in orgAccounts" :key="acct.name" :class="['rounded-md px-3 py-1 font-medium whitespace-nowrap transition-all',
+                  <span>{{ isInfoPanelOpen ? $t('chat.hideContactDetails') : $t('chat.viewContactDetails') }}</span> </DropdownMenuItem> </DropdownMenuContent> </DropdownMenu> </div> </div>
+
+        <!-- Account Tabs (shown when contact has messages from multiple WhatsApp accounts) -->
+        <div
+          v-if="orgAccounts.length > 1 && selectedAccount"
+          data-testid="account-tabs"
+          class="shrink-0 px-4 py-2 border-b border-border bg-background"
+        >
+          <!-- Inactive chips sit on the bg-muted track, so they need a surface
+               of their own — bg-muted made them invisible against it. -->
+          <div class="inline-flex items-center gap-1 rounded-lg bg-muted p-1">
+            <button
+              v-for="acct in orgAccounts"
+              :key="acct.name"
+              data-testid="account-tab"
+              :data-account="acct.name"
+              :data-active="acct.name === selectedAccount"
+              :class="[
+                'rounded-md px-3 py-1 font-medium whitespace-nowrap transition-all',
                 acct.name === selectedAccount
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-muted text-foreground/70 hover:text-foreground/90 hover:bg-accent']" @click="switchAccount(acct.name)" > {{ acct.name }} </button> </div> </div> <!-- Messages --> <div class="relative flex-1 min-h-0 overflow-hidden"> <!-- Loading overlay while switching contacts / loading the first page --> <Spinner v-if="contactsStore.isLoadingMessages" overlay /> <!-- Sticky date header --> <Transition name="sticky-date"> <div v-if="showStickyDate" class="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-muted backdrop-blur-sm rounded-full text-foreground/50 font-medium shadow-xs" > {{ stickyDate }} </div> </Transition> <ScrollArea :ref="(el: any) => messagesScroll.scrollAreaRef.value = el" class="h-full p-3 chat-background"> <div class="space-y-2"> <!-- Loading indicator for older messages --> <div v-if="contactsStore.isLoadingOlderMessages" class="flex justify-center py-2"> <div class="flex items-center gap-2 text-foreground/40"> <div class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> <span>{{ $t('chat.loadingOlderMessages') }}...</span> </div> </div> <template v-for="(message, index) in contactsStore.messages" :key="message.id" > <!-- Date separator --> <div v-if="shouldShowDateSeparator(index)" class="flex items-center justify-center my-4" :data-date-separator="getDateLabel(message.created_at)" > <div class="px-3 py-1 bg-muted rounded-full text-foreground/40 font-medium"> {{ getDateLabel(message.created_at) }} </div> </div> <!-- Unread divider (WhatsApp-style; appears above the first message that arrived while the tab was hidden) --> <div v-if="newMessagesCount > 0 && message.id === firstUnreadId" class="flex items-center justify-center my-4" > <div class="px-3 py-1 rounded-full font-medium"> {{ newMessagesCount }} {{ newMessagesCount === 1 ? $t('chat.unreadMessage', 'unread message') : $t('chat.unreadMessages', 'unread messages') }}
+                  : 'bg-background text-foreground/70 hover:text-foreground hover:bg-accent'
+              ]"
+              @click="switchAccount(acct.name)"
+            >
+              {{ acct.name }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Messages --> <div class="relative flex-1 min-h-0 overflow-hidden"> <!-- Loading overlay while switching contacts / loading the first page --> <Spinner v-if="contactsStore.isLoadingMessages" overlay /> <!-- Sticky date header --> <Transition name="sticky-date"> <div v-if="showStickyDate" class="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-muted backdrop-blur-sm rounded-full text-foreground/50 font-medium shadow-xs" > {{ stickyDate }} </div> </Transition> <ScrollArea :ref="(el: any) => messagesScroll.scrollAreaRef.value = el" class="h-full p-3 chat-background"> <div class="space-y-2"> <!-- Loading indicator for older messages --> <div v-if="contactsStore.isLoadingOlderMessages" class="flex justify-center py-2"> <div class="flex items-center gap-2 text-foreground/40"> <div class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> <span>{{ $t('chat.loadingOlderMessages') }}...</span> </div> </div> <template v-for="(message, index) in contactsStore.messages" :key="message.id" > <!-- Date separator --> <div v-if="shouldShowDateSeparator(index)" class="flex items-center justify-center my-4" :data-date-separator="getDateLabel(message.created_at)" > <div class="px-3 py-1 bg-muted rounded-full text-foreground/40 font-medium"> {{ getDateLabel(message.created_at) }} </div> </div> <!-- Unread divider (WhatsApp-style; appears above the first message that arrived while the tab was hidden) --> <div v-if="newMessagesCount > 0 && message.id === firstUnreadId" class="flex items-center justify-center my-4" > <div class="px-3 py-1 rounded-full font-medium"> {{ newMessagesCount }} {{ newMessagesCount === 1 ? $t('chat.unreadMessage', 'unread message') : $t('chat.unreadMessages', 'unread messages') }}
                   </div>
                 </div>
 
