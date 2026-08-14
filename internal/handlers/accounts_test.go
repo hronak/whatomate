@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/handlers"
 	"github.com/shridarpatil/whatomate/internal/models"
+	"github.com/shridarpatil/whatomate/pkg/whatsapp"
 	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -166,7 +167,7 @@ func TestApp_CreateAccount_Success(t *testing.T) {
 	assert.Equal(t, "123456789", resp.Data.PhoneID)
 	assert.Equal(t, "987654321", resp.Data.BusinessID)
 	assert.Equal(t, "active", resp.Data.Status)
-	assert.Equal(t, "v26.0", resp.Data.APIVersion) // default version
+	assert.Equal(t, whatsapp.DefaultAPIVersion, resp.Data.APIVersion) // default version
 	assert.True(t, resp.Data.HasAccessToken)
 	assert.NotEmpty(t, resp.Data.WebhookVerifyToken) // auto-generated
 	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
