@@ -137,8 +137,8 @@ const isAIEnabled = ref(false)
 
 const aiProviders = [
   { value: 'openai', label: 'OpenAI', models: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna'] },
-  { value: 'anthropic', label: 'Anthropic', models: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'] },
-  { value: 'google', label: 'Google AI', models: ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'] }
+  { value: 'anthropic', label: 'Anthropic', models: ['claude-fable-5', 'claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'] },
+  { value: 'google', label: 'Google AI', models: ['gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'] }
 ]
 
 const availableModels = computed(() => {
