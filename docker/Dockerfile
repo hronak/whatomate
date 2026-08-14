@@ -1,5 +1,5 @@
 # Frontend build stage — pinned to BUILDPLATFORM (output is arch-agnostic JS).
-FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-builder
+FROM --platform=$BUILDPLATFORM node:24-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
@@ -13,7 +13,7 @@ RUN npm run build
 
 # Go build stage — runs on BUILDPLATFORM, cross-compiles to TARGETOS/TARGETARCH
 # so multi-arch builds don't emulate the Go toolchain under QEMU.
-FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26.6-alpine AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
