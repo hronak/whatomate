@@ -1,34 +1,28 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from "vue"
+import { useVModel } from "@vueuse/core"
+import { cn } from "@/lib/utils"
 
 const props = defineProps<{
-  modelValue?: string
-  placeholder?: string
-  disabled?: boolean
-  rows?: number
-  class?: string
+  class?: HTMLAttributes["class"]
+  defaultValue?: string | number
+  modelValue?: string | number
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string]
+const emits = defineEmits<{
+  (e: "update:modelValue", payload: string | number): void
 }>()
 
-const modelValue = computed({
-  get: () => props.modelValue ?? '',
-  set: (value) => emit('update:modelValue', value)
+const modelValue = useVModel(props, "modelValue", emits, {
+  passive: true,
+  defaultValue: props.defaultValue,
 })
 </script>
 
 <template>
   <textarea
     v-model="modelValue"
-    :placeholder="placeholder"
-    :disabled="disabled"
-    :rows="rows ?? 3"
-    :class="cn(
-      'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 placeholder:text-muted-foreground hover:border-white/20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500/60 disabled:cursor-not-allowed disabled:opacity-50 hover:light:border-gray-300 focus-visible:light:ring-emerald-500 focus-visible:light:border-emerald-500',
-      props.class
-    )"
+    data-slot="textarea"
+    :class="cn('border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm', props.class)"
   />
 </template>

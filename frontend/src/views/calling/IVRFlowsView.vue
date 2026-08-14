@@ -196,11 +196,11 @@ onMounted(async () => {
       </div>
       <div class="flex gap-2">
         <Button variant="outline" size="sm" @click="loadFlows()">
-          <RefreshCw class="h-4 w-4 mr-2" />
+          <RefreshCw class="size-4 mr-2" />
           {{ t('common.refresh') }}
         </Button>
         <Button @click="openCreate">
-          <Plus class="h-4 w-4 mr-2" />
+          <Plus class="size-4 mr-2" />
           {{ t('calling.createFlow') }}
         </Button>
       </div>
@@ -292,7 +292,7 @@ onMounted(async () => {
             <TableRow v-if="!store.ivrFlowsLoading && store.ivrFlows.length === 0">
               <TableCell :colspan="5" class="text-center py-8">
                 <div class="flex flex-col items-center gap-2 text-muted-foreground">
-                  <Phone class="h-8 w-8" />
+                  <Phone class="size-8" />
                   <p>{{ t('calling.noIVRFlows') }}</p>
                   <Button variant="outline" size="sm" @click="openCreate">
                     {{ t('calling.createFirstFlow') }}
@@ -304,7 +304,7 @@ onMounted(async () => {
         </Table>
 
         <div v-if="store.ivrFlowsLoading" class="flex justify-center py-8">
-          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+          <div class="animate-spin rounded-full size-6 border-b-2 border-primary" />
         </div>
       </CardContent>
     </Card>
@@ -346,7 +346,7 @@ onMounted(async () => {
         <DialogFooter>
           <Button variant="outline" @click="showCreateDialog = false">{{ t('common.cancel') }}</Button>
           <Button :disabled="saving" @click="createFlow">
-            <span v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+            <span v-if="saving" class="animate-spin rounded-full size-4 border-b-2 border-white mr-2" />
             {{ t('common.create') }}
           </Button>
         </DialogFooter>

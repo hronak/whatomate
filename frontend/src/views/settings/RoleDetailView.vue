@@ -172,7 +172,7 @@ onMounted(async () => {
       <template #actions>
         <div class="flex items-center gap-2">
           <Button v-if="canEditForm && (hasChanges || isNew)" size="sm" @click="save" :disabled="isSaving">
-            <Save class="h-4 w-4 mr-1" />
+            <Save class="size-4 mr-1" />
             {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
           </Button>
           <Button
@@ -181,7 +181,7 @@ onMounted(async () => {
             size="sm"
             @click="deleteDialogOpen = true"
           >
-            <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+            <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
           </Button>
         </div>
       </template>
@@ -193,10 +193,10 @@ onMounted(async () => {
             <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <div class="flex items-center gap-2">
               <Badge v-if="isSystem" variant="secondary">
-                <Lock class="h-3 w-3 mr-1" />{{ $t('roles.system') }}
+                <Lock class="size-3 mr-1" />{{ $t('roles.system') }}
               </Badge>
               <Badge v-if="role?.is_default" variant="outline">
-                <Star class="h-3 w-3 mr-1" />{{ $t('roles.default') }}
+                <Star class="size-3 mr-1" />{{ $t('roles.default') }}
               </Badge>
             </div>
           </div>
@@ -236,7 +236,7 @@ onMounted(async () => {
         <CardContent>
           <p class="text-sm text-muted-foreground mb-3">{{ $t('roles.selectPermissions') }}</p>
           <div v-if="rolesStore.permissions.length === 0" class="text-center py-8 text-muted-foreground border rounded-lg">
-            <Loader2 class="h-6 w-6 animate-spin mx-auto mb-2" />
+            <Loader2 class="size-6 animate-spin mx-auto mb-2" />
             <p>{{ $t('roles.loadingPermissions') }}...</p>
           </div>
           <PermissionMatrix

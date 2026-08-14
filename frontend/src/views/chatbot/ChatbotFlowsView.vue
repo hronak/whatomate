@@ -132,7 +132,7 @@ async function confirmDeleteFlow() {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader
       :title="$t('chatbotFlows.title')"
       :icon="Workflow"
@@ -142,7 +142,7 @@ async function confirmDeleteFlow() {
     >
       <template #actions>
         <Button variant="outline" size="sm" @click="createFlow">
-          <Plus class="h-4 w-4 mr-2" />
+          <Plus class="size-4 mr-2" />
           {{ $t('chatbotFlows.createFlow') }}
         </Button>
       </template>
@@ -214,13 +214,13 @@ async function confirmDeleteFlow() {
                 </template>
                 <template #cell-actions="{ item: flow }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="Pencil" :label="$t('chatbotFlows.editFlowLabel')" class="h-8 w-8" @click="editFlow(flow)" />
-                    <IconButton :icon="Trash2" :label="$t('chatbotFlows.deleteFlowLabel')" class="h-8 w-8 text-destructive" @click="openDeleteDialog(flow)" />
+                    <IconButton :icon="Pencil" :label="$t('chatbotFlows.editFlowLabel')" class="size-8" @click="editFlow(flow)" />
+                    <IconButton :icon="Trash2" :label="$t('chatbotFlows.deleteFlowLabel')" class="size-8 text-destructive" @click="openDeleteDialog(flow)" />
                   </div>
                 </template>
                 <template #empty-action>
                   <Button v-if="!searchQuery" variant="outline" size="sm" @click="createFlow">
-                    <Plus class="h-4 w-4 mr-2" />
+                    <Plus class="size-4 mr-2" />
                     {{ $t('chatbotFlows.createFlow') }}
                   </Button>
                 </template>

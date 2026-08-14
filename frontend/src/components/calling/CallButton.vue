@@ -106,29 +106,25 @@ async function handleCall() {
       <Button
         variant="ghost"
         size="icon"
-        class="h-8 w-8 relative"
-        :class="[
-          permission?.status === 'accepted'
-            ? 'text-green-500 hover:text-green-400 hover:bg-green-500/10 light:text-green-600 hover:light:text-green-700 hover:light:bg-green-50'
-            : 'text-white/50 hover:text-white hover:bg-white/8 light:text-gray-500 hover:light:text-gray-900 hover:light:bg-gray-100'
-        ]"
+        class="size-8 relative"
+        :class="[ permission?.status === 'accepted' ? 'text-success hover:text-success hover:bg-success/10' : 'text-foreground/50 hover:text-foreground hover:bg-accent' ]"
         :disabled="store.isOnCall || isInitiating"
         @click="handleCall"
       >
-        <Loader2 v-if="isInitiating" class="h-4 w-4 animate-spin" />
-        <Phone v-else class="h-4 w-4" />
+        <Loader2 v-if="isInitiating" class="size-4 animate-spin" />
+        <Phone v-else class="size-4" />
         <!-- Permission status badge (pending/declined only) -->
         <span
           v-if="permission?.status === 'pending'"
-          class="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-yellow-500 text-white"
+          class="absolute -top-0.5 -right-0.5 flex size-3 items-center justify-center rounded-full bg-yellow-500 text-white"
         >
-          <Clock class="h-2 w-2" />
+          <Clock class="size-2" />
         </span>
         <span
           v-else-if="permission?.status === 'declined'"
-          class="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-white"
+          class="absolute -top-0.5 -right-0.5 flex size-3 items-center justify-center rounded-full bg-red-500 text-white"
         >
-          <X class="h-2 w-2" />
+          <X class="size-2" />
         </span>
       </Button>
     </TooltipTrigger>

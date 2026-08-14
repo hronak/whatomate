@@ -120,7 +120,7 @@ const emptyDescription = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader
       :title="$t('keywords.title')"
       :icon="Key"
@@ -131,7 +131,7 @@ const emptyDescription = computed(() => {
       <template #actions>
         <RouterLink to="/chatbot/keywords/new">
           <Button variant="outline" size="sm">
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus class="size-4 mr-2" />
             {{ $t('keywords.addRule') }}
           </Button>
         </RouterLink>
@@ -191,9 +191,7 @@ const emptyDescription = computed(() => {
                 </template>
                 <template #cell-response_type="{ item: rule }">
                   <Badge
-                    :class="rule.response_type === 'transfer'
-                      ? 'bg-red-500/20 text-red-400 border-transparent light:bg-red-100 light:text-red-700'
-                      : 'bg-purple-500/20 text-purple-400 border-transparent light:bg-purple-100 light:text-purple-700'"
+                    :class="rule.response_type === 'transfer' ? 'bg-destructive/20 text-destructive border-transparent' : 'bg-purple-500/20 text-purple-700 border-transparent dark:bg-purple-100 dark:text-purple-400'"
                     class="text-xs"
                   >
                     {{ rule.response_type === 'transfer' ? $t('keywords.transfer') : $t('keywords.text') }}
@@ -210,14 +208,14 @@ const emptyDescription = computed(() => {
                 </template>
                 <template #cell-actions="{ item: rule }">
                   <div class="flex items-center justify-end gap-1">
-                    <RouterLink :to="`/chatbot/keywords/${rule.id}`"><IconButton :icon="Pencil" :label="$t('keywords.editRuleLabel')" class="h-8 w-8" /></RouterLink>
-                    <IconButton :icon="Trash2" :label="$t('keywords.deleteRuleLabel')" class="h-8 w-8 text-destructive" @click="openDeleteDialog(rule)" />
+                    <RouterLink :to="`/chatbot/keywords/${rule.id}`"><IconButton :icon="Pencil" :label="$t('keywords.editRuleLabel')" class="size-8" /></RouterLink>
+                    <IconButton :icon="Trash2" :label="$t('keywords.deleteRuleLabel')" class="size-8 text-destructive" @click="openDeleteDialog(rule)" />
                   </div>
                 </template>
                 <template #empty-action>
                   <RouterLink v-if="!searchQuery" to="/chatbot/keywords/new">
                     <Button variant="outline" size="sm">
-                      <Plus class="h-4 w-4 mr-2" />
+                      <Plus class="size-4 mr-2" />
                       {{ $t('keywords.addRule') }}
                     </Button>
                   </RouterLink>

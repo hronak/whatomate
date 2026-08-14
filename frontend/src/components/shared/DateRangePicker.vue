@@ -53,7 +53,7 @@ const { t } = useI18n()
   >
     <PopoverTrigger as-child>
       <Button variant="outline" size="sm">
-        <CalendarIcon class="h-4 w-4 mr-1" />
+        <CalendarIcon class="size-4 mr-1" />
         {{ formatDateRangeDisplay || t('common.select') }}
       </Button>
     </PopoverTrigger>

@@ -1,34 +1,33 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from "vue"
+import { useVModel } from "@vueuse/core"
+import { cn } from "@/lib/utils"
 
 const props = defineProps<{
+  defaultValue?: string | number
   modelValue?: string | number
-  type?: string
-  placeholder?: string
-  disabled?: boolean
-  class?: string
+  class?: HTMLAttributes["class"]
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string]
+const emits = defineEmits<{
+  (e: "update:modelValue", payload: string | number): void
 }>()
 
-const modelValue = computed({
-  get: () => props.modelValue?.toString() ?? '',
-  set: (value) => emit('update:modelValue', value)
+const modelValue = useVModel(props, "modelValue", emits, {
+  passive: true,
+  defaultValue: props.defaultValue,
 })
 </script>
 
 <template>
   <input
     v-model="modelValue"
-    :type="type ?? 'text'"
-    :placeholder="placeholder"
-    :disabled="disabled"
+    data-slot="input"
     :class="cn(
-      'flex h-10 w-full rounded-lg border border-white/10 bg-white/4 px-3 py-2 text-sm text-white transition-all duration-200 placeholder:text-white/40 hover:border-white/20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500/60 disabled:cursor-not-allowed disabled:opacity-50 light:bg-white light:border-gray-200 light:text-gray-900 light:placeholder:text-gray-400 hover:light:border-gray-300 focus-visible:light:ring-emerald-500 focus-visible:light:border-emerald-500',
-      props.class
+      'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+      'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3',
+      'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+      props.class,
     )"
-  />
+  >
 </template>

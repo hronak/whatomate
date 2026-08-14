@@ -675,18 +675,18 @@ onMounted(async () => {
     <template #actions>
       <div class="flex items-center gap-2">
         <Button v-if="!isNew" variant="outline" size="sm" @click="isPreviewOpen = true">
-          <Eye class="h-4 w-4 mr-1" /> {{ $t('templates.preview', 'Preview') }}
+          <Eye class="size-4 mr-1" /> {{ $t('templates.preview', 'Preview') }}
         </Button>
         <Button v-if="canPublish" variant="outline" size="sm" @click="publishDialogOpen = true" :disabled="isPublishing">
-          <Loader2 v-if="isPublishing" class="h-4 w-4 mr-1 animate-spin" />
-          <Send v-else class="h-4 w-4 mr-1" />
+          <Loader2 v-if="isPublishing" class="size-4 mr-1 animate-spin" />
+          <Send v-else class="size-4 mr-1" />
           {{ template?.meta_template_id ? $t('templates.republish', 'Republish') : $t('templates.publish', 'Publish') }}
         </Button>
         <Button v-if="canWrite && (hasChanges || isNew)" size="sm" @click="save" :disabled="isSaving">
-          <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
+          <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
         </Button>
         <Button v-if="canDelete && !isNew" variant="destructive" size="sm" @click="deleteDialogOpen = true">
-          <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+          <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
         </Button>
       </div>
     </template>
@@ -704,13 +704,13 @@ onMounted(async () => {
               {{ getQualityRatingLabel(template.quality_rating, t) }}
             </Badge>
           </div>
-          <ChevronDown class="h-4 w-4 text-muted-foreground transition-transform" :class="isDetailsOpen && 'rotate-180'" />
+          <ChevronDown class="size-4 text-muted-foreground transition-transform" :class="isDetailsOpen && 'rotate-180'" />
         </div>
       </CardHeader>
       <CardContent v-show="isDetailsOpen" class="space-y-4">
         <!-- Edit limits info for approved templates -->
-        <div v-if="template?.status?.toUpperCase() === 'APPROVED'" class="flex items-start gap-2 rounded-md bg-blue-500/10 border border-blue-500/20 px-3 py-2 text-xs text-blue-400 light:text-blue-600">
-          <Info class="h-3.5 w-3.5 shrink-0 mt-0.5" />
+        <div v-if="template?.status?.toUpperCase() === 'APPROVED'" class="flex items-start gap-2 rounded-md bg-blue-500/10 border border-blue-500/20 px-3 py-2 text-xs text-info">
+          <Info class="size-3.5 shrink-0 mt-0.5" />
           <span>{{ $t('templates.editLimitsInfo', 'Approved templates can be edited up to 10 times in 30 days (1 edit per 24 hours). Editing triggers a new review which may take up to 24 hours. Name, language, and category cannot be changed.') }}</span>
         </div>
         <div class="space-y-1.5">
@@ -799,18 +799,18 @@ onMounted(async () => {
               @click="uploadHeaderMedia"
               :disabled="!headerMediaFile || headerMediaUploading"
             >
-              <Loader2 v-if="headerMediaUploading" class="h-3.5 w-3.5 mr-1 animate-spin" />
-              <Upload v-else class="h-3.5 w-3.5 mr-1" />
+              <Loader2 v-if="headerMediaUploading" class="size-3.5 mr-1 animate-spin" />
+              <Upload v-else class="size-3.5 mr-1" />
               {{ $t('templates.uploadMedia', 'Upload') }}
             </Button>
           </div>
           <div v-if="headerMediaFilename && !headerMediaHandle" class="text-xs text-muted-foreground">
             {{ headerMediaFilename }}
           </div>
-          <div v-if="headerMediaHandle" class="bg-green-950 light:bg-green-50 border border-green-800 light:border-green-200 rounded-lg p-2.5">
+          <div v-if="headerMediaHandle" class="bg-success border border-success rounded-lg p-2.5">
             <div class="flex items-center gap-2">
-              <Check class="h-3.5 w-3.5 text-green-600" />
-              <span class="text-xs text-green-200 light:text-green-800">{{ $t('templates.mediaUploadedSuccess', 'Media uploaded') }}</span>
+              <Check class="size-3.5 text-green-600" />
+              <span class="text-xs text-success">{{ $t('templates.mediaUploadedSuccess', 'Media uploaded') }}</span>
             </div>
             <p class="text-xs text-muted-foreground mt-1 font-mono truncate">
               Handle: {{ headerMediaHandle.substring(0, 40) }}...
@@ -859,7 +859,7 @@ onMounted(async () => {
               type="checkbox"
               v-model="form.add_security_recommendation"
               :disabled="!canWrite || !isEditable"
-              class="h-4 w-4 rounded border-gray-300"
+              class="size-4 rounded border-gray-300"
             />
             <Label for="security-rec" class="text-xs cursor-pointer">{{ $t('templates.addSecurityRecommendation', 'Add security recommendation') }}</Label>
           </div>
@@ -871,7 +871,7 @@ onMounted(async () => {
                 :checked="form.code_expiration_minutes > 0"
                 @change="form.code_expiration_minutes = ($event.target as HTMLInputElement).checked ? 10 : 0"
                 :disabled="!canWrite || !isEditable"
-                class="h-4 w-4 rounded border-gray-300"
+                class="size-4 rounded border-gray-300"
               />
               <Label for="code-expiration" class="text-xs cursor-pointer">{{ $t('templates.addCodeExpiration', 'Add expiration time for the code') }}</Label>
             </div>
@@ -879,7 +879,7 @@ onMounted(async () => {
               <Input
                 type="number"
                 :model-value="form.code_expiration_minutes"
-                @update:model-value="(val: string) => form.code_expiration_minutes = val ? parseInt(val) : 0"
+                @update:model-value="(val: string | number) => form.code_expiration_minutes = String(val) ? parseInt(String(val)) : 0"
                 min="1"
                 max="90"
                 class="h-8 text-xs w-24"
@@ -899,7 +899,7 @@ onMounted(async () => {
                 type="checkbox"
                 v-model="zeroTapAccepted"
                 :disabled="!canWrite || !isEditable"
-                class="h-4 w-4 mt-0.5 rounded border-gray-300"
+                class="size-4 mt-0.5 rounded border-gray-300"
               />
               <Label for="zero-tap-tos" class="text-xs cursor-pointer leading-relaxed">
                 By selecting zero-tap, I understand that my business's use of zero-tap authentication is subject to the
@@ -923,7 +923,7 @@ onMounted(async () => {
                   type="button" variant="outline" size="xs" class="h-6 text-xs"
                   @click="addSupportedApp"
                 >
-                  <Plus class="h-3 w-3 mr-1" /> Add App
+                  <Plus class="size-3 mr-1" /> Add App
                 </Button>
               </div>
               <div v-for="(app, i) in form.buttons[0]?.supported_apps || []" :key="i" class="flex items-end gap-2">
@@ -937,10 +937,10 @@ onMounted(async () => {
                 </div>
                 <Button
                   v-if="canWrite && isEditable && (form.buttons[0]?.supported_apps?.length || 0) > 1"
-                  type="button" variant="ghost" size="sm" class="h-8 w-8 p-0 shrink-0"
+                  type="button" variant="ghost" size="sm" class="size-8 p-0 shrink-0"
                   @click="removeSupportedApp(Number(i))"
                 >
-                  <X class="h-3.5 w-3.5 text-destructive" />
+                  <X class="size-3.5 text-destructive" />
                 </Button>
               </div>
             </div>
@@ -956,7 +956,7 @@ onMounted(async () => {
                   type="button" variant="outline" size="xs" class="h-6 text-xs"
                   @click="addSupportedApp"
                 >
-                  <Plus class="h-3 w-3 mr-1" /> Add App
+                  <Plus class="size-3 mr-1" /> Add App
                 </Button>
               </div>
               <div v-for="(app, i) in form.buttons[0]?.supported_apps || []" :key="i" class="flex items-end gap-2">
@@ -970,10 +970,10 @@ onMounted(async () => {
                 </div>
                 <Button
                   v-if="canWrite && isEditable && (form.buttons[0]?.supported_apps?.length || 0) > 1"
-                  type="button" variant="ghost" size="sm" class="h-8 w-8 p-0 shrink-0"
+                  type="button" variant="ghost" size="sm" class="size-8 p-0 shrink-0"
                   @click="removeSupportedApp(Number(i))"
                 >
-                  <X class="h-3.5 w-3.5 text-destructive" />
+                  <X class="size-3.5 text-destructive" />
                 </Button>
               </div>
             </div>
@@ -1004,7 +1004,7 @@ onMounted(async () => {
             <span class="text-xs text-muted-foreground w-28 shrink-0 font-mono">{{ v.component }}:{{ v.label }}</span>
             <Input
               :model-value="getSampleValueForVar(v.component, v.index)"
-              @update:model-value="(val: string) => setSampleValueForVar(v.component, v.index, val)"
+              @update:model-value="(val: string | number) => setSampleValueForVar(v.component, v.index, String(val))"
               :placeholder="$t('templates.sampleValuePlaceholder', 'e.g. John Doe')"
               class="h-8 text-xs"
               :disabled="!canWrite || !isEditable"
@@ -1025,15 +1025,15 @@ onMounted(async () => {
               @click="addButton"
               :disabled="form.buttons.length >= 3"
             >
-              <Plus class="h-3 w-3 mr-1" />
+              <Plus class="size-3 mr-1" />
               {{ $t('templates.addButton', 'Add') }}
             </Button>
           </div>
           <div v-for="(button, index) in form.buttons" :key="index" class="border rounded-lg p-3 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium">{{ $t('templates.button', 'Button') }} {{ index + 1 }}</span>
-              <Button v-if="canWrite && isEditable" type="button" variant="ghost" size="sm" class="h-7 w-7 p-0" @click="removeButton(index)">
-                <X class="h-3.5 w-3.5 text-destructive" />
+              <Button v-if="canWrite && isEditable" type="button" variant="ghost" size="sm" class="size-7 p-0" @click="removeButton(index)">
+                <X class="size-3.5 text-destructive" />
               </Button>
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -1213,11 +1213,11 @@ onMounted(async () => {
         <AlertDialogDescription>{{ template?.display_name || template?.name }}</AlertDialogDescription>
       </AlertDialogHeader>
       <div v-if="template" class="py-2">
-        <div class="bg-gray-800 light:bg-[#e5ddd5] rounded-lg p-4">
-          <div class="bg-gray-700 light:bg-white rounded-lg shadow-sm max-w-[280px] overflow-hidden">
+        <div class="bg-[#e5ddd5] dark:bg-gray-800 rounded-lg p-4">
+          <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm max-w-[280px] overflow-hidden">
             <div v-if="template.header_type && template.header_type !== 'NONE'" class="p-3 border-b">
               <div v-if="template.header_type === 'TEXT'" class="font-semibold">{{ previewHeader }}</div>
-              <div v-else class="h-32 bg-gray-600 light:bg-gray-200 rounded flex items-center justify-center">
+              <div v-else class="h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
                 <span class="text-sm text-gray-400">{{ template.header_type }}</span>
               </div>
             </div>
@@ -1229,7 +1229,7 @@ onMounted(async () => {
             </div>
             <div v-if="template.buttons && template.buttons.length > 0" class="border-t">
               <div v-for="(btn, idx) in template.buttons" :key="idx" class="border-b last:border-b-0">
-                <button class="w-full py-2 text-sm text-blue-500 hover:bg-gray-600 hover:light:bg-gray-50">
+                <button class="w-full py-2 text-sm text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600">
                   {{ btn.text || btn.title || 'Button' }}
                 </button>
               </div>

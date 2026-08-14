@@ -36,7 +36,7 @@ defineEmits<{
         @click="$emit('click', $event)"
       >
         <slot>
-          <component v-if="icon" :is="icon" class="h-4 w-4" />
+          <component v-if="icon" :is="icon" class="size-4" />
         </slot>
       </Button>
     </TooltipTrigger>

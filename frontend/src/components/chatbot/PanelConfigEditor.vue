@@ -149,7 +149,7 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
       <div class="flex items-center justify-between">
         <Label class="text-xs">Sections</Label>
         <Button variant="outline" size="sm" class="h-7 px-2 text-xs gap-1" @click="addSection">
-          <Plus class="h-3.5 w-3.5" /> Add Section
+          <Plus class="size-3.5" /> Add Section
         </Button>
       </div>
 
@@ -172,8 +172,8 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
             placeholder="Section label"
             class="h-7 text-xs flex-1"
           />
-          <Button variant="ghost" size="icon" class="h-7 w-7" @click="removeSection(sectionIdx)">
-            <Trash2 class="h-3 w-3 text-destructive" />
+          <Button variant="ghost" size="icon" class="size-7" @click="removeSection(sectionIdx)">
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
 
@@ -254,8 +254,8 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
                 placeholder="Display label"
                 class="h-6 text-[10px] flex-1"
               />
-              <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeField(sectionIdx, fieldIdx)">
-                <Trash2 class="h-3 w-3 text-destructive" />
+              <Button variant="ghost" size="icon" class="size-6" @click="removeField(sectionIdx, fieldIdx)">
+                <Trash2 class="size-3 text-destructive" />
               </Button>
             </div>
             <div class="flex items-center gap-2">

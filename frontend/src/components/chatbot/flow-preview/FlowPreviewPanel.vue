@@ -100,7 +100,7 @@ const localListPickerOpen = computed({
           }"
           @click="mode = 'edit'"
         >
-          <Edit3 class="h-3.5 w-3.5 mr-1.5" />
+          <Edit3 class="size-3.5 mr-1.5" />
           Edit
         </Button>
         <Button
@@ -113,7 +113,7 @@ const localListPickerOpen = computed({
           }"
           @click="mode = 'preview'"
         >
-          <Play class="h-3.5 w-3.5 mr-1.5" />
+          <Play class="size-3.5 mr-1.5" />
           Preview
         </Button>
       </div>
@@ -135,8 +135,8 @@ const localListPickerOpen = computed({
             class="flex-1 flex items-center justify-center p-6 bg-[#efeae2] dark:bg-[#0b141a]"
           >
             <div class="max-w-sm w-full bg-white dark:bg-[#202c33] rounded-xl shadow-md p-6 text-center">
-              <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
-                <component :is="controlNodeInfo.icon" class="h-6 w-6 text-gray-600 dark:text-gray-300" />
+              <div class="inline-flex items-center justify-center size-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
+                <component :is="controlNodeInfo.icon" class="size-6 text-gray-600 dark:text-gray-300" />
               </div>
               <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                 {{ controlNodeInfo.label }}
@@ -160,8 +160,8 @@ const localListPickerOpen = computed({
               <div class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] relative">
                 <!-- Chat Header -->
                 <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <MessageSquare class="h-5 w-5" />
+                  <div class="size-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <MessageSquare class="size-5" />
                   </div>
                   <div>
                     <p class="font-medium text-sm">{{ flowData.name || 'WhatsApp Preview' }}</p>
@@ -188,7 +188,7 @@ const localListPickerOpen = computed({
                           :key="idx"
                           class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
                         >
-                          <ExternalLink v-if="btn.type === 'url'" class="h-4 w-4" />
+                          <ExternalLink v-if="btn.type === 'url'" class="size-4" />
                           {{ btn.title || `Option ${idx + 1}` }}
                         </button>
                       </div>
@@ -199,7 +199,7 @@ const localListPickerOpen = computed({
                           class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
                           @click="localListPickerOpen = !localListPickerOpen"
                         >
-                          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
                           </svg>
                           Select an option
@@ -218,8 +218,8 @@ const localListPickerOpen = computed({
                   <!-- User Response Placeholder -->
                   <div v-if="selectedStep.message_type !== 'transfer'" class="flex justify-end">
                     <div class="max-w-[85%]">
-                      <div class="bg-[#005c4b] light:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3">
-                        <p class="text-sm text-gray-200 light:text-gray-800 italic">
+                      <div class="bg-[#005c4b] dark:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3">
+                        <p class="text-sm text-gray-800 dark:text-gray-200 italic">
                           <template v-if="selectedStep.input_type === 'none'">
                             (No response needed)
                           </template>
@@ -235,7 +235,7 @@ const localListPickerOpen = computed({
                         </p>
                         <p class="text-[10px] text-gray-500 dark:text-gray-400 text-right mt-1 flex items-center justify-end gap-1">
                           12:01 PM
-                          <svg class="h-4 w-4 text-[#53bdeb]" viewBox="0 0 24 24" fill="currentColor">
+                          <svg class="size-4 text-[#53bdeb]" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                           </svg>
                         </p>
@@ -253,7 +253,7 @@ const localListPickerOpen = computed({
                   <!-- Transfer System Message -->
                   <div v-if="selectedStep.message_type === 'transfer'" class="flex justify-center">
                     <div class="bg-amber-100 dark:bg-amber-900/30 text-xs text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                      <Users class="h-3 w-3" />
+                      <Users class="size-3" />
                       <span>Conversation transferred to {{ selectedStep?.transfer_config?.team_id === '_general' ? 'General Queue' : teams.find(t => t.id === selectedStep?.transfer_config?.team_id)?.name || 'Team' }}</span>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ const localListPickerOpen = computed({
                   <!-- API Info -->
                   <div v-if="selectedStep.message_type === 'api_fetch'" class="flex justify-center">
                     <div class="bg-blue-100 dark:bg-blue-900/30 text-xs text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                      <Globe class="h-3 w-3" />
+                      <Globe class="size-3" />
                       <span>Message populated from API</span>
                     </div>
                   </div>
@@ -273,8 +273,8 @@ const localListPickerOpen = computed({
                   <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
                     <p class="text-sm text-gray-400">Type a message</p>
                   </div>
-                  <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <div class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                    <svg class="size-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 14.5L7 10l1.4-1.4 3.6 3.6 3.6-3.6L17 10l-5 4.5z"/>
                     </svg>
                   </div>
@@ -289,7 +289,7 @@ const localListPickerOpen = computed({
                   <div class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden">
                     <div class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between">
                       <button class="p-1 hover:bg-white/10 rounded" @click="localListPickerOpen = false">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                       </button>
@@ -303,14 +303,14 @@ const localListPickerOpen = computed({
                         class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer flex items-center gap-3"
                         @click="localListPickerOpen = false"
                       >
-                        <div v-if="btn.type === 'url'" class="w-5 h-5 flex items-center justify-center shrink-0 text-[#00a884]">
-                          <ExternalLink class="h-4 w-4" />
+                        <div v-if="btn.type === 'url'" class="size-5 flex items-center justify-center shrink-0 text-[#00a884]">
+                          <ExternalLink class="size-4" />
                         </div>
-                        <div v-else class="w-5 h-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0">
+                        <div v-else class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0">
                           <span class="text-[10px] text-[#00a884] font-medium">{{ idx + 1 }}</span>
                         </div>
                         <span class="text-sm text-gray-800 dark:text-gray-200 flex-1">{{ btn.title || `Option ${idx + 1}` }}</span>
-                        <ExternalLink v-if="btn.type === 'url'" class="h-3 w-3 text-gray-400" />
+                        <ExternalLink v-if="btn.type === 'url'" class="size-3 text-gray-400" />
                       </div>
                     </div>
                   </div>
@@ -322,8 +322,8 @@ const localListPickerOpen = computed({
               <!-- Empty State Phone Frame -->
               <div class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] w-full">
                 <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <MessageSquare class="h-5 w-5" />
+                  <div class="size-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <MessageSquare class="size-5" />
                   </div>
                   <div>
                     <p class="font-medium text-sm">{{ flowData.name || 'WhatsApp Preview' }}</p>
@@ -337,8 +337,8 @@ const localListPickerOpen = computed({
                   <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
                     <p class="text-sm text-gray-400">Type a message</p>
                   </div>
-                  <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <div class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                    <svg class="size-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 14.5L7 10l1.4-1.4 3.6 3.6 3.6-3.6L17 10l-5 4.5z"/>
                     </svg>
                   </div>

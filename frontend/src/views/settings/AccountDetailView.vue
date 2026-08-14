@@ -284,24 +284,24 @@ onMounted(async () => {
     <template #actions>
       <div class="flex items-center gap-2">
         <Button v-if="!isNew && account" variant="outline" size="sm" :disabled="testingConnection" @click="testConnection">
-          <Loader2 v-if="testingConnection" class="h-4 w-4 animate-spin mr-1" />
-          <RefreshCw v-else class="h-4 w-4 mr-1" />
+          <Loader2 v-if="testingConnection" class="size-4 animate-spin mr-1" />
+          <RefreshCw v-else class="size-4 mr-1" />
           {{ $t('accounts.test', 'Test') }}
         </Button>
         <Button v-if="!isNew && account" variant="outline" size="sm" :disabled="subscribing" @click="subscribeApp">
-          <Loader2 v-if="subscribing" class="h-4 w-4 animate-spin mr-1" />
-          <Bell v-else class="h-4 w-4 mr-1" />
+          <Loader2 v-if="subscribing" class="size-4 animate-spin mr-1" />
+          <Bell v-else class="size-4 mr-1" />
           {{ $t('accounts.subscribe', 'Subscribe') }}
         </Button>
         <Button v-if="!isNew && account" variant="outline" size="sm" @click="isProfileDialogOpen = true">
-          <Store class="h-4 w-4 mr-1" />
+          <Store class="size-4 mr-1" />
           {{ $t('accounts.businessProfile', 'Profile') }}
         </Button>
         <Button v-if="canWrite && (hasChanges || isNew)" size="sm" @click="save" :disabled="isSaving">
-          <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
+          <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
         </Button>
         <Button v-if="canDelete && !isNew" variant="destructive" size="sm" @click="deleteDialogOpen = true">
-          <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+          <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
         </Button>
       </div>
     </template>
@@ -310,17 +310,17 @@ onMounted(async () => {
     <Card v-if="testResult">
       <CardContent class="p-4">
         <div v-if="testResult.success" class="space-y-2">
-          <div class="flex items-center gap-2 text-green-400 light:text-green-600">
-            <CheckCircle2 class="h-4 w-4" />
+          <div class="flex items-center gap-2 text-success">
+            <CheckCircle2 class="size-4" />
             <span class="text-sm font-medium">{{ $t('accounts.connected', 'Connected') }}</span>
             <span v-if="testResult.display_phone_number" class="text-sm text-muted-foreground">— {{ testResult.display_phone_number }}</span>
             <Badge v-if="testResult.is_test_number" variant="outline" class="border-amber-600 text-amber-600">
-              <TestTube2 class="h-3 w-3 mr-1" /> {{ $t('accounts.testNumber', 'Test Number') }}
+              <TestTube2 class="size-3 mr-1" /> {{ $t('accounts.testNumber', 'Test Number') }}
             </Badge>
           </div>
-          <div v-if="testResult.warning" class="flex items-start gap-2 p-2 rounded-lg bg-amber-950/50 light:bg-amber-50 border border-amber-800 light:border-amber-200">
-            <AlertCircle class="h-4 w-4 text-amber-400 light:text-amber-600 mt-0.5 shrink-0" />
-            <span class="text-sm text-amber-300 light:text-amber-700">{{ testResult.warning }}</span>
+          <div v-if="testResult.warning" class="flex items-start gap-2 p-2 rounded-lg bg-warning/50 border border-warning">
+            <AlertCircle class="size-4 text-warning mt-0.5 shrink-0" />
+            <span class="text-sm text-warning">{{ testResult.warning }}</span>
           </div>
           <!-- Meta Connection Details -->
           <div class="mt-4 border-t pt-4 border-border/40">
@@ -357,8 +357,8 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <div v-else class="flex items-center gap-2 text-red-400 light:text-red-600">
-          <X class="h-4 w-4" />
+        <div v-else class="flex items-center gap-2 text-destructive">
+          <X class="size-4" />
           <span class="text-sm">{{ testResult.error }}</span>
         </div>
       </CardContent>
@@ -412,7 +412,7 @@ onMounted(async () => {
             </Label>
             <Input v-model="form.access_token" type="password" :disabled="!canWrite" />
             <Badge v-if="account?.has_access_token" variant="outline" class="border-green-600 text-green-600">
-              <Check class="h-3 w-3 mr-1" /> {{ $t('accounts.configured', 'Configured') }}
+              <Check class="size-3 mr-1" /> {{ $t('accounts.configured', 'Configured') }}
             </Badge>
           </div>
           <div class="space-y-1.5">
@@ -422,7 +422,7 @@ onMounted(async () => {
             </Label>
             <Input v-model="form.app_secret" type="password" :disabled="!canWrite" />
             <Badge v-if="account?.has_app_secret" variant="outline" class="border-green-600 text-green-600">
-              <Check class="h-3 w-3 mr-1" /> {{ $t('accounts.configured', 'Configured') }}
+              <Check class="size-3 mr-1" /> {{ $t('accounts.configured', 'Configured') }}
             </Badge>
           </div>
         </div>

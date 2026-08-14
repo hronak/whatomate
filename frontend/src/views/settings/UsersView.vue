@@ -199,12 +199,12 @@ async function copyInviteLink() {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('users.title')" :icon="Users" icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20" back-link="/settings" :breadcrumbs="breadcrumbs">
       <template #actions>
-        <Button variant="outline" size="sm" @click="copyInviteLink"><Link class="h-4 w-4 mr-2" />{{ $t('users.copyInviteLink') }}</Button>
-        <Button v-if="organizationsStore.isMultiOrg && authStore.hasPermission('organizations', 'assign')" variant="outline" size="sm" @click="openAddExistingDialog"><UserPlus class="h-4 w-4 mr-2" />{{ $t('users.addExistingUser') }}</Button>
-        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('users.addUser') }}</Button>
+        <Button variant="outline" size="sm" @click="copyInviteLink"><Link class="size-4 mr-2" />{{ $t('users.copyInviteLink') }}</Button>
+        <Button v-if="organizationsStore.isMultiOrg && authStore.hasPermission('organizations', 'assign')" variant="outline" size="sm" @click="openAddExistingDialog"><UserPlus class="size-4 mr-2" />{{ $t('users.addExistingUser') }}</Button>
+        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('users.addUser') }}</Button>
       </template>
     </PageHeader>
 
@@ -228,7 +228,7 @@ async function copyInviteLink() {
                   <div class="flex items-center gap-2">
                     <CardTitle>{{ $t('users.yourUsers') }}</CardTitle>
                     <Badge variant="outline" class="border-green-600 text-green-600 gap-1.5">
-                      <span class="inline-block h-2 w-2 rounded-full bg-green-600" />
+                      <span class="inline-block size-2 rounded-full bg-green-600" />
                       {{ onlineCount }} {{ $t('users.online', 'online') }}
                     </Badge>
                   </div>
@@ -258,8 +258,8 @@ async function copyInviteLink() {
               <DataTable :items="users" :columns="columns" :is-loading="isLoading" :empty-icon="UserIcon" :empty-title="searchQuery ? $t('users.noMatchingUsers') : $t('users.noUsersFound')" :empty-description="searchQuery ? $t('users.noMatchingUsersDesc') : $t('users.noUsersFoundDesc')" v-model:sort-key="sortKey" v-model:sort-direction="sortDirection" server-pagination :current-page="currentPage" :total-items="totalItems" :page-size="pageSize" item-name="users" @page-change="handlePageChange">
                 <template #cell-user="{ item: user }">
                   <RouterLink :to="`/settings/users/${user.id}`" class="flex items-center gap-3 text-inherit no-underline hover:opacity-80">
-                    <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <component :is="getRoleIcon(getRoleName(user))" class="h-4 w-4 text-primary" />
+                    <div class="size-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <component :is="getRoleIcon(getRoleName(user))" class="size-4 text-primary" />
                     </div>
                     <div class="min-w-0">
                       <div class="flex items-center gap-2">
@@ -286,22 +286,22 @@ async function copyInviteLink() {
                 <template #cell-actions="{ item: user }">
                   <div class="flex items-center justify-end gap-1">
                     <RouterLink :to="`/settings/users/${user.id}`">
-                      <IconButton :icon="Pencil" :label="$t('users.editUserTooltip')" class="h-8 w-8" />
+                      <IconButton :icon="Pencil" :label="$t('users.editUserTooltip')" class="size-8" />
                     </RouterLink>
                     <IconButton
                       :label="user.is_member
                         ? $t('users.removeMemberTooltip')
                         : (user.id === currentUserId ? $t('users.cantDeleteYourself') : $t('users.deleteUserTooltip'))"
-                      class="h-8 w-8"
+                      class="size-8"
                       :disabled="user.id === currentUserId"
                       @click="openDeleteDialog(user)"
                     >
-                      <component :is="user.is_member ? UserMinus : Trash2" class="h-4 w-4 text-destructive" />
+                      <component :is="user.is_member ? UserMinus : Trash2" class="size-4 text-destructive" />
                     </IconButton>
                   </div>
                 </template>
                 <template #empty-action>
-                  <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('users.addUser') }}</Button>
+                  <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('users.addUser') }}</Button>
                 </template>
               </DataTable>
             </CardContent>
@@ -371,7 +371,7 @@ async function copyInviteLink() {
         <DialogFooter>
           <Button variant="outline" @click="isAddExistingOpen = false">{{ $t('common.cancel') }}</Button>
           <Button @click="submitAddExisting" :disabled="isAddExistingSubmitting || !addExistingEmail.trim()">
-            <Loader2 v-if="isAddExistingSubmitting" class="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 v-if="isAddExistingSubmitting" class="size-4 mr-2 animate-spin" />
             {{ $t('users.addExistingUser') }}
           </Button>
         </DialogFooter>

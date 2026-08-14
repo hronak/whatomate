@@ -212,11 +212,11 @@ function downloadSampleCsv() {
       <Tabs v-model="activeTab" class="w-full">
         <TabsList v-if="canExport && canImport" class="grid w-full grid-cols-2">
           <TabsTrigger value="export">
-            <Download class="h-4 w-4 mr-2" />
+            <Download class="size-4 mr-2" />
             {{ $t('importExport.export') }}
           </TabsTrigger>
           <TabsTrigger value="import">
-            <Upload class="h-4 w-4 mr-2" />
+            <Upload class="size-4 mr-2" />
             {{ $t('importExport.import') }}
           </TabsTrigger>
         </TabsList>
@@ -224,7 +224,7 @@ function downloadSampleCsv() {
         <!-- Export Tab -->
         <TabsContent v-if="canExport" value="export" class="space-y-4 mt-4">
           <div v-if="isLoadingExportConfig" class="flex items-center justify-center py-8">
-            <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
+            <Loader2 class="size-6 animate-spin text-muted-foreground" />
           </div>
           <template v-else>
             <div class="space-y-2">
@@ -246,8 +246,8 @@ function downloadSampleCsv() {
             <div class="flex justify-end gap-2 pt-2">
               <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
               <Button @click="handleExport" :disabled="isExporting || selectedColumns.length === 0">
-                <Loader2 v-if="isExporting" class="h-4 w-4 mr-2 animate-spin" />
-                <Download v-else class="h-4 w-4 mr-2" />
+                <Loader2 v-if="isExporting" class="size-4 mr-2 animate-spin" />
+                <Download v-else class="size-4 mr-2" />
                 {{ $t('importExport.exportCsv') }}
               </Button>
             </div>
@@ -257,7 +257,7 @@ function downloadSampleCsv() {
         <!-- Import Tab -->
         <TabsContent v-if="canImport" value="import" class="space-y-4 mt-4">
           <div v-if="isLoadingImportConfig" class="flex items-center justify-center py-8">
-            <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
+            <Loader2 class="size-6 animate-spin text-muted-foreground" />
           </div>
           <template v-else>
             <!-- Column Info -->
@@ -275,7 +275,7 @@ function downloadSampleCsv() {
                 </span>
               </div>
               <Button variant="link" size="sm" class="h-auto p-0 text-xs" @click="downloadSampleCsv">
-                <FileSpreadsheet class="h-3 w-3 mr-1" />
+                <FileSpreadsheet class="size-3 mr-1" />
                 {{ $t('importExport.downloadSample') }}
               </Button>
             </div>
@@ -305,8 +305,8 @@ function downloadSampleCsv() {
             <!-- Import Result -->
             <div v-if="importResult" class="rounded-md p-3 space-y-2" :class="importResult.errors > 0 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-green-500/10 border border-green-500/20'">
               <div class="flex items-center gap-2">
-                <Check v-if="importResult.errors === 0" class="h-4 w-4 text-green-500" />
-                <AlertCircle v-else class="h-4 w-4 text-amber-500" />
+                <Check v-if="importResult.errors === 0" class="size-4 text-green-500" />
+                <AlertCircle v-else class="size-4 text-amber-500" />
                 <span class="font-medium">{{ $t('importExport.importComplete') }}</span>
               </div>
               <div class="text-sm text-muted-foreground space-y-1">
@@ -323,8 +323,8 @@ function downloadSampleCsv() {
             <div class="flex justify-end gap-2 pt-2">
               <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
               <Button @click="handleImport" :disabled="isImporting || !importFile">
-                <Loader2 v-if="isImporting" class="h-4 w-4 mr-2 animate-spin" />
-                <Upload v-else class="h-4 w-4 mr-2" />
+                <Loader2 v-if="isImporting" class="size-4 mr-2 animate-spin" />
+                <Upload v-else class="size-4 mr-2" />
                 {{ $t('importExport.importCsv') }}
               </Button>
             </div>

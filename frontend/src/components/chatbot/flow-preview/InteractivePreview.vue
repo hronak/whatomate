@@ -145,7 +145,7 @@ function handleGoToStep(stepName: string) {
         <!-- Device bezel -->
         <div
           id="preview-phone-frame"
-          class="w-full max-w-[400px] h-full max-h-[760px] bg-black rounded-[40px] p-[10px] shadow-2xl flex flex-col"
+          class="size-full max-w-[400px] max-h-[760px] bg-black rounded-[40px] p-[10px] shadow-2xl flex flex-col"
         >
           <!-- Screen -->
           <div class="flex-1 rounded-[32px] overflow-hidden flex flex-col bg-[#efeae2] dark:bg-[#0b141a]">
@@ -162,8 +162,8 @@ function handleGoToStep(stepName: string) {
 
             <!-- Chat Header -->
             <div class="bg-[#008069] dark:bg-[#202c33] text-white px-3 py-2 flex items-center gap-3 shrink-0">
-              <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                <MessageSquare class="h-4 w-4" />
+              <div class="size-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <MessageSquare class="size-4" />
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-sm truncate">{{ flowData.name || 'Flow Preview' }}</p>
@@ -180,7 +180,7 @@ function handleGoToStep(stepName: string) {
             <div class="space-y-3">
               <!-- Idle State -->
               <div v-if="state.status === 'idle' && state.messages.length === 0" class="text-center py-12">
-                <MessageSquare class="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                <MessageSquare class="size-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   Start the preview to simulate the flow
                 </p>

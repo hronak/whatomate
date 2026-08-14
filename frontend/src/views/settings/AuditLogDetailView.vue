@@ -119,7 +119,7 @@ onMounted(async () => {
               <template v-if="log.action === 'updated'">
                 <div class="flex items-start gap-2 text-muted-foreground">
                   <span class="text-red-400 line-through wrap-break-word">{{ formatValue(change.old_value) }}</span>
-                  <ArrowRight class="h-4 w-4 shrink-0 mt-0.5" />
+                  <ArrowRight class="size-4 shrink-0 mt-0.5" />
                   <span class="text-green-400 wrap-break-word">{{ formatValue(change.new_value) }}</span>
                 </div>
               </template>
@@ -140,7 +140,7 @@ onMounted(async () => {
       <Card v-if="log" class="overflow-hidden">
         <CardHeader class="pb-3">
           <div class="flex items-center gap-2">
-            <Info class="h-4 w-4 text-muted-foreground" />
+            <Info class="size-4 text-muted-foreground" />
             <CardTitle class="text-sm font-medium">{{ t('common.details', 'Details') }}</CardTitle>
           </div>
         </CardHeader>
@@ -167,7 +167,7 @@ onMounted(async () => {
           </div>
           <RouterLink v-if="resourceLink" :to="resourceLink">
             <Button variant="outline" size="sm" class="w-full mt-2">
-              <ExternalLink class="h-3.5 w-3.5 mr-1.5" />
+              <ExternalLink class="size-3.5 mr-1.5" />
               {{ t('auditLogs.viewResource') }}
             </Button>
           </RouterLink>

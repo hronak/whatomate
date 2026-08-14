@@ -166,10 +166,10 @@ onMounted(async () => {
       <template #actions>
         <div class="flex items-center gap-2">
           <Button v-if="isNew && canWrite" size="sm" @click="create" :disabled="isSaving">
-            <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.create') }}
+            <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.create') }}
           </Button>
           <Button v-if="!isNew && canDelete" variant="destructive" size="sm" @click="deleteDialogOpen = true">
-            <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+            <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
           </Button>
         </div>
       </template>
@@ -202,8 +202,8 @@ onMounted(async () => {
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div class="h-10 w-10 rounded-full bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
-              <Key class="h-5 w-5 text-white" />
+            <div class="size-10 rounded-full bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
+              <Key class="size-5 text-white" />
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ apiKey?.name }}</p>
@@ -253,7 +253,7 @@ onMounted(async () => {
           <DialogTitle>{{ $t('apiKeys.apiKeyCreated') }}</DialogTitle>
           <DialogDescription>
             <div class="flex items-center gap-2 text-amber-600 mt-2">
-              <AlertTriangle class="h-4 w-4" />
+              <AlertTriangle class="size-4" />
               <span>{{ $t('apiKeys.apiKeyCreatedWarning') }}</span>
             </div>
           </DialogDescription>

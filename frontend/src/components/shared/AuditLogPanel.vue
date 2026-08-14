@@ -80,14 +80,14 @@ onMounted(() => loadLogs())
   <Card class="overflow-hidden">
     <CardHeader class="pb-3">
       <div class="flex items-center gap-2">
-        <History class="h-4 w-4 text-muted-foreground" />
+        <History class="size-4 text-muted-foreground" />
         <CardTitle class="text-sm font-medium">{{ $t('common.activityLog', 'Activity Log') }}</CardTitle>
       </div>
     </CardHeader>
     <CardContent>
       <!-- Loading state -->
       <div v-if="isLoading && logs.length === 0" class="flex items-center justify-center py-8">
-        <Loader2 class="h-5 w-5 animate-spin text-muted-foreground" />
+        <Loader2 class="size-5 animate-spin text-muted-foreground" />
       </div>
 
       <!-- Empty state -->
@@ -104,7 +104,7 @@ onMounted(() => loadLogs())
           <!-- Dot -->
           <div
             :class="[
-              'absolute left-1.5 top-1 w-3 h-3 rounded-full border-2 border-background',
+              'absolute left-1.5 top-1 size-3 rounded-full border-2 border-background',
               actionConfig[log.action]?.color || 'bg-muted-foreground'
             ]"
           />
@@ -148,7 +148,7 @@ onMounted(() => loadLogs())
       <!-- Load more -->
       <div v-if="logs.length < total" class="mt-4 flex justify-center">
         <Button variant="ghost" size="sm" class="text-xs" :disabled="isLoading" @click="loadMore">
-          <ChevronDown class="h-3.5 w-3.5 mr-1" />
+          <ChevronDown class="size-3.5 mr-1" />
           {{ isLoading ? $t('common.loading') + '...' : $t('common.loadMore', 'Load more') }}
         </Button>
       </div>

@@ -696,7 +696,7 @@ onMounted(async () => {
     <header class="border-b bg-background px-4 py-3 shrink-0">
       <div class="flex items-center gap-4">
         <Button variant="ghost" size="icon" @click="handleCancel">
-          <ArrowLeft class="h-5 w-5" />
+          <ArrowLeft class="size-5" />
         </Button>
 
         <div class="flex-1 flex items-center gap-6">
@@ -717,12 +717,12 @@ onMounted(async () => {
           </div>
 
           <Button variant="outline" size="sm" @click="showPreview = true" :disabled="nodes.length === 0">
-            <Play class="h-4 w-4 mr-1" />
+            <Play class="size-4 mr-1" />
             {{ $t('flowBuilder.preview', 'Preview') }}
           </Button>
           <Button variant="outline" @click="handleCancel">{{ $t('flowBuilder.cancel') }}</Button>
           <Button @click="saveFlow" :disabled="isSaving">
-            <Save class="h-4 w-4 mr-2" />
+            <Save class="size-4 mr-2" />
             {{ isSaving ? $t('flowBuilder.saving') + '...' : $t('flowBuilder.saveFlow') }}
           </Button>
         </div>
@@ -740,8 +740,8 @@ onMounted(async () => {
         class="h-7 text-xs gap-1.5 shrink-0"
         @click="addNodeFromPalette(p.type)"
       >
-        <div :class="['w-2 h-2 rounded-full', p.color]" />
-        <component :is="p.icon" class="w-3 h-3" />
+        <div :class="['size-2 rounded-full', p.color]" />
+        <component :is="p.icon" class="size-3" />
         {{ p.label }}
       </Button>
     </div>
@@ -751,7 +751,7 @@ onMounted(async () => {
       <!-- Canvas -->
       <div class="flex-1 relative">
         <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <div class="animate-spin rounded-full size-8 border-b-2 border-primary" />
         </div>
         <ErrorState
           v-else-if="loadError"
@@ -828,7 +828,7 @@ onMounted(async () => {
             <Collapsible v-model:open="completionConfigOpen">
               <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium">
                 {{ $t('flowBuilder.onCompletion') }}
-                <component :is="completionConfigOpen ? ChevronDown : ChevronRight" class="h-4 w-4" />
+                <component :is="completionConfigOpen ? ChevronDown : ChevronRight" class="size-4" />
               </CollapsibleTrigger>
               <CollapsibleContent class="pt-3 space-y-3">
                 <div class="space-y-1.5">
@@ -866,24 +866,24 @@ onMounted(async () => {
                       <div class="flex items-center justify-between">
                         <Label class="text-[10px]">{{ $t('flowBuilder.headers') }}</Label>
                         <Button variant="ghost" size="sm" class="h-5 text-[10px] px-1" @click="addCompletionHeader">
-                          <Plus class="h-3 w-3" />
+                          <Plus class="size-3" />
                         </Button>
                       </div>
                       <div v-for="(val, key) in completionConfig.headers" :key="key" class="flex gap-1">
                         <Input
                           :model-value="String(key)"
-                          @update:model-value="(v: string) => updateCompletionHeaderKey(String(key), v)"
+                          @update:model-value="(v: string | number) => updateCompletionHeaderKey(String(key), String(v))"
                           placeholder="Key"
                           class="h-6 text-[10px] flex-1"
                         />
                         <Input
                           :model-value="String(val)"
-                          @update:model-value="(v: string) => updateCompletionHeaderValue(String(key), v)"
+                          @update:model-value="(v: string | number) => updateCompletionHeaderValue(String(key), String(v))"
                           placeholder="Value"
                           class="h-6 text-[10px] flex-1"
                         />
-                        <Button variant="ghost" size="icon" class="h-5 w-5" @click="removeCompletionHeader(String(key))">
-                          <Trash2 class="h-3 w-3 text-destructive" />
+                        <Button variant="ghost" size="icon" class="size-5" @click="removeCompletionHeader(String(key))">
+                          <Trash2 class="size-3 text-destructive" />
                         </Button>
                       </div>
                     </div>
@@ -902,7 +902,7 @@ onMounted(async () => {
             <Collapsible v-model:open="panelConfigOpen">
               <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium">
                 Contact panel display
-                <component :is="panelConfigOpen ? ChevronDown : ChevronRight" class="h-4 w-4" />
+                <component :is="panelConfigOpen ? ChevronDown : ChevronRight" class="size-4" />
               </CollapsibleTrigger>
               <CollapsibleContent class="pt-3">
                 <PanelConfigEditor
@@ -918,7 +918,7 @@ onMounted(async () => {
               <Collapsible v-model:open="activityOpen">
                 <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium">
                   Activity
-                  <component :is="activityOpen ? ChevronDown : ChevronRight" class="h-4 w-4" />
+                  <component :is="activityOpen ? ChevronDown : ChevronRight" class="size-4" />
                 </CollapsibleTrigger>
                 <CollapsibleContent class="pt-3 space-y-3">
                   <MetadataPanel

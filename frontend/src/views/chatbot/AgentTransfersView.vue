@@ -316,12 +316,12 @@ function formatTimeRemaining(deadline: string | undefined): string {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('agentTransfers.title')" :subtitle="$t('agentTransfers.subtitle')" :icon="UserX" icon-gradient="bg-linear-to-br from-red-500 to-orange-600 shadow-red-500/20">
       <template v-if="!isAdminOrManager" #actions>
         <div class="flex items-center gap-4">
-          <div class="text-sm text-white/50 light:text-gray-500">
-            <Users class="h-4 w-4 inline mr-1" />
+          <div class="text-sm text-foreground/50">
+            <Users class="size-4 inline mr-1" />
             {{ $t('agentTransfers.waitingInQueue', { count: transfersStore.queueCount }) }}
           </div>
           <Tooltip :disabled="allowQueuePickup">
@@ -333,8 +333,8 @@ function formatTimeRemaining(deadline: string | undefined): string {
                   @click="pickNextTransfer"
                   :disabled="!allowQueuePickup || isPicking || transfersStore.queueCount === 0"
                 >
-                  <Loader2 v-if="isPicking" class="mr-2 h-4 w-4 animate-spin" />
-                  <Play v-else class="mr-2 h-4 w-4" />
+                  <Loader2 v-if="isPicking" class="mr-2 size-4 animate-spin" />
+                  <Play v-else class="mr-2 size-4" />
                   {{ $t('agentTransfers.pickNext') }}
                 </Button>
               </span>
@@ -350,8 +350,8 @@ function formatTimeRemaining(deadline: string | undefined): string {
       <div class="p-6 space-y-6">
         <!-- Loading skeleton -->
         <div v-if="isLoading" class="space-y-4">
-          <Skeleton class="h-12 w-full bg-white/8 light:bg-gray-200 rounded-xl" />
-          <Skeleton class="h-64 w-full bg-white/8 light:bg-gray-200 rounded-xl" />
+          <Skeleton class="h-12 w-full bg-muted rounded-xl" />
+          <Skeleton class="h-64 w-full bg-muted rounded-xl" />
         </div>
 
         <!-- Error state -->
@@ -365,15 +365,15 @@ function formatTimeRemaining(deadline: string | undefined): string {
 
         <!-- Agent View (no tabs, just their transfers) -->
         <div v-else-if="!isAdminOrManager">
-          <div class="rounded-xl border border-white/8 bg-white/2 light:bg-white light:border-gray-200">
+          <div class="rounded-xl border border-border bg-card">
             <div class="p-6">
-              <h3 class="text-lg font-semibold text-white light:text-gray-900">{{ $t('agentTransfers.myTransfers') }}</h3>
-              <p class="text-sm text-white/50 light:text-gray-500">{{ $t('agentTransfers.contactsTransferred') }}</p>
+              <h3 class="text-lg font-semibold text-foreground">{{ $t('agentTransfers.myTransfers') }}</h3>
+              <p class="text-sm text-foreground/50">{{ $t('agentTransfers.contactsTransferred') }}</p>
             </div>
             <div class="px-6 pb-6">
-              <div v-if="myTransfers.length === 0" class="text-center py-8 text-white/50 light:text-gray-500">
-                <div class="h-16 w-16 rounded-xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-                  <UserX class="h-8 w-8 text-red-400" />
+              <div v-if="myTransfers.length === 0" class="text-center py-8 text-foreground/50">
+                <div class="size-16 rounded-xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                  <UserX class="size-8 text-red-400" />
                 </div>
                 <p>{{ $t('agentTransfers.noActiveTransfers') }}</p>
                 <p class="text-sm mt-2">{{ $t('agentTransfers.clickPickNext') }}</p>
@@ -439,7 +439,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 </CardHeader>
                 <CardContent>
                   <div v-if="myTransfers.length === 0" class="text-center py-8 text-muted-foreground">
-                    <UserX class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <UserX class="size-12 mx-auto mb-4 opacity-50" />
                     <p>{{ $t('agentTransfers.noActiveTransfers') }}</p>
                   </div>
 
@@ -467,7 +467,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         <TableCell class="max-w-[200px] truncate">{{ transfer.notes || '-' }}</TableCell>
                         <TableCell class="text-right space-x-2">
                           <Button size="sm" variant="outline" @click="viewChat(transfer)">
-                            <MessageSquare class="h-4 w-4 mr-1" />
+                            <MessageSquare class="size-4 mr-1" />
                             {{ $t('agentTransfers.chat') }}
                           </Button>
                           <Button
@@ -476,7 +476,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                             @click="openResumeDialog(transfer)"
                             :disabled="isResuming"
                           >
-                            <Play class="h-4 w-4 mr-1" />
+                            <Play class="size-4 mr-1" />
                             {{ $t('agentTransfers.resume') }}
                           </Button>
                         </TableCell>
@@ -520,7 +520,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 </CardHeader>
                 <CardContent>
                   <div v-if="queueTransfers.length === 0" class="text-center py-8 text-muted-foreground">
-                    <Clock class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <Clock class="size-12 mx-auto mb-4 opacity-50" />
                     <p>{{ $t('agentTransfers.noTransfersInQueue') }}</p>
                   </div>
 
@@ -542,7 +542,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         <TableCell>{{ transfer.phone_number }}</TableCell>
                         <TableCell>
                           <Badge variant="outline">
-                            <Users class="h-3 w-3 mr-1" />
+                            <Users class="size-3 mr-1" />
                             {{ getTeamName(transfer.team_id) }}
                           </Badge>
                         </TableCell>
@@ -550,9 +550,9 @@ function formatTimeRemaining(deadline: string | undefined): string {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge :variant="getSLABadge(transfer).variant" class="cursor-help">
-                                <XCircle v-if="getSLABadge(transfer).icon === 'xcircle'" class="h-3 w-3 mr-1" />
-                                <AlertTriangle v-else-if="getSLABadge(transfer).icon === 'alert'" class="h-3 w-3 mr-1" />
-                                <CheckCircle2 v-else class="h-3 w-3 mr-1" />
+                                <XCircle v-if="getSLABadge(transfer).icon === 'xcircle'" class="size-3 mr-1" />
+                                <AlertTriangle v-else-if="getSLABadge(transfer).icon === 'alert'" class="size-3 mr-1" />
+                                <CheckCircle2 v-else class="size-3 mr-1" />
                                 {{ getSLABadge(transfer).label }}
                               </Badge>
                             </TooltipTrigger>
@@ -577,11 +577,11 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         </TableCell>
                         <TableCell class="text-right space-x-2">
                           <Button size="sm" variant="outline" @click="openAssignDialog(transfer)">
-                            <UserPlus class="h-4 w-4 mr-1" />
+                            <UserPlus class="size-4 mr-1" />
                             {{ $t('agentTransfers.assign') }}
                           </Button>
                           <Button size="sm" variant="outline" @click="viewChat(transfer)">
-                            <MessageSquare class="h-4 w-4 mr-1" />
+                            <MessageSquare class="size-4 mr-1" />
                             {{ $t('agentTransfers.chat') }}
                           </Button>
                         </TableCell>
@@ -601,7 +601,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 </CardHeader>
                 <CardContent>
                   <div v-if="allActiveTransfers.length === 0" class="text-center py-8 text-muted-foreground">
-                    <UserX class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <UserX class="size-12 mx-auto mb-4 opacity-50" />
                     <p>{{ $t('agentTransfers.noActiveTransfersGlobal') }}</p>
                   </div>
 
@@ -623,14 +623,14 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         <TableCell>{{ transfer.phone_number }}</TableCell>
                         <TableCell>
                           <Badge v-if="transfer.agent_name" variant="outline">
-                            <User class="h-3 w-3 mr-1" />
+                            <User class="size-3 mr-1" />
                             {{ transfer.agent_name }}
                           </Badge>
                           <Badge v-else variant="destructive">{{ $t('agentTransfers.unassigned') }}</Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
-                            <Users class="h-3 w-3 mr-1" />
+                            <Users class="size-3 mr-1" />
                             {{ getTeamName(transfer.team_id) }}
                           </Badge>
                         </TableCell>
@@ -638,9 +638,9 @@ function formatTimeRemaining(deadline: string | undefined): string {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge :variant="getSLABadge(transfer).variant" class="cursor-help">
-                                <XCircle v-if="getSLABadge(transfer).icon === 'xcircle'" class="h-3 w-3 mr-1" />
-                                <AlertTriangle v-else-if="getSLABadge(transfer).icon === 'alert'" class="h-3 w-3 mr-1" />
-                                <CheckCircle2 v-else class="h-3 w-3 mr-1" />
+                                <XCircle v-if="getSLABadge(transfer).icon === 'xcircle'" class="size-3 mr-1" />
+                                <AlertTriangle v-else-if="getSLABadge(transfer).icon === 'alert'" class="size-3 mr-1" />
+                                <CheckCircle2 v-else class="size-3 mr-1" />
                                 {{ getSLABadge(transfer).label }}
                               </Badge>
                             </TooltipTrigger>
@@ -686,12 +686,12 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 <CardContent>
                   <!-- Loading state -->
                   <div v-if="isLoadingHistory && historyTransfers.length === 0" class="text-center py-8">
-                    <Loader2 class="h-8 w-8 mx-auto mb-4 animate-spin text-muted-foreground" />
+                    <Loader2 class="size-8 mx-auto mb-4 animate-spin text-muted-foreground" />
                     <p class="text-muted-foreground">{{ $t('agentTransfers.loadingHistory') }}...</p>
                   </div>
 
                   <div v-else-if="historyTransfers.length === 0" class="text-center py-8 text-muted-foreground">
-                    <Clock class="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <Clock class="size-12 mx-auto mb-4 opacity-50" />
                     <p>{{ $t('agentTransfers.noTransferHistory') }}</p>
                   </div>
 
@@ -724,7 +724,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         @click="transfersStore.loadMoreHistory()"
                         :disabled="isLoadingHistory"
                       >
-                        <Loader2 v-if="isLoadingHistory" class="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 v-if="isLoadingHistory" class="size-4 mr-2 animate-spin" />
                         {{ $t('agentTransfers.loadMore') }}
                       </Button>
                     </div>
@@ -789,7 +789,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
         <DialogFooter>
           <Button variant="outline" size="sm" @click="assignDialogOpen = false">{{ $t('common.cancel') }}</Button>
           <Button size="sm" @click="assignTransfer" :disabled="isAssigning">
-            <Loader2 v-if="isAssigning" class="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 v-if="isAssigning" class="mr-2 size-4 animate-spin" />
             {{ $t('agentTransfers.save') }}
           </Button>
         </DialogFooter>

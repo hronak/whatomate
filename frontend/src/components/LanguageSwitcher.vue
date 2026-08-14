@@ -27,7 +27,7 @@ const currentLocaleName = computed(() => {
 <template>
   <Select v-model="currentLocale">
     <SelectTrigger class="w-auto gap-2">
-      <Globe class="h-4 w-4" />
+      <Globe class="size-4" />
       <SelectValue>{{ currentLocaleName }}</SelectValue>
     </SelectTrigger>
     <SelectContent>

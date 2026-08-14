@@ -122,7 +122,7 @@ function handleSubmit() {
     <DialogContent class="sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <Globe class="h-5 w-5 text-blue-500" />
+          <Globe class="size-5 text-blue-500" />
           Configure API Mock
         </DialogTitle>
         <DialogDescription>
@@ -194,7 +194,7 @@ function handleSubmit() {
               v-if="parseError"
               class="text-xs text-red-500 flex items-center gap-1"
             >
-              <AlertCircle class="h-3 w-3" />
+              <AlertCircle class="size-3" />
               {{ parseError }}
             </span>
           </div>

@@ -196,7 +196,7 @@ onMounted(async () => {
     <template #actions>
       <div class="flex items-center gap-2">
         <Button v-if="hasChanges || isNew" size="sm" @click="save" :disabled="isSaving">
-          <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
+          <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
         </Button>
       </div>
     </template>

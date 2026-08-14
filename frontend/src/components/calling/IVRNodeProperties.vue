@@ -48,7 +48,8 @@ function updateConfigEntries(entries: Record<string, any>) {
   })
 }
 
-function updateLabel(label: string) {
+function updateLabel(label: string | number) {
+  label = String(label)
   emit('update:node', { ...props.node, label })
 }
 
@@ -251,8 +252,8 @@ const greetingTab = computed(() =>
   <div class="space-y-4 p-4">
     <div class="flex items-center justify-between">
       <h3 class="font-semibold text-sm capitalize">{{ node.type.replace('_', ' ') }}</h3>
-      <Button variant="ghost" size="icon" class="h-7 w-7" @click="emit('delete')">
-        <Trash2 class="h-3.5 w-3.5 text-destructive" />
+      <Button variant="ghost" size="icon" class="size-7" @click="emit('delete')">
+        <Trash2 class="size-3.5 text-destructive" />
       </Button>
     </div>
 
@@ -268,27 +269,27 @@ const greetingTab = computed(() =>
       <Tabs :default-value="greetingTab">
         <TabsList class="h-8">
           <TabsTrigger value="audio" class="text-xs h-7 px-2">
-            <Upload class="h-3 w-3 mr-1" /> Upload
+            <Upload class="size-3 mr-1" /> Upload
           </TabsTrigger>
           <TabsTrigger value="text" class="text-xs h-7 px-2">
-            <Type class="h-3 w-3 mr-1" /> TTS
+            <Type class="size-3 mr-1" /> TTS
           </TabsTrigger>
         </TabsList>
         <TabsContent value="audio" class="mt-2">
           <div class="flex items-center gap-2">
             <div v-if="config.audio_file" class="flex items-center gap-1 flex-1 min-w-0 px-2 py-1 border rounded-md bg-muted/50">
-              <Button variant="ghost" size="icon" class="h-5 w-5 shrink-0" @click="togglePlayback">
-                <Pause v-if="isPlaying" class="h-3 w-3" />
-                <Play v-else class="h-3 w-3" />
+              <Button variant="ghost" size="icon" class="size-5 shrink-0" @click="togglePlayback">
+                <Pause v-if="isPlaying" class="size-3" />
+                <Play v-else class="size-3" />
               </Button>
               <span class="text-xs truncate">{{ config.audio_file }}</span>
-              <Button variant="ghost" size="icon" class="h-5 w-5 shrink-0 ml-auto" @click="removeAudio">
-                <X class="h-3 w-3 text-destructive" />
+              <Button variant="ghost" size="icon" class="size-5 shrink-0 ml-auto" @click="removeAudio">
+                <X class="size-3 text-destructive" />
               </Button>
             </div>
             <Button v-else variant="outline" size="sm" class="h-7 text-xs w-full" @click="triggerFileUpload" :disabled="isUploading">
-              <Loader2 v-if="isUploading" class="h-3 w-3 mr-1 animate-spin" />
-              <Upload v-else class="h-3 w-3 mr-1" />
+              <Loader2 v-if="isUploading" class="size-3 mr-1 animate-spin" />
+              <Upload v-else class="size-3 mr-1" />
               Upload Audio
             </Button>
             <input ref="audioFileInput" type="file" accept="audio/*" class="hidden" @change="handleFileSelect" />
@@ -297,7 +298,7 @@ const greetingTab = computed(() =>
         <TabsContent value="text" class="mt-2">
           <Textarea
             :model-value="config.greeting_text || ''"
-            @update:model-value="(v: string) => updateConfigEntries(v ? { greeting_text: v, audio_file: undefined } : { greeting_text: v })"
+            @update:model-value="(v: string | number) => updateConfigEntries(String(v) ? { greeting_text: String(v), audio_file: undefined } : { greeting_text: String(v) })"
             placeholder="Enter text for TTS..."
             class="min-h-[60px] text-xs resize-none"
             :maxlength="500"
@@ -316,24 +317,24 @@ const greetingTab = computed(() =>
     <template v-if="node.type === 'menu'">
       <div class="space-y-1.5">
         <Label class="text-xs">Timeout (seconds)</Label>
-        <Input type="number" :model-value="String(config.timeout_seconds || 10)" @update:model-value="(v: string) => updateConfig('timeout_seconds', parseInt(v) || 10)" class="h-8 text-sm" min="1" max="60" />
+        <Input type="number" :model-value="String(config.timeout_seconds || 10)" @update:model-value="(v: string | number) => updateConfig('timeout_seconds', parseInt(String(v)) || 10)" class="h-8 text-sm" min="1" max="60" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Max Retries</Label>
-        <Input type="number" :model-value="String(config.max_retries || 3)" @update:model-value="(v: string) => updateConfig('max_retries', parseInt(v) || 3)" class="h-8 text-sm" min="1" max="10" />
+        <Input type="number" :model-value="String(config.max_retries || 3)" @update:model-value="(v: string | number) => updateConfig('max_retries', parseInt(String(v)) || 3)" class="h-8 text-sm" min="1" max="10" />
       </div>
       <div class="space-y-1.5">
         <div class="flex items-center justify-between">
           <Label class="text-xs">Menu Options</Label>
           <Button variant="outline" size="sm" class="h-6 text-xs" @click="addMenuOption">
-            <Plus class="h-3 w-3 mr-1" /> Add
+            <Plus class="size-3 mr-1" /> Add
           </Button>
         </div>
         <div v-for="(opt, digit) in (config.options || {})" :key="String(digit)" class="flex items-center gap-1.5">
           <span class="font-mono text-xs font-bold w-5 text-center">{{ digit }}</span>
-          <Input :model-value="(opt as any)?.label || ''" @update:model-value="(v: string) => updateMenuOption(String(digit), 'label', v)" placeholder="Label" class="h-7 text-xs flex-1" />
-          <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeMenuOption(String(digit))">
-            <Trash2 class="h-3 w-3 text-destructive" />
+          <Input :model-value="(opt as any)?.label || ''" @update:model-value="(v: string | number) => updateMenuOption(String(digit), 'label', String(v))" placeholder="Label" class="h-7 text-xs flex-1" />
+          <Button variant="ghost" size="icon" class="size-6" @click="removeMenuOption(String(digit))">
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
       </div>
@@ -343,23 +344,23 @@ const greetingTab = computed(() =>
     <template v-if="node.type === 'gather'">
       <div class="space-y-1.5">
         <Label class="text-xs">Max Digits</Label>
-        <Input type="number" :model-value="String(config.max_digits || 10)" @update:model-value="(v: string) => updateConfig('max_digits', parseInt(v) || 10)" class="h-8 text-sm" min="1" max="20" />
+        <Input type="number" :model-value="String(config.max_digits || 10)" @update:model-value="(v: string | number) => updateConfig('max_digits', parseInt(String(v)) || 10)" class="h-8 text-sm" min="1" max="20" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Terminator</Label>
-        <Input :model-value="config.terminator || '#'" @update:model-value="(v: string) => updateConfig('terminator', v)" class="h-8 text-sm" />
+        <Input :model-value="config.terminator || '#'" @update:model-value="(v: string | number) => updateConfig('terminator', String(v))" class="h-8 text-sm" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Store As (variable name)</Label>
-        <Input :model-value="config.store_as || ''" @update:model-value="(v: string) => updateConfig('store_as', v)" placeholder="e.g. account_number" class="h-8 text-sm" />
+        <Input :model-value="config.store_as || ''" @update:model-value="(v: string | number) => updateConfig('store_as', String(v))" placeholder="e.g. account_number" class="h-8 text-sm" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Timeout (seconds)</Label>
-        <Input type="number" :model-value="String(config.timeout_seconds || 10)" @update:model-value="(v: string) => updateConfig('timeout_seconds', parseInt(v) || 10)" class="h-8 text-sm" min="1" max="60" />
+        <Input type="number" :model-value="String(config.timeout_seconds || 10)" @update:model-value="(v: string | number) => updateConfig('timeout_seconds', parseInt(String(v)) || 10)" class="h-8 text-sm" min="1" max="60" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Max Retries</Label>
-        <Input type="number" :model-value="String(config.max_retries || 3)" @update:model-value="(v: string) => updateConfig('max_retries', parseInt(v) || 3)" class="h-8 text-sm" min="1" max="10" />
+        <Input type="number" :model-value="String(config.max_retries || 3)" @update:model-value="(v: string | number) => updateConfig('max_retries', parseInt(String(v)) || 3)" class="h-8 text-sm" min="1" max="10" />
       </div>
     </template>
 
@@ -367,7 +368,7 @@ const greetingTab = computed(() =>
     <template v-if="node.type === 'http_callback'">
       <div class="space-y-1.5">
         <Label class="text-xs">URL</Label>
-        <Input :model-value="config.url || ''" @update:model-value="(v: string) => updateConfig('url', v)" placeholder="https://api.example.com/ivr" class="h-8 text-xs font-mono" />
+        <Input :model-value="config.url || ''" @update:model-value="(v: string | number) => updateConfig('url', String(v))" placeholder="https://api.example.com/ivr" class="h-8 text-xs font-mono" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Method</Label>
@@ -383,28 +384,28 @@ const greetingTab = computed(() =>
         <div class="flex items-center justify-between">
           <Label class="text-xs">Headers</Label>
           <Button variant="outline" size="sm" class="h-6 text-xs" @click="addHeader">
-            <Plus class="h-3 w-3 mr-1" /> Add
+            <Plus class="size-3 mr-1" /> Add
           </Button>
         </div>
         <div v-for="(val, key) in (config.headers || {})" :key="String(key)" class="flex items-center gap-1">
-          <Input :model-value="String(key)" @update:model-value="(v: string) => updateHeaderKey(String(key), v)" placeholder="Key" class="h-7 text-xs flex-1" />
-          <Input :model-value="String(val)" @update:model-value="(v: string) => updateHeaderValue(String(key), v)" placeholder="Value" class="h-7 text-xs flex-1" />
-          <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeHeader(String(key))">
-            <Trash2 class="h-3 w-3 text-destructive" />
+          <Input :model-value="String(key)" @update:model-value="(v: string | number) => updateHeaderKey(String(key), String(v))" placeholder="Key" class="h-7 text-xs flex-1" />
+          <Input :model-value="String(val)" @update:model-value="(v: string | number) => updateHeaderValue(String(key), String(v))" placeholder="Value" class="h-7 text-xs flex-1" />
+          <Button variant="ghost" size="icon" class="size-6" @click="removeHeader(String(key))">
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Body Template</Label>
-        <Textarea :model-value="config.body_template || ''" @update:model-value="(v: string) => updateConfig('body_template', v)" placeholder='{"phone": "{{caller_phone}}"}' class="min-h-[60px] text-xs font-mono resize-none" />
+        <Textarea :model-value="config.body_template || ''" @update:model-value="(v: string | number) => updateConfig('body_template', String(v))" placeholder='{"phone": "{{caller_phone}}"}' class="min-h-[60px] text-xs font-mono resize-none" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Timeout (seconds)</Label>
-        <Input type="number" :model-value="String(config.timeout_seconds || 10)" @update:model-value="(v: string) => updateConfig('timeout_seconds', parseInt(v) || 10)" class="h-8 text-sm" min="1" max="30" />
+        <Input type="number" :model-value="String(config.timeout_seconds || 10)" @update:model-value="(v: string | number) => updateConfig('timeout_seconds', parseInt(String(v)) || 10)" class="h-8 text-sm" min="1" max="30" />
       </div>
       <div class="space-y-1.5">
         <Label class="text-xs">Store Response As (variable name)</Label>
-        <Input :model-value="config.response_store_as || ''" @update:model-value="(v: string) => updateConfig('response_store_as', v)" placeholder="e.g. api_response" class="h-8 text-sm" />
+        <Input :model-value="config.response_store_as || ''" @update:model-value="(v: string | number) => updateConfig('response_store_as', String(v))" placeholder="e.g. api_response" class="h-8 text-sm" />
       </div>
     </template>
 
@@ -437,7 +438,7 @@ const greetingTab = computed(() =>
           <div v-if="getCallbackConfig(event)._expanded" class="px-3 pb-3 space-y-1.5 border-t">
             <div class="space-y-1 pt-2">
               <Label class="text-[10px]">URL</Label>
-              <Input :model-value="getCallbackConfig(event).url || ''" @update:model-value="(v: string) => updateCallbackField(event, 'url', v)" placeholder="https://crm.example.com/api/call" class="h-7 text-xs font-mono" />
+              <Input :model-value="getCallbackConfig(event).url || ''" @update:model-value="(v: string | number) => updateCallbackField(event, 'url', String(v))" placeholder="https://crm.example.com/api/call" class="h-7 text-xs font-mono" />
             </div>
             <div class="space-y-1">
               <Label class="text-[10px]">Method</Label>
@@ -453,20 +454,20 @@ const greetingTab = computed(() =>
               <div class="flex items-center justify-between">
                 <Label class="text-[10px]">Headers</Label>
                 <Button variant="outline" size="sm" class="h-5 text-[10px] px-1.5" @click="addCallbackHeader(event)">
-                  <Plus class="h-2.5 w-2.5 mr-0.5" /> Add
+                  <Plus class="size-2.5 mr-0.5" /> Add
                 </Button>
               </div>
               <div v-for="(val, key) in (getCallbackConfig(event).headers || {})" :key="String(key)" class="flex items-center gap-1">
-                <Input :model-value="String(key)" @update:model-value="(v: string) => updateCallbackHeaderKey(event, String(key), v)" placeholder="Key" class="h-6 text-[10px] flex-1" />
-                <Input :model-value="String(val)" @update:model-value="(v: string) => updateCallbackHeaderValue(event, String(key), v)" placeholder="Value" class="h-6 text-[10px] flex-1" />
-                <Button variant="ghost" size="icon" class="h-5 w-5" @click="removeCallbackHeader(event, String(key))">
-                  <Trash2 class="h-2.5 w-2.5 text-destructive" />
+                <Input :model-value="String(key)" @update:model-value="(v: string | number) => updateCallbackHeaderKey(event, String(key), String(v))" placeholder="Key" class="h-6 text-[10px] flex-1" />
+                <Input :model-value="String(val)" @update:model-value="(v: string | number) => updateCallbackHeaderValue(event, String(key), String(v))" placeholder="Value" class="h-6 text-[10px] flex-1" />
+                <Button variant="ghost" size="icon" class="size-5" @click="removeCallbackHeader(event, String(key))">
+                  <Trash2 class="size-2.5 text-destructive" />
                 </Button>
               </div>
             </div>
             <div v-if="(getCallbackConfig(event).method || 'POST') === 'POST'" class="space-y-1">
               <Label class="text-[10px]">Body Template</Label>
-              <Textarea :model-value="getCallbackConfig(event).body_template || ''" @update:model-value="(v: string) => updateCallbackField(event, 'body_template', v)" :placeholder='`{"phone": "{{caller_phone}}", "transfer_id": "{{transfer_id}}"}`' class="min-h-[50px] text-[10px] font-mono resize-none" />
+              <Textarea :model-value="getCallbackConfig(event).body_template || ''" @update:model-value="(v: string | number) => updateCallbackField(event, 'body_template', String(v))" :placeholder='`{"phone": "{{caller_phone}}", "transfer_id": "{{transfer_id}}"}`' class="min-h-[50px] text-[10px] font-mono resize-none" />
             </div>
           </div>
         </div>
@@ -513,7 +514,7 @@ const greetingTab = computed(() =>
             v-if="entry.enabled"
             type="time"
             :model-value="entry.start_time"
-            @update:model-value="(v: string) => updateScheduleEntry(Number(idx), 'start_time', v)"
+            @update:model-value="(v: string | number) => updateScheduleEntry(Number(idx), 'start_time', String(v))"
             class="h-8 text-xs w-28"
           />
           <span v-if="entry.enabled" class="text-muted-foreground">-</span>
@@ -521,7 +522,7 @@ const greetingTab = computed(() =>
             v-if="entry.enabled"
             type="time"
             :model-value="entry.end_time"
-            @update:model-value="(v: string) => updateScheduleEntry(Number(idx), 'end_time', v)"
+            @update:model-value="(v: string | number) => updateScheduleEntry(Number(idx), 'end_time', String(v))"
             class="h-8 text-xs w-28"
           />
         </div>

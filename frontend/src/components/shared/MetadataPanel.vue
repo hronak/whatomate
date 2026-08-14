@@ -19,14 +19,14 @@ defineProps<{
     </CardHeader>
     <CardContent class="space-y-2.5 text-sm">
       <div v-if="createdByName" class="flex items-start gap-2">
-        <UserCircle class="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        <UserCircle class="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         <div class="min-w-0">
           <span class="text-muted-foreground text-xs">{{ $t('common.createdBy', 'Created by') }}</span>
           <p class="font-medium truncate">{{ createdByName }}</p>
         </div>
       </div>
       <div v-if="createdAt" class="flex items-start gap-2">
-        <Clock class="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        <Clock class="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         <div class="min-w-0">
           <span class="text-muted-foreground text-xs">{{ $t('common.createdAt', 'Created') }}</span>
           <p class="truncate">{{ formatDateTime(createdAt) }}</p>
@@ -36,14 +36,14 @@ defineProps<{
       <Separator v-if="(createdByName || createdAt) && (updatedByName || updatedAt)" />
 
       <div v-if="updatedByName" class="flex items-start gap-2">
-        <UserCircle class="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        <UserCircle class="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         <div class="min-w-0">
           <span class="text-muted-foreground text-xs">{{ $t('common.updatedBy', 'Modified by') }}</span>
           <p class="font-medium truncate">{{ updatedByName }}</p>
         </div>
       </div>
       <div v-if="updatedAt" class="flex items-start gap-2">
-        <Clock class="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        <Clock class="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         <div class="min-w-0">
           <span class="text-muted-foreground text-xs">{{ $t('common.lastUpdated', 'Last updated') }}</span>
           <p class="truncate">{{ formatDateTime(updatedAt) }}</p>

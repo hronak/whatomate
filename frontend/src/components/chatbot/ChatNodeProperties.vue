@@ -232,8 +232,8 @@ const typeLabel: Record<string, string> = {
   <div class="space-y-4 p-4">
     <div class="flex items-center justify-between">
       <h3 class="font-semibold text-sm">{{ typeLabel[node.type] || node.type }}</h3>
-      <Button v-if="node.type !== 'start'" variant="ghost" size="icon" class="h-7 w-7" @click="emit('delete')">
-        <Trash2 class="h-3.5 w-3.5 text-destructive" />
+      <Button v-if="node.type !== 'start'" variant="ghost" size="icon" class="size-7" @click="emit('delete')">
+        <Trash2 class="size-3.5 text-destructive" />
       </Button>
     </div>
 
@@ -254,7 +254,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Message</Label>
         <Textarea
           :model-value="textBodyValue"
-          @update:model-value="(v: string) => updateTextBody(String(v ?? ''))"
+          @update:model-value="(v: string | number) => updateTextBody(String(String(v) ?? ''))"
           placeholder="Enter your message"
           class="min-h-[80px] text-xs"
         />
@@ -281,7 +281,7 @@ const typeLabel: Record<string, string> = {
           <Label class="text-xs">Store response as</Label>
           <Input
             :model-value="config.store_as || ''"
-            @update:model-value="(v: string) => updateConfig('store_as', v)"
+            @update:model-value="(v: string | number) => updateConfig('store_as', String(v))"
             placeholder="variable_name"
             class="h-8 text-sm font-mono"
           />
@@ -290,7 +290,7 @@ const typeLabel: Record<string, string> = {
           <Label class="text-xs">Validation regex (optional)</Label>
           <Input
             :model-value="config.validation_regex || ''"
-            @update:model-value="(v: string) => updateConfig('validation_regex', v)"
+            @update:model-value="(v: string | number) => updateConfig('validation_regex', String(v))"
             placeholder="^[0-9]+$"
             class="h-8 text-xs font-mono"
           />
@@ -299,7 +299,7 @@ const typeLabel: Record<string, string> = {
           <Label class="text-xs">Validation error message</Label>
           <Input
             :model-value="config.validation_error || ''"
-            @update:model-value="(v: string) => updateConfig('validation_error', v)"
+            @update:model-value="(v: string | number) => updateConfig('validation_error', String(v))"
             placeholder="Invalid input. Please try again."
             class="h-8 text-xs"
           />
@@ -309,7 +309,7 @@ const typeLabel: Record<string, string> = {
           <Input
             type="number"
             :model-value="String(config.max_retries ?? 3)"
-            @update:model-value="(v: string) => updateConfig('max_retries', parseInt(v) || 3)"
+            @update:model-value="(v: string | number) => updateConfig('max_retries', parseInt(String(v)) || 3)"
             class="h-8 text-sm"
             min="1"
             max="10"
@@ -324,7 +324,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Body</Label>
         <Textarea
           :model-value="config.body || ''"
-          @update:model-value="(v: string) => updateConfig('body', v)"
+          @update:model-value="(v: string | number) => updateConfig('body', String(v))"
           placeholder="Message shown above the buttons"
           class="min-h-[60px] text-xs"
         />
@@ -335,13 +335,13 @@ const typeLabel: Record<string, string> = {
         </div>
         <div class="flex gap-1">
           <Button variant="outline" size="sm" class="h-7 text-xs" :disabled="hasCtaButtons || replyCount >= 10" @click="addReplyButton">
-            <Plus class="h-3 w-3 mr-0.5" /> Reply
+            <Plus class="size-3 mr-0.5" /> Reply
           </Button>
           <Button variant="outline" size="sm" class="h-7 text-xs" :disabled="hasReplyButtons || ctaCount >= 2" @click="addUrlButton">
-            <Plus class="h-3 w-3 mr-0.5" /> URL
+            <Plus class="size-3 mr-0.5" /> URL
           </Button>
           <Button variant="outline" size="sm" class="h-7 text-xs" :disabled="hasReplyButtons || ctaCount >= 2" @click="addPhoneButton">
-            <Plus class="h-3 w-3 mr-0.5" /> Phone
+            <Plus class="size-3 mr-0.5" /> Phone
           </Button>
         </div>
         <div v-for="(btn, idx) in (config.buttons || [])" :key="btn.id || idx" class="p-2 border rounded-md space-y-2 bg-muted/30">
@@ -349,31 +349,31 @@ const typeLabel: Record<string, string> = {
             <span class="text-[10px] uppercase text-muted-foreground w-12">{{ btn.type || 'reply' }}</span>
             <Input
               :model-value="btn.title || ''"
-              @update:model-value="(v: string) => updateButton(Number(idx), 'title', v)"
+              @update:model-value="(v: string | number) => updateButton(Number(idx), 'title', String(v))"
               placeholder="Button Title"
               class="h-7 text-xs flex-1"
             />
-            <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeButton(Number(idx))">
-              <Trash2 class="h-3 w-3 text-destructive" />
+            <Button variant="ghost" size="icon" class="size-6" @click="removeButton(Number(idx))">
+              <Trash2 class="size-3 text-destructive" />
             </Button>
           </div>
           <Input
             :model-value="btn.id || ''"
-            @update:model-value="(v: string) => updateButton(Number(idx), 'id', v)"
+            @update:model-value="(v: string | number) => updateButton(Number(idx), 'id', String(v))"
             placeholder="button_id"
             class="h-7 text-xs font-mono"
           />
           <Input
             v-if="btn.type === 'url'"
             :model-value="btn.url || ''"
-            @update:model-value="(v: string) => updateButton(Number(idx), 'url', v)"
+            @update:model-value="(v: string | number) => updateButton(Number(idx), 'url', String(v))"
             placeholder="https://example.com"
             class="h-7 text-xs font-mono"
           />
           <Input
             v-if="btn.type === 'phone'"
             :model-value="btn.phone_number || ''"
-            @update:model-value="(v: string) => updateButton(Number(idx), 'phone_number', v)"
+            @update:model-value="(v: string | number) => updateButton(Number(idx), 'phone_number', String(v))"
             placeholder="+1234567890"
             class="h-7 text-xs font-mono"
           />
@@ -397,7 +397,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Store response as (optional)</Label>
         <Input
           :model-value="config.store_as || ''"
-          @update:model-value="(v: string) => updateConfig('store_as', v)"
+          @update:model-value="(v: string | number) => updateConfig('store_as', String(v))"
           placeholder="variable_name"
           class="h-8 text-sm font-mono"
         />
@@ -412,7 +412,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">URL</Label>
         <Input
           :model-value="config.url || ''"
-          @update:model-value="(v: string) => updateConfig('url', v)"
+          @update:model-value="(v: string | number) => updateConfig('url', String(v))"
           placeholder="https://api.example.com/endpoint"
           class="h-8 text-xs font-mono"
         />
@@ -433,14 +433,14 @@ const typeLabel: Record<string, string> = {
         <div class="flex items-center justify-between">
           <Label class="text-xs">Headers</Label>
           <Button variant="outline" size="sm" class="h-6 text-xs" @click="addHeader">
-            <Plus class="h-3 w-3 mr-1" /> Add
+            <Plus class="size-3 mr-1" /> Add
           </Button>
         </div>
         <div v-for="(val, key) in (config.headers || {})" :key="String(key)" class="flex items-center gap-1">
-          <Input :model-value="String(key)" @update:model-value="(v: string) => updateHeaderKey(String(key), v)" placeholder="Key" class="h-7 text-xs flex-1" />
-          <Input :model-value="String(val)" @update:model-value="(v: string) => updateHeaderValue(String(key), v)" placeholder="Value" class="h-7 text-xs flex-1" />
-          <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeHeader(String(key))">
-            <Trash2 class="h-3 w-3 text-destructive" />
+          <Input :model-value="String(key)" @update:model-value="(v: string | number) => updateHeaderKey(String(key), String(v))" placeholder="Key" class="h-7 text-xs flex-1" />
+          <Input :model-value="String(val)" @update:model-value="(v: string | number) => updateHeaderValue(String(key), String(v))" placeholder="Value" class="h-7 text-xs flex-1" />
+          <Button variant="ghost" size="icon" class="size-6" @click="removeHeader(String(key))">
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
       </div>
@@ -448,7 +448,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Body</Label>
         <Textarea
           :model-value="config.body || ''"
-          @update:model-value="(v: string) => updateConfig('body', v)"
+          @update:model-value="(v: string | number) => updateConfig('body', String(v))"
           placeholder='{"phone": "{{phone_number}}"}'
           class="min-h-[60px] text-xs font-mono"
         />
@@ -457,15 +457,15 @@ const typeLabel: Record<string, string> = {
         <div class="flex items-center justify-between">
           <Label class="text-xs">Response mapping</Label>
           <Button variant="outline" size="sm" class="h-6 text-xs" @click="addResponseMapping">
-            <Plus class="h-3 w-3 mr-1" /> Add
+            <Plus class="size-3 mr-1" /> Add
           </Button>
         </div>
         <p class="text-[10px] text-muted-foreground">Map JSON paths into session variables (e.g. <code>data.user.name</code>).</p>
         <div v-for="(val, key) in (config.response_mapping || {})" :key="String(key)" class="flex items-center gap-1">
-          <Input :model-value="String(key)" @update:model-value="(v: string) => updateResponseMappingKey(String(key), v)" placeholder="var_name" class="h-7 text-xs flex-1 font-mono" />
-          <Input :model-value="String(val)" @update:model-value="(v: string) => updateResponseMappingValue(String(key), v)" placeholder="path.to.field" class="h-7 text-xs flex-1 font-mono" />
-          <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeResponseMapping(String(key))">
-            <Trash2 class="h-3 w-3 text-destructive" />
+          <Input :model-value="String(key)" @update:model-value="(v: string | number) => updateResponseMappingKey(String(key), String(v))" placeholder="var_name" class="h-7 text-xs flex-1 font-mono" />
+          <Input :model-value="String(val)" @update:model-value="(v: string | number) => updateResponseMappingValue(String(key), String(v))" placeholder="path.to.field" class="h-7 text-xs flex-1 font-mono" />
+          <Button variant="ghost" size="icon" class="size-6" @click="removeResponseMapping(String(key))">
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
       </div>
@@ -473,7 +473,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Message template (optional)</Label>
         <Textarea
           :model-value="config.message_template || ''"
-          @update:model-value="(v: string) => updateConfig('message_template', v)"
+          @update:model-value="(v: string | number) => updateConfig('message_template', String(v))"
           placeholder="Hello {{user_name}}!"
           class="min-h-[50px] text-xs"
         />
@@ -487,7 +487,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Expression</Label>
         <Textarea
           :model-value="config.expression || ''"
-          @update:model-value="(v: string) => updateConfig('expression', v)"
+          @update:model-value="(v: string | number) => updateConfig('expression', String(v))"
           placeholder='tier == "premium" and amount > 100'
           class="min-h-[60px] text-xs font-mono"
         />
@@ -506,7 +506,7 @@ const typeLabel: Record<string, string> = {
             v-if="entry.enabled"
             type="time"
             :model-value="entry.start_time"
-            @update:model-value="(v: string) => updateScheduleEntry(Number(idx), 'start_time', v)"
+            @update:model-value="(v: string | number) => updateScheduleEntry(Number(idx), 'start_time', String(v))"
             class="h-8 text-xs w-28"
           />
           <span v-if="entry.enabled" class="text-muted-foreground">-</span>
@@ -514,7 +514,7 @@ const typeLabel: Record<string, string> = {
             v-if="entry.enabled"
             type="time"
             :model-value="entry.end_time"
-            @update:model-value="(v: string) => updateScheduleEntry(Number(idx), 'end_time', v)"
+            @update:model-value="(v: string | number) => updateScheduleEntry(Number(idx), 'end_time', String(v))"
             class="h-8 text-xs w-28"
           />
         </div>
@@ -528,7 +528,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Body (sent before handoff)</Label>
         <Textarea
           :model-value="config.body || ''"
-          @update:model-value="(v: string) => updateConfig('body', v)"
+          @update:model-value="(v: string | number) => updateConfig('body', String(v))"
           placeholder="Connecting you with a human..."
           class="min-h-[50px] text-xs"
         />
@@ -549,7 +549,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Notes (for agents)</Label>
         <Textarea
           :model-value="config.notes || ''"
-          @update:model-value="(v: string) => updateConfig('notes', v)"
+          @update:model-value="(v: string | number) => updateConfig('notes', String(v))"
           placeholder="Customer asked about: {{topic}}"
           class="min-h-[50px] text-xs"
         />
@@ -562,7 +562,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Final message (optional)</Label>
         <Textarea
           :model-value="config.message || ''"
-          @update:model-value="(v: string) => updateConfig('message', v)"
+          @update:model-value="(v: string | number) => updateConfig('message', String(v))"
           placeholder="Sent when the flow ends. Leave blank for silent terminal."
           class="min-h-[60px] text-xs"
         />
@@ -592,7 +592,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">WhatsApp Flow ID</Label>
         <Input
           :model-value="config.flow_id || ''"
-          @update:model-value="(v: string) => updateConfig('flow_id', v)"
+          @update:model-value="(v: string | number) => updateConfig('flow_id', String(v))"
           placeholder="Meta flow id"
           class="h-8 text-xs font-mono"
         />
@@ -601,7 +601,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Header</Label>
         <Input
           :model-value="config.header || ''"
-          @update:model-value="(v: string) => updateConfig('header', v)"
+          @update:model-value="(v: string | number) => updateConfig('header', String(v))"
           class="h-8 text-xs"
         />
       </div>
@@ -609,7 +609,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Body</Label>
         <Textarea
           :model-value="config.body || ''"
-          @update:model-value="(v: string) => updateConfig('body', v)"
+          @update:model-value="(v: string | number) => updateConfig('body', String(v))"
           class="min-h-[50px] text-xs"
         />
       </div>
@@ -617,7 +617,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">CTA label</Label>
         <Input
           :model-value="config.cta || ''"
-          @update:model-value="(v: string) => updateConfig('cta', v)"
+          @update:model-value="(v: string | number) => updateConfig('cta', String(v))"
           placeholder="Open form"
           class="h-8 text-xs"
         />
@@ -630,7 +630,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">URL</Label>
         <Input
           :model-value="config.url || ''"
-          @update:model-value="(v: string) => updateConfig('url', v)"
+          @update:model-value="(v: string | number) => updateConfig('url', String(v))"
           placeholder="https://example.com/hook"
           class="h-8 text-xs font-mono"
         />
@@ -651,14 +651,14 @@ const typeLabel: Record<string, string> = {
         <div class="flex items-center justify-between">
           <Label class="text-xs">Headers</Label>
           <Button variant="outline" size="sm" class="h-6 text-xs" @click="addHeader">
-            <Plus class="h-3 w-3 mr-1" /> Add
+            <Plus class="size-3 mr-1" /> Add
           </Button>
         </div>
         <div v-for="(val, key) in (config.headers || {})" :key="String(key)" class="flex items-center gap-1">
-          <Input :model-value="String(key)" @update:model-value="(v: string) => updateHeaderKey(String(key), v)" placeholder="Key" class="h-7 text-xs flex-1" />
-          <Input :model-value="String(val)" @update:model-value="(v: string) => updateHeaderValue(String(key), v)" placeholder="Value" class="h-7 text-xs flex-1" />
-          <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeHeader(String(key))">
-            <Trash2 class="h-3 w-3 text-destructive" />
+          <Input :model-value="String(key)" @update:model-value="(v: string | number) => updateHeaderKey(String(key), String(v))" placeholder="Key" class="h-7 text-xs flex-1" />
+          <Input :model-value="String(val)" @update:model-value="(v: string | number) => updateHeaderValue(String(key), String(v))" placeholder="Value" class="h-7 text-xs flex-1" />
+          <Button variant="ghost" size="icon" class="size-6" @click="removeHeader(String(key))">
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
       </div>
@@ -666,7 +666,7 @@ const typeLabel: Record<string, string> = {
         <Label class="text-xs">Body</Label>
         <Textarea
           :model-value="config.body || ''"
-          @update:model-value="(v: string) => updateConfig('body', v)"
+          @update:model-value="(v: string | number) => updateConfig('body', String(v))"
           class="min-h-[50px] text-xs font-mono"
         />
       </div>
@@ -687,7 +687,7 @@ const typeLabel: Record<string, string> = {
       <Label class="text-xs">Skip condition (optional)</Label>
       <Input
         :model-value="config.skip_condition || ''"
-        @update:model-value="(v: string) => updateConfig('skip_condition', v)"
+        @update:model-value="(v: string | number) => updateConfig('skip_condition', String(v))"
         placeholder='tier == "premium"'
         class="h-8 text-xs font-mono"
       />

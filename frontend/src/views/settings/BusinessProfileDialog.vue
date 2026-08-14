@@ -219,12 +219,12 @@ async function handleFileChange(event: Event) {
     @submit="saveProfile"
   >
     <div v-if="isLoading" class="py-12 flex justify-center">
-      <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+      <Loader2 class="size-8 animate-spin text-muted-foreground" />
     </div>
 
     <div v-else class="space-y-6">
       <Alert variant="warning">
-        <AlertTriangle class="h-4 w-4" />
+        <AlertTriangle class="size-4" />
         <AlertTitle>{{ $t('businessProfile.profileUpdates') }}</AlertTitle>
         <AlertDescription>
           {{ $t('businessProfile.profileUpdatesDesc') }}
@@ -235,21 +235,21 @@ async function handleFileChange(event: Event) {
         <!-- Profile Picture Preview -->
         <div class="md:col-span-2 flex items-center gap-4">
           <div
-            class="group relative h-24 w-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border cursor-pointer transition-all hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 hover:ring-offset-background"
+            class="group relative size-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border cursor-pointer transition-all hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 hover:ring-offset-background"
             @click="triggerFileInput"
           >
             <!-- Loading Overlay -->
             <div v-if="isUploading" class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-              <Loader2 class="h-6 w-6 text-white animate-spin" />
+              <Loader2 class="size-6 text-white animate-spin" />
             </div>
 
             <!-- Hover Overlay -->
             <div v-if="!isUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <Pencil class="h-6 w-6 text-white" />
+              <Pencil class="size-6 text-white" />
             </div>
 
-            <img v-if="profile.profile_picture_url" :src="profile.profile_picture_url" alt="Profile" class="h-full w-full object-cover" />
-            <ImageIcon v-else class="h-10 w-10 text-muted-foreground" />
+            <img v-if="profile.profile_picture_url" :src="profile.profile_picture_url" alt="Profile" class="size-full object-cover" />
+            <ImageIcon v-else class="size-10 text-muted-foreground" />
 
             <input
               ref="fileInput"
@@ -302,7 +302,7 @@ async function handleFileChange(event: Event) {
         <div class="space-y-2">
           <Label for="email">{{ $t('businessProfile.contactEmail') }}</Label>
           <div class="relative">
-            <Mail class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Mail class="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input id="email" v-model="profile.email" type="email" class="pl-9" :placeholder="$t('businessProfile.emailPlaceholder')" maxlength="128" />
           </div>
         </div>
@@ -311,7 +311,7 @@ async function handleFileChange(event: Event) {
         <div class="md:col-span-2 space-y-2">
           <Label for="address">{{ $t('businessProfile.businessAddress') }}</Label>
           <div class="relative">
-            <MapPin class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <MapPin class="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input id="address" v-model="profile.address" class="pl-9" :placeholder="$t('businessProfile.addressPlaceholder')" maxlength="256" />
           </div>
         </div>
@@ -320,7 +320,7 @@ async function handleFileChange(event: Event) {
         <div class="md:col-span-2 space-y-3">
           <Label>{{ $t('businessProfile.websites') }}</Label>
           <div v-for="(_, index) in profile.websites" :key="index" class="relative">
-            <Globe class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Globe class="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input v-model="profile.websites[index]" class="pl-9" :placeholder="$t('businessProfile.websitePlaceholder')" maxlength="256" />
           </div>
         </div>

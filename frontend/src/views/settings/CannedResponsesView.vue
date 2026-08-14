@@ -98,10 +98,10 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('cannedResponses.title')" :icon="MessageSquareText" icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20" back-link="/settings" :breadcrumbs="breadcrumbs">
       <template #actions>
-        <Button variant="outline" size="sm" @click="openCreate"><Plus class="h-4 w-4 mr-2" />{{ $t('cannedResponses.addResponse') }}</Button>
+        <Button variant="outline" size="sm" @click="openCreate"><Plus class="size-4 mr-2" />{{ $t('cannedResponses.addResponse') }}</Button>
       </template>
     </PageHeader>
 
@@ -179,27 +179,27 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
                     <IconButton
                       :icon="Copy"
                       :label="$t('cannedResponses.copyContent')"
-                      class="h-8 w-8"
+                      class="size-8"
                       @click="copyToClipboard(response.content)"
                     />
                     <IconButton
                       :icon="Pencil"
                       :label="$t('cannedResponses.editResponse')"
-                      class="h-8 w-8"
+                      class="size-8"
                       @click="openEdit(response)"
                     />
                     <IconButton
                       :icon="Trash2"
                       :label="$t('cannedResponses.deleteResponse')"
                       variant="ghost"
-                      class="h-8 w-8 text-destructive"
+                      class="size-8 text-destructive"
                       @click="openDeleteDialog(response)"
                     />
                   </div>
                 </template>
                 <template #empty-action>
                   <Button variant="outline" size="sm" @click="openCreate">
-                    <Plus class="h-4 w-4 mr-2" />{{ $t('cannedResponses.addResponse') }}
+                    <Plus class="size-4 mr-2" />{{ $t('cannedResponses.addResponse') }}
                   </Button>
                 </template>
               </DataTable>

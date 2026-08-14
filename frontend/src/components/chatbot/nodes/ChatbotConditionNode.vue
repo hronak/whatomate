@@ -27,7 +27,7 @@ const outputHandles = [
     :output-handles="outputHandles"
     :has-input="!data?.isEntryNode"
   >
-    <template #icon><GitBranch class="w-4 h-4" /></template>
+    <template #icon><GitBranch class="size-4" /></template>
     <p class="truncate" :title="summary">{{ summary }}</p>
   </BaseNode>
 </template>

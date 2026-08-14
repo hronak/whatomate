@@ -24,7 +24,7 @@ const notes = computed(() => {
 
 <template>
   <BaseNode :label="data?.label || 'Transfer'" header-class="bg-amber-600" :output-handles="[]" :has-input="!data?.isEntryNode">
-    <template #icon><UserPlus class="w-4 h-4" /></template>
+    <template #icon><UserPlus class="size-4" /></template>
     <div>
       <p class="font-medium truncate" :title="teamLabel">→ {{ teamLabel }}</p>
       <p v-if="notes" class="truncate text-muted-foreground/70 mt-0.5" :title="notes">{{ notes }}</p>

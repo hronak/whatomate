@@ -29,9 +29,9 @@ function handleClick(button: ButtonConfig) {
       :disabled="disabled"
       @click="handleClick(btn)"
     >
-      <ExternalLink v-if="btn.type === 'url'" class="h-4 w-4" />
-      <Phone v-else-if="btn.type === 'phone'" class="h-4 w-4" />
-      <PhoneCall v-else-if="btn.type === 'voice_call'" class="h-4 w-4" />
+      <ExternalLink v-if="btn.type === 'url'" class="size-4" />
+      <Phone v-else-if="btn.type === 'phone'" class="size-4" />
+      <PhoneCall v-else-if="btn.type === 'voice_call'" class="size-4" />
       {{ btn.title || 'Option' }}
     </button>
   </div>

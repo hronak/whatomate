@@ -11,38 +11,38 @@ const { colorMode, setColorMode } = useColorMode()
     <Button
       variant="ghost"
       size="icon"
-      class="h-7 w-7"
+      class="size-7"
       :class="colorMode === 'light' && 'bg-accent'"
       :aria-checked="colorMode === 'light'"
       aria-label="Light theme"
       role="radio"
       @click="setColorMode('light')"
     >
-      <Sun class="h-3.5 w-3.5" aria-hidden="true" />
+      <Sun class="size-3.5" aria-hidden="true" />
     </Button>
     <Button
       variant="ghost"
       size="icon"
-      class="h-7 w-7"
+      class="size-7"
       :class="colorMode === 'dark' && 'bg-accent'"
       :aria-checked="colorMode === 'dark'"
       aria-label="Dark theme"
       role="radio"
       @click="setColorMode('dark')"
     >
-      <Moon class="h-3.5 w-3.5" aria-hidden="true" />
+      <Moon class="size-3.5" aria-hidden="true" />
     </Button>
     <Button
       variant="ghost"
       size="icon"
-      class="h-7 w-7"
+      class="size-7"
       :class="colorMode === 'system' && 'bg-accent'"
       :aria-checked="colorMode === 'system'"
       aria-label="System theme"
       role="radio"
       @click="setColorMode('system')"
     >
-      <Monitor class="h-3.5 w-3.5" aria-hidden="true" />
+      <Monitor class="size-3.5" aria-hidden="true" />
     </Button>
   </div>
 </template>

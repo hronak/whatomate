@@ -104,7 +104,7 @@ function handlePlayPause() {
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div
-            class="w-2 h-2 rounded-full animate-pulse"
+            class="size-2 rounded-full animate-pulse"
             :class="statusColor"
           />
           <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
@@ -117,44 +117,44 @@ function handlePlayPause() {
           <Button
             variant="ghost"
             size="icon"
-            class="h-7 w-7"
+            class="size-7"
             :disabled="state.status === 'error'"
             :title="state.status === 'completed' ? 'Restart' : (state.status === 'running' || state.status === 'waiting_input' ? 'Pause' : 'Start')"
             @click="handlePlayPause"
           >
-            <Pause v-if="state.status === 'running' || state.status === 'waiting_input'" class="h-4 w-4" />
-            <Play v-else class="h-4 w-4" />
+            <Pause v-if="state.status === 'running' || state.status === 'waiting_input'" class="size-4" />
+            <Play v-else class="size-4" />
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            class="h-7 w-7"
+            class="size-7"
             :disabled="state.status === 'idle' || state.status === 'completed' || state.status === 'error' || state.status === 'waiting_input'"
             @click="emit('stepForward')"
           >
-            <SkipForward class="h-4 w-4" />
+            <SkipForward class="size-4" />
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            class="h-7 w-7"
+            class="size-7"
             title="Step back"
             :disabled="!canUndo"
             @click="emit('undo')"
           >
-            <Undo2 class="h-4 w-4" />
+            <Undo2 class="size-4" />
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            class="h-7 w-7"
+            class="size-7"
             title="Restart"
             @click="emit('reset')"
           >
-            <RotateCcw class="h-4 w-4" />
+            <RotateCcw class="size-4" />
           </Button>
         </div>
       </div>
@@ -170,9 +170,9 @@ function handlePlayPause() {
         <!-- Variables Section -->
         <Collapsible v-model:open="variablesExpanded">
           <CollapsibleTrigger class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300">
-            <ChevronDown v-if="variablesExpanded" class="h-4 w-4" />
-            <ChevronRight v-else class="h-4 w-4" />
-            <Braces class="h-4 w-4" />
+            <ChevronDown v-if="variablesExpanded" class="size-4" />
+            <ChevronRight v-else class="size-4" />
+            <Braces class="size-4" />
             Variables
             <span class="ml-auto text-xs text-gray-400">{{ variableEntries.length }}</span>
           </CollapsibleTrigger>
@@ -200,9 +200,9 @@ function handlePlayPause() {
         <!-- Steps Section -->
         <Collapsible v-model:open="stepsExpanded">
           <CollapsibleTrigger class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300">
-            <ChevronDown v-if="stepsExpanded" class="h-4 w-4" />
-            <ChevronRight v-else class="h-4 w-4" />
-            <ListTree class="h-4 w-4" />
+            <ChevronDown v-if="stepsExpanded" class="size-4" />
+            <ChevronRight v-else class="size-4" />
+            <ListTree class="size-4" />
             Steps
             <span class="ml-auto text-xs text-gray-400">{{ steps.length }}</span>
           </CollapsibleTrigger>
@@ -219,7 +219,7 @@ function handlePlayPause() {
                 @click="emit('goToStep', step.step_name)"
               >
                 <CircleDot
-                  class="h-3 w-3"
+                  class="size-3"
                   :class="{
                     'text-green-500': state.currentStepName === step.step_name,
                     'text-gray-300 dark:text-gray-600': state.currentStepName !== step.step_name
@@ -235,8 +235,8 @@ function handlePlayPause() {
         <!-- Timeline Section -->
         <Collapsible v-model:open="timelineExpanded">
           <CollapsibleTrigger class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300">
-            <ChevronDown v-if="timelineExpanded" class="h-4 w-4" />
-            <ChevronRight v-else class="h-4 w-4" />
+            <ChevronDown v-if="timelineExpanded" class="size-4" />
+            <ChevronRight v-else class="size-4" />
             Timeline
             <span class="ml-auto text-xs text-gray-400">{{ state.executionLog.length }}</span>
           </CollapsibleTrigger>

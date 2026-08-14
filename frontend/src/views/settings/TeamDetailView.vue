@@ -246,10 +246,10 @@ onMounted(async () => {
     <template #actions>
       <div class="flex items-center gap-2">
         <Button v-if="canWrite && (hasChanges || isNew)" size="sm" @click="save" :disabled="isSaving">
-          <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
+          <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
         </Button>
         <Button v-if="canDelete && !isNew" variant="destructive" size="sm" @click="deleteDialogOpen = true">
-          <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+          <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
         </Button>
       </div>
     </template>
@@ -310,7 +310,7 @@ onMounted(async () => {
             :key="member.user_id"
             class="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
           >
-            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <span class="text-xs font-medium text-primary">{{ (member.full_name || '?')[0].toUpperCase() }}</span>
             </div>
             <div class="flex-1 min-w-0">
@@ -318,17 +318,17 @@ onMounted(async () => {
               <p class="text-xs text-muted-foreground truncate">{{ member.email }}</p>
             </div>
             <Badge variant="outline" class="text-xs shrink-0">
-              <Shield v-if="member.role === 'manager'" class="h-3 w-3 mr-1" />
+              <Shield v-if="member.role === 'manager'" class="size-3 mr-1" />
               {{ member.role }}
             </Badge>
             <Button
               v-if="canWrite"
               variant="ghost"
               size="icon"
-              class="h-7 w-7 shrink-0 text-destructive"
+              class="size-7 shrink-0 text-destructive"
               @click="openRemoveMemberDialog(member)"
             >
-              <UserMinus class="h-3.5 w-3.5" />
+              <UserMinus class="size-3.5" />
             </Button>
           </div>
         </div>
@@ -348,7 +348,7 @@ onMounted(async () => {
                 :key="user.id"
                 class="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
               >
-                <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <div class="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
                   <span class="text-xs font-medium">{{ (user.full_name || '?')[0].toUpperCase() }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -357,10 +357,10 @@ onMounted(async () => {
                 </div>
                 <div class="flex gap-1 shrink-0">
                   <Button variant="outline" size="sm" class="h-7 text-xs" @click="addMember(user.id, 'agent')">
-                    <UserPlus class="h-3 w-3 mr-1" /> {{ $t('teams.agent', 'Agent') }}
+                    <UserPlus class="size-3 mr-1" /> {{ $t('teams.agent', 'Agent') }}
                   </Button>
                   <Button variant="outline" size="sm" class="h-7 text-xs" @click="addMember(user.id, 'manager')">
-                    <Shield class="h-3 w-3 mr-1" /> {{ $t('teams.manager', 'Manager') }}
+                    <Shield class="size-3 mr-1" /> {{ $t('teams.manager', 'Manager') }}
                   </Button>
                 </div>
               </div>

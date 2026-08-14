@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { TagBadge } from '@/components/ui/tag-badge'
+import { TagBadge } from '@/components/shared'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -159,7 +159,7 @@ function closeDialog() {
               <Button variant="outline" role="combobox" class="w-full justify-between">
                 <span v-if="formData.tags.length === 0" class="text-muted-foreground">{{ $t('contacts.selectTags') }}</span>
                 <span v-else>{{ formData.tags.length }} {{ $t('contacts.tagsSelected') }}</span>
-                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent class="w-[300px] p-0" @interact-outside="(e) => e.preventDefault()">
@@ -176,10 +176,10 @@ function closeDialog() {
                       @select.prevent="toggleTag(tag.name)"
                     >
                       <div class="flex items-center gap-2 flex-1">
-                        <span :class="['w-2 h-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
+                        <span :class="['size-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
                         <span>{{ tag.name }}</span>
                       </div>
-                      <Check v-if="isTagSelected(tag.name)" class="h-4 w-4 text-primary" />
+                      <Check v-if="isTagSelected(tag.name)" class="size-4 text-primary" />
                     </CommandItem>
                   </CommandGroup>
                 </CommandList>
@@ -198,7 +198,7 @@ function closeDialog() {
                 class="ml-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 p-0.5 transition-colors"
                 @click.stop="removeTag(tagName)"
               >
-                <X class="h-3 w-3" />
+                <X class="size-3" />
               </button>
             </TagBadge>
           </div>
@@ -207,7 +207,7 @@ function closeDialog() {
       <div class="flex justify-end gap-2">
         <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
         <Button @click="saveContact" :disabled="isSubmitting">
-          <Loader2 v-if="isSubmitting" class="h-4 w-4 mr-2 animate-spin" />
+          <Loader2 v-if="isSubmitting" class="size-4 mr-2 animate-spin" />
           {{ $t('common.create') }}
         </Button>
       </div>

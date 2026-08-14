@@ -41,11 +41,11 @@ onUnmounted(() => {
       v-show="isVisible"
       variant="secondary"
       size="icon"
-      class="fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full shadow-lg shadow-black/20 ring-1 ring-white/10 light:ring-gray-200 light:shadow-gray-300/30"
+      class="fixed bottom-6 right-6 z-40 size-10 rounded-full shadow-lg shadow-gray-300/30 ring-1 ring-border dark:shadow-black/20"
       aria-label="Scroll to top"
       @click="scrollToTop"
     >
-      <ArrowUp class="h-4 w-4" />
+      <ArrowUp class="size-4" />
     </Button>
   </Transition>
 </template>

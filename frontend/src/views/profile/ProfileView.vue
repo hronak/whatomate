@@ -117,8 +117,8 @@ async function changePassword() {
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   @click="showCurrentPassword = !showCurrentPassword"
                 >
-                  <Eye v-if="!showCurrentPassword" class="h-4 w-4" />
-                  <EyeOff v-else class="h-4 w-4" />
+                  <Eye v-if="!showCurrentPassword" class="size-4" />
+                  <EyeOff v-else class="size-4" />
                 </button>
               </div>
             </div>
@@ -136,8 +136,8 @@ async function changePassword() {
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   @click="showNewPassword = !showNewPassword"
                 >
-                  <Eye v-if="!showNewPassword" class="h-4 w-4" />
-                  <EyeOff v-else class="h-4 w-4" />
+                  <Eye v-if="!showNewPassword" class="size-4" />
+                  <EyeOff v-else class="size-4" />
                 </button>
               </div>
               <p class="text-xs text-muted-foreground">{{ $t('profile.passwordMinLength') }}</p>
@@ -156,14 +156,14 @@ async function changePassword() {
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   @click="showConfirmPassword = !showConfirmPassword"
                 >
-                  <Eye v-if="!showConfirmPassword" class="h-4 w-4" />
-                  <EyeOff v-else class="h-4 w-4" />
+                  <Eye v-if="!showConfirmPassword" class="size-4" />
+                  <EyeOff v-else class="size-4" />
                 </button>
               </div>
             </div>
             <div class="flex justify-end">
               <Button variant="outline" size="sm" @click="changePassword" :disabled="isChangingPassword">
-                <Loader2 v-if="isChangingPassword" class="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 v-if="isChangingPassword" class="mr-2 size-4 animate-spin" />
                 {{ $t('profile.changePassword') }}
               </Button>
             </div>

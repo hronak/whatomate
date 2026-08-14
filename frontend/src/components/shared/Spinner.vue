@@ -19,11 +19,11 @@ const props = withDefaults(defineProps<SpinnerProps>(), {
 const sizeClass = computed(() => {
   switch (props.size) {
     case "sm":
-      return "h-4 w-4"
+      return "size-4"
     case "lg":
-      return "h-8 w-8"
+      return "size-8"
     default:
-      return "h-6 w-6"
+      return "size-6"
   }
 })
 </script>
@@ -33,7 +33,7 @@ const sizeClass = computed(() => {
     v-if="overlay"
     class="absolute inset-0 z-20 flex items-center justify-center"
   >
-    <Loader2 :class="cn('animate-spin text-white/40 light:text-gray-400', sizeClass, props.class)" />
+    <Loader2 :class="cn('animate-spin text-gray-400 dark:text-white/40', sizeClass, props.class)" />
   </div>
   <Loader2
     v-else

@@ -113,13 +113,13 @@ function selectResponse(response: CannedResponse) {
   <Popover v-model:open="isOpen">
     <PopoverTrigger as-child>
       <Button id="canned-response-picker-button" type="button" variant="ghost" size="icon">
-        <MessageSquareText class="h-5 w-5" />
+        <MessageSquareText class="size-5" />
       </Button>
     </PopoverTrigger>
     <PopoverContent side="top" align="start" class="w-80 p-0">
       <div class="p-3 border-b">
         <div class="relative">
-          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             v-model="searchQuery"
             placeholder="Search responses..."
@@ -131,7 +131,7 @@ function selectResponse(response: CannedResponse) {
 
       <ScrollArea class="h-[300px]">
         <div v-if="isLoading" class="flex items-center justify-center py-8">
-          <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 class="size-6 animate-spin text-muted-foreground" />
         </div>
 
         <div v-else-if="filteredResponses.length === 0" class="py-8 text-center text-muted-foreground text-sm">

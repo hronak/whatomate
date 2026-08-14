@@ -299,7 +299,7 @@ onMounted(() => { loadResponse() })
       <template #actions>
         <div class="flex items-center gap-2">
           <Button v-if="canWrite && (hasChanges || isNew)" size="sm" @click="save" :disabled="isSaving || !canSave">
-            <Save class="h-4 w-4 mr-1" />
+            <Save class="size-4 mr-1" />
             {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.save') }}
           </Button>
           <Button
@@ -308,7 +308,7 @@ onMounted(() => { loadResponse() })
             size="sm"
             @click="deleteDialogOpen = true"
           >
-            <Trash2 class="h-4 w-4 mr-1" />
+            <Trash2 class="size-4 mr-1" />
             {{ $t('common.delete') }}
           </Button>
         </div>

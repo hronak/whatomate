@@ -189,7 +189,7 @@ onMounted(async () => {
       <template #actions>
         <div class="flex items-center gap-2">
           <Button v-if="canWrite && hasChanges" size="sm" @click="save" :disabled="isSaving">
-            <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.save') }}
+            <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.save') }}
           </Button>
           <Button
             v-if="canDelete && !isSelf"
@@ -197,7 +197,7 @@ onMounted(async () => {
             size="sm"
             @click="deleteDialogOpen = true"
           >
-            <Trash2 class="h-4 w-4 mr-1" />
+            <Trash2 class="size-4 mr-1" />
             {{ isMember ? $t('users.removeMember') : $t('common.delete') }}
           </Button>
         </div>
@@ -220,8 +220,8 @@ onMounted(async () => {
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <component :is="getRoleIcon(user?.role?.name || '')" class="h-5 w-5 text-primary" />
+            <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <component :is="getRoleIcon(user?.role?.name || '')" class="size-5 text-primary" />
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ user?.full_name }}</p>

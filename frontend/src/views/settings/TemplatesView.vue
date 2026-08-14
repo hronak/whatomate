@@ -251,32 +251,31 @@ async function confirmDeleteTemplate() {
   }
 }
 
-// Dark-first: default is dark mode, light: prefix for light mode
 function getStatusBadgeClass(status: string) {
   switch (status) {
     case 'APPROVED':
-      return 'bg-green-900 text-green-300 light:bg-green-100 light:text-green-800'
+      return 'bg-success text-success'
     case 'PENDING':
-      return 'bg-yellow-900 text-yellow-300 light:bg-yellow-100 light:text-yellow-800'
+      return 'bg-yellow-100 text-yellow-300 dark:bg-yellow-900 dark:text-yellow-800'
     case 'REJECTED':
-      return 'bg-red-900 text-red-300 light:bg-red-100 light:text-red-800'
+      return 'bg-destructive text-destructive'
     case 'DRAFT':
-      return 'bg-gray-800 text-gray-300 light:bg-gray-100 light:text-gray-800'
+      return 'bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800'
     default:
-      return 'bg-gray-800 text-gray-300 light:bg-gray-100 light:text-gray-800'
+      return 'bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800'
   }
 }
 
 function getCategoryBadgeClass(category: string) {
   switch (category) {
     case 'UTILITY':
-      return 'bg-blue-900 text-blue-300 light:bg-blue-100 light:text-blue-800'
+      return 'bg-info text-info'
     case 'MARKETING':
-      return 'bg-purple-900 text-purple-300 light:bg-purple-100 light:text-purple-800'
+      return 'bg-purple-100 text-purple-300 dark:bg-purple-900 dark:text-purple-800'
     case 'AUTHENTICATION':
-      return 'bg-orange-900 text-orange-300 light:bg-orange-100 light:text-orange-800'
+      return 'bg-orange-100 text-orange-300 dark:bg-orange-900 dark:text-orange-800'
     default:
-      return 'bg-gray-800 text-gray-300 light:bg-gray-100 light:text-gray-800'
+      return 'bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800'
   }
 }
 
@@ -295,17 +294,17 @@ function getHeaderIcon(type: string) {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('templates.title')" :subtitle="$t('templates.subtitle')" :icon="FileText" icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20">
       <template #actions>
         <Button variant="outline" size="sm" @click="syncTemplates" :disabled="isSyncing || !selectedAccount || selectedAccount === 'all'">
-          <Loader2 v-if="isSyncing" class="h-4 w-4 mr-2 animate-spin" />
-          <RefreshCw v-else class="h-4 w-4 mr-2" />
+          <Loader2 v-if="isSyncing" class="size-4 mr-2 animate-spin" />
+          <RefreshCw v-else class="size-4 mr-2" />
           {{ $t('templates.syncFromMeta') }}
         </Button>
         <RouterLink to="/templates/new">
           <Button variant="outline" size="sm">
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus class="size-4 mr-2" />
             {{ $t('templates.createTemplate') }}
           </Button>
         </RouterLink>
@@ -392,7 +391,7 @@ function getHeaderIcon(type: string) {
                 </template>
                 <template #cell-header_type="{ item: template }">
                   <div class="flex items-center gap-1">
-                    <component :is="getHeaderIcon(template.header_type)" class="h-4 w-4 text-muted-foreground" />
+                    <component :is="getHeaderIcon(template.header_type)" class="size-4 text-muted-foreground" />
                     <span class="text-muted-foreground text-sm">{{ template.header_type || 'NONE' }}</span>
                   </div>
                 </template>
@@ -402,13 +401,13 @@ function getHeaderIcon(type: string) {
                       <IconButton
                         :icon="Pencil"
                         :label="$t('common.edit')"
-                        class="h-8 w-8"
+                        class="size-8"
                       />
                     </RouterLink>
                     <IconButton
                       :icon="Trash2"
                       :label="$t('common.delete')"
-                      class="h-8 w-8 text-destructive"
+                      class="size-8 text-destructive"
                       @click="openDeleteDialog(template)"
                     />
                   </div>
@@ -416,12 +415,12 @@ function getHeaderIcon(type: string) {
                 <template #empty-action>
                   <div class="flex items-center justify-center gap-2">
                     <Button variant="outline" size="sm" @click="syncTemplates" :disabled="!selectedAccount || selectedAccount === 'all'">
-                      <RefreshCw class="h-4 w-4 mr-2" />
+                      <RefreshCw class="size-4 mr-2" />
                       {{ $t('templates.syncFromMeta') }}
                     </Button>
                     <RouterLink to="/templates/new">
                       <Button variant="outline" size="sm">
-                        <Plus class="h-4 w-4 mr-2" />
+                        <Plus class="size-4 mr-2" />
                         {{ $t('templates.createTemplate') }}
                       </Button>
                     </RouterLink>

@@ -36,7 +36,7 @@ defineProps<{
 
     <!-- Loading -->
     <div v-if="isLoading" class="flex-1 flex items-center justify-center">
-      <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+      <Loader2 class="size-8 animate-spin text-muted-foreground" />
     </div>
 
     <!-- Not found -->

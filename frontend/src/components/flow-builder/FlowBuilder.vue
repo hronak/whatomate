@@ -290,7 +290,8 @@ function removeOption(index: number) {
   selectedComponent.value['data-source'].splice(index, 1)
 }
 
-function updateOption(index: number, key: string, value: string) {
+function updateOption(index: number, key: string, value: string | number) {
+  value = String(value)
   if (!selectedComponent.value || !selectedComponent.value['data-source']) return
   selectedComponent.value['data-source'][index][key] = value
 }
@@ -354,11 +355,11 @@ defineExpose({
       <CardHeader class="py-3 px-4">
         <div class="flex items-center justify-between">
           <CardTitle class="text-sm font-medium flex items-center gap-2">
-            <Layers class="h-4 w-4" />
+            <Layers class="size-4" />
             Screens
           </CardTitle>
-          <Button variant="ghost" size="icon" class="h-7 w-7" @click="addScreen">
-            <Plus class="h-4 w-4" />
+          <Button variant="ghost" size="icon" class="size-7" @click="addScreen">
+            <Plus class="size-4" />
           </Button>
         </div>
       </CardHeader>
@@ -370,20 +371,20 @@ defineExpose({
             :key="screen.id"
             :class="[
               'flex items-center gap-2 p-2 rounded-md cursor-pointer text-sm',
-              selectedScreenIndex === index ? 'bg-primary text-primary-foreground light:bg-primary light:text-primary-foreground' : 'hover:bg-muted'
+              selectedScreenIndex === index ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground' : 'hover:bg-muted'
             ]"
             @click="selectScreen(index)"
           >
-            <GripVertical class="h-4 w-4 opacity-50" />
+            <GripVertical class="size-4 opacity-50" />
             <span class="flex-1 truncate">{{ screen.title }}</span>
             <Button
               v-if="screens.length > 1"
               variant="ghost"
               size="icon"
-              class="h-6 w-6 opacity-50 hover:opacity-100"
+              class="size-6 opacity-50 hover:opacity-100"
               @click.stop="removeScreen(index)"
             >
-              <Trash2 class="h-3 w-3" />
+              <Trash2 class="size-3" />
             </Button>
           </div>
           <div
@@ -427,7 +428,7 @@ defineExpose({
                 class="h-auto py-2 flex-col gap-1 text-xs"
                 @click="addComponent(comp.type)"
               >
-                <component :is="comp.icon" class="h-4 w-4" />
+                <component :is="comp.icon" class="size-4" />
                 <span class="text-[10px]">{{ comp.label }}</span>
               </Button>
             </div>
@@ -491,7 +492,7 @@ defineExpose({
                   </Label>
                   <div class="mt-1 p-2 rounded-md border bg-background text-sm flex items-center justify-between">
                     <span class="text-muted-foreground">Select...</span>
-                    <ChevronDown class="h-4 w-4" />
+                    <ChevronDown class="size-4" />
                   </div>
                 </template>
 
@@ -507,7 +508,7 @@ defineExpose({
                       :key="opt.id"
                       class="flex items-center gap-2"
                     >
-                      <div class="h-4 w-4 rounded-full border-2" />
+                      <div class="size-4 rounded-full border-2" />
                       <span class="text-sm">{{ opt.title }}</span>
                     </div>
                   </div>
@@ -525,7 +526,7 @@ defineExpose({
                       :key="opt.id"
                       class="flex items-center gap-2"
                     >
-                      <div class="h-4 w-4 rounded border" />
+                      <div class="size-4 rounded border" />
                       <span class="text-sm">{{ opt.title }}</span>
                     </div>
                   </div>
@@ -539,14 +540,14 @@ defineExpose({
                   </Label>
                   <div class="mt-1 p-2 rounded-md border bg-background text-sm flex items-center justify-between">
                     <span class="text-muted-foreground">Select date...</span>
-                    <Calendar class="h-4 w-4" />
+                    <Calendar class="size-4" />
                   </div>
                 </template>
 
                 <!-- Image -->
                 <template v-else-if="comp.type === 'Image'">
                   <div class="bg-muted rounded-md p-8 flex items-center justify-center">
-                    <Image class="h-8 w-8 text-muted-foreground" />
+                    <Image class="size-8 text-muted-foreground" />
                   </div>
                 </template>
 
@@ -558,7 +559,7 @@ defineExpose({
                 <!-- Generic fallback -->
                 <template v-else>
                   <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <component :is="getComponentIcon(comp.type)" class="h-4 w-4" />
+                    <component :is="getComponentIcon(comp.type)" class="size-4" />
                     {{ getComponentLabel(comp) }}
                   </div>
                 </template>
@@ -578,10 +579,10 @@ defineExpose({
 
       <div v-else class="flex-1 flex items-center justify-center text-muted-foreground">
         <div class="text-center">
-          <Layers class="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <Layers class="size-12 mx-auto mb-4 opacity-50" />
           <p>Add a screen to get started</p>
           <Button class="mt-4" @click="addScreen">
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus class="size-4 mr-2" />
             Add Screen
           </Button>
         </div>
@@ -592,7 +593,7 @@ defineExpose({
     <Card class="w-72 shrink-0 flex flex-col overflow-hidden">
       <CardHeader class="py-3 px-4 shrink-0">
         <CardTitle class="text-sm font-medium flex items-center gap-2">
-          <Settings2 class="h-4 w-4" />
+          <Settings2 class="size-4" />
           Properties
         </CardTitle>
       </CardHeader>
@@ -605,7 +606,7 @@ defineExpose({
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-7 w-7"
+                class="size-7"
                 :disabled="selectedComponentIndex === 0"
                 @click="moveComponent(selectedComponentIndex!, 'up')"
               >
@@ -614,7 +615,7 @@ defineExpose({
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-7 w-7"
+                class="size-7"
                 :disabled="selectedComponentIndex === selectedScreen!.layout.children.length - 1"
                 @click="moveComponent(selectedComponentIndex!, 'down')"
               >
@@ -623,10 +624,10 @@ defineExpose({
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-7 w-7 text-destructive"
+                class="size-7 text-destructive"
                 @click="removeComponent(selectedComponentIndex!)"
               >
-                <Trash2 class="h-4 w-4" />
+                <Trash2 class="size-4" />
               </Button>
             </div>
           </div>
@@ -677,7 +678,7 @@ defineExpose({
             <div class="flex items-center justify-between">
               <Label class="text-xs">Options</Label>
               <Button variant="ghost" size="sm" class="h-6 text-xs" @click="addOption">
-                <Plus class="h-3 w-3 mr-1" />
+                <Plus class="size-3 mr-1" />
                 Add
               </Button>
             </div>
@@ -696,10 +697,10 @@ defineExpose({
                 <Button
                   variant="ghost"
                   size="icon"
-                  class="h-9 w-9 shrink-0"
+                  class="size-9 shrink-0"
                   @click="removeOption(index)"
                 >
-                  <Trash2 class="h-3 w-3" />
+                  <Trash2 class="size-3" />
                 </Button>
               </div>
             </div>

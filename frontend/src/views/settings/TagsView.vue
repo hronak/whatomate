@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TagBadge } from '@/components/ui/tag-badge'
-import { PageHeader, SearchInput, DataTable, CrudFormDialog, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { TagBadge, PageHeader, SearchInput, DataTable, CrudFormDialog, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import type { Tag } from '@/services/api'
 import { useTagsStore } from '@/stores/tags'
 import { useCrudState } from '@/composables/useCrudState'
@@ -124,10 +123,10 @@ function getColorLabel(color: string): string {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('tags.title')" :subtitle="$t('tags.subtitle')" :icon="Tags" icon-gradient="bg-linear-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20" back-link="/settings">
       <template #actions>
-        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('tags.addTag') }}</Button>
+        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('tags.addTag') }}</Button>
       </template>
     </PageHeader>
 
@@ -182,15 +181,15 @@ function getColorLabel(color: string): string {
                 </template>
                 <template #cell-actions="{ item: tag }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="Pencil" :label="$t('tags.editTag')" class="h-8 w-8" @click="openEditDialog(tag)" />
-                    <IconButton :label="$t('tags.deleteTag')" class="h-8 w-8" @click="openDeleteDialog(tag)">
-                      <Trash2 class="h-4 w-4 text-destructive" />
+                    <IconButton :icon="Pencil" :label="$t('tags.editTag')" class="size-8" @click="openEditDialog(tag)" />
+                    <IconButton :label="$t('tags.deleteTag')" class="size-8" @click="openDeleteDialog(tag)">
+                      <Trash2 class="size-4 text-destructive" />
                     </IconButton>
                   </div>
                 </template>
                 <template #empty-action>
                   <Button variant="outline" size="sm" @click="openCreateDialog">
-                    <Plus class="h-4 w-4 mr-2" />
+                    <Plus class="size-4 mr-2" />
                     {{ $t('tags.addTag') }}
                   </Button>
                 </template>
@@ -227,7 +226,7 @@ function getColorLabel(color: string): string {
             <SelectContent>
               <SelectItem v-for="color in TAG_COLORS" :key="color.value" :value="color.value" :text-value="color.label">
                 <div class="flex items-center gap-2">
-                  <span :class="['w-3 h-3 rounded-full', color.class.split(' ')[0]]"></span>
+                  <span :class="['size-3 rounded-full', color.class.split(' ')[0]]"></span>
                   {{ color.label }}
                 </div>
               </SelectItem>
