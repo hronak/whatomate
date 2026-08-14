@@ -205,7 +205,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    line-height: 1.5;
+    line-height: 1.65;
     font-weight: 400;
     /* Subtle gradient for depth like Linear/Vercel */
     background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.05), transparent);
@@ -235,6 +235,46 @@
   a {
     @apply text-primary font-medium;
     text-decoration: none;
+  }
+
+  /* ─── Vertical rhythm ───
+     With a 1rem floor under every font size (commit 99cd6d3) almost all app
+     text now inherits from `body` — only ~65 elements carry an explicit
+     `text-*` size. So leading is split by what the text actually is:
+
+       - Multi-line text (prose, descriptions, table cells, chat bubbles)
+         gets roomier leading — that is what relieves the density.
+       - Single-line control labels (buttons, badges, tabs, menu items) keep
+         tight leading. Their line box is really implicit padding, and at 1.65
+         it overflows the fixed h-6/h-8/h-9 boxes the variants declare.
+
+     Anything that opts out with `leading-none`/`leading-relaxed` still wins;
+     these are element selectors, so any utility class overrides them. */
+  p,
+  li,
+  dd,
+  blockquote {
+    line-height: 1.7;
+  }
+  td,
+  dt,
+  label,
+  figcaption {
+    line-height: 1.55;
+  }
+  textarea {
+    line-height: 1.6;
+  }
+  button,
+  input,
+  select,
+  th,
+  [role="menuitem"],
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="option"],
+  [data-slot="badge"] {
+    line-height: 1.25;
   }
 }
 
