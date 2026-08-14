@@ -54,8 +54,9 @@ test.describe('DateRangePicker — re-open after Apply', () => {
     await expect(dateButton).toBeVisible({ timeout: 10000 })
     await dateButton.click()
 
-    // The grid is what was missing before the fix.
-    const grid = page.locator('[role="grid"]').first()
+    // The grid is what was missing before the fix. Queried by test id: reka-ui
+    // renders the grid table as role="application", not role="grid".
+    const grid = page.getByTestId('calendar-grid').first()
     await expect(grid).toBeVisible({ timeout: 5000 })
 
     // Sanity: at least one date cell is present.

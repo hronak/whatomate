@@ -235,7 +235,7 @@ export class ChatPage extends BasePage {
   }
 
   getNoteCard(content: string): Locator {
-    return this.notesPanel.locator('.group').filter({ hasText: content }).first()
+    return this.notesPanel.getByTestId('note-card').filter({ hasText: content }).first()
   }
 
   async editNote(oldContent: string, newContent: string) {
@@ -243,12 +243,11 @@ export class ChatPage extends BasePage {
     await noteCard.scrollIntoViewIfNeeded()
     await noteCard.hover()
     // Action buttons use group-hover opacity — force click to bypass visibility check
-    const actionBtns = noteCard.locator('button.h-5.w-5')
-    await actionBtns.first().click({ force: true })
+    await noteCard.getByTestId('note-edit').click({ force: true })
     // After clicking edit, the text moves from <p> to textarea value,
     // so the hasText-based noteCard locator becomes stale.
     // Find the edit textarea + Save button directly in the panel.
-    const editCard = this.notesPanel.locator('.group').filter({ has: this.page.getByRole('button', { name: /Save/i }) })
+    const editCard = this.notesPanel.getByTestId('note-card').filter({ has: this.page.getByRole('button', { name: /Save/i }) })
     const editTextarea = editCard.locator('textarea')
     await editTextarea.waitFor({ state: 'visible', timeout: 5000 })
     await editTextarea.fill(newContent)
@@ -260,29 +259,28 @@ export class ChatPage extends BasePage {
     await noteCard.scrollIntoViewIfNeeded()
     await noteCard.hover()
     // Action buttons use group-hover opacity — force click
-    const actionBtns = noteCard.locator('button.h-5.w-5')
-    await actionBtns.last().click({ force: true })
+    await noteCard.getByTestId('note-delete').click({ force: true })
   }
 
   // Account tabs helpers
   get accountTabsContainer(): Locator {
-    return this.page.locator('[class*="shrink-0"]').filter({ has: this.page.locator('button') }).filter({ hasText: /.+/ }).last()
+    return this.page.getByTestId('account-tabs')
   }
 
   getAccountTab(accountName: string): Locator {
-    return this.page.locator('button.rounded-md.text-xs').filter({ hasText: accountName })
+    return this.page.getByTestId('account-tab').filter({ hasText: accountName })
   }
 
   get accountTabs(): Locator {
-    return this.page.locator('button.rounded-md.text-xs.font-medium')
+    return this.page.getByTestId('account-tab')
   }
 
   get activeAccountTab(): Locator {
-    return this.page.locator('button.rounded-md.text-xs[class*="bg-emerald"]')
+    return this.page.locator('[data-testid="account-tab"][data-active="true"]')
   }
 
   get inactiveAccountTabs(): Locator {
-    return this.page.locator('button.rounded-md.text-xs:not([class*="bg-emerald"])')
+    return this.page.locator('[data-testid="account-tab"][data-active="false"]')
   }
 
   async switchAccount(accountName: string) {

@@ -202,9 +202,15 @@ test.describe('Multi-Account Tabs', () => {
     // Inactive tab should be visible (not transparent/invisible)
     const inactiveTab = inactiveTabs.first()
     await expect(inactiveTab).toBeVisible()
-    // Check it has a background class for visibility
-    const classes = await inactiveTab.getAttribute('class') || ''
-    expect(classes).toContain('bg-white')
+    // It must read as a chip, so its background has to differ from the track
+    // it sits on — asserted on the computed color rather than a class name,
+    // which changes with every theme-token refactor.
+    const [tabBg, trackBg] = await inactiveTab.evaluate((el) => [
+      getComputedStyle(el).backgroundColor,
+      getComputedStyle(el.parentElement as HTMLElement).backgroundColor,
+    ])
+    expect(tabBg).not.toBe('rgba(0, 0, 0, 0)')
+    expect(tabBg).not.toBe(trackBg)
   })
 
   test('should switch account when clicking inactive tab', async ({ page }) => {
@@ -252,7 +258,7 @@ test.describe('Multi-Account Tabs', () => {
 
     // Get the chat header and account tabs bounding boxes
     const header = page.locator('.h-14.shrink-0').first()
-    const tabsContainer = chatPage.getAccountTab('account-1').locator('..')
+    const tabsContainer = chatPage.accountTabsContainer
 
     const headerBox = await header.boundingBox()
     const tabsBox = await tabsContainer.boundingBox()

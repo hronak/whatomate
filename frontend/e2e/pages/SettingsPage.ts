@@ -387,8 +387,9 @@ export class CannedResponsesPage extends TableSettingsPage {
 export class CustomActionsPage extends TableSettingsPage {
   constructor(page: Page) {
     super(page, { headingText: 'Custom Actions', addButtonText: 'Add Action' })
-    // Override heading to use text locator since this page uses CardTitle not h1
-    this.heading = page.locator('text=Custom Actions').first()
+    // Override heading to use a text locator since this page uses CardTitle,
+    // not h1. Scoped to main so it can't match the settings sub-nav entry.
+    this.heading = page.locator('main').getByText('Custom Actions').first()
   }
 
   async goto() {

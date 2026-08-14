@@ -23,7 +23,7 @@ export class ChatbotHubPage extends BasePage {
     this.keywordsCard = page.getByRole('link', { name: /Keyword Rules.*rules/i })
     this.flowsCard = page.getByRole('link', { name: /Conversation Flows.*flows/i })
     this.aiContextsCard = page.getByRole('link', { name: /AI Contexts.*contexts/i })
-    this.statsCards = page.locator('.grid .rounded-lg.border')
+    this.statsCards = page.getByTestId('stat-card')
   }
 
   async goto() {

@@ -266,8 +266,9 @@ test.describe('Roles Management', () => {
     await page.goto('/settings')
     await page.waitForLoadState('networkidle')
 
-    // Click on Roles card/link
-    await page.locator('text=Roles').click()
+    // Click Roles in the settings sub-nav. Role-based, so it can't match the
+    // drawer's md:hidden copy of the same links.
+    await page.getByRole('menuitem', { name: 'Roles' }).click()
 
     // Should be on roles page
     await expect(page).toHaveURL(/\/settings\/roles/)
@@ -328,9 +329,11 @@ test.describe('Roles - Permissions Selection', () => {
 
     await gotoCreateRole(page)
 
-    // Should show permission groups (Users, Contacts, Messages, etc.)
-    await expect(page.locator('text=Users').first()).toBeVisible()
-    await expect(page.locator('text=Contacts').first()).toBeVisible()
+    // Should show permission groups (Users, Contacts, Messages, etc.) — scoped
+    // to main, since the settings sub-nav lists those same words.
+    const groups = page.locator('main')
+    await expect(groups.getByRole('button', { name: /Users/ }).first()).toBeVisible()
+    await expect(groups.getByRole('button', { name: /Contacts/ }).first()).toBeVisible()
   })
 
   test('should select all permissions in a group', async ({ page }) => {

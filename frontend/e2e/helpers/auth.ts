@@ -28,12 +28,17 @@ export const TEST_USERS = {
 export async function login(page: Page, user: TestUser) {
   // Clear any existing session to ensure the router doesn't intercept the /login
   // navigation and redirect us away if the browser already has an active session.
-  await page.context().clearCookies()
+  //
+  // localStorage is origin-scoped, so it goes first; cookies go once the SPA is
+  // parked on about:blank, since a live app that loses its session redirects
+  // itself to /login and aborts the goto below. See framework/auth.ts.
   try {
     await page.evaluate(() => window.localStorage.clear())
   } catch {
     // Ignore if on about:blank
   }
+  await page.goto('about:blank')
+  await page.context().clearCookies()
 
   // Use domcontentloaded: vite dev server keeps the browser 'load' event pending
   // due to HMR websocket + async chunk loading, which makes the default wait hang.
