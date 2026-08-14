@@ -3,6 +3,8 @@
 Modern, open-source WhatsApp Business Platform. Single binary app.
 
 > **Note:** This is a fork of the original [shridarpatil/whatomate](https://github.com/shridarpatil/whatomate), not the upstream project. Releases and Docker images here are published under `hronak/whatomate`.
+>
+> **Caution:** This fork is under constant development and may break. Use at your own risk. Documentation may also be out of date.
 
 ![Dashboard](docs/public/images/dashboard-light.png#gh-light-mode-only)
 ![Dashboard](docs/public/images/dashboard-dark.png#gh-dark-mode-only)
