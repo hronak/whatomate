@@ -763,7 +763,7 @@ const chartOptions = {
               <div class="grid gap-4 md:grid-cols-3">
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.messagesSent') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.messagesSent') }}</span>
                     <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <Send class="size-5 text-blue-400" />
                     </div>
@@ -777,7 +777,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.messagesDelivered') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.messagesDelivered') }}</span>
                     <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <CheckCircle class="size-5 text-emerald-400" />
                     </div>
@@ -791,7 +791,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.deliveryRate') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.deliveryRate') }}</span>
                     <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <TrendingUp class="size-5 text-purple-400" />
                     </div>
@@ -838,7 +838,7 @@ const chartOptions = {
               <div class="grid gap-4 md:grid-cols-2">
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.totalMessages') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.totalMessages') }}</span>
                     <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <MessagesSquare class="size-5 text-blue-400" />
                     </div>
@@ -852,7 +852,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
                     <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <DollarSign class="size-5 text-emerald-400" />
                     </div>
@@ -892,15 +892,15 @@ const chartOptions = {
                   <CardContent>
                     <div class="space-y-3">
                       <div class="flex items-center justify-between py-2 border-b border-border">
-                        <span class="text-sm text-foreground/70">{{ $t('metaInsights.freeCustomerService') }}</span>
+                        <span class="text-foreground/70">{{ $t('metaInsights.freeCustomerService') }}</span>
                         <span class="font-semibold text-foreground">{{ (aggregatedData as ReturnType<typeof aggregatePricingData>).freeMessages.customerService.toLocaleString() }}</span>
                       </div>
                       <div class="flex items-center justify-between py-2 border-b border-border">
-                        <span class="text-sm text-foreground/70">{{ $t('metaInsights.freeEntryPoint') }}</span>
+                        <span class="text-foreground/70">{{ $t('metaInsights.freeEntryPoint') }}</span>
                         <span class="font-semibold text-foreground">{{ (aggregatedData as ReturnType<typeof aggregatePricingData>).freeMessages.entryPoint.toLocaleString() }}</span>
                       </div>
                       <div class="flex items-center justify-between py-2 bg-green-500/10 rounded px-2 -mx-2">
-                        <span class="text-sm font-medium text-success">{{ $t('metaInsights.totalFree') }}</span>
+                        <span class="font-medium text-success">{{ $t('metaInsights.totalFree') }}</span>
                         <span class="font-bold text-success">{{ (aggregatedData as ReturnType<typeof aggregatePricingData>).freeMessages.total.toLocaleString() }}</span>
                       </div>
                     </div>
@@ -916,14 +916,14 @@ const chartOptions = {
                   <CardContent>
                     <div class="space-y-3">
                       <div v-for="(count, category) in (aggregatedData as ReturnType<typeof aggregatePricingData>).paidMessages.byCategory" :key="category" class="flex items-center justify-between py-2 border-b border-border last:border-0">
-                        <span class="text-sm text-foreground/70">{{ formatCategory(category as string) }}</span>
+                        <span class="text-foreground/70">{{ formatCategory(category as string) }}</span>
                         <span class="font-semibold text-foreground">{{ (count as number).toLocaleString() }}</span>
                       </div>
                       <div v-if="Object.keys((aggregatedData as ReturnType<typeof aggregatePricingData>).paidMessages.byCategory).length === 0" class="text-center text-foreground/40 py-4">
                         {{ $t('metaInsights.noPaidMessages') }}
                       </div>
                       <div v-else class="flex items-center justify-between py-2 bg-amber-500/10 rounded px-2 -mx-2">
-                        <span class="text-sm font-medium text-warning">{{ $t('metaInsights.totalPaid') }}</span>
+                        <span class="font-medium text-warning">{{ $t('metaInsights.totalPaid') }}</span>
                         <span class="font-bold text-warning">{{ (aggregatedData as ReturnType<typeof aggregatePricingData>).paidMessages.total.toLocaleString() }}</span>
                       </div>
                     </div>
@@ -939,11 +939,11 @@ const chartOptions = {
                   <CardContent>
                     <div class="space-y-3">
                       <div v-for="(cost, category) in (aggregatedData as ReturnType<typeof aggregatePricingData>).costByCategory" :key="category" class="flex items-center justify-between py-2 border-b border-border last:border-0">
-                        <span class="text-sm text-foreground/70">{{ formatCategory(category as string) }}</span>
+                        <span class="text-foreground/70">{{ formatCategory(category as string) }}</span>
                         <span class="font-semibold text-foreground">{{ formatCurrency(cost as number) }}</span>
                       </div>
                       <div class="flex items-center justify-between py-2 bg-emerald-500/10 rounded px-2 -mx-2">
-                        <span class="text-sm font-medium text-success">{{ $t('metaInsights.totalCost') }}</span>
+                        <span class="font-medium text-success">{{ $t('metaInsights.totalCost') }}</span>
                         <span class="font-bold text-success">{{ formatCurrency((aggregatedData as ReturnType<typeof aggregatePricingData>).totals.cost) }}</span>
                       </div>
                     </div>
@@ -959,7 +959,7 @@ const chartOptions = {
                   <CardContent>
                     <div class="space-y-3">
                       <div v-for="(data, country) in (aggregatedData as ReturnType<typeof aggregatePricingData>).byCountry" :key="country" class="flex items-center justify-between py-2 border-b border-border last:border-0">
-                        <span class="text-sm text-foreground/70">{{ country }}</span>
+                        <span class="text-foreground/70">{{ country }}</span>
                         <div class="text-right">
                           <span class="font-semibold text-foreground">{{ (data as {volume: number, cost: number}).volume.toLocaleString() }} {{ $t('metaInsights.msgs') }}</span>
                           <span class="text-foreground/50 ml-2">{{ formatCurrency((data as {volume: number, cost: number}).cost) }}</span>
@@ -992,7 +992,7 @@ const chartOptions = {
               <div class="grid gap-4 md:grid-cols-6">
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.sent') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.sent') }}</span>
                     <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <Send class="size-5 text-blue-400" />
                     </div>
@@ -1006,7 +1006,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.delivered') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.delivered') }}</span>
                     <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <CheckCircle class="size-5 text-emerald-400" />
                     </div>
@@ -1020,7 +1020,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.read') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.read') }}</span>
                     <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <Eye class="size-5 text-purple-400" />
                     </div>
@@ -1034,7 +1034,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.replied') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.replied') }}</span>
                     <div class="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
                       <MessagesSquare class="size-5 text-amber-400" />
                     </div>
@@ -1048,7 +1048,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.clicked') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.clicked') }}</span>
                     <div class="size-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
                       <MousePointerClick class="size-5 text-cyan-400" />
                     </div>
@@ -1062,7 +1062,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
                     <div class="size-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
                       <DollarSign class="size-5 text-rose-400" />
                     </div>
@@ -1106,7 +1106,7 @@ const chartOptions = {
                   >
                     <template #cell-name="{ item }">
                       <div class="font-medium">{{ item.name }}</div>
-                      <div v-if="item.name !== item.templateId" class="text-xs text-muted-foreground font-mono">{{ item.templateId }}</div>
+                      <div v-if="item.name !== item.templateId" class="text-muted-foreground font-mono">{{ item.templateId }}</div>
                     </template>
                     <template #cell-sent="{ item }">
                       {{ item.sent.toLocaleString() }}
@@ -1158,7 +1158,7 @@ const chartOptions = {
               <div class="grid gap-4 md:grid-cols-5">
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.totalCalls') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.totalCalls') }}</span>
                     <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <Phone class="size-5 text-blue-400" />
                     </div>
@@ -1172,7 +1172,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.incoming') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.incoming') }}</span>
                     <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <PhoneIncoming class="size-5 text-blue-400" />
                     </div>
@@ -1186,7 +1186,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.outgoing') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.outgoing') }}</span>
                     <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <PhoneOutgoing class="size-5 text-purple-400" />
                     </div>
@@ -1200,7 +1200,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.avgDuration') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.avgDuration') }}</span>
                     <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <TrendingUp class="size-5 text-emerald-400" />
                     </div>
@@ -1214,7 +1214,7 @@ const chartOptions = {
 
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <span class="text-sm font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
+                    <span class="font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
                     <div class="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
                       <DollarSign class="size-5 text-amber-400" />
                     </div>

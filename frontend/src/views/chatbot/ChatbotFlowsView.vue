@@ -194,13 +194,13 @@ async function confirmDeleteFlow() {
                 </template>
                 <template #cell-trigger_keywords="{ item: flow }">
                   <div class="flex flex-wrap gap-1">
-                    <Badge v-for="keyword in flow.trigger_keywords?.slice(0, 2)" :key="keyword" variant="secondary" class="text-xs">
+                    <Badge v-for="keyword in flow.trigger_keywords?.slice(0, 2)" :key="keyword" variant="secondary">
                       {{ keyword }}
                     </Badge>
-                    <Badge v-if="flow.trigger_keywords?.length > 2" variant="outline" class="text-xs">
+                    <Badge v-if="flow.trigger_keywords?.length > 2" variant="outline">
                       +{{ flow.trigger_keywords.length - 2 }}
                     </Badge>
-                    <span v-if="!flow.trigger_keywords?.length" class="text-muted-foreground text-sm">—</span>
+                    <span v-if="!flow.trigger_keywords?.length" class="text-muted-foreground">—</span>
                   </div>
                 </template>
                 <template #cell-steps_count="{ item: flow }">
@@ -209,7 +209,7 @@ async function confirmDeleteFlow() {
                 <template #cell-status="{ item: flow }">
                   <div class="flex items-center gap-2">
                     <Switch :checked="flow.enabled" @update:checked="toggleFlow(flow)" />
-                    <span class="text-sm text-muted-foreground">{{ flow.enabled ? $t('chatbotFlows.active') : $t('chatbotFlows.inactive') }}</span>
+                    <span class="text-muted-foreground">{{ flow.enabled ? $t('chatbotFlows.active') : $t('chatbotFlows.inactive') }}</span>
                   </div>
                 </template>
                 <template #cell-actions="{ item: flow }">

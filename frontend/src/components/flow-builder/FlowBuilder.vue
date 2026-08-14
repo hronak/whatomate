@@ -354,7 +354,7 @@ defineExpose({
     <Card class="w-64 shrink-0 flex flex-col overflow-hidden">
       <CardHeader class="py-3 px-4">
         <div class="flex items-center justify-between">
-          <CardTitle class="text-sm font-medium flex items-center gap-2">
+          <CardTitle class="font-medium flex items-center gap-2">
             <Layers class="size-4" />
             Screens
           </CardTitle>
@@ -370,7 +370,7 @@ defineExpose({
             v-for="(screen, index) in screens"
             :key="screen.id"
             :class="[
-              'flex items-center gap-2 p-2 rounded-md cursor-pointer text-sm',
+              'flex items-center gap-2 p-2 rounded-md cursor-pointer',
               selectedScreenIndex === index ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground' : 'hover:bg-muted'
             ]"
             @click="selectScreen(index)"
@@ -389,7 +389,7 @@ defineExpose({
           </div>
           <div
             v-if="screens.length === 0"
-            class="p-4 text-center text-sm text-muted-foreground"
+            class="p-4 text-center text-muted-foreground"
           >
             No screens yet
           </div>
@@ -404,12 +404,12 @@ defineExpose({
           <div v-if="selectedScreen" class="flex items-center gap-2">
             <Input
               v-model="selectedScreen.title"
-              class="h-8 w-48 text-sm font-medium"
+              class="h-8 w-48 font-medium"
               placeholder="Screen Title"
             />
             <Badge variant="outline">{{ selectedScreen.id }}</Badge>
           </div>
-          <CardTitle v-else class="text-sm font-medium">Select a screen</CardTitle>
+          <CardTitle v-else class="font-medium">Select a screen</CardTitle>
         </div>
       </CardHeader>
       <Separator />
@@ -418,18 +418,18 @@ defineExpose({
         <!-- Component Palette -->
         <ScrollArea class="w-48 border-r shrink-0">
           <div class="p-3">
-            <p class="text-xs font-medium text-muted-foreground mb-2">Add Components</p>
+            <p class="font-medium text-muted-foreground mb-2">Add Components</p>
             <div class="grid grid-cols-2 gap-1">
               <Button
                 v-for="comp in componentTypes"
                 :key="comp.type"
                 variant="outline"
                 size="sm"
-                class="h-auto py-2 flex-col gap-1 text-xs"
+                class="h-auto py-2 flex-col gap-1"
                 @click="addComponent(comp.type)"
               >
                 <component :is="comp.icon" class="size-4" />
-                <span class="text-[10px]">{{ comp.label }}</span>
+                <span>{{ comp.label }}</span>
               </Button>
             </div>
           </div>
@@ -460,12 +460,12 @@ defineExpose({
                   <h3 class="text-lg font-semibold">{{ comp.text }}</h3>
                 </template>
                 <template v-else-if="comp.type === 'TextBody'">
-                  <p class="text-sm">{{ comp.text }}</p>
+                  <p>{{ comp.text }}</p>
                 </template>
 
                 <!-- Input Components -->
                 <template v-else-if="comp.type === 'TextInput' || comp.type === 'TextArea'">
-                  <Label class="text-sm">
+                  <Label>
                     {{ comp.label }}
                     <span v-if="comp.required" class="text-destructive">*</span>
                   </Label>
@@ -479,18 +479,18 @@ defineExpose({
                     v-else
                     disabled
                     :placeholder="comp.label"
-                    class="mt-1 w-full p-2 rounded-md border bg-background text-sm"
+                    class="mt-1 w-full p-2 rounded-md border bg-background"
                     rows="3"
                   />
                 </template>
 
                 <!-- Dropdown -->
                 <template v-else-if="comp.type === 'Dropdown'">
-                  <Label class="text-sm">
+                  <Label>
                     {{ comp.label }}
                     <span v-if="comp.required" class="text-destructive">*</span>
                   </Label>
-                  <div class="mt-1 p-2 rounded-md border bg-background text-sm flex items-center justify-between">
+                  <div class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between">
                     <span class="text-muted-foreground">Select...</span>
                     <ChevronDown class="size-4" />
                   </div>
@@ -498,7 +498,7 @@ defineExpose({
 
                 <!-- Radio Buttons -->
                 <template v-else-if="comp.type === 'RadioButtonsGroup'">
-                  <Label class="text-sm mb-2 block">
+                  <Label class="mb-2 block">
                     {{ comp.label }}
                     <span v-if="comp.required" class="text-destructive">*</span>
                   </Label>
@@ -509,14 +509,14 @@ defineExpose({
                       class="flex items-center gap-2"
                     >
                       <div class="size-4 rounded-full border-2" />
-                      <span class="text-sm">{{ opt.title }}</span>
+                      <span>{{ opt.title }}</span>
                     </div>
                   </div>
                 </template>
 
                 <!-- Checkboxes -->
                 <template v-else-if="comp.type === 'CheckboxGroup'">
-                  <Label class="text-sm mb-2 block">
+                  <Label class="mb-2 block">
                     {{ comp.label }}
                     <span v-if="comp.required" class="text-destructive">*</span>
                   </Label>
@@ -527,18 +527,18 @@ defineExpose({
                       class="flex items-center gap-2"
                     >
                       <div class="size-4 rounded border" />
-                      <span class="text-sm">{{ opt.title }}</span>
+                      <span>{{ opt.title }}</span>
                     </div>
                   </div>
                 </template>
 
                 <!-- Date Picker -->
                 <template v-else-if="comp.type === 'DatePicker'">
-                  <Label class="text-sm">
+                  <Label>
                     {{ comp.label }}
                     <span v-if="comp.required" class="text-destructive">*</span>
                   </Label>
-                  <div class="mt-1 p-2 rounded-md border bg-background text-sm flex items-center justify-between">
+                  <div class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between">
                     <span class="text-muted-foreground">Select date...</span>
                     <Calendar class="size-4" />
                   </div>
@@ -558,7 +558,7 @@ defineExpose({
 
                 <!-- Generic fallback -->
                 <template v-else>
-                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div class="flex items-center gap-2 text-muted-foreground">
                     <component :is="getComponentIcon(comp.type)" class="size-4" />
                     {{ getComponentLabel(comp) }}
                   </div>
@@ -567,7 +567,7 @@ defineExpose({
 
               <div
                 v-if="selectedScreen.layout.children.length === 0"
-                class="p-8 text-center text-sm text-muted-foreground border-2 border-dashed rounded-lg"
+                class="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg"
               >
                 Add components from the palette
               </div>
@@ -592,7 +592,7 @@ defineExpose({
     <!-- Properties Panel -->
     <Card class="w-72 shrink-0 flex flex-col overflow-hidden">
       <CardHeader class="py-3 px-4 shrink-0">
-        <CardTitle class="text-sm font-medium flex items-center gap-2">
+        <CardTitle class="font-medium flex items-center gap-2">
           <Settings2 class="size-4" />
           Properties
         </CardTitle>
@@ -634,7 +634,7 @@ defineExpose({
 
           <!-- Text property -->
           <div v-if="'text' in selectedComponent" class="space-y-2">
-            <Label class="text-xs">Text</Label>
+            <Label>Text</Label>
             <Input
               :model-value="selectedComponent.text"
               @update:model-value="updateComponentProperty('text', $event)"
@@ -643,7 +643,7 @@ defineExpose({
 
           <!-- Label property -->
           <div v-if="'label' in selectedComponent && selectedComponent.type !== 'Footer'" class="space-y-2">
-            <Label class="text-xs">Label</Label>
+            <Label>Label</Label>
             <Input
               :model-value="selectedComponent.label"
               @update:model-value="updateComponentProperty('label', $event)"
@@ -652,21 +652,21 @@ defineExpose({
 
           <!-- Name property -->
           <div v-if="'name' in selectedComponent" class="space-y-2">
-            <Label class="text-xs">Field Name (Key)</Label>
+            <Label>Field Name (Key)</Label>
             <Input
               :model-value="selectedComponent.name"
               @update:model-value="updateComponentProperty('name', $event)"
-              class="font-mono text-sm"
+              class="font-mono"
               placeholder="e.g. email, phone, message"
             />
-            <p class="text-xs text-muted-foreground">
+            <p class="text-muted-foreground">
               This key is used in the response data. Use lowercase with underscores (e.g. customer_name).
             </p>
           </div>
 
           <!-- Required property -->
           <div v-if="'required' in selectedComponent" class="flex items-center justify-between">
-            <Label class="text-xs">Required</Label>
+            <Label>Required</Label>
             <Switch
               :checked="selectedComponent.required"
               @update:checked="updateComponentProperty('required', $event)"
@@ -676,8 +676,8 @@ defineExpose({
           <!-- Options for Dropdown, Radio, Checkbox -->
           <div v-if="selectedComponent['data-source']" class="space-y-2">
             <div class="flex items-center justify-between">
-              <Label class="text-xs">Options</Label>
-              <Button variant="ghost" size="sm" class="h-6 text-xs" @click="addOption">
+              <Label>Options</Label>
+              <Button variant="ghost" size="sm" class="h-6" @click="addOption">
                 <Plus class="size-3 mr-1" />
                 Add
               </Button>
@@ -691,7 +691,6 @@ defineExpose({
                 <Input
                   :model-value="opt.title"
                   @update:model-value="updateOption(index, 'title', $event)"
-                  class="text-sm"
                   placeholder="Option text"
                 />
                 <Button
@@ -709,14 +708,14 @@ defineExpose({
           <!-- Footer specific -->
           <div v-if="selectedComponent.type === 'Footer'" class="space-y-4">
             <div class="space-y-2">
-              <Label class="text-xs">Button Text</Label>
+              <Label>Button Text</Label>
               <Input
                 :model-value="selectedComponent.label"
                 @update:model-value="updateComponentProperty('label', $event)"
               />
             </div>
             <div class="space-y-2">
-              <Label class="text-xs">Action</Label>
+              <Label>Action</Label>
               <Select
                 :model-value="selectedComponent['on-click-action']?.name || 'complete'"
                 @update:model-value="updateComponentProperty('on-click-action', { name: $event, payload: {} })"
@@ -734,7 +733,7 @@ defineExpose({
               v-if="selectedComponent['on-click-action']?.name === 'navigate'"
               class="space-y-2"
             >
-              <Label class="text-xs">Target Screen</Label>
+              <Label>Target Screen</Label>
               <Select
                 :model-value="selectedComponent['on-click-action']?.next?.name || ''"
                 @update:model-value="updateComponentProperty('on-click-action', {
@@ -758,7 +757,7 @@ defineExpose({
             </div>
           </div>
         </div>
-        <div v-else class="p-4 text-center text-sm text-muted-foreground">
+        <div v-else class="p-4 text-center text-muted-foreground">
           Select a component to edit its properties
         </div>
       </ScrollArea>

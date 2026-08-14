@@ -23,6 +23,6 @@ const outputHandles = [
 <template>
   <BaseNode :label="data?.label || 'HTTP Callback'" header-class="bg-orange-600" :output-handles="outputHandles" :has-input="!data?.isEntryNode">
     <template #icon><Globe class="size-4" /></template>
-    <p class="truncate font-mono text-[10px]">{{ summary }}</p>
+    <p class="truncate font-mono">{{ summary }}</p>
   </BaseNode>
 </template>

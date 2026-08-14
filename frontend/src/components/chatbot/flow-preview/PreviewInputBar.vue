@@ -78,10 +78,10 @@ function handleKeydown(event: KeyboardEvent) {
         v-model="inputValue"
         :type="inputTypeAttr"
         :placeholder="inputPlaceholder"
-        class="w-full text-sm bg-transparent border-none outline-hidden text-gray-800 dark:text-gray-200 placeholder:text-gray-400"
+        class="w-full bg-transparent border-none outline-hidden text-gray-800 dark:text-gray-200 placeholder:text-gray-400"
         @keydown="handleKeydown"
       />
-      <p v-else class="text-sm text-gray-400">
+      <p v-else class="text-gray-400">
         {{ disabled ? 'Waiting...' : 'Type a message' }}
       </p>
     </div>

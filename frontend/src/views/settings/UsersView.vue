@@ -246,7 +246,7 @@ async function copyInviteLink() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <label class="flex items-center gap-2 text-sm">
+                  <label class="flex items-center gap-2">
                     <Switch :checked="onlineOnly" @update:checked="onlineOnly = $event" />
                     <span>{{ $t('users.onlineOnly', 'Online only') }}</span>
                   </label>
@@ -264,15 +264,15 @@ async function copyInviteLink() {
                     <div class="min-w-0">
                       <div class="flex items-center gap-2">
                         <p class="font-medium truncate">{{ user.full_name }}</p>
-                        <Badge v-if="user.id === currentUserId" variant="outline" class="text-xs">{{ $t('users.you') }}</Badge>
-                        <Badge v-if="user.is_super_admin" variant="default" class="text-xs">{{ $t('users.superAdmin') }}</Badge>
-                        <Badge v-if="user.is_member" variant="secondary" class="text-xs">{{ $t('users.member') }}</Badge>
+                        <Badge v-if="user.id === currentUserId" variant="outline">{{ $t('users.you') }}</Badge>
+                        <Badge v-if="user.is_super_admin" variant="default">{{ $t('users.superAdmin') }}</Badge>
+                        <Badge v-if="user.is_member" variant="secondary">{{ $t('users.member') }}</Badge>
                       </div>
                     </div>
                   </RouterLink>
                 </template>
                 <template #cell-email="{ item: user }">
-                  <span class="text-sm text-muted-foreground truncate">{{ user.email }}</span>
+                  <span class="text-muted-foreground truncate">{{ user.email }}</span>
                 </template>
                 <template #cell-role="{ item: user }">
                   <Badge :variant="getRoleBadgeVariant(getRoleName(user))" class="capitalize">{{ getRoleName(user) }}</Badge>
@@ -322,7 +322,7 @@ async function copyInviteLink() {
               <SelectValue :placeholder="$t('users.selectRole')">
                 <template v-if="formData.role_id">
                   <span class="capitalize">{{ rolesStore.roles.find(r => r.id === formData.role_id)?.name }}</span>
-                  <Badge v-if="rolesStore.roles.find(r => r.id === formData.role_id)?.is_system" variant="secondary" class="text-xs ml-2">{{ $t('users.system') }}</Badge>
+                  <Badge v-if="rolesStore.roles.find(r => r.id === formData.role_id)?.is_system" variant="secondary" class="ml-2">{{ $t('users.system') }}</Badge>
                 </template>
               </SelectValue>
             </SelectTrigger>
@@ -330,13 +330,13 @@ async function copyInviteLink() {
               <SelectItem v-for="role in rolesStore.roles" :key="role.id" :value="role.id">
                 <div class="flex items-center gap-2">
                   <span class="capitalize">{{ role.name }}</span>
-                  <Badge v-if="role.is_system" variant="secondary" class="text-xs">{{ $t('users.system') }}</Badge>
+                  <Badge v-if="role.is_system" variant="secondary">{{ $t('users.system') }}</Badge>
                 </div>
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div v-if="isSuperAdmin" class="flex items-center justify-between border-t pt-4"><div><Label for="is_super_admin" class="font-normal cursor-pointer">{{ $t('users.superAdminLabel') }}</Label><p class="text-xs text-muted-foreground">{{ $t('users.superAdminDesc') }}</p></div><Switch id="is_super_admin" :checked="formData.is_super_admin" @update:checked="formData.is_super_admin = $event" /></div>
+        <div v-if="isSuperAdmin" class="flex items-center justify-between border-t pt-4"><div><Label for="is_super_admin" class="font-normal cursor-pointer">{{ $t('users.superAdminLabel') }}</Label><p class="text-muted-foreground">{{ $t('users.superAdminDesc') }}</p></div><Switch id="is_super_admin" :checked="formData.is_super_admin" @update:checked="formData.is_super_admin = $event" /></div>
       </div>
     </CrudFormDialog>
 

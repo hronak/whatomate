@@ -261,7 +261,7 @@ onMounted(async () => {
       <Card>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <div class="flex items-center gap-2">
               <Badge v-if="contact?.marketing_opt_out" variant="secondary">{{ $t('contacts.marketingOptOut', 'Marketing Opt-out') }}</Badge>
             </div>
@@ -274,22 +274,22 @@ onMounted(async () => {
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ contact?.profile_name || contact?.name || contact?.phone_number }}</p>
-              <p class="text-sm text-muted-foreground truncate">{{ contact?.phone_number }}</p>
+              <p class="text-muted-foreground truncate">{{ contact?.phone_number }}</p>
             </div>
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('contacts.profileName', 'Profile Name') }}</Label>
+            <Label>{{ $t('contacts.profileName', 'Profile Name') }}</Label>
             <Input v-model="form.profile_name" :disabled="!canWrite" />
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('contacts.phoneNumber') }}</Label>
+            <Label>{{ $t('contacts.phoneNumber') }}</Label>
             <Input v-model="form.phone_number" disabled />
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('contacts.whatsappAccount', 'WhatsApp Account') }}</Label>
+            <Label>{{ $t('contacts.whatsappAccount', 'WhatsApp Account') }}</Label>
             <Select v-model="form.whatsapp_account" :disabled="!canWrite">
               <SelectTrigger>
                 <SelectValue :placeholder="$t('contacts.selectAccount', 'Select account')">
@@ -307,7 +307,7 @@ onMounted(async () => {
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('contacts.tags') }}</Label>
+            <Label>{{ $t('contacts.tags') }}</Label>
             <Popover v-model:open="tagSelectorOpen">
               <PopoverTrigger as-child>
                 <Button variant="outline" role="combobox" class="w-full justify-between" :disabled="!canWrite">
@@ -360,7 +360,7 @@ onMounted(async () => {
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('contacts.assignedAgent', 'Assigned Agent') }}</Label>
+            <Label>{{ $t('contacts.assignedAgent', 'Assigned Agent') }}</Label>
             <Popover v-model:open="agentSelectorOpen">
               <PopoverTrigger as-child>
                 <Button variant="outline" role="combobox" class="w-full justify-between" :disabled="!canWrite">
@@ -406,7 +406,7 @@ onMounted(async () => {
           </div>
 
           <div class="flex items-center justify-between">
-            <Label class="text-xs font-normal">{{ $t('contacts.marketingOptOut', 'Marketing Opt-out') }}</Label>
+            <Label class="font-normal">{{ $t('contacts.marketingOptOut', 'Marketing Opt-out') }}</Label>
             <Badge :variant="contact?.marketing_opt_out ? 'destructive' : 'secondary'">
               {{ contact?.marketing_opt_out ? $t('common.yes', 'Yes') : $t('common.no', 'No') }}
             </Badge>

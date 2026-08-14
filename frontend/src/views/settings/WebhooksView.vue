@@ -171,14 +171,14 @@ onMounted(() => fetchWebhooks())
                 <template #cell-url="{ item: webhook }"><span class="max-w-[200px] truncate text-muted-foreground block">{{ webhook.url }}</span></template>
                 <template #cell-events="{ item: webhook }">
                   <div class="flex flex-wrap gap-1">
-                    <Badge v-for="event in webhook.events.slice(0, 2)" :key="event" variant="secondary" class="text-xs">{{ getEventLabel(event) }}</Badge>
-                    <Badge v-if="webhook.events.length > 2" variant="outline" class="text-xs">+{{ webhook.events.length - 2 }}</Badge>
+                    <Badge v-for="event in webhook.events.slice(0, 2)" :key="event" variant="secondary">{{ getEventLabel(event) }}</Badge>
+                    <Badge v-if="webhook.events.length > 2" variant="outline">+{{ webhook.events.length - 2 }}</Badge>
                   </div>
                 </template>
                 <template #cell-status="{ item: webhook }">
                   <div class="flex items-center gap-2">
                     <Switch :checked="webhook.is_active" @update:checked="handleToggleWebhook(webhook)" />
-                    <span class="text-sm text-muted-foreground">{{ webhook.is_active ? $t('common.active') : $t('common.inactive') }}</span>
+                    <span class="text-muted-foreground">{{ webhook.is_active ? $t('common.active') : $t('common.inactive') }}</span>
                   </div>
                 </template>
                 <template #cell-created="{ item: webhook }"><span class="text-muted-foreground">{{ formatDate(webhook.created_at) }}</span></template>

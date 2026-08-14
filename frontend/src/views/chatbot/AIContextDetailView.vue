@@ -205,7 +205,7 @@ onMounted(async () => {
     <Card>
       <CardHeader class="pb-3">
         <div class="flex items-center justify-between">
-          <CardTitle class="text-sm font-medium">{{ $t('aiContexts.details', 'Details') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('aiContexts.details', 'Details') }}</CardTitle>
           <Badge :variant="form.enabled ? 'default' : 'secondary'">
             {{ form.enabled ? $t('aiContexts.active', 'Active') : $t('aiContexts.inactive', 'Inactive') }}
           </Badge>
@@ -213,12 +213,12 @@ onMounted(async () => {
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('aiContexts.name', 'Name') }} *</Label>
+          <Label>{{ $t('aiContexts.name', 'Name') }} *</Label>
           <Input v-model="form.name" :placeholder="$t('aiContexts.namePlaceholder', 'e.g. Product Knowledge Base')" />
         </div>
 
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('aiContexts.contextType', 'Context Type') }}</Label>
+          <Label>{{ $t('aiContexts.contextType', 'Context Type') }}</Label>
           <Select v-model="form.context_type">
             <SelectTrigger><SelectValue :placeholder="$t('aiContexts.selectType', 'Select type')" /></SelectTrigger>
             <SelectContent>
@@ -229,24 +229,24 @@ onMounted(async () => {
         </div>
 
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('aiContexts.triggerKeywords', 'Trigger Keywords') }}</Label>
+          <Label>{{ $t('aiContexts.triggerKeywords', 'Trigger Keywords') }}</Label>
           <Input
             v-model="form.trigger_keywords"
             :placeholder="$t('aiContexts.triggerKeywordsPlaceholder', 'pricing, plans, cost')"
           />
-          <p class="text-xs text-muted-foreground">
+          <p class="text-muted-foreground">
             {{ $t('aiContexts.triggerKeywordsHint', 'Comma-separated. Leave empty to always trigger.') }}
           </p>
         </div>
 
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('aiContexts.contentPrompt', 'Static Content') }}</Label>
+          <Label>{{ $t('aiContexts.contentPrompt', 'Static Content') }}</Label>
           <Textarea
             v-model="form.static_content"
             :placeholder="$t('aiContexts.contentPlaceholder', 'Enter prompt text') + '...'"
             :rows="6"
           />
-          <p class="text-xs text-muted-foreground">
+          <p class="text-muted-foreground">
             {{ $t('aiContexts.contentHint', 'Supports variable placeholders') }}:
             <code class="bg-muted px-1 rounded">{{ variableExample('variable') }}</code>
           </p>
@@ -254,13 +254,13 @@ onMounted(async () => {
 
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('aiContexts.priorityLabel', 'Priority') }}</Label>
+            <Label>{{ $t('aiContexts.priorityLabel', 'Priority') }}</Label>
             <Input v-model.number="form.priority" type="number" min="1" max="100" />
-            <p class="text-xs text-muted-foreground">{{ $t('aiContexts.priorityHint', 'Higher priority contexts are used first (1-100)') }}</p>
+            <p class="text-muted-foreground">{{ $t('aiContexts.priorityHint', 'Higher priority contexts are used first (1-100)') }}</p>
           </div>
           <div class="flex items-center gap-2 pt-6">
             <Switch :checked="form.enabled" @update:checked="form.enabled = $event" />
-            <Label class="text-xs">{{ $t('aiContexts.enabled', 'Enabled') }}</Label>
+            <Label>{{ $t('aiContexts.enabled', 'Enabled') }}</Label>
           </div>
         </div>
       </CardContent>
@@ -269,14 +269,14 @@ onMounted(async () => {
     <!-- API Configuration Card (only for api type) -->
     <Card v-if="form.context_type === 'api'">
       <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-medium">{{ $t('aiContexts.apiConfiguration', 'API Configuration') }}</CardTitle>
+        <CardTitle class="font-medium">{{ $t('aiContexts.apiConfiguration', 'API Configuration') }}</CardTitle>
       </CardHeader>
       <CardContent class="space-y-4">
-        <p class="text-xs text-muted-foreground">{{ $t('aiContexts.apiConfigHint', 'Configure the external API to fetch dynamic context.') }}</p>
+        <p class="text-muted-foreground">{{ $t('aiContexts.apiConfigHint', 'Configure the external API to fetch dynamic context.') }}</p>
 
         <div class="grid grid-cols-4 gap-4">
           <div class="col-span-1 space-y-1.5">
-            <Label class="text-xs">{{ $t('aiContexts.method', 'Method') }}</Label>
+            <Label>{{ $t('aiContexts.method', 'Method') }}</Label>
             <Select v-model="form.api_method">
               <SelectTrigger><SelectValue :placeholder="$t('aiContexts.method', 'Method')" /></SelectTrigger>
               <SelectContent>
@@ -286,34 +286,34 @@ onMounted(async () => {
             </Select>
           </div>
           <div class="col-span-3 space-y-1.5">
-            <Label class="text-xs">{{ $t('aiContexts.apiUrl', 'API URL') }}</Label>
+            <Label>{{ $t('aiContexts.apiUrl', 'API URL') }}</Label>
             <Input
               v-model="form.api_url"
               :placeholder="$t('aiContexts.apiUrlPlaceholder', 'https://api.example.com/data')"
             />
           </div>
         </div>
-        <p class="text-xs text-muted-foreground">
+        <p class="text-muted-foreground">
           {{ $t('aiContexts.variables', 'Variables') }}: <code class="bg-muted px-1 rounded">{{ variableExample('phone_number') }}</code>, <code class="bg-muted px-1 rounded">{{ variableExample('user_message') }}</code>
         </p>
 
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('aiContexts.headersOptional', 'Headers (optional)') }}</Label>
+          <Label>{{ $t('aiContexts.headersOptional', 'Headers (optional)') }}</Label>
           <Textarea
             v-model="form.api_headers"
             placeholder='{"Authorization": "Bearer ..."}'
             :rows="3"
           />
-          <p class="text-xs text-muted-foreground">{{ $t('aiContexts.headersHint', 'JSON format') }}</p>
+          <p class="text-muted-foreground">{{ $t('aiContexts.headersHint', 'JSON format') }}</p>
         </div>
 
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('aiContexts.responsePath', 'Response Path') }}</Label>
+          <Label>{{ $t('aiContexts.responsePath', 'Response Path') }}</Label>
           <Input
             v-model="form.api_response_path"
             :placeholder="$t('aiContexts.responsePathPlaceholder', '$.data.result')"
           />
-          <p class="text-xs text-muted-foreground">{{ $t('aiContexts.responsePathHint', 'JSONPath to extract from the API response') }}</p>
+          <p class="text-muted-foreground">{{ $t('aiContexts.responsePathHint', 'JSONPath to extract from the API response') }}</p>
         </div>
       </CardContent>
     </Card>

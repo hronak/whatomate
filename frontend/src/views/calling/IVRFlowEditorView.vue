@@ -402,18 +402,18 @@ onMounted(() => {
       <Button variant="ghost" size="icon" class="size-8" :aria-label="t('calling.backToFlows')" @click="router.push({ name: 'ivr-flows' })">
         <ArrowLeft class="size-4" />
       </Button>
-      <Input v-model="flowName" placeholder="Flow Name" class="h-8 text-sm max-w-[250px]" />
+      <Input v-model="flowName" placeholder="Flow Name" class="h-8 max-w-[250px]" />
       <div class="flex items-center gap-2 ml-4">
         <Switch v-model:checked="isActive" />
-        <Label class="text-xs whitespace-nowrap">Active</Label>
+        <Label class="whitespace-nowrap">Active</Label>
       </div>
       <div class="flex items-center gap-2 ml-2">
         <Switch v-model:checked="isCallStart" :disabled="!isActive" />
-        <Label class="text-xs whitespace-nowrap">Incoming Call Start</Label>
+        <Label class="whitespace-nowrap">Incoming Call Start</Label>
       </div>
       <div class="flex items-center gap-2 ml-2">
         <Switch v-model:checked="isOutgoingEnd" :disabled="!isActive" />
-        <Label class="text-xs whitespace-nowrap">Outgoing Post-Call</Label>
+        <Label class="whitespace-nowrap">Outgoing Post-Call</Label>
       </div>
       <div class="flex-1" />
       <Button :disabled="saving" size="sm" @click="saveFlow">
@@ -429,7 +429,7 @@ onMounted(() => {
         :key="p.type"
         variant="outline"
         size="sm"
-        class="h-7 text-xs gap-1.5 shrink-0"
+        class="h-7 gap-1.5 shrink-0"
         @click="addNodeFromPalette(p.type)"
       >
         <div :class="['size-2 rounded-full', p.color]" />

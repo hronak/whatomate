@@ -157,22 +157,22 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
                   <RouterLink :to="`/settings/canned-responses/${response.id}`" class="text-inherit no-underline hover:opacity-80">
                     <div>
                       <span class="font-medium">{{ response.name }}</span>
-                      <p v-if="response.shortcut" class="text-xs font-mono text-muted-foreground">/{{ response.shortcut }}</p>
+                      <p v-if="response.shortcut" class="font-mono text-muted-foreground">/{{ response.shortcut }}</p>
                     </div>
                   </RouterLink>
                 </template>
                 <template #cell-category="{ item: response }">
-                  <Badge variant="outline" class="text-xs">{{ getCategoryLabel(response.category) }}</Badge>
+                  <Badge variant="outline">{{ getCategoryLabel(response.category) }}</Badge>
                 </template>
                 <template #cell-content="{ item: response }">
-                  <p class="text-sm text-muted-foreground max-w-[300px] truncate">{{ response.content }}</p>
+                  <p class="text-muted-foreground max-w-[300px] truncate">{{ response.content }}</p>
                 </template>
                 <template #cell-usage_count="{ item: response }">
                   <span class="text-muted-foreground">{{ response.usage_count }}</span>
                 </template>
                 <template #cell-status="{ item: response }">
-                  <Badge v-if="response.is_active" class="bg-emerald-500/20 text-emerald-400 border-transparent text-xs">{{ $t('common.active') }}</Badge>
-                  <Badge v-else variant="secondary" class="text-xs">{{ $t('common.inactive') }}</Badge>
+                  <Badge v-if="response.is_active" class="bg-emerald-500/20 text-emerald-400 border-transparent">{{ $t('common.active') }}</Badge>
+                  <Badge v-else variant="secondary">{{ $t('common.inactive') }}</Badge>
                 </template>
                 <template #cell-actions="{ item: response }">
                   <div class="flex items-center justify-end gap-1">

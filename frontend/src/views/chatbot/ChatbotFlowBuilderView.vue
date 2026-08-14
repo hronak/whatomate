@@ -701,11 +701,11 @@ onMounted(async () => {
 
         <div class="flex-1 flex items-center gap-6">
           <div class="flex items-center gap-2">
-            <Label class="text-sm text-muted-foreground whitespace-nowrap">{{ $t('flowBuilder.name') }}</Label>
+            <Label class="text-muted-foreground whitespace-nowrap">{{ $t('flowBuilder.name') }}</Label>
             <Input v-model="name" :placeholder="$t('flowBuilder.namePlaceholder')" class="w-48 font-medium" />
           </div>
           <div class="flex items-center gap-2">
-            <Label class="text-sm text-muted-foreground whitespace-nowrap">{{ $t('flowBuilder.description') }}</Label>
+            <Label class="text-muted-foreground whitespace-nowrap">{{ $t('flowBuilder.description') }}</Label>
             <Input v-model="description" :placeholder="$t('flowBuilder.optional')" class="w-64" />
           </div>
         </div>
@@ -713,7 +713,7 @@ onMounted(async () => {
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2">
             <Switch :checked="enabled" @update:checked="enabled = $event" />
-            <span class="text-sm">{{ enabled ? $t('flowBuilder.enabled') : $t('flowBuilder.disabled') }}</span>
+            <span>{{ enabled ? $t('flowBuilder.enabled') : $t('flowBuilder.disabled') }}</span>
           </div>
 
           <Button variant="outline" size="sm" @click="showPreview = true" :disabled="nodes.length === 0">
@@ -731,13 +731,13 @@ onMounted(async () => {
 
     <!-- Node palette -->
     <div class="flex items-center gap-2 px-4 py-2 border-b bg-muted/30 overflow-x-auto shrink-0">
-      <span class="text-xs text-muted-foreground shrink-0">Add node:</span>
+      <span class="text-muted-foreground shrink-0">Add node:</span>
       <Button
         v-for="p in palette"
         :key="p.type"
         variant="outline"
         size="sm"
-        class="h-7 text-xs gap-1.5 shrink-0"
+        class="h-7 gap-1.5 shrink-0"
         @click="addNodeFromPalette(p.type)"
       >
         <div :class="['size-2 rounded-full', p.color]" />
@@ -798,43 +798,43 @@ onMounted(async () => {
         <ScrollArea v-else orientation="vertical" class="flex-1">
           <div class="p-4 space-y-4 min-w-0">
             <CardHeader class="p-0 pb-2">
-              <CardTitle class="text-sm font-medium">{{ $t('flowBuilder.flowSettings') }}</CardTitle>
+              <CardTitle class="font-medium">{{ $t('flowBuilder.flowSettings') }}</CardTitle>
             </CardHeader>
 
             <!-- Trigger keywords -->
             <div class="space-y-1.5">
-              <Label class="text-xs">{{ $t('flowBuilder.triggerKeywords') }}</Label>
-              <Input v-model="triggerKeywords" :placeholder="$t('flowBuilder.triggerKeywordsPlaceholder')" class="h-8 text-xs" />
-              <p class="text-[10px] text-muted-foreground">{{ $t('flowBuilder.triggerKeywordsHint') }}</p>
+              <Label>{{ $t('flowBuilder.triggerKeywords') }}</Label>
+              <Input v-model="triggerKeywords" :placeholder="$t('flowBuilder.triggerKeywordsPlaceholder')" class="h-8" />
+              <p class="text-muted-foreground">{{ $t('flowBuilder.triggerKeywordsHint') }}</p>
             </div>
 
             <Separator />
 
             <!-- Initial message -->
             <div class="space-y-1.5">
-              <Label class="text-xs">{{ $t('flowBuilder.initialMessage') }}</Label>
-              <Textarea v-model="initialMessage" :placeholder="$t('flowBuilder.initialMessagePlaceholder')" :rows="2" class="text-xs" />
+              <Label>{{ $t('flowBuilder.initialMessage') }}</Label>
+              <Textarea v-model="initialMessage" :placeholder="$t('flowBuilder.initialMessagePlaceholder')" :rows="2" />
             </div>
 
             <!-- Completion message -->
             <div class="space-y-1.5">
-              <Label class="text-xs">{{ $t('flowBuilder.completionMessage') }}</Label>
-              <Textarea v-model="completionMessage" :placeholder="$t('flowBuilder.completionMessagePlaceholder')" :rows="2" class="text-xs" />
+              <Label>{{ $t('flowBuilder.completionMessage') }}</Label>
+              <Textarea v-model="completionMessage" :placeholder="$t('flowBuilder.completionMessagePlaceholder')" :rows="2" />
             </div>
 
             <Separator />
 
             <!-- On complete action -->
             <Collapsible v-model:open="completionConfigOpen">
-              <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium">
+              <CollapsibleTrigger class="flex items-center justify-between w-full py-1 font-medium">
                 {{ $t('flowBuilder.onCompletion') }}
                 <component :is="completionConfigOpen ? ChevronDown : ChevronRight" class="size-4" />
               </CollapsibleTrigger>
               <CollapsibleContent class="pt-3 space-y-3">
                 <div class="space-y-1.5">
-                  <Label class="text-xs">{{ $t('flowBuilder.action') }}</Label>
+                  <Label>{{ $t('flowBuilder.action') }}</Label>
                   <Select v-model="onCompleteAction">
-                    <SelectTrigger class="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectTrigger class="h-8"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">{{ $t('flowBuilder.noAction') }}</SelectItem>
                       <SelectItem value="webhook">{{ $t('flowBuilder.sendToWebhook') }}</SelectItem>
@@ -846,9 +846,9 @@ onMounted(async () => {
                   <div class="space-y-3 p-3 border rounded-lg bg-muted/30">
                     <div class="flex gap-2">
                       <div class="w-20">
-                        <Label class="text-[10px]">{{ $t('flowBuilder.method') }}</Label>
+                        <Label>{{ $t('flowBuilder.method') }}</Label>
                         <Select v-model="completionConfig.method">
-                          <SelectTrigger class="h-7 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectTrigger class="h-7"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="GET">GET</SelectItem>
                             <SelectItem value="POST">POST</SelectItem>
@@ -858,14 +858,14 @@ onMounted(async () => {
                         </Select>
                       </div>
                       <div class="flex-1">
-                        <Label class="text-[10px]">URL</Label>
-                        <Input v-model="completionConfig.url" placeholder="https://example.com/hook" class="h-7 text-xs font-mono" />
+                        <Label>URL</Label>
+                        <Input v-model="completionConfig.url" placeholder="https://example.com/hook" class="h-7 font-mono" />
                       </div>
                     </div>
                     <div class="space-y-2">
                       <div class="flex items-center justify-between">
-                        <Label class="text-[10px]">{{ $t('flowBuilder.headers') }}</Label>
-                        <Button variant="ghost" size="sm" class="h-5 text-[10px] px-1" @click="addCompletionHeader">
+                        <Label>{{ $t('flowBuilder.headers') }}</Label>
+                        <Button variant="ghost" size="sm" class="h-5 px-1" @click="addCompletionHeader">
                           <Plus class="size-3" />
                         </Button>
                       </div>
@@ -874,13 +874,13 @@ onMounted(async () => {
                           :model-value="String(key)"
                           @update:model-value="(v: string | number) => updateCompletionHeaderKey(String(key), String(v))"
                           placeholder="Key"
-                          class="h-6 text-[10px] flex-1"
+                          class="h-6 flex-1"
                         />
                         <Input
                           :model-value="String(val)"
                           @update:model-value="(v: string | number) => updateCompletionHeaderValue(String(key), String(v))"
                           placeholder="Value"
-                          class="h-6 text-[10px] flex-1"
+                          class="h-6 flex-1"
                         />
                         <Button variant="ghost" size="icon" class="size-5" @click="removeCompletionHeader(String(key))">
                           <Trash2 class="size-3 text-destructive" />
@@ -888,8 +888,8 @@ onMounted(async () => {
                       </div>
                     </div>
                     <div class="space-y-1">
-                      <Label class="text-[10px]">Body</Label>
-                      <Textarea v-model="completionConfig.body" :rows="2" class="text-[10px] font-mono" />
+                      <Label>Body</Label>
+                      <Textarea v-model="completionConfig.body" :rows="2" class="font-mono" />
                     </div>
                   </div>
                 </template>
@@ -900,7 +900,7 @@ onMounted(async () => {
 
             <!-- Contact panel display config -->
             <Collapsible v-model:open="panelConfigOpen">
-              <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium">
+              <CollapsibleTrigger class="flex items-center justify-between w-full py-1 font-medium">
                 Contact panel display
                 <component :is="panelConfigOpen ? ChevronDown : ChevronRight" class="size-4" />
               </CollapsibleTrigger>
@@ -916,7 +916,7 @@ onMounted(async () => {
             <template v-if="!isNewFlow">
               <Separator />
               <Collapsible v-model:open="activityOpen">
-                <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium">
+                <CollapsibleTrigger class="flex items-center justify-between w-full py-1 font-medium">
                   Activity
                   <component :is="activityOpen ? ChevronDown : ChevronRight" class="size-4" />
                 </CollapsibleTrigger>

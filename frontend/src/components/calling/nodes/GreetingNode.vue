@@ -21,6 +21,6 @@ const outputHandles = [{ id: 'default', label: 'next' }]
   <BaseNode :label="data?.label || 'Greeting'" header-class="bg-green-600" :output-handles="outputHandles" :has-input="!data?.isEntryNode">
     <template #icon><Volume2 class="size-4" /></template>
     <p class="truncate">{{ summary }}</p>
-    <p v-if="data?.config?.interruptible" class="text-[10px] text-green-600 mt-0.5">Interruptible</p>
+    <p v-if="data?.config?.interruptible" class="text-green-600 mt-0.5">Interruptible</p>
   </BaseNode>
 </template>

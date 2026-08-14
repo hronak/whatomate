@@ -190,7 +190,7 @@ onMounted(async () => {
       <Card>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <div class="flex items-center gap-2">
               <Badge v-if="isSystem" variant="secondary">
                 <Lock class="size-3 mr-1" />{{ $t('roles.system') }}
@@ -202,21 +202,21 @@ onMounted(async () => {
           </div>
         </CardHeader>
         <CardContent class="space-y-4">
-          <p v-if="isSystem" class="text-xs text-muted-foreground">
+          <p v-if="isSystem" class="text-muted-foreground">
             {{ isSuperAdmin ? $t('roles.superAdminCanEdit') : $t('roles.systemRoleViewOnly') }}
           </p>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('roles.name') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('roles.name') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.name" :placeholder="$t('roles.namePlaceholder')" :disabled="!canEditForm || isSystem" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('roles.description') }}</Label>
+            <Label>{{ $t('roles.description') }}</Label>
             <Textarea v-model="form.description" :placeholder="$t('roles.descriptionPlaceholder')" :rows="2" :disabled="!canEditForm" />
           </div>
           <div v-if="!isSystem" class="flex items-center justify-between">
             <div class="space-y-0.5">
-              <Label class="text-xs font-normal cursor-pointer">{{ $t('roles.defaultRole') }}</Label>
-              <p class="text-[11px] text-muted-foreground">{{ $t('roles.defaultRoleDesc') }}</p>
+              <Label class="font-normal cursor-pointer">{{ $t('roles.defaultRole') }}</Label>
+              <p class="text-muted-foreground">{{ $t('roles.defaultRoleDesc') }}</p>
             </div>
             <Switch :checked="form.is_default" @update:checked="form.is_default = $event" :disabled="!canEditForm" />
           </div>
@@ -227,14 +227,14 @@ onMounted(async () => {
       <Card>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('roles.permissions') }}</CardTitle>
-            <span class="text-xs text-muted-foreground">
+            <CardTitle class="font-medium">{{ $t('roles.permissions') }}</CardTitle>
+            <span class="text-muted-foreground">
               {{ form.permissions.length }} {{ $t('common.selected') || 'selected' }}
             </span>
           </div>
         </CardHeader>
         <CardContent>
-          <p class="text-sm text-muted-foreground mb-3">{{ $t('roles.selectPermissions') }}</p>
+          <p class="text-muted-foreground mb-3">{{ $t('roles.selectPermissions') }}</p>
           <div v-if="rolesStore.permissions.length === 0" class="text-center py-8 text-muted-foreground border rounded-lg">
             <Loader2 class="size-6 animate-spin mx-auto mb-2" />
             <p>{{ $t('roles.loadingPermissions') }}...</p>

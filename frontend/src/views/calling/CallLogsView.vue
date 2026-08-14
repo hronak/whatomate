@@ -312,7 +312,7 @@ watch(phoneSearch, () => {
           <template #cell-caller="{ item: log }">
             <div class="cursor-pointer" @click="viewDetail(log)">
               <p class="font-medium">{{ log.contact?.profile_name || log.caller_phone }}</p>
-              <p v-if="log.contact?.profile_name" class="text-sm text-muted-foreground">{{ log.caller_phone }}</p>
+              <p v-if="log.contact?.profile_name" class="text-muted-foreground">{{ log.caller_phone }}</p>
             </div>
           </template>
           <template #cell-direction="{ item: log }">
@@ -335,7 +335,7 @@ watch(phoneSearch, () => {
             </span>
           </template>
           <template #cell-agent="{ item: log }">
-            <span v-if="log.agent" class="text-sm">{{ log.agent.full_name }}</span>
+            <span v-if="log.agent">{{ log.agent.full_name }}</span>
             <span v-else class="text-muted-foreground">-</span>
           </template>
           <template #cell-disconnected_by="{ item: log }">
@@ -368,7 +368,7 @@ watch(phoneSearch, () => {
           </DialogDescription>
         </DialogHeader>
         <div v-if="selectedLog" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4 text-sm">
+          <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-muted-foreground">{{ t('calling.caller') }}</p>
               <p class="font-medium">{{ selectedLog.caller_phone }}</p>
@@ -420,7 +420,7 @@ watch(phoneSearch, () => {
           </div>
 
           <div v-if="selectedTransfers.length > 0" class="space-y-2">
-            <p class="text-sm text-muted-foreground flex items-center gap-1.5">
+            <p class="text-muted-foreground flex items-center gap-1.5">
               <ArrowRightLeft class="size-3.5" />
               {{ t('calling.transferHistory') }}
             </p>
@@ -428,13 +428,13 @@ watch(phoneSearch, () => {
               <div
                 v-for="transfer in selectedTransfers"
                 :key="transfer.id"
-                class="border rounded-lg p-3 text-sm space-y-1"
+                class="border rounded-lg p-3 space-y-1"
               >
                 <div class="flex items-center justify-between">
                   <Badge :variant="transfer.status === 'connected' || transfer.status === 'completed' ? 'default' : 'secondary'">
                     {{ transfer.status }}
                   </Badge>
-                  <span class="text-xs text-muted-foreground">{{ formatDate(transfer.transferred_at) }}</span>
+                  <span class="text-muted-foreground">{{ formatDate(transfer.transferred_at) }}</span>
                 </div>
                 <div v-if="transfer.team" class="text-muted-foreground">
                   {{ t('calling.team') }}: <span class="text-foreground font-medium">{{ transfer.team.name }}</span>
@@ -450,18 +450,18 @@ watch(phoneSearch, () => {
           </div>
 
           <div v-if="selectedLog.ivr_flow">
-            <p class="text-sm text-muted-foreground mb-1">{{ t('calling.ivrFlow') }}</p>
+            <p class="text-muted-foreground mb-1">{{ t('calling.ivrFlow') }}</p>
             <p class="font-medium">{{ selectedLog.ivr_flow.name }}</p>
           </div>
 
           <div v-if="selectedLog.ivr_path?.steps?.length">
-            <p class="text-sm text-muted-foreground mb-3">{{ t('calling.ivrPath') }}</p>
+            <p class="text-muted-foreground mb-3">{{ t('calling.ivrPath') }}</p>
             <IVRPathTree :steps="selectedLog.ivr_path.steps" />
           </div>
 
           <div v-if="selectedLog.recording_s3_key" class="space-y-2">
-            <p class="text-sm text-muted-foreground">{{ t('calling.recording') }}</p>
-            <div v-if="recordingLoading" class="flex items-center gap-2 text-sm text-muted-foreground">
+            <p class="text-muted-foreground">{{ t('calling.recording') }}</p>
+            <div v-if="recordingLoading" class="flex items-center gap-2 text-muted-foreground">
               <div class="animate-spin rounded-full size-4 border-b-2 border-primary" />
               {{ t('common.loading') }}
             </div>
@@ -472,14 +472,14 @@ watch(phoneSearch, () => {
               preload="none"
               class="w-full"
             />
-            <p v-if="selectedLog.recording_duration" class="text-xs text-muted-foreground">
+            <p v-if="selectedLog.recording_duration" class="text-muted-foreground">
               {{ formatDuration(selectedLog.recording_duration) }}
             </p>
           </div>
 
           <div v-if="selectedLog.error_message">
-            <p class="text-sm text-muted-foreground mb-1">{{ t('calling.error') }}</p>
-            <p class="text-sm text-destructive">{{ selectedLog.error_message }}</p>
+            <p class="text-muted-foreground mb-1">{{ t('calling.error') }}</p>
+            <p class="text-destructive">{{ selectedLog.error_message }}</p>
           </div>
         </div>
       </DialogContent>

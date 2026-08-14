@@ -105,7 +105,7 @@ onMounted(async () => {
   >
     <Card v-if="log">
       <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-medium">{{ t('auditLogs.changes') }}</CardTitle>
+        <CardTitle class="font-medium">{{ t('auditLogs.changes') }}</CardTitle>
       </CardHeader>
       <CardContent>
         <div v-if="log.changes && log.changes.length > 0" class="space-y-3">
@@ -114,8 +114,8 @@ onMounted(async () => {
             :key="idx"
             class="rounded-md bg-muted/50 px-3 py-2.5"
           >
-            <span class="text-sm font-medium">{{ formatLabel(change.field) }}</span>
-            <div class="mt-1 text-sm">
+            <span class="font-medium">{{ formatLabel(change.field) }}</span>
+            <div class="mt-1">
               <template v-if="log.action === 'updated'">
                 <div class="flex items-start gap-2 text-muted-foreground">
                   <span class="text-red-400 line-through wrap-break-word">{{ formatValue(change.old_value) }}</span>
@@ -132,7 +132,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <p v-else class="text-sm text-muted-foreground">{{ t('auditLogs.noChanges') }}</p>
+        <p v-else class="text-muted-foreground">{{ t('auditLogs.noChanges') }}</p>
       </CardContent>
     </Card>
 
@@ -141,28 +141,28 @@ onMounted(async () => {
         <CardHeader class="pb-3">
           <div class="flex items-center gap-2">
             <Info class="size-4 text-muted-foreground" />
-            <CardTitle class="text-sm font-medium">{{ t('common.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ t('common.details', 'Details') }}</CardTitle>
           </div>
         </CardHeader>
-        <CardContent class="space-y-3 text-sm">
+        <CardContent class="space-y-3">
           <div>
-            <span class="text-muted-foreground text-xs">{{ t('auditLogs.user') }}</span>
+            <span class="text-muted-foreground">{{ t('auditLogs.user') }}</span>
             <p class="font-medium">{{ log.user_name }}</p>
           </div>
           <div>
-            <span class="text-muted-foreground text-xs">{{ t('auditLogs.action') }}</span>
+            <span class="text-muted-foreground">{{ t('auditLogs.action') }}</span>
             <div class="mt-0.5">
-              <Badge variant="outline" :class="[actionVariant(log.action), 'text-xs']">
+              <Badge variant="outline" :class="[actionVariant(log.action), '']">
                 {{ t(`auditLogs.${log.action}`) }}
               </Badge>
             </div>
           </div>
           <div>
-            <span class="text-muted-foreground text-xs">{{ t('auditLogs.resource') }}</span>
+            <span class="text-muted-foreground">{{ t('auditLogs.resource') }}</span>
             <p class="font-medium">{{ formatLabel(log.resource_type) }}</p>
           </div>
           <div>
-            <span class="text-muted-foreground text-xs">{{ t('auditLogs.date') }}</span>
+            <span class="text-muted-foreground">{{ t('auditLogs.date') }}</span>
             <p>{{ formatDateTime(log.created_at) }}</p>
           </div>
           <RouterLink v-if="resourceLink" :to="resourceLink">

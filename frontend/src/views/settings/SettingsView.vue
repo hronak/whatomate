@@ -244,7 +244,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
 <template>
   <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" :icon="Settings" icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20" /> <ScrollArea class="flex-1"> <div class="p-6 space-y-4 max-w-4xl mx-auto"> <Tabs default-value="general" class="w-full"> <TabsList class="grid w-full grid-cols-3 mb-6 bg-muted border border-border"> <TabsTrigger value="general" class="data-[state=active]:bg-card data-[state=active]:text-foreground text-foreground/50"> <Settings class="size-4 mr-2" /> {{ $t('settings.general') }} </TabsTrigger> <TabsTrigger value="notifications" class="data-[state=active]:bg-card data-[state=active]:text-foreground text-foreground/50"> <Bell class="size-4 mr-2" /> {{ $t('settings.notifications') }} </TabsTrigger> <TabsTrigger value="calling" class="data-[state=active]:bg-card data-[state=active]:text-foreground text-foreground/50"> <Phone class="size-4 mr-2" /> {{ $t('settings.calling') }} </TabsTrigger> </TabsList> <!-- General Settings Tab --> <TabsContent value="general"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.generalSettings') }}</h3>
-                <p class="text-sm text-foreground/40">{{ $t('settings.generalSettingsDesc') }}</p>
+                <p class="text-foreground/40">{{ $t('settings.generalSettingsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="space-y-2">
@@ -285,14 +285,14 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     {{ $t('settings.language') }}
                   </Label>
                   <LanguageSwitcher class="max-w-xs" />
-                  <p class="text-xs text-foreground/40">{{ $t('settings.languageDesc') }}</p>
+                  <p class="text-foreground/40">{{ $t('settings.languageDesc') }}</p>
                 </div>
                 <Separator class="bg-muted" />
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.maskPhoneNumbers') }}</p>
-                    <p class="text-sm text-foreground/40">{{ $t('settings.maskPhoneNumbersDesc') }}</p> </div> <Switch :checked="generalSettings.mask_phone_numbers" @update:checked="generalSettings.mask_phone_numbers = $event" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <!-- Meta App Credentials Card (Gated on canWriteAccounts) --> <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.metaAppCredentials') }}</h3>
-                <p class="text-sm text-foreground/40">{{ $t('settings.metaAppCredentialsDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.maskPhoneNumbersDesc') }}</p> </div> <Switch :checked="generalSettings.mask_phone_numbers" @update:checked="generalSettings.mask_phone_numbers = $event" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <!-- Meta App Credentials Card (Gated on canWriteAccounts) --> <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.metaAppCredentials') }}</h3>
+                <p class="text-foreground/40">{{ $t('settings.metaAppCredentialsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -320,13 +320,13 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     type="password"
                     v-model="generalSettings.meta_app_secret"
                     :placeholder="generalSettings.has_meta_app_secret ? '••••••••••••' : 'Enter Meta App Secret'" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="orgID" class="mt-4"> <AuditLogPanel :key="generalLogKey" resource-type="settings.general" :resource-id="orgID" /> </div> </TabsContent> <!-- Notification Settings Tab --> <TabsContent value="notifications"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.notifications') }}</h3>
-                <p class="text-sm text-foreground/40">{{ $t('settings.notificationsDesc') }}</p>
+                <p class="text-foreground/40">{{ $t('settings.notificationsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.emailNotifications') }}</p>
-                    <p class="text-sm text-foreground/40">{{ $t('settings.emailNotificationsDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.emailNotificationsDesc') }}</p>
                   </div>
                   <Switch
                     :checked="notificationSettings.email_notifications"
@@ -337,7 +337,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.newMessageAlerts') }}</p>
-                    <p class="text-sm text-foreground/40">{{ $t('settings.newMessageAlertsDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.newMessageAlertsDesc') }}</p>
                   </div>
                   <Switch
                     :checked="notificationSettings.new_message_alerts"
@@ -348,14 +348,14 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.campaignUpdates') }}</p>
-                    <p class="text-sm text-foreground/40">{{ $t('settings.campaignUpdatesDesc') }}</p> </div> <Switch :checked="notificationSettings.campaign_updates" @update:checked="notificationSettings.campaign_updates = $event" /> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveNotificationSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="userID" class="mt-4"> <AuditLogPanel :key="notificationLogKey" resource-type="settings.notification" :resource-id="userID" /> </div> </TabsContent> <!-- Calling Settings Tab --> <TabsContent value="calling"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.callingSettings') }}</h3>
-                <p class="text-sm text-foreground/40">{{ $t('settings.callingSettingsDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.campaignUpdatesDesc') }}</p> </div> <Switch :checked="notificationSettings.campaign_updates" @update:checked="notificationSettings.campaign_updates = $event" /> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveNotificationSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="userID" class="mt-4"> <AuditLogPanel :key="notificationLogKey" resource-type="settings.notification" :resource-id="userID" /> </div> </TabsContent> <!-- Calling Settings Tab --> <TabsContent value="calling"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.callingSettings') }}</h3>
+                <p class="text-foreground/40">{{ $t('settings.callingSettingsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.callingEnabled') }}</p>
-                    <p class="text-sm text-foreground/40">{{ $t('settings.callingEnabledDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.callingEnabledDesc') }}</p>
                   </div>
                   <Switch
                     :checked="callingSettings.calling_enabled"
@@ -373,7 +373,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                       :min="60"
                       :max="3600"
                     />
-                    <p class="text-xs text-foreground/40">{{ $t('settings.maxCallDurationDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.maxCallDurationDesc') }}</p>
                   </div>
                   <div class="space-y-2">
                     <Label for="transfer_timeout" class="text-foreground/70">{{ $t('settings.transferTimeout') }}</Label>
@@ -384,7 +384,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                       :min="30"
                       :max="600"
                     />
-                    <p class="text-xs text-foreground/40">{{ $t('settings.transferTimeoutDesc') }}</p>
+                    <p class="text-foreground/40">{{ $t('settings.transferTimeoutDesc') }}</p>
                   </div>
                 </div>
                 <Separator class="bg-muted" />
@@ -393,10 +393,10 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   <div>
                     <Label class="text-foreground/70 flex items-center gap-2">
                       <Music class="size-4" />
-                      {{ $t('settings.holdMusic') }} </Label> <p class="text-xs text-foreground/40 mt-1">{{ $t('settings.holdMusicDesc') }}</p>
+                      {{ $t('settings.holdMusic') }} </Label> <p class="text-foreground/40 mt-1">{{ $t('settings.holdMusicDesc') }}</p>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm text-foreground/50">
+                    <span class="text-foreground/50">
                       {{ callingSettings.hold_music_file ? `${$t('settings.currentFile')}: ${callingSettings.hold_music_file}` : $t('settings.noFileUploaded') }} </span> <Button v-if="callingSettings.hold_music_file" variant="ghost" size="sm" class="size-8 p-0 text-foreground/50 hover:text-foreground" @click="togglePlayAudio('hold_music')"
                     >
                       <Pause v-if="playingHoldMusic" class="size-4" />
@@ -406,7 +406,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   <div class="flex items-center gap-2">
                     <input ref="holdMusicInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('hold_music', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="holdMusicInput?.click()" :disabled="isUploadingHoldMusic"> <Loader2 v-if="isUploadingHoldMusic" class="mr-2 size-4 animate-spin" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }}
                     </Button>
-                    <span class="text-xs text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span>
+                    <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span>
                   </div>
                 </div>
                 <!-- Ringback Tone Upload -->
@@ -414,10 +414,10 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   <div>
                     <Label class="text-foreground/70 flex items-center gap-2">
                       <Phone class="size-4" />
-                      {{ $t('settings.ringbackTone') }} </Label> <p class="text-xs text-foreground/40 mt-1">{{ $t('settings.ringbackToneDesc') }}</p>
+                      {{ $t('settings.ringbackTone') }} </Label> <p class="text-foreground/40 mt-1">{{ $t('settings.ringbackToneDesc') }}</p>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm text-foreground/50">
+                    <span class="text-foreground/50">
                       {{ callingSettings.ringback_file ? `${$t('settings.currentFile')}: ${callingSettings.ringback_file}` : $t('settings.noFileUploaded') }} </span> <Button v-if="callingSettings.ringback_file" variant="ghost" size="sm" class="size-8 p-0 text-foreground/50 hover:text-foreground" @click="togglePlayAudio('ringback')"
                     >
                       <Pause v-if="playingRingback" class="size-4" />
@@ -425,7 +425,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     </Button>
                   </div>
                   <div class="flex items-center gap-2">
-                    <input ref="ringbackInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('ringback', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="ringbackInput?.click()" :disabled="isUploadingRingback"> <Loader2 v-if="isUploadingRingback" class="mr-2 size-4 animate-spin" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }} </Button> <span class="text-xs text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span> </div> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveCallingSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }}
+                    <input ref="ringbackInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('ringback', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="ringbackInput?.click()" :disabled="isUploadingRingback"> <Loader2 v-if="isUploadingRingback" class="mr-2 size-4 animate-spin" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }} </Button> <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span> </div> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveCallingSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }}
                   </Button>
                 </div>
               </div>

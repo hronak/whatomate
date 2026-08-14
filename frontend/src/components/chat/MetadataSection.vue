@@ -47,7 +47,7 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
 
 <template>
   <Collapsible v-model:open="isOpen" class="border-t pt-3">
-    <CollapsibleTrigger class="flex items-center justify-between w-full py-1 text-sm font-medium hover:text-primary transition-colors">
+    <CollapsibleTrigger class="flex items-center justify-between w-full py-1 font-medium hover:text-primary transition-colors">
       <span>
         {{ label }}
         <span v-if="isArrayOfObjects(data)" class="text-muted-foreground font-normal">({{ data.length }})</span>
@@ -67,15 +67,15 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
           :key="key"
           class="flex justify-between items-start px-3 py-1.5 border-b border-muted/50 last:border-0"
         >
-          <span class="text-xs text-muted-foreground shrink-0">{{ formatLabel(String(key)) }}</span>
+          <span class="text-muted-foreground shrink-0">{{ formatLabel(String(key)) }}</span>
           <Badge
             v-if="typeof val === 'boolean'"
             :variant="val ? 'default' : 'secondary'"
-            class="text-[10px] ml-2"
+            class="ml-2"
           >
             {{ val ? 'Yes' : 'No' }}
           </Badge>
-          <span v-else class="text-xs font-medium text-right max-w-[60%] wrap-break-word ml-2">
+          <span v-else class="font-medium text-right max-w-[60%] wrap-break-word ml-2">
             {{ formatValue(val) }}
           </span>
         </div>
@@ -83,7 +83,7 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
 
       <!-- Array of objects: table -->
       <div v-else-if="isArrayOfObjects(data)" class="mt-2 rounded-md border overflow-x-auto">
-        <table class="w-full text-xs">
+        <table class="w-full">
           <thead>
             <tr class="border-b bg-muted/50">
               <th
@@ -115,7 +115,7 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
 
       <!-- Array of primitives: inline badges -->
       <div v-else-if="isArrayOfPrimitives(data)" class="mt-2 flex flex-wrap gap-1.5">
-        <Badge v-for="(item, idx) in data" :key="idx" variant="secondary" class="text-xs">
+        <Badge v-for="(item, idx) in data" :key="idx" variant="secondary">
           {{ String(item) }}
         </Badge>
       </div>
@@ -123,15 +123,15 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
       <!-- Single primitive (fallback) -->
       <div v-else class="mt-2 rounded-md border">
         <div class="flex justify-between items-start px-3 py-1.5">
-          <span class="text-xs text-muted-foreground">{{ label }}</span>
+          <span class="text-muted-foreground">{{ label }}</span>
           <Badge
             v-if="typeof data === 'boolean'"
             :variant="data ? 'default' : 'secondary'"
-            class="text-[10px] ml-2"
+            class="ml-2"
           >
             {{ data ? 'Yes' : 'No' }}
           </Badge>
-          <span v-else class="text-xs font-medium text-right max-w-[60%] wrap-break-word ml-2">
+          <span v-else class="font-medium text-right max-w-[60%] wrap-break-word ml-2">
             {{ formatValue(data) }}
           </span>
         </div>

@@ -176,35 +176,35 @@ const handleLogout = () => {
         >
           <Avatar class="size-7 ring-2 ring-border">
             <AvatarImage :src="undefined" />
-            <AvatarFallback class="text-xs bg-linear-to-br from-emerald-500 to-green-600 text-white">
+            <AvatarFallback class="bg-linear-to-br from-emerald-500 to-green-600 text-white">
               {{ getInitials(authStore.user?.full_name || 'U') }}
             </AvatarFallback>
           </Avatar>
           <div v-if="!collapsed" class="flex flex-col items-start text-left">
-            <span class="text-[13px] font-medium truncate max-w-[140px] text-foreground">
+            <span class="font-medium truncate max-w-[140px] text-foreground">
               {{ authStore.user?.full_name }}
             </span>
-            <span class="text-[11px] text-foreground/40 truncate max-w-[140px]">
+            <span class="text-foreground/40 truncate max-w-[140px]">
               {{ authStore.user?.email }}
             </span>
           </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent side="top" align="start" class="w-52 p-1.5 bg-white dark:bg-[#141414] border-border">
-        <div class="text-xs font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.myAccount') }}</div>
+        <div class="font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.myAccount') }}</div>
         <Separator class="my-1 bg-muted" />
         <!-- Availability Toggle -->
         <div class="flex items-center justify-between px-2 py-1.5">
           <div class="flex items-center gap-2">
-            <span class="text-[13px] text-foreground/70">{{ $t('userMenu.status') }}</span>
+            <span class="text-foreground/70">{{ $t('userMenu.status') }}</span>
             <Badge
-              :class="'text-[10px] px-1.5 py-0 ' + (authStore.isAvailable
+              :class="'px-1.5 py-0 ' + (authStore.isAvailable
                   ? 'bg-success/20 text-success'
                   : 'bg-muted text-foreground/50')"
             >
               {{ authStore.isAvailable ? $t('userMenu.available') : $t('userMenu.away') }}
             </Badge>
-            <span v-if="!authStore.isAvailable && breakDuration" class="text-[10px] text-foreground/40">
+            <span v-if="!authStore.isAvailable && breakDuration" class="text-foreground/40">
               {{ breakDuration }}
             </span>
           </div>
@@ -219,7 +219,7 @@ const handleLogout = () => {
         <RouterLink to="/profile">
           <Button
             variant="ghost"
-            class="w-full justify-start px-2 py-1 h-auto text-[13px] font-normal text-foreground/70 hover:text-foreground hover:bg-accent"
+            class="w-full justify-start px-2 py-1 h-auto font-normal text-foreground/70 hover:text-foreground hover:bg-accent"
             @click="isUserMenuOpen = false"
           >
             <User class="mr-2 size-3.5" aria-hidden="true" />
@@ -227,17 +227,17 @@ const handleLogout = () => {
           </Button>
         </RouterLink>
         <Separator class="my-1 bg-muted" />
-        <div class="text-xs font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.theme') }}</div>
+        <div class="font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.theme') }}</div>
         <ThemeSwitcher />
         <Separator class="my-1 bg-muted" />
-        <div class="text-xs font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.language') }}</div>
+        <div class="font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.language') }}</div>
         <div class="px-1.5 py-1">
           <LanguageSwitcher />
         </div>
         <Separator class="my-1 bg-muted" />
         <Button
           variant="ghost"
-          class="w-full justify-start px-2 py-1 h-auto text-[13px] font-normal text-foreground/70 hover:text-foreground hover:bg-accent"
+          class="w-full justify-start px-2 py-1 h-auto font-normal text-foreground/70 hover:text-foreground hover:bg-accent"
           @click="handleLogout"
         >
           <LogOut class="mr-2 size-3.5" aria-hidden="true" />

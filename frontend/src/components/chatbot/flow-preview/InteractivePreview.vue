@@ -150,7 +150,7 @@ function handleGoToStep(stepName: string) {
           <!-- Screen -->
           <div class="flex-1 rounded-[32px] overflow-hidden flex flex-col bg-[#efeae2] dark:bg-[#0b141a]">
             <!-- iOS-ish status bar -->
-            <div class="bg-[#008069] dark:bg-[#202c33] text-white px-5 py-1 flex items-center justify-between text-[11px] font-medium shrink-0">
+            <div class="bg-[#008069] dark:bg-[#202c33] text-white px-5 py-1 flex items-center justify-between font-medium shrink-0">
               <span>9:41</span>
               <div class="flex items-center gap-1">
                 <!-- signal -->
@@ -166,8 +166,8 @@ function handleGoToStep(stepName: string) {
                 <MessageSquare class="size-4" />
               </div>
               <div class="flex-1 min-w-0">
-                <p class="font-medium text-sm truncate">{{ flowData.name || 'Flow Preview' }}</p>
-                <p class="text-[11px] text-white/80 truncate">
+                <p class="font-medium truncate">{{ flowData.name || 'Flow Preview' }}</p>
+                <p class="text-white/80 truncate">
                   <template v-if="state.status === 'idle'">tap Start to begin</template>
                   <template v-else-if="state.currentStepName">{{ state.currentStepName }}</template>
                   <template v-else>{{ state.status }}</template>
@@ -181,7 +181,7 @@ function handleGoToStep(stepName: string) {
               <!-- Idle State -->
               <div v-if="state.status === 'idle' && state.messages.length === 0" class="text-center py-12">
                 <MessageSquare class="size-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-gray-500 dark:text-gray-400">
                   Start the preview to simulate the flow
                 </p>
               </div>
@@ -200,12 +200,12 @@ function handleGoToStep(stepName: string) {
               >
                 <div class="max-w-[85%]">
                   <button
-                    class="px-4 py-2 bg-[#075e54] text-white text-sm rounded-lg hover:bg-[#064e46] transition-colors"
+                    class="px-4 py-2 bg-[#075e54] text-white rounded-lg hover:bg-[#064e46] transition-colors"
                     @click="handleWhatsAppFlowComplete"
                   >
                     {{ currentStep.input_config?.flow_cta || 'Open Form' }}
                   </button>
-                  <p class="text-[10px] text-gray-500 mt-1 italic">Simulated: clicks complete the flow</p>
+                  <p class="text-gray-500 mt-1 italic">Simulated: clicks complete the flow</p>
                 </div>
               </div>
 

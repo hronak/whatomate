@@ -177,17 +177,17 @@ onMounted(async () => {
       <!-- Create form -->
       <Card v-if="isNew">
         <CardHeader class="pb-3">
-          <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('apiKeys.name') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('apiKeys.name') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.name" :placeholder="$t('apiKeys.namePlaceholder')" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('apiKeys.expiration') }}</Label>
+            <Label>{{ $t('apiKeys.expiration') }}</Label>
             <Input v-model="form.expires_at" type="datetime-local" />
-            <p class="text-xs text-muted-foreground">{{ $t('apiKeys.expirationHint') }}</p>
+            <p class="text-muted-foreground">{{ $t('apiKeys.expirationHint') }}</p>
           </div>
         </CardContent>
       </Card>
@@ -196,7 +196,7 @@ onMounted(async () => {
       <Card v-else>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <Badge :variant="statusVariant">{{ statusLabel }}</Badge>
           </div>
         </CardHeader>
@@ -207,29 +207,29 @@ onMounted(async () => {
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ apiKey?.name }}</p>
-              <code class="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">whm_{{ apiKey?.key_prefix }}...</code>
+              <code class="text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">whm_{{ apiKey?.key_prefix }}...</code>
             </div>
           </div>
 
           <div class="grid gap-4">
             <div class="space-y-1">
-              <p class="text-xs text-muted-foreground">{{ $t('common.createdAt', 'Created') }}</p>
-              <p class="text-sm">{{ apiKey?.created_at ? formatDateTime(apiKey.created_at) : '—' }}</p>
+              <p class="text-muted-foreground">{{ $t('common.createdAt', 'Created') }}</p>
+              <p>{{ apiKey?.created_at ? formatDateTime(apiKey.created_at) : '—' }}</p>
             </div>
             <div class="space-y-1">
-              <p class="text-xs text-muted-foreground">{{ $t('apiKeys.lastUsedAt', 'Last Used') }}</p>
-              <p class="text-sm">{{ apiKey?.last_used_at ? formatDateTime(apiKey.last_used_at) : '—' }}</p>
+              <p class="text-muted-foreground">{{ $t('apiKeys.lastUsedAt', 'Last Used') }}</p>
+              <p>{{ apiKey?.last_used_at ? formatDateTime(apiKey.last_used_at) : '—' }}</p>
             </div>
             <div class="space-y-1">
-              <p class="text-xs text-muted-foreground">{{ $t('apiKeys.expiresAt', 'Expires') }}</p>
+              <p class="text-muted-foreground">{{ $t('apiKeys.expiresAt', 'Expires') }}</p>
               <div class="flex items-center gap-2">
-                <p class="text-sm">{{ apiKey?.expires_at ? formatDateTime(apiKey.expires_at) : $t('apiKeys.never', 'Never') }}</p>
-                <Badge v-if="isExpired" variant="destructive" class="text-xs">{{ $t('apiKeys.expired', 'Expired') }}</Badge>
+                <p>{{ apiKey?.expires_at ? formatDateTime(apiKey.expires_at) : $t('apiKeys.never', 'Never') }}</p>
+                <Badge v-if="isExpired" variant="destructive">{{ $t('apiKeys.expired', 'Expired') }}</Badge>
               </div>
             </div>
           </div>
           <div v-if="canWrite" class="flex items-center justify-between border-t pt-4">
-            <Label class="text-xs font-normal cursor-pointer">{{ $t('common.active') }}</Label>
+            <Label class="font-normal cursor-pointer">{{ $t('common.active') }}</Label>
             <Switch
               :checked="apiKey?.is_active ?? false"
               :disabled="isExpired"
@@ -262,13 +262,13 @@ onMounted(async () => {
           <div class="space-y-2">
             <Label>{{ $t('apiKeys.yourApiKey') }}</Label>
             <div class="flex gap-2">
-              <Input :model-value="newlyCreatedKey?.key" readonly class="font-mono text-sm" />
+              <Input :model-value="newlyCreatedKey?.key" readonly class="font-mono" />
               <IconButton :icon="Copy" :label="$t('apiKeys.copyApiKey')" variant="outline" @click="copyToClipboard(newlyCreatedKey?.key || '')" />
             </div>
           </div>
-          <div class="bg-muted p-3 rounded-lg text-sm">
+          <div class="bg-muted p-3 rounded-lg">
             <p class="font-medium mb-1">{{ $t('apiKeys.usage') }}:</p>
-            <code class="text-xs">curl -H "X-API-Key: {{ newlyCreatedKey?.key }}" https://your-api.com/api/contacts</code>
+            <code>curl -H "X-API-Key: {{ newlyCreatedKey?.key }}" https://your-api.com/api/contacts</code>
           </div>
         </div>
         <DialogFooter>

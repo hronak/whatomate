@@ -90,10 +90,10 @@ async function handleAccept(id: string) {
           <Phone v-else class="size-4 text-green-400" />
         </div>
         <div>
-          <p class="text-sm font-medium text-zinc-100">
+          <p class="font-medium text-zinc-100">
             {{ displayName }}
           </p>
-          <p class="text-xs text-zinc-400">{{ statusText }}</p>
+          <p class="text-zinc-400">{{ statusText }}</p>
         </div>
       </div>
 

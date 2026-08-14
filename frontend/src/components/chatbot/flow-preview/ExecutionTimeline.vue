@@ -116,7 +116,7 @@ const formattedEntries = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-1 text-xs">
+  <div class="space-y-1">
     <div
       v-for="entry in formattedEntries"
       :key="entry.id"

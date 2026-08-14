@@ -261,7 +261,7 @@ async function handleFileChange(event: Event) {
           </div>
           <div class="flex-1">
             <Label>{{ $t('businessProfile.profilePicture') }}</Label>
-            <p class="text-xs text-muted-foreground mt-1">
+            <p class="text-muted-foreground mt-1">
               {{ $t('businessProfile.profilePictureHint') }}
             </p>
           </div>
@@ -271,14 +271,14 @@ async function handleFileChange(event: Event) {
         <div class="md:col-span-2 space-y-2">
           <Label for="about">{{ $t('businessProfile.about') }}</Label>
           <Input id="about" v-model="profile.about" :placeholder="$t('businessProfile.aboutPlaceholder')" maxlength="139" />
-          <p class="text-xs text-muted-foreground text-right">{{ profile.about.length }}/139</p>
+          <p class="text-muted-foreground text-right">{{ profile.about.length }}/139</p>
         </div>
 
         <!-- Description -->
         <div class="md:col-span-2 space-y-2">
           <Label for="description">{{ $t('businessProfile.businessDescription') }}</Label>
           <Textarea id="description" v-model="profile.description" :placeholder="$t('businessProfile.descriptionPlaceholder')" :rows="3" maxlength="512" />
-          <p class="text-xs text-muted-foreground text-right">{{ profile.description.length }}/512</p>
+          <p class="text-muted-foreground text-right">{{ profile.description.length }}/512</p>
         </div>
 
         <!-- Vertical (Category) -->

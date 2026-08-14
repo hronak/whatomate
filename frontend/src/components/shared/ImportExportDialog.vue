@@ -262,19 +262,19 @@ function downloadSampleCsv() {
           <template v-else>
             <!-- Column Info -->
             <div class="space-y-2">
-              <div class="text-sm">
+              <div>
                 <span class="font-medium">{{ $t('importExport.requiredColumns') }}:</span>
                 <span class="text-muted-foreground ml-1">
                   {{ importRequiredColumns.map(c => translateColumnLabel(c)).join(', ') }}
                 </span>
               </div>
-              <div v-if="importOptionalColumns.length > 0" class="text-sm">
+              <div v-if="importOptionalColumns.length > 0">
                 <span class="font-medium">{{ $t('importExport.optionalColumns') }}:</span>
                 <span class="text-muted-foreground ml-1">
                   {{ importOptionalColumns.map(c => translateColumnLabel(c)).join(', ') }}
                 </span>
               </div>
-              <Button variant="link" size="sm" class="h-auto p-0 text-xs" @click="downloadSampleCsv">
+              <Button variant="link" size="sm" class="h-auto p-0" @click="downloadSampleCsv">
                 <FileSpreadsheet class="size-3 mr-1" />
                 {{ $t('importExport.downloadSample') }}
               </Button>
@@ -297,7 +297,7 @@ function downloadSampleCsv() {
                 :checked="updateOnDuplicate"
                 @update:checked="updateOnDuplicate = !!$event"
               />
-              <Label for="update-dup" class="cursor-pointer font-normal text-sm">
+              <Label for="update-dup" class="cursor-pointer font-normal">
                 {{ $t('importExport.updateExisting') }}
               </Label>
             </div>
@@ -309,13 +309,13 @@ function downloadSampleCsv() {
                 <AlertCircle v-else class="size-4 text-amber-500" />
                 <span class="font-medium">{{ $t('importExport.importComplete') }}</span>
               </div>
-              <div class="text-sm text-muted-foreground space-y-1">
+              <div class="text-muted-foreground space-y-1">
                 <p>{{ $t('importExport.created') }}: {{ importResult.created }}</p>
                 <p>{{ $t('importExport.updated') }}: {{ importResult.updated }}</p>
                 <p v-if="importResult.skipped > 0">{{ $t('importExport.skipped') }}: {{ importResult.skipped }}</p>
                 <p v-if="importResult.errors > 0" class="text-amber-500">{{ $t('importExport.errors') }}: {{ importResult.errors }}</p>
               </div>
-              <ScrollArea v-if="importResult.messages && importResult.messages.length > 0" class="h-24 text-xs">
+              <ScrollArea v-if="importResult.messages && importResult.messages.length > 0" class="h-24">
                 <div v-for="(msg, i) in importResult.messages" :key="i" class="text-amber-500">{{ msg }}</div>
               </ScrollArea>
             </div>

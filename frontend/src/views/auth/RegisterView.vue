@@ -83,7 +83,7 @@ const handleRegister = async () => {
       <template v-if="!organizationId">
         <CardContent>
           <div class="text-center py-4">
-            <p class="text-sm text-muted-foreground">
+            <p class="text-muted-foreground">
               {{ $t('auth.invitationRequired') }}
             </p>
           </div>
@@ -150,7 +150,7 @@ const handleRegister = async () => {
             <Loader2 v-if="isLoading" class="mr-2 size-4 animate-spin" />
             {{ $t('auth.createAccountBtn') }}
           </Button>
-          <p class="text-sm text-center text-muted-foreground">
+          <p class="text-center text-muted-foreground">
             {{ $t('auth.alreadyHaveAccount') }}
             <RouterLink to="/login" class="text-primary hover:underline">
               {{ $t('auth.signIn') }}

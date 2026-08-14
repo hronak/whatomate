@@ -230,7 +230,7 @@ onMounted(async () => {
     <Card>
       <CardHeader class="pb-3">
         <div class="flex items-center justify-between">
-          <CardTitle class="text-sm font-medium">{{ $t('keywords.details', 'Details') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('keywords.details', 'Details') }}</CardTitle>
           <Badge :variant="(keyword?.enabled ?? form.enabled) ? 'default' : 'secondary'">
             {{ (keyword?.enabled ?? form.enabled) ? $t('keywords.active', 'Active') : $t('keywords.inactive', 'Inactive') }}
           </Badge>
@@ -238,16 +238,16 @@ onMounted(async () => {
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('keywords.keywordsLabel', 'Keywords') }} *</Label>
+          <Label>{{ $t('keywords.keywordsLabel', 'Keywords') }} *</Label>
           <Input
             v-model="form.keywords"
             :placeholder="$t('keywords.keywordsPlaceholder', 'hello, hi, hey')"
             :disabled="!canWrite"
           />
-          <p class="text-xs text-muted-foreground">{{ $t('keywords.keywordsHint', 'Comma-separated list of keywords') }}</p>
+          <p class="text-muted-foreground">{{ $t('keywords.keywordsHint', 'Comma-separated list of keywords') }}</p>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('keywords.matchTypeLabel', 'Match Type') }}</Label>
+          <Label>{{ $t('keywords.matchTypeLabel', 'Match Type') }}</Label>
           <Select v-model="form.match_type" :disabled="!canWrite">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -258,7 +258,7 @@ onMounted(async () => {
           </Select>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('keywords.responseType', 'Response Type') }}</Label>
+          <Label>{{ $t('keywords.responseType', 'Response Type') }}</Label>
           <Select v-model="form.response_type" :disabled="!canWrite">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -268,7 +268,7 @@ onMounted(async () => {
           </Select>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">
+          <Label>
             {{ form.response_type === 'transfer' ? $t('keywords.transferMessage', 'Transfer Message') : $t('keywords.responseMessage', 'Response Message') }}
             <span v-if="form.response_type !== 'transfer'">*</span>
           </Label>
@@ -278,7 +278,7 @@ onMounted(async () => {
             :rows="3"
             :disabled="!canWrite"
           />
-          <p v-if="form.response_type === 'transfer'" class="text-xs text-muted-foreground">
+          <p v-if="form.response_type === 'transfer'" class="text-muted-foreground">
             {{ $t('keywords.transferHint', 'Optional message sent before transferring to a human agent') }}
           </p>
         </div>
@@ -286,13 +286,13 @@ onMounted(async () => {
         <!-- Buttons Section (only for text responses) -->
         <div v-if="form.response_type === 'text'" class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <Label class="text-xs">{{ $t('keywords.buttonsOptional', 'Buttons (optional)') }}</Label>
+            <Label>{{ $t('keywords.buttonsOptional', 'Buttons (optional)') }}</Label>
             <Button
               v-if="canWrite"
               type="button"
               variant="outline"
               size="sm"
-              class="h-7 text-xs"
+              class="h-7"
               @click="addButton"
               :disabled="form.buttons.length >= 10"
             >
@@ -300,7 +300,7 @@ onMounted(async () => {
               {{ $t('keywords.addButton', 'Add Button') }}
             </Button>
           </div>
-          <p class="text-xs text-muted-foreground">
+          <p class="text-muted-foreground">
             {{ $t('keywords.buttonsHint', 'Add quick-reply buttons to the response message') }}
           </p>
           <div v-if="form.buttons.length > 0" class="space-y-2 mt-2">
@@ -333,7 +333,7 @@ onMounted(async () => {
         </div>
 
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('keywords.priorityLabel', 'Priority') }}</Label>
+          <Label>{{ $t('keywords.priorityLabel', 'Priority') }}</Label>
           <Input
             v-model.number="form.priority"
             type="number"
@@ -344,7 +344,7 @@ onMounted(async () => {
         </div>
         <div class="flex items-center gap-2">
           <Switch :checked="form.enabled" @update:checked="form.enabled = $event" :disabled="!canWrite" />
-          <Label class="text-xs">{{ $t('keywords.enabled', 'Enabled') }}</Label>
+          <Label>{{ $t('keywords.enabled', 'Enabled') }}</Label>
         </div>
       </CardContent>
     </Card>

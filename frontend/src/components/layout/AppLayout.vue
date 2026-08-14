@@ -113,7 +113,7 @@ const handleLogout = async () => {
         <div class="size-7 rounded-lg bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
           <MessageSquare class="size-4 text-white" />
         </div>
-        <span class="font-semibold text-sm text-foreground">Whatomate</span>
+        <span class="font-semibold text-foreground">Whatomate</span>
       </RouterLink>
       <Button
         variant="ghost"
@@ -149,7 +149,7 @@ const handleLogout = async () => {
           </div>
           <span
             v-if="!isCollapsed"
-            class="font-semibold text-sm text-foreground"
+            class="font-semibold text-foreground"
           >
             Whatomate
           </span>
@@ -179,7 +179,7 @@ const handleLogout = async () => {
             <!-- Section header -->
             <div
               v-if="section.label && !isCollapsed"
-              :class="['px-2.5 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/30', sIdx === 0 && 'pt-1']"
+              :class="['px-2.5 pt-4 pb-1 font-semibold uppercase tracking-wider text-foreground/30', sIdx === 0 && 'pt-1']"
             >
               {{ $t(section.label) }}
             </div>
@@ -190,7 +190,7 @@ const handleLogout = async () => {
               <template v-for="item in section.items" :key="item.path">
                 <RouterLink
                   :to="item.path"
-                  :class="[ 'nav-active-indicator btn-press flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-200', item.active ? 'bg-muted text-foreground' : 'text-foreground/50 hover:text-foreground hover:bg-accent', isCollapsed && 'md:justify-center md:px-2' ]"
+                  :class="[ 'nav-active-indicator btn-press flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium transition-all duration-200', item.active ? 'bg-muted text-foreground' : 'text-foreground/50 hover:text-foreground hover:bg-accent', isCollapsed && 'md:justify-center md:px-2' ]"
                   :data-active="item.active"
                   role="menuitem"
                   :aria-current="item.active ? 'page' : undefined"
@@ -206,7 +206,7 @@ const handleLogout = async () => {
                     v-for="child in item.children"
                     :key="child.path"
                     :to="child.path"
-                    :class="[ 'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-all duration-200 ml-4', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-accent' ]"
+                    :class="[ 'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-medium transition-all duration-200 ml-4', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-accent' ]"
                     role="menuitem"
                     :aria-current="route.path === child.path ? 'page' : undefined"
                     @click="isMobileMenuOpen = false"
@@ -227,7 +227,7 @@ const handleLogout = async () => {
           <template v-for="item in section.items" :key="item.path">
             <RouterLink
               :to="item.path"
-              :class="[ 'nav-active-indicator btn-press flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-200', item.active ? 'bg-muted text-foreground' : 'text-foreground/50 hover:text-foreground hover:bg-accent', isCollapsed && 'md:justify-center md:px-2' ]"
+              :class="[ 'nav-active-indicator btn-press flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium transition-all duration-200', item.active ? 'bg-muted text-foreground' : 'text-foreground/50 hover:text-foreground hover:bg-accent', isCollapsed && 'md:justify-center md:px-2' ]"
               :data-active="item.active"
               role="menuitem"
               :aria-current="item.active ? 'page' : undefined"
@@ -242,7 +242,7 @@ const handleLogout = async () => {
                 v-for="child in item.children"
                 :key="child.path"
                 :to="child.path"
-                :class="[ 'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-all duration-200 ml-4', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-accent' ]"
+                :class="[ 'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-medium transition-all duration-200 ml-4', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-accent' ]"
                 role="menuitem"
                 :aria-current="route.path === child.path ? 'page' : undefined"
                 @click="isMobileMenuOpen = false"

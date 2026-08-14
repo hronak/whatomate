@@ -344,21 +344,21 @@ async function confirmDelete() {
                   </RouterLink>
                 </template>
                 <template #cell-app_id="{ item: account }">
-                  <code v-if="account.app_id" class="text-xs bg-muted px-1.5 py-0.5 rounded">{{ account.app_id }}</code>
+                  <code v-if="account.app_id" class="bg-muted px-1.5 py-0.5 rounded">{{ account.app_id }}</code>
                   <span v-else class="text-muted-foreground">—</span>
                 </template>
                 <template #cell-phone_id="{ item: account }">
-                  <code class="text-xs bg-muted px-1.5 py-0.5 rounded">{{ account.phone_id }}</code>
+                  <code class="bg-muted px-1.5 py-0.5 rounded">{{ account.phone_id }}</code>
                 </template>
                 <template #cell-api_version="{ item: account }">
-                  <span class="text-sm">{{ account.api_version }}</span>
+                  <span>{{ account.api_version }}</span>
                 </template>
                 <template #cell-defaults="{ item: account }">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <Badge v-if="account.is_default_incoming" variant="outline" class="text-[10px]">
+                    <Badge v-if="account.is_default_incoming" variant="outline">
                       <Check class="size-2.5 mr-0.5" /> {{ $t('accounts.incoming') }}
                     </Badge>
-                    <Badge v-if="account.is_default_outgoing" variant="outline" class="text-[10px]">
+                    <Badge v-if="account.is_default_outgoing" variant="outline">
                       <Check class="size-2.5 mr-0.5" /> {{ $t('accounts.outgoing') }}
                     </Badge>
                   </div>
@@ -426,7 +426,7 @@ async function confirmDelete() {
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
-              <span class="text-[10px] bg-success/10 text-success border border-success/20 px-2 py-0.5 rounded-full font-medium">
+              <span class="bg-success/10 text-success border border-success/20 px-2 py-0.5 rounded-full font-medium">
                 {{ $t('accounts.coexistenceRecommend') }}
               </span>
             </div>
@@ -438,11 +438,11 @@ async function confirmDelete() {
             <h3 class="text-base font-semibold text-foreground group-hover:text-success transition-colors duration-200">
               {{ $t('accounts.coexistenceTitle') }}
             </h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 grow leading-relaxed">
+            <p class="text-gray-600 dark:text-gray-400 mt-2 grow leading-relaxed">
               {{ $t('accounts.coexistenceDesc') }}
             </p>
 
-            <div class="mt-5 flex items-center justify-between text-xs font-medium text-success">
+            <div class="mt-5 flex items-center justify-between font-medium text-success">
               <span>{{ $t('accounts.selectMode') }}</span>
               <span class="group-hover:translate-x-1 transition-transform duration-200">→</span>
             </div>
@@ -455,7 +455,7 @@ async function confirmDelete() {
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
-              <span class="text-[10px] bg-info/10 text-info border border-info/20 px-2 py-0.5 rounded-full font-medium">
+              <span class="bg-info/10 text-info border border-info/20 px-2 py-0.5 rounded-full font-medium">
                 {{ $t('accounts.classicRecommend') }}
               </span>
             </div>
@@ -467,11 +467,11 @@ async function confirmDelete() {
             <h3 class="text-base font-semibold text-foreground group-hover:text-info transition-colors duration-200">
               {{ $t('accounts.classicTitle') }}
             </h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 grow leading-relaxed">
+            <p class="text-gray-600 dark:text-gray-400 mt-2 grow leading-relaxed">
               {{ $t('accounts.classicDesc') }}
             </p>
 
-            <div class="mt-5 flex items-center justify-between text-xs font-medium text-info">
+            <div class="mt-5 flex items-center justify-between font-medium text-info">
               <span>{{ $t('accounts.selectMode') }}</span>
               <span class="group-hover:translate-x-1 transition-transform duration-200">→</span>
             </div>

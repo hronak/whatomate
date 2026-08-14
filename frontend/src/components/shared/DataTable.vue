@@ -207,7 +207,7 @@ function getRowKey(item: T, index: number): string {
               <component :is="emptyIcon" class="size-7 text-primary/60" />
             </div>
             <p v-if="emptyTitle">{{ emptyTitle }}</p>
-            <p v-if="emptyDescription" class="text-sm">{{ emptyDescription }}</p>
+            <p v-if="emptyDescription">{{ emptyDescription }}</p>
             <div class="mt-3">
               <slot name="empty-action" />
             </div>

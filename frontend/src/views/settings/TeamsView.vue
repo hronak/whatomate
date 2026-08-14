@@ -159,7 +159,7 @@ async function confirmDelete() {
                 <template #cell-strategy="{ item: team }">
                   <div class="flex items-center gap-2">
                     <component :is="getStrategyIcon(team.assignment_strategy)" class="size-4 text-muted-foreground" />
-                    <span class="text-sm">{{ getStrategyLabel(team.assignment_strategy) }}</span>
+                    <span>{{ getStrategyLabel(team.assignment_strategy) }}</span>
                   </div>
                 </template>
                 <template #cell-members="{ item: team }">

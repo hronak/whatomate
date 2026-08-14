@@ -118,7 +118,7 @@ const localListPickerOpen = computed({
         </Button>
       </div>
 
-      <div class="text-xs text-gray-500 dark:text-gray-400">
+      <div class="text-gray-500 dark:text-gray-400">
         {{ mode === 'edit' ? 'Read-only preview of selected step' : 'Interactive flow simulation' }}
       </div>
     </div>
@@ -138,16 +138,16 @@ const localListPickerOpen = computed({
               <div class="inline-flex items-center justify-center size-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
                 <component :is="controlNodeInfo.icon" class="size-6 text-gray-600 dark:text-gray-300" />
               </div>
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+              <p class="font-medium text-gray-900 dark:text-gray-100 mb-1">
                 {{ controlNodeInfo.label }}
               </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              <p class="text-gray-500 dark:text-gray-400 mb-4">
                 {{ controlNodeInfo.description }}
               </p>
-              <p v-if="selectedStep.message" class="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 rounded px-3 py-2 text-left">
+              <p v-if="selectedStep.message" class="text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 rounded px-3 py-2 text-left">
                 {{ selectedStep.message }}
               </p>
-              <p v-else class="text-xs text-gray-400 italic">
+              <p v-else class="text-gray-400 italic">
                 Use the right panel to configure this step.
               </p>
             </div>
@@ -164,8 +164,8 @@ const localListPickerOpen = computed({
                     <MessageSquare class="size-5" />
                   </div>
                   <div>
-                    <p class="font-medium text-sm">{{ flowData.name || 'WhatsApp Preview' }}</p>
-                    <p class="text-xs text-white/70">Step {{ (selectedStepIndex ?? 0) + 1 }}: {{ selectedStep.step_name }}</p>
+                    <p class="font-medium">{{ flowData.name || 'WhatsApp Preview' }}</p>
+                    <p class="text-white/70">Step {{ (selectedStepIndex ?? 0) + 1 }}: {{ selectedStep.step_name }}</p>
                   </div>
                 </div>
 
@@ -176,9 +176,9 @@ const localListPickerOpen = computed({
                   <div class="flex justify-start">
                     <div class="max-w-[85%]">
                       <div class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none shadow-xs p-3">
-                        <p v-if="selectedStep.message" class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ selectedStep.message }}</p>
-                        <p v-else class="text-sm text-gray-400 italic">No message configured</p>
-                        <p class="text-[10px] text-gray-400 text-right mt-1">12:00 PM</p>
+                        <p v-if="selectedStep.message" class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ selectedStep.message }}</p>
+                        <p v-else class="text-gray-400 italic">No message configured</p>
+                        <p class="text-gray-400 text-right mt-1">12:00 PM</p>
                       </div>
 
                       <!-- Interactive Buttons (up to 3) -->
@@ -186,7 +186,7 @@ const localListPickerOpen = computed({
                         <button
                           v-for="(btn, idx) in selectedStep.buttons"
                           :key="idx"
-                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
+                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
                         >
                           <ExternalLink v-if="btn.type === 'url'" class="size-4" />
                           {{ btn.title || `Option ${idx + 1}` }}
@@ -196,7 +196,7 @@ const localListPickerOpen = computed({
                       <!-- List Button (more than 3 options) -->
                       <div v-if="selectedStep.message_type === 'buttons' && selectedStep.buttons.length > 3" class="mt-1">
                         <button
-                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
+                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
                           @click="localListPickerOpen = !localListPickerOpen"
                         >
                           <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
@@ -208,7 +208,7 @@ const localListPickerOpen = computed({
 
                       <!-- WhatsApp Flow Button -->
                       <div v-if="selectedStep.message_type === 'whatsapp_flow'" class="mt-1">
-                        <button class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 rounded-lg shadow-xs border-0">
+                        <button class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0">
                           {{ selectedStep.input_config?.flow_cta || 'Open Form' }}
                         </button>
                       </div>
@@ -219,7 +219,7 @@ const localListPickerOpen = computed({
                   <div v-if="selectedStep.message_type !== 'transfer'" class="flex justify-end">
                     <div class="max-w-[85%]">
                       <div class="bg-[#005c4b] dark:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3">
-                        <p class="text-sm text-gray-800 dark:text-gray-200 italic">
+                        <p class="text-gray-800 dark:text-gray-200 italic">
                           <template v-if="selectedStep.input_type === 'none'">
                             (No response needed)
                           </template>
@@ -233,7 +233,7 @@ const localListPickerOpen = computed({
                             User types {{ selectedStep.input_type }}...
                           </template>
                         </p>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 text-right mt-1 flex items-center justify-end gap-1">
+                        <p class="text-gray-500 dark:text-gray-400 text-right mt-1 flex items-center justify-end gap-1">
                           12:01 PM
                           <svg class="size-4 text-[#53bdeb]" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
@@ -245,14 +245,14 @@ const localListPickerOpen = computed({
 
                   <!-- Store As Info -->
                   <div v-if="selectedStep.store_as" class="flex justify-center">
-                    <div class="bg-white/80 dark:bg-[#202c33]/80 text-xs text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full">
+                    <div class="bg-white/80 dark:bg-[#202c33]/80 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full">
                       Response saved as <code class="font-mono text-[#00a884]">{{ selectedStep.store_as }}</code>
                     </div>
                   </div>
 
                   <!-- Transfer System Message -->
                   <div v-if="selectedStep.message_type === 'transfer'" class="flex justify-center">
-                    <div class="bg-amber-100 dark:bg-amber-900/30 text-xs text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                       <Users class="size-3" />
                       <span>Conversation transferred to {{ selectedStep?.transfer_config?.team_id === '_general' ? 'General Queue' : teams.find(t => t.id === selectedStep?.transfer_config?.team_id)?.name || 'Team' }}</span>
                     </div>
@@ -260,7 +260,7 @@ const localListPickerOpen = computed({
 
                   <!-- API Info -->
                   <div v-if="selectedStep.message_type === 'api_fetch'" class="flex justify-center">
-                    <div class="bg-blue-100 dark:bg-blue-900/30 text-xs text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                       <Globe class="size-3" />
                       <span>Message populated from API</span>
                     </div>
@@ -271,7 +271,7 @@ const localListPickerOpen = computed({
                 <!-- Input Bar -->
                 <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0">
                   <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
-                    <p class="text-sm text-gray-400">Type a message</p>
+                    <p class="text-gray-400">Type a message</p>
                   </div>
                   <div class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
                     <svg class="size-5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -293,7 +293,7 @@ const localListPickerOpen = computed({
                           <path d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                       </button>
-                      <span class="font-medium text-sm">Select an option</span>
+                      <span class="font-medium">Select an option</span>
                       <div class="w-5"></div>
                     </div>
                     <div class="max-h-[250px] overflow-y-auto">
@@ -307,9 +307,9 @@ const localListPickerOpen = computed({
                           <ExternalLink class="size-4" />
                         </div>
                         <div v-else class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0">
-                          <span class="text-[10px] text-[#00a884] font-medium">{{ idx + 1 }}</span>
+                          <span class="text-[#00a884] font-medium">{{ idx + 1 }}</span>
                         </div>
-                        <span class="text-sm text-gray-800 dark:text-gray-200 flex-1">{{ btn.title || `Option ${idx + 1}` }}</span>
+                        <span class="text-gray-800 dark:text-gray-200 flex-1">{{ btn.title || `Option ${idx + 1}` }}</span>
                         <ExternalLink v-if="btn.type === 'url'" class="size-3 text-gray-400" />
                       </div>
                     </div>
@@ -326,16 +326,16 @@ const localListPickerOpen = computed({
                     <MessageSquare class="size-5" />
                   </div>
                   <div>
-                    <p class="font-medium text-sm">{{ flowData.name || 'WhatsApp Preview' }}</p>
-                    <p class="text-xs text-white/70">Select a step</p>
+                    <p class="font-medium">{{ flowData.name || 'WhatsApp Preview' }}</p>
+                    <p class="text-white/70">Select a step</p>
                   </div>
                 </div>
                 <div class="flex-1 flex items-center justify-center">
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Select a step to view preview</p>
+                  <p class="text-gray-500 dark:text-gray-400">Select a step to view preview</p>
                 </div>
                 <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0">
                   <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
-                    <p class="text-sm text-gray-400">Type a message</p>
+                    <p class="text-gray-400">Type a message</p>
                   </div>
                   <div class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
                     <svg class="size-5 text-white" viewBox="0 0 24 24" fill="currentColor">

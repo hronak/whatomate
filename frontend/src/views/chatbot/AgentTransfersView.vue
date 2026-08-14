@@ -320,7 +320,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
     <PageHeader :title="$t('agentTransfers.title')" :subtitle="$t('agentTransfers.subtitle')" :icon="UserX" icon-gradient="bg-linear-to-br from-red-500 to-orange-600 shadow-red-500/20">
       <template v-if="!isAdminOrManager" #actions>
         <div class="flex items-center gap-4">
-          <div class="text-sm text-foreground/50">
+          <div class="text-foreground/50">
             <Users class="size-4 inline mr-1" />
             {{ $t('agentTransfers.waitingInQueue', { count: transfersStore.queueCount }) }}
           </div>
@@ -368,7 +368,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
           <div class="rounded-xl border border-border bg-card">
             <div class="p-6">
               <h3 class="text-lg font-semibold text-foreground">{{ $t('agentTransfers.myTransfers') }}</h3>
-              <p class="text-sm text-foreground/50">{{ $t('agentTransfers.contactsTransferred') }}</p>
+              <p class="text-foreground/50">{{ $t('agentTransfers.contactsTransferred') }}</p>
             </div>
             <div class="px-6 pb-6">
               <div v-if="myTransfers.length === 0" class="text-center py-8 text-foreground/50">
@@ -376,7 +376,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                   <UserX class="size-8 text-red-400" />
                 </div>
                 <p>{{ $t('agentTransfers.noActiveTransfers') }}</p>
-                <p class="text-sm mt-2">{{ $t('agentTransfers.clickPickNext') }}</p>
+                <p class="mt-2">{{ $t('agentTransfers.clickPickNext') }}</p>
               </div>
 
               <Table v-else>
@@ -497,7 +497,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                       <CardDescription>{{ $t('agentTransfers.unassignedTransfers') }}</CardDescription>
                     </div>
                     <div class="flex items-center gap-3">
-                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div class="flex items-center gap-2 text-muted-foreground">
                         <Badge variant="outline">{{ $t('agentTransfers.general') }}: {{ teamQueueCounts.general || 0 }}</Badge>
                         <Badge v-for="team in teams" :key="team.id" variant="outline">
                           {{ team.name }}: {{ teamQueueCounts[team.id] || 0 }}
@@ -557,7 +557,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <div class="text-xs space-y-1">
+                              <div class="space-y-1">
                                 <p v-if="transfer.sla_response_deadline">{{ $t('agentTransfers.responseDeadline') }}: {{ formatDate(transfer.sla_response_deadline) }}</p>
                                 <p v-if="transfer.escalation_level > 0">{{ $t('agentTransfers.escalationLevel') }}: {{ transfer.escalation_level }}</p>
                                 <p v-if="transfer.sla_breached">{{ $t('agentTransfers.breachedAt') }}: {{ formatDate(transfer.sla_breached_at!) }}</p>
@@ -645,7 +645,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <div class="text-xs space-y-1">
+                              <div class="space-y-1">
                                 <p v-if="transfer.picked_up_at">{{ $t('agentTransfers.pickedUpAt') }}: {{ formatDate(transfer.picked_up_at) }}</p>
                                 <p v-else-if="transfer.sla_response_deadline">{{ $t('agentTransfers.responseDeadline') }}: {{ formatDate(transfer.sla_response_deadline) }}</p>
                                 <p v-if="transfer.escalation_level > 0">{{ $t('agentTransfers.escalationLevel') }}: {{ transfer.escalation_level }}</p>
@@ -677,7 +677,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 <CardHeader>
                   <CardTitle class="flex items-center justify-between">
                     <span>{{ $t('agentTransfers.transferHistory') }}</span>
-                    <span v-if="historyTotalCount > 0" class="text-sm font-normal text-muted-foreground">
+                    <span v-if="historyTotalCount > 0" class="font-normal text-muted-foreground">
                       {{ historyTransfers.length }} of {{ historyTotalCount }}
                     </span>
                   </CardTitle>
@@ -748,13 +748,13 @@ function formatTimeRemaining(deadline: string | undefined): string {
         </DialogHeader>
 
         <div class="space-y-4 py-4">
-          <div v-if="transferToAssign" class="text-sm border rounded-lg p-3 bg-muted/50">
+          <div v-if="transferToAssign" class="border rounded-lg p-3 bg-muted/50">
             <p><strong>{{ $t('agentTransfers.contact') }}:</strong> {{ transferToAssign.contact_name }}</p>
             <p><strong>{{ $t('agentTransfers.phone') }}:</strong> {{ transferToAssign.phone_number }}</p>
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">{{ $t('agentTransfers.teamQueue') }}</label>
+            <label class="font-medium">{{ $t('agentTransfers.teamQueue') }}</label>
             <Select v-model="selectedTeamId">
               <SelectTrigger>
                 <SelectValue :placeholder="$t('agentTransfers.selectTeam')" />
@@ -766,11 +766,11 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p class="text-xs text-muted-foreground">{{ $t('agentTransfers.moveToTeamQueue') }}</p>
+            <p class="text-muted-foreground">{{ $t('agentTransfers.moveToTeamQueue') }}</p>
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">{{ $t('agentTransfers.assignToAgent') }}</label>
+            <label class="font-medium">{{ $t('agentTransfers.assignToAgent') }}</label>
             <Select v-model="selectedAgentId">
               <SelectTrigger>
                 <SelectValue :placeholder="$t('agentTransfers.selectAgent')" />
@@ -782,7 +782,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p class="text-xs text-muted-foreground">{{ $t('agentTransfers.directlyAssign') }}</p>
+            <p class="text-muted-foreground">{{ $t('agentTransfers.directlyAssign') }}</p>
           </div>
         </div>
 

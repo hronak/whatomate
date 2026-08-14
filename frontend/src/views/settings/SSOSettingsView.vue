@@ -254,7 +254,7 @@ onMounted(() => {
         <Card class="bg-info/30 border-info">
           <CardContent class="flex items-start gap-3 pt-6">
             <Info class="size-5 text-info shrink-0 mt-0.5" />
-            <div class="text-sm text-info">
+            <div class="text-info">
               <p class="font-medium mb-1">{{ $t('sso.configuration') }}</p>
               <p class="text-info">
                 {{ $t('sso.configurationDesc') }}
@@ -280,7 +280,7 @@ onMounted(() => {
                   </div>
                   <div>
                     <CardTitle class="text-base">{{ config.name }}</CardTitle>
-                    <CardDescription class="text-xs mt-0.5">
+                    <CardDescription class="mt-0.5">
                       {{ config.description }}
                     </CardDescription>
                   </div>
@@ -294,7 +294,7 @@ onMounted(() => {
               </div>
             </CardHeader>
             <CardContent class="space-y-3">
-              <div v-if="getConfiguredProvider(key)" class="text-xs text-muted-foreground space-y-1">
+              <div v-if="getConfiguredProvider(key)" class="text-muted-foreground space-y-1">
                 <p>
                   <span class="font-medium">{{ $t('sso.autoCreateUsers') }}:</span>
                   {{ getConfiguredProvider(key)?.allow_auto_create ? $t('sso.yes') : $t('sso.no') }}
@@ -352,14 +352,14 @@ onMounted(() => {
           <!-- Redirect URL -->
           <div class="space-y-2">
             <Label>{{ $t('sso.redirectUrl') }}</Label>
-            <p class="text-xs text-muted-foreground mb-1">
+            <p class="text-muted-foreground mb-1">
               {{ $t('sso.redirectUrlHint', { provider: currentProviderConfig?.name }) }}
             </p>
             <div class="flex gap-2">
               <Input
                 :model-value="redirectUrl"
                 readonly
-                class="font-mono text-xs bg-muted"
+                class="font-mono bg-muted"
               />
               <Button
                 variant="outline"
@@ -387,7 +387,7 @@ onMounted(() => {
           <div class="space-y-2">
             <Label for="client_secret">
               {{ $t('sso.clientSecret') }}
-              <span v-if="getConfiguredProvider(editingProvider)?.has_secret" class="text-xs text-muted-foreground ml-1">
+              <span v-if="getConfiguredProvider(editingProvider)?.has_secret" class="text-muted-foreground ml-1">
                 {{ $t('sso.clientSecretKeepExisting') }}
               </span>
             </Label>
@@ -432,7 +432,7 @@ onMounted(() => {
             <div class="flex items-center justify-between">
               <div>
                 <Label>{{ $t('sso.enableProvider') }}</Label>
-                <p class="text-xs text-muted-foreground">{{ $t('sso.enableProviderDesc') }}</p>
+                <p class="text-muted-foreground">{{ $t('sso.enableProviderDesc') }}</p>
               </div>
               <Switch v-model:checked="editForm.is_enabled" />
             </div>
@@ -441,7 +441,7 @@ onMounted(() => {
             <div class="flex items-center justify-between">
               <div>
                 <Label>{{ $t('sso.autoCreateUsersLabel') }}</Label>
-                <p class="text-xs text-muted-foreground">{{ $t('sso.autoCreateUsersDesc') }}</p>
+                <p class="text-muted-foreground">{{ $t('sso.autoCreateUsersDesc') }}</p>
               </div>
               <Switch v-model:checked="editForm.allow_auto_create" />
             </div>
@@ -469,7 +469,7 @@ onMounted(() => {
                 v-model="editForm.allowed_domains"
                 :placeholder="$t('sso.allowedDomainsPlaceholder')"
               />
-              <p class="text-xs text-muted-foreground">
+              <p class="text-muted-foreground">
                 {{ $t('sso.allowedDomainsHint') }}
               </p>
             </div>

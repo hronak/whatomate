@@ -343,7 +343,7 @@
 
 /* Modern chat bubble styles */
 .chat-bubble {
-  @apply relative px-4 py-2.5 text-sm;
+  @apply relative px-4 py-2.5;
   max-width: 65%;
   border-radius: 1rem;
 }
@@ -379,17 +379,15 @@
 
 .chat-bubble-outgoing .text-destructive {
   color: #dc2626;
-  font-size: 0.80rem;
 }
 
 .dark .chat-bubble-outgoing .text-destructive {
   color: #fd7878fc;
-  font-size: 0.80rem;
 }
 
 /* Time and status */
 .chat-bubble-time {
-  @apply text-[10px] mt-1 flex items-center gap-1.5 float-right;
+  @apply mt-1 flex items-center gap-1.5 float-right;
   margin-left: 8px;
   margin-bottom: -4px;
   position: relative;
@@ -583,8 +581,7 @@
 
 /* Reaction badges */
 .reaction-badge {
-  @apply text-sm px-1 py-0.5 rounded-full bg-muted/50;
-  font-size: 0.875rem;
+  @apply px-1 py-0.5 rounded-full bg-muted/50;
 }
 
 .reactions-display {

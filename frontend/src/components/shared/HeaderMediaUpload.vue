@@ -18,16 +18,16 @@ defineEmits<{
 
 <template>
   <div class="space-y-1">
-    <label v-if="label" class="text-sm font-medium">{{ label }}</label>
+    <label v-if="label" class="font-medium">{{ label }}</label>
     <div v-if="!file" class="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors" @click="($refs.fileInput as HTMLInputElement)?.click()">
       <Upload class="size-6 mx-auto text-muted-foreground mb-1" />
-      <p class="text-xs text-muted-foreground">Click to upload file</p>
-      <p v-if="mediaLabel" class="text-xs text-muted-foreground mt-0.5">{{ mediaLabel }}</p>
+      <p class="text-muted-foreground">Click to upload file</p>
+      <p v-if="mediaLabel" class="text-muted-foreground mt-0.5">{{ mediaLabel }}</p>
     </div>
     <div v-else class="flex items-center gap-2 p-2 bg-muted rounded-lg">
       <img v-if="previewUrl" :src="previewUrl" class="size-12 object-cover rounded" />
       <FileText v-else class="size-8 text-muted-foreground shrink-0" />
-      <span class="text-sm truncate flex-1">{{ file.name }}</span>
+      <span class="truncate flex-1">{{ file.name }}</span>
       <Button variant="ghost" size="icon" class="size-6 shrink-0" @click="$emit('clear')">
         <X class="size-4" />
       </Button>

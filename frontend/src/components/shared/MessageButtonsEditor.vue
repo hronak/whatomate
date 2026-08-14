@@ -136,7 +136,7 @@ function typeIcon(type?: string) {
 <template>
   <div class="space-y-3">
     <div class="flex items-center justify-between flex-wrap gap-2">
-      <Label class="text-xs">
+      <Label>
         {{ $t('flowBuilder.buttonOptions', 'Buttons') }} ({{ buttons.length }}/{{ effectiveMax }})
       </Label>
       <div class="flex gap-1">
@@ -144,7 +144,7 @@ function typeIcon(type?: string) {
           v-if="allowedTypes.includes('reply')"
           variant="outline"
           size="sm"
-          class="h-6 text-xs"
+          class="h-6"
           :disabled="!canAdd('reply')"
           @click="addButton('reply')"
         >
@@ -155,7 +155,7 @@ function typeIcon(type?: string) {
           v-if="allowedTypes.includes('url')"
           variant="outline"
           size="sm"
-          class="h-6 text-xs"
+          class="h-6"
           :disabled="!canAdd('url')"
           @click="addButton('url')"
         >
@@ -166,7 +166,7 @@ function typeIcon(type?: string) {
           v-if="allowedTypes.includes('phone')"
           variant="outline"
           size="sm"
-          class="h-6 text-xs"
+          class="h-6"
           :disabled="!canAdd('phone')"
           @click="addButton('phone')"
         >
@@ -177,7 +177,7 @@ function typeIcon(type?: string) {
           v-if="allowedTypes.includes('voice_call')"
           variant="outline"
           size="sm"
-          class="h-6 text-xs"
+          class="h-6"
           :disabled="!canAdd('voice_call')"
           @click="addButton('voice_call')"
         >
@@ -188,7 +188,7 @@ function typeIcon(type?: string) {
           v-if="allowedTypes.includes('flow')"
           variant="outline"
           size="sm"
-          class="h-6 text-xs"
+          class="h-6"
           :disabled="!canAdd('flow')"
           @click="addButton('flow')"
         >
@@ -205,14 +205,14 @@ function typeIcon(type?: string) {
         class="p-2 border rounded-md bg-muted/30 space-y-2"
       >
         <div class="flex items-center gap-2">
-          <Badge variant="outline" class="text-[10px] px-1.5">
+          <Badge variant="outline" class="px-1.5">
             <component :is="typeIcon(btn.type)" class="size-2.5 mr-1" />
             {{ typeLabel(btn.type) }}
           </Badge>
           <Input
             :model-value="btn.title"
             :placeholder="$t('flowBuilder.buttonTitle', 'Button title')"
-            class="h-7 flex-1 text-xs"
+            class="h-7 flex-1"
             :disabled="disabled"
             @update:model-value="updateButton(idx, { title: String($event) })"
           />
@@ -231,7 +231,7 @@ function typeIcon(type?: string) {
           <Input
             :model-value="btn.url"
             :placeholder="$t('flowBuilder.exampleUrlPlaceholder', 'https://example.com')"
-            class="h-7 text-xs"
+            class="h-7"
             :disabled="disabled"
             @update:model-value="updateButton(idx, { url: String($event) })"
           />
@@ -240,13 +240,13 @@ function typeIcon(type?: string) {
           <Input
             :model-value="btn.phone_number"
             :placeholder="$t('flowBuilder.phoneNumberPlaceholder', '+1234567890')"
-            class="h-7 text-xs"
+            class="h-7"
             :disabled="disabled"
             @update:model-value="updateButton(idx, { phone_number: String($event) })"
           />
         </div>
         <div v-else-if="btn.type === 'voice_call'" class="flex items-center gap-2">
-          <Label class="text-[10px] text-muted-foreground shrink-0">
+          <Label class="text-muted-foreground shrink-0">
             {{ $t('flowBuilder.voiceCallTtl', 'Expires after') }}
           </Label>
           <Input
@@ -254,28 +254,28 @@ function typeIcon(type?: string) {
             min="1"
             max="60"
             :model-value="btn.ttl_minutes ?? 15"
-            class="h-7 w-16 text-xs"
+            class="h-7 w-16"
             :disabled="disabled"
             @update:model-value="updateButton(idx, { ttl_minutes: Number($event) || 0 })"
           />
-          <span class="text-[10px] text-muted-foreground">
+          <span class="text-muted-foreground">
             {{ $t('flowBuilder.voiceCallTtlSuffix', 'minutes (1–60)') }}
           </span>
         </div>
         <div v-else-if="btn.type === 'flow'" class="space-y-1">
           <select
             :value="btn.flow_id || ''"
-            class="h-7 w-full rounded-md border bg-background px-2 text-xs"
+            class="h-7 w-full rounded-md border bg-background px-2"
             :disabled="disabled"
             @change="updateButton(idx, { flow_id: ($event.target as HTMLSelectElement).value })"
           >
             <option value="" disabled>{{ $t('flowBuilder.selectFlow', 'Select a published flow…') }}</option>
             <option v-for="f in publishedFlows" :key="f.meta_flow_id" :value="f.meta_flow_id">{{ f.name }}</option>
           </select>
-          <p v-if="publishedFlows.length === 0" class="text-[10px] text-muted-foreground">
+          <p v-if="publishedFlows.length === 0" class="text-muted-foreground">
             {{ $t('flowBuilder.noPublishedFlows', 'No published flows available. Publish a flow first.') }}
           </p>
-          <p v-else class="text-[10px] text-muted-foreground">
+          <p v-else class="text-muted-foreground">
             {{ $t('flowBuilder.flowCtaHint', 'The title above is the button label shown to the customer.') }}
           </p>
         </div>
@@ -283,7 +283,7 @@ function typeIcon(type?: string) {
           <Input
             :model-value="btn.id"
             :placeholder="$t('flowBuilder.buttonIdPlaceholder', 'button-id')"
-            class="h-7 text-xs"
+            class="h-7"
             :disabled="disabled"
             @update:model-value="updateButton(idx, { id: String($event) })"
           />
