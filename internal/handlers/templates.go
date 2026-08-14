@@ -341,7 +341,10 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 	if template.MetaTemplateID != "" {
 		if account, err := a.resolveWhatsAppAccount(orgID, template.WhatsAppAccount); err == nil {
 			// Delete from Meta API
-			go a.deleteTemplateFromMeta(account, template.Name)
+			templateName := template.Name
+			a.spawn("delete_template_from_meta", func(context.Context) {
+				a.deleteTemplateFromMeta(account, templateName)
+			})
 		}
 	}
 
@@ -555,10 +558,10 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 			if template.QualityRating != "" {
 				updates["quality_rating"] = template.QualityRating
 			}
-			a.DB.Unscoped().Model(&template).Updates(updates)
+			a.logWrite("template undelete", a.DB.Unscoped().Model(&template).Updates(updates))
 		} else {
 			// Create new
-			a.DB.Create(&template)
+			a.logWrite("template create", a.DB.Create(&template))
 		}
 		synced++
 	}

@@ -2,6 +2,7 @@ package calling
 
 import (
 	"sync"
+	"time"
 
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
@@ -10,7 +11,7 @@ import (
 // AudioBridge forwards RTP packets bidirectionally between two WebRTC tracks.
 // It bridges the caller's remote track to the agent's local track, and vice versa.
 type AudioBridge struct {
-	stop      chan struct{}
+	stop      *signal
 	wg        sync.WaitGroup
 	callerRec *CallRecorder // records caller's audio (caller→agent direction), may be nil
 	agentRec  *CallRecorder // records agent's audio (agent→caller direction), may be nil
@@ -53,7 +54,7 @@ type callerLeg struct {
 // kept in separate OGG files and can be merged correctly after the call.
 func NewAudioBridge(callerRec, agentRec *CallRecorder) *AudioBridge {
 	return &AudioBridge{
-		stop:       make(chan struct{}),
+		stop:       newSignal(),
 		callerRec:  callerRec,
 		agentRec:   agentRec,
 		callerSlot: make(chan callerLeg, 1),
@@ -93,7 +94,7 @@ func (b *AudioBridge) Start(
 		// leg exits first.
 		b.wg.Go(func() {
 			select {
-			case <-b.stop:
+			case <-b.stop.Done():
 			case leg := <-b.callerSlot:
 				b.forward(leg.src, leg.dst, b.callerRec, false)
 			}
@@ -147,13 +148,21 @@ func (b *AudioBridge) forward(src *webrtc.TrackRemote, dst *webrtc.TrackLocalSta
 	buf := make([]byte, 1500)
 	for {
 		select {
-		case <-b.stop:
+		case <-b.stop.Done():
 			return
 		default:
 		}
 
+		// Bound the read: a half-open peer never errors, and without a
+		// deadline this goroutine outlives the bridge.
+		if err := src.SetReadDeadline(time.Now().Add(rtpReadDeadline)); err != nil {
+			return
+		}
 		n, _, err := src.Read(buf)
 		if err != nil {
+			if isTimeout(err) {
+				continue
+			}
 			return
 		}
 
@@ -216,7 +225,7 @@ func (b *AudioBridge) Stop() {
 	b.mu.Lock()
 	b.stopped = true
 	b.mu.Unlock()
-	safeClose(b.stop)
+	b.stop.Fire()
 }
 
 // Wait blocks until all forwarding goroutines (and the reserved caller slot,

@@ -505,7 +505,13 @@ func (a *App) Logout(r *fastglue.Request) error {
 			if claims, ok := token.Claims.(*middleware.JWTClaims); ok && claims.ID != "" {
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
-				a.Redis.Del(ctx, refreshTokenKey(claims.ID))
+				// A failed revocation leaves the refresh token usable until it
+				// expires, so a "logged out" session is still live. Nothing to
+				// return it to here, but it must not vanish silently.
+				if err := a.Redis.Del(ctx, refreshTokenKey(claims.ID)).Err(); err != nil {
+					a.Log.Error("Failed to revoke refresh token on logout — session remains valid until expiry",
+						"error", err, "jti", claims.ID)
+				}
 			}
 		}
 	}

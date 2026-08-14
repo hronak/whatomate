@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"runtime/debug"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -44,12 +46,106 @@ type App struct {
 	S3Client *storage.S3Client
 	// wg tracks background goroutines for graceful shutdown
 	wg sync.WaitGroup
+
+	// ingestSem bounds webhook fan-out; built lazily by ingestSlots
+	ingestSemOnce sync.Once
+	ingestSem     chan struct{}
+
+	// auditSem bounds audit persistence; built lazily by auditSlots
+	auditSemOnce sync.Once
+	auditSem     chan struct{}
+
+	// campaignSub is the Redis pub/sub subscriber, retained so shutdown can
+	// close its connection
+	campaignSub *queue.Subscriber
 }
 
 // WaitForBackgroundTasks blocks until all background goroutines complete.
 // Call this during graceful shutdown to ensure all async work finishes.
 func (a *App) WaitForBackgroundTasks() {
 	a.wg.Wait()
+}
+
+// backgroundTaskTimeout bounds any single detached background task. Without a
+// ceiling a wedged external call would hold up shutdown indefinitely, since
+// WaitForBackgroundTasks waits for every spawned goroutine.
+const backgroundTaskTimeout = 2 * time.Minute
+
+// spawn runs fn on a tracked background goroutine.
+//
+// It is the single entry point for fire-and-forget work, and supplies the three
+// things the raw `go func()` launches it replaces did not:
+//
+//   - the goroutine is registered with a.wg, so WaitForBackgroundTasks (and
+//     therefore graceful shutdown) actually waits for it;
+//   - fn receives a detached context with a timeout, so work started while
+//     serving a request outlives that request but not the process;
+//   - a panic is recovered and logged instead of killing the process, which is
+//     what a panic on any unrecovered goroutine does.
+//
+// name identifies the task in panic logs.
+func (a *App) spawn(name string, fn func(ctx context.Context)) {
+	a.wg.Go(func() {
+		defer func() {
+			if r := recover(); r != nil {
+				a.Log.Error("Recovered from panic in background task",
+					"task", name, "error", r, "stack", string(debug.Stack()))
+			}
+		}()
+
+		ctx, cancel := context.WithTimeout(context.Background(), backgroundTaskTimeout)
+		defer cancel()
+		fn(ctx)
+	})
+}
+
+const (
+	// maxConcurrentIngestTasks bounds the goroutines a single inbound Meta
+	// webhook POST may have in flight. Meta batches, so one POST can carry many
+	// messages and statuses; the previous unbounded fan-out let one request
+	// launch hundreds.
+	maxConcurrentIngestTasks = 64
+
+	// maxConcurrentAuditWrites bounds audit persistence. Every mutation logs an
+	// entry, so a burst of writes previously meant a burst of goroutines.
+	maxConcurrentAuditWrites = 16
+)
+
+// ingestSlots returns the webhook-ingest semaphore, creating it on first use.
+// App is built as a struct literal in main and in tests, so these cannot be
+// constructor fields.
+func (a *App) ingestSlots() chan struct{} {
+	a.ingestSemOnce.Do(func() {
+		a.ingestSem = make(chan struct{}, maxConcurrentIngestTasks)
+	})
+	return a.ingestSem
+}
+
+// auditSlots returns the audit-write semaphore, creating it on first use.
+func (a *App) auditSlots() chan struct{} {
+	a.auditSemOnce.Do(func() {
+		a.auditSem = make(chan struct{}, maxConcurrentAuditWrites)
+	})
+	return a.auditSem
+}
+
+// spawnBounded is spawn with a concurrency ceiling.
+//
+// The slot is acquired on the caller's goroutine, so a saturated queue applies
+// backpressure to the caller rather than growing without limit. That is
+// deliberate: Meta retries a slow webhook, but a process that has spawned ten
+// thousand goroutines recovers from nothing.
+func (a *App) spawnBounded(name string, sem chan struct{}, fn func(ctx context.Context)) {
+	sem <- struct{}{}
+	a.spawn(name, func(ctx context.Context) {
+		defer func() { <-sem }()
+		fn(ctx)
+	})
+}
+
+// spawnIngest runs webhook fan-out work under the ingest bound.
+func (a *App) spawnIngest(name string, fn func(ctx context.Context)) {
+	a.spawnBounded(name, a.ingestSlots(), fn)
 }
 
 // getOrgID extracts organization ID from request context (set by auth middleware)
@@ -173,6 +269,9 @@ func (a *App) StartCampaignStatsSubscriber() error {
 	a.CampaignSubCancel = cancel
 
 	subscriber := queue.NewSubscriber(a.Redis, a.Log)
+	// Held on App so shutdown can close it. Previously this local went out of
+	// scope and its Redis pub/sub connection was never released.
+	a.campaignSub = subscriber
 
 	err := subscriber.SubscribeCampaignStats(ctx, func(update *queue.CampaignStatsUpdate) {
 		a.Log.Debug("Received campaign stats update from Redis",
@@ -204,10 +303,17 @@ func (a *App) StartCampaignStatsSubscriber() error {
 	return nil
 }
 
-// StopCampaignStatsSubscriber stops the campaign stats subscriber
+// StopCampaignStatsSubscriber cancels the subscriber's context and closes its
+// Redis pub/sub connection.
 func (a *App) StopCampaignStatsSubscriber() {
 	if a.CampaignSubCancel != nil {
 		a.CampaignSubCancel()
+	}
+	if a.campaignSub != nil {
+		if err := a.campaignSub.Close(); err != nil {
+			a.Log.Error("Failed to close campaign stats subscriber", "error", err)
+		}
+		a.campaignSub = nil
 	}
 }
 

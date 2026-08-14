@@ -66,7 +66,8 @@ func (m *Manager) InitiateOutgoingCall(
 		AgentID:        agentID,
 		TargetPhone:    contactPhone,
 		SDPAnswerReady: make(chan string, 1),
-		BridgeStarted:  make(chan struct{}),
+		BridgeStarted:  newSignal(),
+		done:           newSignal(),
 	}
 
 	// 4. Capture agent's remote track
@@ -92,8 +93,8 @@ func (m *Manager) InitiateOutgoingCall(
 			"state", state.String(),
 		)
 		if state == webrtc.PeerConnectionStateFailed || state == webrtc.PeerConnectionStateDisconnected {
-			if session.ID != "" {
-				m.EndCall(session.ID)
+			if id := session.callID(); id != "" {
+				m.EndCall(id)
 			}
 		}
 	})
@@ -166,8 +167,8 @@ func (m *Manager) InitiateOutgoingCall(
 			"state", state.String(),
 		)
 		if state == webrtc.PeerConnectionStateFailed || state == webrtc.PeerConnectionStateDisconnected {
-			if session.ID != "" {
-				m.EndCall(session.ID)
+			if id := session.callID(); id != "" {
+				m.EndCall(id)
 			}
 		}
 	})
@@ -211,15 +212,20 @@ func (m *Manager) InitiateOutgoingCall(
 	}
 
 	// Update call log with WhatsApp call ID
-	m.db.Model(&callLog).Update("whatsapp_call_id", callID)
+	m.logWrite("call log whatsapp id", m.db.Model(&callLog).Update("whatsapp_call_id", callID))
 
-	// 12. Complete session setup
+	// 12. Complete session setup.
+	// Under the lock: the OnTrack and OnConnectionStateChange callbacks
+	// registered above are already live on both peer connections and read
+	// session.ID, so these writes race them otherwise.
+	session.mu.Lock()
 	session.ID = callID
 	session.PeerConnection = agentPC // agent's PC
 	session.AgentPC = agentPC
 	session.AgentAudioTrack = agentLocalTrack
 	session.WAPeerConn = waPC
 	session.WAAudioTrack = waLocalTrack
+	session.mu.Unlock()
 
 	// 13. Store session
 	m.mu.Lock()
@@ -300,7 +306,7 @@ func (m *Manager) HandleOutgoingCallWebhook(callID, event, sdpAnswer string) {
 			if session.AgentAudioTrack != nil && session.RingbackPlayer == nil {
 				player := NewAudioPlayer(session.AgentAudioTrack)
 				session.RingbackPlayer = player
-				go func() { _ = player.PlayFileLoop(ringbackFile) }()
+				player.Go(func() { _ = player.PlayFileLoop(ringbackFile) })
 			}
 			session.mu.Unlock()
 		}
@@ -390,7 +396,7 @@ func (m *Manager) HandleOutgoingCallWebhook(callID, event, sdpAnswer string) {
 			} else {
 				disconnectedBy = string(callLog.DisconnectedBy)
 			}
-			m.db.Model(&callLog).Updates(updates)
+			m.logWrite("call log status", m.db.Model(&callLog).Updates(updates))
 		}
 
 		m.broadcastEvent(session.OrganizationID, websocket.TypeOutgoingCallEnded, map[string]any{
@@ -435,12 +441,12 @@ func (m *Manager) HangupOutgoingCall(callLogID, agentID uuid.UUID) error {
 		now := time.Now()
 		var callLog models.CallLog
 		if err := m.db.Where("id = ?", callLogID).First(&callLog).Error; err == nil {
-			m.db.Model(&callLog).Updates(map[string]any{
+			m.logWrite("call log status", m.db.Model(&callLog).Updates(map[string]any{
 				"status":          models.CallStatusCompleted,
 				"ended_at":        now,
 				"duration":        durationSince(callLog.AnsweredAt, now),
 				"disconnected_by": models.DisconnectedByAgent,
-			})
+			}))
 		}
 
 		m.broadcastEvent(session.OrganizationID, websocket.TypeOutgoingCallEnded, map[string]any{
@@ -539,11 +545,11 @@ func (m *Manager) HangupOutgoingCall(callLogID, agentID uuid.UUID) error {
 		now := time.Now()
 		var callLog models.CallLog
 		if err := m.db.Where("id = ?", callLogID).First(&callLog).Error; err == nil {
-			m.db.Model(&callLog).Updates(map[string]any{
+			m.logWrite("call log status", m.db.Model(&callLog).Updates(map[string]any{
 				"status":   models.CallStatusCompleted,
 				"ended_at": now,
 				"duration": durationSince(callLog.AnsweredAt, now),
-			})
+			}))
 		}
 
 		m.cleanupSession(session.ID)
@@ -562,7 +568,7 @@ func (m *Manager) startOutgoingBridge(
 	waLocal *webrtc.TrackLocalStaticRTP,
 ) {
 	// Signal that bridge is taking over
-	safeClose(session.BridgeStarted)
+	session.fireBridgeStarted()
 
 	bridge := m.setupAudioBridge(session)
 

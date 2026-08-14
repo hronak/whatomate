@@ -92,7 +92,7 @@ func (m *Manager) runIVRFlow(session *CallSession, waAccount *whatsapp.Account) 
 		if session.DTMFBuffer == nil {
 			session.DTMFBuffer = make(chan byte, 32)
 		}
-		session.BridgeStarted = make(chan struct{})
+		session.BridgeStarted = newSignal()
 		session.mu.Unlock()
 		if waRemote != nil {
 			go m.consumeAudioWithDTMF(session, waRemote)
@@ -299,15 +299,18 @@ func (m *Manager) executeMenu(session *CallSession, node *IVRNode, ctx *IVRConte
 			case <-playDone:
 				// Audio finished playing, wait for digit input
 				digit, gotDigit = m.waitForDTMF(session, timeout, 1)
-			case d, chOk := <-session.DTMFBuffer:
+			case d := <-session.dtmfChan():
 				// Caller interrupted audio with a digit
 				player.Stop()
 				<-playDone
 				player.ResetAfterInterrupt()
-				if chOk {
-					digit = d
-					gotDigit = true
-				}
+				digit = d
+				gotDigit = true
+			case <-session.doneChan():
+				// Session torn down mid-prompt; stop the flow.
+				player.Stop()
+				<-playDone
+				return "max_retries"
 			}
 		} else {
 			digit, gotDigit = m.waitForDTMF(session, timeout, 1)
@@ -374,17 +377,18 @@ func (m *Manager) collectDTMFDigits(session *CallSession, maxDigits int, termina
 	var digits []byte
 	deadline := time.After(timeout)
 
+	dtmf := session.dtmfChan()
+	done := session.doneChan()
 	for len(digits) < maxDigits {
 		select {
-		case d, ok := <-session.DTMFBuffer:
-			if !ok {
-				return string(digits)
-			}
+		case d := <-dtmf:
 			if string(d) == terminator {
 				return string(digits)
 			}
 			digits = append(digits, d)
 		case <-deadline:
+			return string(digits)
+		case <-done:
 			return string(digits)
 		}
 	}
@@ -618,21 +622,23 @@ func (m *Manager) playInterruptible(session *CallSession, player *AudioPlayer, a
 	select {
 	case <-playDone:
 		// Played fully
-	case _, ok := <-session.DTMFBuffer:
+	case <-session.dtmfChan():
 		player.Stop()
 		<-playDone
 		player.ResetAfterInterrupt()
-		if ok {
-			m.log.Info("Audio interrupted by DTMF", "call_id", session.ID)
-		}
+		m.log.Info("Audio interrupted by DTMF", "call_id", session.ID)
+	case <-session.doneChan():
+		player.Stop()
+		<-playDone
 	}
 }
 
 // drainDTMF discards any buffered DTMF digits.
 func (m *Manager) drainDTMF(session *CallSession) {
+	dtmf := session.dtmfChan()
 	for {
 		select {
-		case <-session.DTMFBuffer:
+		case <-dtmf:
 		default:
 			return
 		}
@@ -641,13 +647,14 @@ func (m *Manager) drainDTMF(session *CallSession) {
 
 // waitForDTMF waits for a DTMF digit with timeout and retries.
 func (m *Manager) waitForDTMF(session *CallSession, timeout time.Duration, maxRetries int) (byte, bool) {
+	dtmf := session.dtmfChan()
+	done := session.doneChan()
 	for attempt := range maxRetries {
 		select {
-		case digit, ok := <-session.DTMFBuffer:
-			if !ok {
-				return 0, false
-			}
+		case digit := <-dtmf:
 			return digit, true
+		case <-done:
+			return 0, false
 		case <-time.After(timeout):
 			m.log.Debug("DTMF timeout", "call_id", session.ID, "attempt", attempt+1)
 		}

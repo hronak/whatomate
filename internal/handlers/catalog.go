@@ -203,7 +203,7 @@ func (a *App) DeleteCatalog(r *fastglue.Request) error {
 	}
 
 	// Delete products first
-	a.DB.Where("catalog_id = ?", id).Delete(&models.CatalogProduct{})
+	a.logWrite("catalog products purge", a.DB.Where("catalog_id = ?", id).Delete(&models.CatalogProduct{}))
 
 	// Delete catalog
 	if err := a.DB.Delete(catalog).Error; err != nil {
@@ -268,7 +268,7 @@ func (a *App) SyncCatalogs(r *fastglue.Request) error {
 		} else {
 			// Update existing
 			existing.Name = mc.Name
-			a.DB.Save(&existing)
+			a.logWrite("catalog product upsert", a.DB.Save(&existing))
 			synced++
 		}
 	}

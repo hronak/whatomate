@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -218,12 +219,22 @@ func validateAPIKey(r *fastglue.Request, key string, db *gorm.DB) bool {
 				return false // Key expired
 			}
 
-			// Update last used timestamp (async to not block request)
+			// Update last used timestamp (async to not block request).
+			// slog rather than the injected logger: this helper is called from
+			// the auth path and has no App or logf.Logger in scope.
 			go func(id uuid.UUID) {
+				defer func() {
+					if rec := recover(); rec != nil {
+						slog.Error("recovered from panic updating api key last_used_at",
+							"error", rec, "api_key_id", id)
+					}
+				}()
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
 				now := time.Now()
-				db.WithContext(ctx).Model(&models.APIKey{}).Where("id = ?", id).Update("last_used_at", now)
+				if err := db.WithContext(ctx).Model(&models.APIKey{}).Where("id = ?", id).Update("last_used_at", now).Error; err != nil {
+					slog.Error("failed to update api key last_used_at", "error", err, "api_key_id", id)
+				}
 			}(apiKey.ID)
 
 			// Set context values from the user who created the key

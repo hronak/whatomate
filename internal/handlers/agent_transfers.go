@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -522,7 +523,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	// set the contact's assigned agent for future chat routing.
 	// Skip if already assigned to preserve a manually set relationship manager.
 	if agentID != nil && settings != nil && settings.AgentAssignment.AssignToSameAgent && contact.AssignedUserID == nil {
-		a.DB.Model(contact).Update("assigned_user_id", agentID)
+		a.logWrite("contact assignment", a.DB.Model(contact).Update("assigned_user_id", agentID))
 	}
 
 	// End any active chatbot session
@@ -787,14 +788,14 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 	if targetAgentID != nil && transfer.Contact != nil {
 		settings, _ := a.getChatbotSettingsCached(orgID, "")
 		if settings != nil && settings.AgentAssignment.AssignToSameAgent && transfer.Contact.AssignedUserID == nil {
-			a.DB.Model(transfer.Contact).Update("assigned_user_id", targetAgentID)
+			a.logWrite("contact assignment", a.DB.Model(transfer.Contact).Update("assigned_user_id", targetAgentID))
 		}
 	} else if targetAgentID == nil && transfer.Contact != nil {
 		// Unassigning (returning to queue) — clear the relationship-manager
 		// pointer iff it was pointing at the agent we just removed. Don't
 		// blow away a manually set manager that wasn't this transfer's agent.
 		if previousAgentID != nil && transfer.Contact.AssignedUserID != nil && *transfer.Contact.AssignedUserID == *previousAgentID {
-			a.DB.Model(transfer.Contact).Update("assigned_user_id", nil)
+			a.logWrite("contact unassignment", a.DB.Model(transfer.Contact).Update("assigned_user_id", nil))
 		}
 	}
 
@@ -880,8 +881,15 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	// Use transaction with FOR UPDATE lock to prevent race conditions
 	tx := a.DB.Begin()
 	defer func() {
-		if r := recover(); r != nil {
+		if rec := recover(); rec != nil {
 			tx.Rollback()
+			// Roll back, then let it propagate: swallowing the panic here left
+			// the handler returning a zero value as if the pick had succeeded,
+			// and hid the fault from the Recovery middleware entirely.
+			a.Log.Error("Panic while picking transfer, rolled back",
+				"error", rec, "user_id", userID, "org_id", orgID,
+				"stack", string(debug.Stack()))
+			panic(rec)
 		}
 	}()
 
@@ -1192,7 +1200,7 @@ func (a *App) saveAndFinalizeTransfer(transfer *models.AgentTransfer, account *m
 	// is enabled and no relationship manager is already set. Active transfers
 	// already grant the assigned agent visibility into the chat.
 	if transfer.AgentID != nil && settings != nil && settings.AgentAssignment.AssignToSameAgent && contact.AssignedUserID == nil {
-		a.DB.Model(contact).Update("assigned_user_id", transfer.AgentID)
+		a.logWrite("contact assignment", a.DB.Model(contact).Update("assigned_user_id", transfer.AgentID))
 	}
 
 	// End any active chatbot session
@@ -1397,7 +1405,7 @@ func (a *App) ReturnAgentTransfersToQueue(userID, orgID uuid.UUID) int {
 		// set manager assigned via /api/contacts/<id>/assign.
 		if transfer.ContactID != uuid.Nil && previousAgentID != nil && transfer.Contact != nil &&
 			transfer.Contact.AssignedUserID != nil && *transfer.Contact.AssignedUserID == *previousAgentID {
-			a.DB.Model(&models.Contact{}).Where("id = ?", transfer.ContactID).Update("assigned_user_id", nil)
+			a.logWrite("contact unassignment", a.DB.Model(&models.Contact{}).Where("id = ?", transfer.ContactID).Update("assigned_user_id", nil))
 		}
 
 		// Broadcast the unassignment

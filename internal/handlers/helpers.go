@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"strconv"
 	"time"
@@ -101,7 +102,38 @@ func findByIDAndOrg[T any](db *gorm.DB, r *fastglue.Request, id, orgID uuid.UUID
 // actor's display name automatically. It wraps audit.LogAudit to remove the
 // repeated a.DB + GetUserName boilerplate at call sites.
 func (a *App) logAudit(orgID, userID uuid.UUID, resourceType string, resourceID uuid.UUID, action models.AuditAction, oldData, newData any, extraChanges ...map[string]any) {
-	audit.LogAudit(a.DB, orgID, userID, audit.GetUserName(a.DB, userID), resourceType, resourceID, action, oldData, newData, extraChanges...)
+	a.logAuditAs(orgID, userID, "", resourceType, resourceID, action, oldData, newData, extraChanges...)
+}
+
+// logAuditAs is logAudit for callers that already know the actor's display
+// name and would otherwise pay for a redundant lookup. An empty userName is
+// resolved in the background.
+//
+// The write runs on a bounded, WaitGroup-tracked goroutine, so it neither
+// blocks the response nor escapes graceful shutdown: WaitForBackgroundTasks
+// flushes pending audit entries.
+func (a *App) logAuditAs(orgID, userID uuid.UUID, userName string, resourceType string, resourceID uuid.UUID, action models.AuditAction, oldData, newData any, extraChanges ...map[string]any) {
+	a.spawnBounded("audit_log", a.auditSlots(), func(context.Context) {
+		if userName == "" {
+			userName = audit.GetUserName(a.DB, userID)
+		}
+		audit.LogAudit(a.DB, orgID, userID, userName, resourceType, resourceID, action, oldData, newData, extraChanges...)
+	})
+}
+
+// logWrite reports a failed database write at a site that has no error path to
+// return to — webhook processing, async updates, best-effort bookkeeping.
+//
+// These writes previously discarded their result entirely: a failed contact
+// assignment, call-log transition or campaign counter left the row stale with
+// nothing recorded anywhere. Passing the *gorm.DB through here keeps the call
+// a single expression while making the failure visible.
+//
+// op names the operation; kv are extra log fields.
+func (a *App) logWrite(op string, tx *gorm.DB, kv ...any) {
+	if tx.Error != nil {
+		a.Log.Error("Database write failed", append([]any{"op", op, "error", tx.Error}, kv...)...)
+	}
 }
 
 // listEnvelope builds the standard paginated list response payload used across

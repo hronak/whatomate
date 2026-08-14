@@ -329,9 +329,9 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 		if err := waClient.UpdateFlowJSON(ctx, waAccount, metaFlowID, flowJSON); err != nil {
 			a.Log.Error("Failed to update flow JSON in Meta", "error", err, "flow_id", id, "meta_flow_id", metaFlowID)
 			// Save the meta flow ID even if JSON update fails
-			a.DB.Model(flow).Updates(map[string]any{
+			a.logWrite("flow state", a.DB.Model(flow).Updates(map[string]any{
 				"meta_flow_id": metaFlowID,
-			})
+			}))
 			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update flow JSON", nil, "")
 		}
 	}

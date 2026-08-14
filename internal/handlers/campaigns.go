@@ -473,7 +473,7 @@ func (a *App) StartCampaign(r *fastglue.Request) error {
 	if err := a.Queue.EnqueueRecipients(r.RequestCtx, jobs); err != nil {
 		a.Log.Error("Failed to enqueue recipients", "error", err)
 		// Revert status on failure
-		a.DB.Model(campaign).Update("status", models.CampaignStatusDraft)
+		a.logWrite("campaign status", a.DB.Model(campaign).Update("status", models.CampaignStatusDraft))
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to queue recipients", nil, "")
 	}
 
@@ -695,7 +695,7 @@ func (a *App) ImportRecipients(r *fastglue.Request) error {
 	// Update total recipients count
 	var totalCount int64
 	a.DB.Model(&models.BulkMessageRecipient{}).Where("campaign_id = ?", id).Count(&totalCount)
-	a.DB.Model(campaign).Update("total_recipients", totalCount)
+	a.logWrite("campaign recipient total", a.DB.Model(campaign).Update("total_recipients", totalCount))
 
 	a.Log.Info("Recipients added to campaign", "campaign_id", id, "count", len(req.Recipients))
 
@@ -799,7 +799,7 @@ func (a *App) DeleteCampaignRecipient(r *fastglue.Request) error {
 	}
 
 	// Update campaign recipient count
-	a.DB.Model(campaign).Update("total_recipients", gorm.Expr("total_recipients - 1"))
+	a.logWrite("campaign recipient total", a.DB.Model(campaign).Update("total_recipients", gorm.Expr("total_recipients - 1")))
 
 	a.logAudit(orgID, userID,
 		"campaign", campaignUUID, models.AuditActionUpdated, nil, nil,

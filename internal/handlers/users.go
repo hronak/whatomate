@@ -305,18 +305,18 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 		// Restore or create UserOrganization entry
 		var existingOrg models.UserOrganization
 		if err := a.DB.Unscoped().Where("user_id = ? AND organization_id = ?", softDeleted.ID, orgID).First(&existingOrg).Error; err == nil {
-			a.DB.Unscoped().Model(&existingOrg).Updates(map[string]any{
+			a.logWrite("user organization undelete", a.DB.Unscoped().Model(&existingOrg).Updates(map[string]any{
 				"deleted_at": nil,
 				"role_id":    roleID,
 				"is_default": true,
-			})
+			}))
 		} else {
-			a.DB.Create(&models.UserOrganization{
+			a.logWrite("user organization create", a.DB.Create(&models.UserOrganization{
 				UserID:         softDeleted.ID,
 				OrganizationID: orgID,
 				RoleID:         roleID,
 				IsDefault:      true,
-			})
+			}))
 		}
 
 		// Load role for response
@@ -625,7 +625,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 	}
 
 	// Delete all UserOrganization entries for this user
-	a.DB.Where("user_id = ?", id).Delete(&models.UserOrganization{})
+	a.logWrite("user organization purge", a.DB.Where("user_id = ?", id).Delete(&models.UserOrganization{}))
 
 	a.logAudit(orgID, currentUserID,
 		"user", id, models.AuditActionDeleted, userAuditSnapshot(&user), nil)

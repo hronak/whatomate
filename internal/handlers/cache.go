@@ -182,11 +182,27 @@ func (a *App) InvalidateChatbotSettingsCache(orgID uuid.UUID) {
 	a.deleteKeysByPattern(ctx, pattern)
 }
 
+// invalidate deletes a cache key and reports failure.
+//
+// A dropped invalidation is not benign here: these entries carry permissions,
+// WhatsApp account credentials and routing config with a 6-hour TTL, so a
+// failed Del serves stale authorization or misroutes inbound webhooks for the
+// rest of that window. Logging is the minimum; it makes the cause visible when
+// the symptom shows up hours later.
+func (a *App) invalidate(ctx context.Context, what string, keys ...string) {
+	if len(keys) == 0 {
+		return
+	}
+	if err := a.Redis.Del(ctx, keys...).Err(); err != nil {
+		a.Log.Error("Cache invalidation failed — stale data will be served until TTL",
+			"cache", what, "keys", keys, "error", err)
+	}
+}
+
 // InvalidateChatbotFlowsCache invalidates the flows cache for an organization
 func (a *App) InvalidateChatbotFlowsCache(orgID uuid.UUID) {
 	ctx := context.Background()
-	cacheKey := flowsCachePrefix + orgID.String()
-	a.Redis.Del(ctx, cacheKey)
+	a.invalidate(ctx, "chatbot_flows", flowsCachePrefix+orgID.String())
 }
 
 // InvalidateKeywordRulesCache invalidates the keyword rules cache for an organization
@@ -200,7 +216,11 @@ func (a *App) InvalidateKeywordRulesCache(orgID uuid.UUID) {
 func (a *App) deleteKeysByPattern(ctx context.Context, pattern string) {
 	iter := a.Redis.Scan(ctx, 0, pattern, 100).Iterator()
 	for iter.Next(ctx) {
-		a.Redis.Del(ctx, iter.Val())
+		a.invalidate(ctx, "pattern:"+pattern, iter.Val())
+	}
+	if err := iter.Err(); err != nil {
+		a.Log.Error("Cache invalidation scan failed — stale data will be served until TTL",
+			"pattern", pattern, "error", err)
 	}
 }
 
@@ -261,8 +281,7 @@ func (a *App) decryptAccountSecrets(account *models.WhatsAppAccount) {
 // InvalidateWhatsAppAccountCache invalidates the WhatsApp account cache
 func (a *App) InvalidateWhatsAppAccountCache(phoneID string) {
 	ctx := context.Background()
-	cacheKey := whatsappAccountCachePrefix + phoneID
-	a.Redis.Del(ctx, cacheKey)
+	a.invalidate(ctx, "whatsapp_account", whatsappAccountCachePrefix+phoneID)
 }
 
 // getWebhooksCached retrieves active webhooks for an organization from cache or database
@@ -296,8 +315,7 @@ func (a *App) getWebhooksCached(orgID uuid.UUID) ([]models.Webhook, error) {
 // InvalidateWebhooksCache invalidates the webhooks cache for an organization
 func (a *App) InvalidateWebhooksCache(orgID uuid.UUID) {
 	ctx := context.Background()
-	cacheKey := webhooksCachePrefix + orgID.String()
-	a.Redis.Del(ctx, cacheKey)
+	a.invalidate(ctx, "webhooks", webhooksCachePrefix+orgID.String())
 }
 
 // getSLAEnabledSettingsCached retrieves all SLA-enabled chatbot settings from cache or database
@@ -330,7 +348,7 @@ func (a *App) getSLAEnabledSettingsCached() ([]models.ChatbotSettings, error) {
 // InvalidateSLASettingsCache invalidates the SLA settings cache
 func (a *App) InvalidateSLASettingsCache() {
 	ctx := context.Background()
-	a.Redis.Del(ctx, slaSettingsCacheKey)
+	a.invalidate(ctx, "sla_settings", slaSettingsCacheKey)
 }
 
 // getAIContextsCached retrieves AI contexts from cache or database
@@ -589,8 +607,7 @@ func (a *App) GetRolePermissionsCached(roleID uuid.UUID) ([]string, error) {
 func (a *App) InvalidateUserPermissionsCache(userID uuid.UUID) {
 	ctx := context.Background()
 	// Delete the base key (no org suffix)
-	cacheKey := userPermissionsCachePrefix + userID.String()
-	a.Redis.Del(ctx, cacheKey)
+	a.invalidate(ctx, "user_permissions", userPermissionsCachePrefix+userID.String())
 	// Delete all org-specific keys
 	pattern := fmt.Sprintf("%s%s:*", userPermissionsCachePrefix, userID.String())
 	a.deleteKeysByPattern(ctx, pattern)
@@ -604,8 +621,7 @@ func (a *App) InvalidateRolePermissionsCache(roleID uuid.UUID) {
 	ctx := context.Background()
 
 	// Delete role cache
-	roleCacheKey := rolePermissionsCachePrefix + roleID.String()
-	a.Redis.Del(ctx, roleCacheKey)
+	a.invalidate(ctx, "role_permissions", rolePermissionsCachePrefix+roleID.String())
 
 	// Collect all user IDs that have this role (deduplicated)
 	userIDs := make(map[uuid.UUID]bool)
@@ -701,6 +717,5 @@ func (a *App) getTagsCached(orgID uuid.UUID) ([]models.Tag, error) {
 // InvalidateTagsCache invalidates the tags cache for an organization
 func (a *App) InvalidateTagsCache(orgID uuid.UUID) {
 	ctx := context.Background()
-	cacheKey := tagsCachePrefix + orgID.String()
-	a.Redis.Del(ctx, cacheKey)
+	a.invalidate(ctx, "tags", tagsCachePrefix+orgID.String())
 }

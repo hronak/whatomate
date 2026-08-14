@@ -244,7 +244,11 @@ func TestWorker_HandleRecipientJob_CampaignNotFound(t *testing.T) {
 
 	err := w.HandleRecipientJob(context.Background(), job)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to load campaign")
+	// A missing campaign can never succeed, so it must be reported as
+	// permanent: a plain error here left the job unacknowledged and Redis
+	// redelivered it every 5 minutes forever.
+	assert.ErrorIs(t, err, queue.ErrPermanent)
+	assert.Contains(t, err.Error(), "not found")
 }
 
 // createMinimalCampaignData creates the minimum data needed for campaign tests

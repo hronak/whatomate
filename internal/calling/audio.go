@@ -4,18 +4,29 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
 )
 
+// samplesPerFrame is one 20ms Opus frame at 48kHz.
+const samplesPerFrame = 960
+
 // AudioPlayer handles playing pre-recorded OGG/Opus audio into a WebRTC track.
 // It maintains cumulative RTP sequence numbers and timestamps across multiple
 // PlayFile calls so that receivers don't drop packets as duplicates.
+// All mutable state is guarded by mu: the transfer path reads Sequence and
+// calls Stop/ResetAfterInterrupt while the playback goroutine is still writing
+// counters and reading the stop signal.
 type AudioPlayer struct {
-	track          *webrtc.TrackLocalStaticRTP
-	stop           chan struct{}
+	track *webrtc.TrackLocalStaticRTP
+
+	mu             sync.Mutex
+	stop           *signal
+	started        bool
+	finished       *signal
 	sequenceNumber uint16
 	timestamp      uint32
 }
@@ -23,9 +34,40 @@ type AudioPlayer struct {
 // NewAudioPlayer creates a new audio player for a WebRTC track.
 func NewAudioPlayer(track *webrtc.TrackLocalStaticRTP) *AudioPlayer {
 	return &AudioPlayer{
-		track: track,
-		stop:  make(chan struct{}),
+		track:    track,
+		stop:     newSignal(),
+		finished: newSignal(),
 	}
+}
+
+// Go runs fn — the player's blocking playback — in its own goroutine and marks
+// the player finished when it returns.
+//
+// Pair it with Wait: a caller that is about to hand this player's track to
+// something else (a bridge) must know the player has actually stopped writing
+// RTP, and Stop only requests that. Waiting is what the 20ms-tick sleep used
+// to approximate.
+func (p *AudioPlayer) Go(fn func()) {
+	p.mu.Lock()
+	p.started = true
+	p.mu.Unlock()
+
+	go func() {
+		defer p.finished.Fire()
+		fn()
+	}()
+}
+
+// Wait blocks until the goroutine started by Go has exited. It returns
+// immediately for a player that was never started with Go.
+func (p *AudioPlayer) Wait() {
+	p.mu.Lock()
+	started := p.started
+	p.mu.Unlock()
+	if !started {
+		return
+	}
+	<-p.finished.Done()
 }
 
 // SetSequence advances the player's RTP sequence number and timestamp so that
@@ -33,13 +75,34 @@ func NewAudioPlayer(track *webrtc.TrackLocalStaticRTP) *AudioPlayer {
 // after a bridge has forwarded agent RTP with high seq numbers — without this,
 // the receiver would drop the player's packets as "old".
 func (p *AudioPlayer) SetSequence(seq uint16, ts uint32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.sequenceNumber = seq + 1
 	p.timestamp = ts + 960 // one frame ahead
 }
 
 // Sequence returns the player's current RTP sequence number and timestamp.
 func (p *AudioPlayer) Sequence() (uint16, uint32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	return p.sequenceNumber, p.timestamp
+}
+
+// stopSignal returns the player's current stop signal.
+func (p *AudioPlayer) stopSignal() *signal {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.stop
+}
+
+// nextRTP reserves the next sequence number and timestamp for one 20ms frame.
+func (p *AudioPlayer) nextRTP() (uint16, uint32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	seq, ts := p.sequenceNumber, p.timestamp
+	p.sequenceNumber++
+	p.timestamp += samplesPerFrame
+	return seq, ts
 }
 
 // PlayFile plays an OGG/Opus audio file into the WebRTC track.
@@ -58,25 +121,28 @@ func (p *AudioPlayer) PlayFile(filePath string) (int, error) {
 		return 0, fmt.Errorf("failed to read Opus packets: %w", err)
 	}
 
-	// Opus at 48kHz, 20ms frames = 960 samples per frame
-	const samplesPerFrame = 960
-
 	packetCount := 0
 
 	ticker := time.NewTicker(20 * time.Millisecond)
 	defer ticker.Stop()
 
+	// Snapshot the stop signal for this playback run. A concurrent
+	// ResetAfterInterrupt installs a fresh one for the *next* run; this run
+	// must keep watching the signal it started with.
+	stop := p.stopSignal().Done()
+
 	for _, opusData := range packets {
 		select {
-		case <-p.stop:
+		case <-stop:
 			return packetCount, nil
 		case <-ticker.C:
+			seq, ts := p.nextRTP()
 			rtpPkt := &rtp.Packet{
 				Header: rtp.Header{
 					Version:        2,
 					PayloadType:    111, // Opus
-					SequenceNumber: p.sequenceNumber,
-					Timestamp:      p.timestamp,
+					SequenceNumber: seq,
+					Timestamp:      ts,
 					SSRC:           1,
 				},
 				Payload: opusData,
@@ -86,8 +152,6 @@ func (p *AudioPlayer) PlayFile(filePath string) (int, error) {
 				return packetCount, fmt.Errorf("failed to write RTP packet: %w", err)
 			}
 
-			p.sequenceNumber++
-			p.timestamp += samplesPerFrame
 			packetCount++
 		}
 	}
@@ -95,15 +159,15 @@ func (p *AudioPlayer) PlayFile(filePath string) (int, error) {
 	return packetCount, nil
 }
 
-// Stop stops the current audio playback
+// Stop stops the current audio playback. Idempotent.
 func (p *AudioPlayer) Stop() {
-	safeClose(p.stop)
+	p.stopSignal().Fire()
 }
 
 // IsStopped returns true if the player has been stopped.
 func (p *AudioPlayer) IsStopped() bool {
 	select {
-	case <-p.stop:
+	case <-p.stopSignal().Done():
 		return true
 	default:
 		return false
@@ -114,7 +178,9 @@ func (p *AudioPlayer) IsStopped() bool {
 // to interrupt playback. Must only be called after the interrupted PlayFile
 // goroutine has fully exited.
 func (p *AudioPlayer) ResetAfterInterrupt() {
-	p.stop = make(chan struct{})
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.stop = newSignal()
 }
 
 // PlayFileLoop plays an OGG/Opus audio file in a continuous loop until Stop() is called.
@@ -125,7 +191,7 @@ func (p *AudioPlayer) PlayFileLoop(filePath string) error {
 		}
 		// Check stop between loop iterations
 		select {
-		case <-p.stop:
+		case <-p.stopSignal().Done():
 			return nil
 		default:
 		}
@@ -138,25 +204,25 @@ func (p *AudioPlayer) PlaySilence(duration time.Duration) {
 	// Opus silence frame (a minimal valid Opus packet representing silence)
 	silence := []byte{0xF8, 0xFF, 0xFE}
 
-	const samplesPerFrame = 960
-
 	ticker := time.NewTicker(20 * time.Millisecond)
 	defer ticker.Stop()
 
 	deadline := time.After(duration)
+	stop := p.stopSignal().Done()
 	for {
 		select {
-		case <-p.stop:
+		case <-stop:
 			return
 		case <-deadline:
 			return
 		case <-ticker.C:
+			seq, ts := p.nextRTP()
 			packet := &rtp.Packet{
 				Header: rtp.Header{
 					Version:        2,
 					PayloadType:    111,
-					SequenceNumber: p.sequenceNumber,
-					Timestamp:      p.timestamp,
+					SequenceNumber: seq,
+					Timestamp:      ts,
 					SSRC:           1,
 				},
 				Payload: silence,
@@ -164,8 +230,6 @@ func (p *AudioPlayer) PlaySilence(duration time.Duration) {
 			if err := p.track.WriteRTP(packet); err != nil {
 				return
 			}
-			p.sequenceNumber++
-			p.timestamp += samplesPerFrame
 		}
 	}
 }

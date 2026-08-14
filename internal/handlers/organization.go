@@ -235,12 +235,12 @@ func (a *App) UpdateOrganizationSettings(r *fastglue.Request) error {
 	userName := audit.GetUserName(a.DB, userID)
 	if generalTouched {
 		newGeneral := generalSettingsSnapshot(org.Name, org.Settings)
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsGeneral, orgID, models.AuditActionUpdated, oldGeneral, newGeneral)
 	}
 	if callingTouched {
 		newCalling := callingSettingsSnapshot(org.Settings)
-		audit.LogAudit(a.DB, orgID, userID, userName,
+		a.logAuditAs(orgID, userID, userName,
 			models.ResourceSettingsCalling, orgID, models.AuditActionUpdated, oldCalling, newCalling)
 	}
 

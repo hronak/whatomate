@@ -85,7 +85,7 @@ func (a *Assigner) assignRoundRobin(teamID, orgID uuid.UUID, memberIDs []uuid.UU
 
 	selected := members[0]
 	now := time.Now()
-	a.db.Model(&selected).Update("last_assigned_at", now)
+	a.logWrite("assignment round-robin cursor", a.db.Model(&selected).Update("last_assigned_at", now))
 
 	a.log.Debug("Round-robin assigned to agent", "team_id", teamID, "user_id", selected.UserID)
 	return &selected.UserID
@@ -171,4 +171,13 @@ func (a *Assigner) InvalidateTeamCache(teamID uuid.UUID) {
 	key := teamCachePrefix + teamID.String()
 	a.redis.Del(ctx, key)
 	a.log.Debug("Invalidated team assignment cache", "team_id", teamID)
+}
+
+// logWrite reports a failed database write at a site with no error path to
+// return to. A dropped last_assigned_at write silently breaks round-robin
+// fairness: the same agent keeps winning the next assignment.
+func (a *Assigner) logWrite(op string, tx *gorm.DB, kv ...any) {
+	if tx.Error != nil {
+		a.log.Error("Database write failed", append([]any{"op", op, "error", tx.Error}, kv...)...)
+	}
 }

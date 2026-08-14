@@ -204,7 +204,11 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 					"template_language", change.Value.MessageTemplateLanguage,
 					"waba_id", entry.ID,
 				)
-				go a.processTemplateStatusUpdate(entry.ID, change.Value.Event, change.Value.MessageTemplateName, change.Value.MessageTemplateLanguage, change.Value.Reason)
+				templateWABAID, event := entry.ID, change.Value.Event
+				name, lang, reason := change.Value.MessageTemplateName, change.Value.MessageTemplateLanguage, change.Value.Reason
+				a.spawnIngest("template_status_update", func(context.Context) {
+					a.processTemplateStatusUpdate(templateWABAID, event, name, lang, reason)
+				})
 				continue
 			}
 
@@ -212,7 +216,10 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 			if change.Field == "user_preferences" {
 				for _, pref := range change.Value.UserPreferences {
 					if pref.Category == "marketing_messages" {
-						go a.processMarketingPreference(change.Value.Metadata.PhoneNumberID, pref.WaID, pref.UserID, pref.Value)
+						phoneID, waID, userID, value := change.Value.Metadata.PhoneNumberID, pref.WaID, pref.UserID, pref.Value
+						a.spawnIngest("marketing_preference", func(context.Context) {
+							a.processMarketingPreference(phoneID, waID, userID, value)
+						})
 					}
 				}
 				continue
@@ -258,7 +265,10 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 					"contact_phone_number", change.Value.ContactPhoneNumber,
 					"contact_name", change.Value.ContactName,
 				)
-				go a.processContactSync(phoneNumberID, change.Value.ContactPhoneNumber, change.Value.ContactName, change.Value.Action)
+				contactPhone, contactName, action := change.Value.ContactPhoneNumber, change.Value.ContactName, change.Value.Action
+				a.spawnIngest("contact_sync", func(context.Context) {
+					a.processContactSync(phoneNumberID, contactPhone, contactName, action)
+				})
 				continue
 			}
 
@@ -271,7 +281,9 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 						"type", echo.Type,
 						"phone_number_id", phoneNumberID,
 					)
-					go a.processMessageEcho(phoneNumberID, echo)
+					a.spawnIngest("message_echo", func(context.Context) {
+						a.processMessageEcho(phoneNumberID, echo)
+					})
 				}
 				continue
 			}
@@ -300,11 +312,14 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 						a.Log.Error("Failed to parse call permission expiration timestamp", "error", err, "from", msg.From)
 						continue
 					}
-					go a.processCallPermissionReply(phoneNumberID, msg.From, &CallPermissionReplyData{
+					from, data := msg.From, &CallPermissionReplyData{
 						Response:            cpr.Response,
 						IsPermanent:         cpr.IsPermanent,
 						ExpirationTimestamp: expTS,
 						ResponseSource:      cpr.ResponseSource,
+					}
+					a.spawnIngest("call_permission_reply", func(context.Context) {
+						a.processCallPermissionReply(phoneNumberID, from, data)
 					})
 					continue
 				}
@@ -326,7 +341,9 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 				}
 
 				// Process message asynchronously
-				go a.processIncomingMessage(phoneNumberID, msg, profileName)
+				a.spawnIngest("incoming_message", func(context.Context) {
+					a.processIncomingMessage(phoneNumberID, msg, profileName)
+				})
 			}
 
 			// Process status updates
@@ -336,7 +353,9 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 					"status", status.Status,
 				)
 
-				go a.processStatusUpdate(phoneNumberID, status)
+				a.spawnIngest("status_update", func(context.Context) {
+					a.processStatusUpdate(phoneNumberID, status)
+				})
 			}
 		}
 	}
@@ -652,7 +671,7 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 
 	// Store BSUID if provided and not already set
 	if msg.FromUserID != "" && contact.BSUID != msg.FromUserID {
-		a.DB.Model(contact).Update("bsuid", msg.FromUserID)
+		a.logWrite("contact bsuid", a.DB.Model(contact).Update("bsuid", msg.FromUserID))
 		contact.BSUID = msg.FromUserID
 	}
 
@@ -706,12 +725,12 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 		preview = "[" + messageType + "]"
 	}
 
-	a.DB.Model(contact).Updates(map[string]any{
+	a.logWrite("contact profile", a.DB.Model(contact).Updates(map[string]any{
 		"last_message_at":      now,
 		"last_message_preview": preview,
 		"is_read":              true, // Echoes from mobile app are outgoing, so conversation is read
 		"whats_app_account":    account.Name,
-	})
+	}))
 
 	// Broadcast new message via WebSocket to keep UI updated
 	a.broadcastNewMessage(account.OrganizationID, &message, contact)

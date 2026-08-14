@@ -2,7 +2,9 @@ package calling
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/pion/webrtc/v4"
@@ -327,22 +329,55 @@ func (m *Manager) createPeerConnection() (*webrtc.PeerConnection, error) {
 }
 
 // consumeAudioTrack reads and discards RTP packets to keep the stream active.
-// It exits when the bridge takes over (BridgeStarted channel is closed) or on error.
+// It exits when the bridge takes over, when the session is torn down, or on a
+// non-timeout read error.
 func (m *Manager) consumeAudioTrack(session *CallSession, track *webrtc.TrackRemote) {
 	buf := make([]byte, 1500)
+	done := session.doneChan()
 	for {
+		// BridgeStarted is re-read every iteration: a transfer installs a
+		// fresh signal, and this goroutine must watch the current one.
 		select {
-		case <-session.BridgeStarted:
+		case <-session.bridgeStarted().Done():
 			// Bridge is taking over reading from this track
+			return
+		case <-done:
 			return
 		default:
 		}
 
-		_, _, err := track.Read(buf)
-		if err != nil {
+		if !readRTPDeadline(track, session, m) {
+			return
+		}
+		if _, _, err := track.Read(buf); err != nil {
+			if isTimeout(err) {
+				continue
+			}
 			return
 		}
 	}
+}
+
+// rtpReadDeadline bounds one blocking track read. Without it a half-open
+// connection parks the consumer goroutine forever: the peer stops sending, no
+// error is ever raised, and the goroutine outlives the call.
+const rtpReadDeadline = 5 * time.Second
+
+// readRTPDeadline arms the next read's deadline, reporting whether the caller
+// should keep reading.
+func readRTPDeadline(track *webrtc.TrackRemote, session *CallSession, m *Manager) bool {
+	if err := track.SetReadDeadline(time.Now().Add(rtpReadDeadline)); err != nil {
+		m.log.Debug("Failed to set RTP read deadline", "call_id", session.ID, "error", err)
+		return false
+	}
+	return true
+}
+
+// isTimeout reports whether err is a read-deadline expiry rather than a real
+// stream failure. pion returns a net.Error with Timeout() true.
+func isTimeout(err error) bool {
+	var netErr net.Error
+	return errors.As(err, &netErr) && netErr.Timeout()
 }
 
 // consumeAudioWithDTMF reads RTP packets from the audio track, detecting
@@ -361,15 +396,24 @@ func (m *Manager) consumeAudioWithDTMF(session *CallSession, track *webrtc.Track
 		"audio_pt", audioPT,
 	)
 
+	done := session.doneChan()
 	for {
 		select {
-		case <-session.BridgeStarted:
+		case <-session.bridgeStarted().Done():
+			return
+		case <-done:
 			return
 		default:
 		}
 
+		if !readRTPDeadline(track, session, m) {
+			return
+		}
 		pkt, _, err := track.ReadRTP()
 		if err != nil {
+			if isTimeout(err) {
+				continue
+			}
 			m.log.Debug("Audio track read ended", "call_id", session.ID, "error", err)
 			return
 		}
