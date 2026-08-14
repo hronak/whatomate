@@ -335,7 +335,7 @@ func TestApp_ExchangeToken_Success_CodeOnly_Discovery(t *testing.T) {
 	assert.Equal(t, "active", accountMap["status"])
 	assert.Equal(t, phoneID, accountMap["phone_id"])
 	assert.Equal(t, wabaID, accountMap["business_id"])
-	assert.Equal(t, "v21.0", accountMap["api_version"])
+	assert.Equal(t, whatsapp.DefaultAPIVersion, accountMap["api_version"])
 }
 
 func TestApp_ExchangeToken_MissingFields(t *testing.T) {
