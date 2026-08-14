@@ -31,8 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates tzdata espeak-ng opus-tools ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy pre-built binary from GoReleaser
-COPY whatomate .
+# Copy pre-built binary from GoReleaser — dockers_v2 stages the build
+# context with per-platform subdirectories (see goreleaser.com/deprecations#dockers).
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/whatomate .
 
 # Install Piper TTS binary + shared libraries
 COPY --from=piper-dl /tmp/piper/piper /usr/local/bin/piper
