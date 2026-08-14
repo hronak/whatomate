@@ -104,7 +104,7 @@ docker_manifests:
 
 release:
   github:
-    owner: shridarpatil
+    owner: hronak
     name: whatomate
   draft: false
   prerelease: auto

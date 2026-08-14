@@ -53,5 +53,5 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCKER_ORG: shridh0r
+          DOCKER_ORG: hronak
           GITHUB_ORG: ${{ github.repository_owner }}

@@ -1,7 +1,7 @@
 services:
   # Whatomate app
   app:
-    image: shridh0r/whatomate:latest
+    image: hronak/whatomate:latest
     container_name: whatomate_app
     restart: unless-stopped
     ports:
