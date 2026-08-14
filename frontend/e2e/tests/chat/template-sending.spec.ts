@@ -83,8 +83,13 @@ test.describe('Template Sending', () => {
     // Get the organization ID for the logged-in user
     const orgId = await execSQL(`SELECT organization_id FROM users WHERE email = 'admin@test.com' LIMIT 1`)
 
-    // Clean up leftover e2e templates from previous runs
-    await execSQL(`DELETE FROM templates WHERE name LIKE 'e2e_%' AND organization_id = '${orgId}'`)
+    // Clean up leftover templates from previous runs — only the prefixes this
+    // spec seeds. A blanket 'e2e_%' sweep also deleted the e2e_hdr_% templates
+    // that template-header-param.spec.ts had just seeded in a parallel worker,
+    // leaving its composer picker with "No approved templates".
+    await execSQL(
+      `DELETE FROM templates WHERE organization_id = '${orgId}' AND (name LIKE 'e2e_simple_%' OR name LIKE 'e2e_params_%' OR name LIKE 'e2e_buttons_%')`,
+    )
 
     // Seed APPROVED templates directly via SQL (API only creates DRAFT)
     const uid = Date.now().toString().slice(-6)

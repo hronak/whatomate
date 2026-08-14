@@ -26,12 +26,19 @@ export interface Credentials {
 export async function loginAs(page: Page, creds: Credentials): Promise<void> {
   // Clear any existing session to ensure the router doesn't intercept the /login
   // navigation and redirect us away if the browser already has an active session.
-  await page.context().clearCookies()
+  //
+  // Order matters. localStorage is origin-scoped, so it has to go while we're
+  // still on the app; cookies have to go once the SPA is no longer running,
+  // because a live app that loses its session redirects itself to /login and
+  // that redirect aborts the goto below (net::ERR_ABORTED, then "interrupted
+  // by another navigation" on the retry).
   try {
     await page.evaluate(() => window.localStorage.clear())
   } catch {
     // Ignore if on about:blank
   }
+  await page.goto('about:blank')
+  await page.context().clearCookies()
 
   await page.goto('/login')
   await page.locator('input[type="email"], input[name="email"]').fill(creds.email)

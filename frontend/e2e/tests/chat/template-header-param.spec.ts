@@ -52,23 +52,19 @@ test.describe('Chat composer — TEXT header parameter', () => {
     const contact = contacts.find((c: any) => c.phone_number === phone) || contacts[0]
     contactId = contact.id
 
-    let accounts: any[] = []
-    try {
-      accounts = await api.getWhatsAppAccounts()
-    } catch {
-      // ignore
-    }
-    if (accounts.length === 0) {
-      const uid = Date.now().toString().slice(-8)
-      await api.createWhatsAppAccount({
-        name: `e2e-hdr-account-${uid}`,
-        phone_id: `phone-${uid}`,
-        business_id: `biz-${uid}`,
-        access_token: `token-${uid}`,
-      })
-      accounts = await api.getWhatsAppAccounts()
-    }
-    accountName = accounts[0].name
+    // Seed a dedicated account rather than reusing the org's first one: the
+    // templates below are keyed to this account name, and parallel workers
+    // create-then-delete accounts (accounts.spec, audit-trail.spec). Losing
+    // that shared account mid-run leaves the composer's picker showing "No
+    // approved templates".
+    const acctUid = Date.now().toString().slice(-8)
+    const account = await api.createWhatsAppAccount({
+      name: `e2e-hdr-account-${acctUid}`,
+      phone_id: `phone-${acctUid}`,
+      business_id: `biz-${acctUid}`,
+      access_token: `token-${acctUid}`,
+    })
+    accountName = account.name
 
     const orgId = await execSQL(
       `SELECT organization_id FROM users WHERE email = 'admin@test.com' LIMIT 1`,

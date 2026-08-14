@@ -140,8 +140,9 @@ test.describe('Language Switching', () => {
       await languageSelect.click()
       await page.locator('[role="option"]').filter({ hasText: 'Español' }).click()
 
-      // Sidebar nav items should be in Spanish
-      const sidebar = page.locator('aside')
+      // Sidebar nav items should be in Spanish. Scoped to the main rail — the
+      // settings sub-nav is a second <aside> and repeats the section name.
+      const sidebar = page.getByRole('navigation', { name: 'Main navigation' })
       await expect(sidebar.getByText('Panel')).toBeVisible() // Dashboard -> Panel
       await expect(sidebar.getByText('Configuración')).toBeVisible() // Settings -> Configuración
     })

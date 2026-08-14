@@ -92,10 +92,9 @@ test.describe('Stats Cards', () => {
     await chatbotHubPage.goto()
   })
 
-  test('should display stats cards', async ({ page }) => {
+  test('should display stats cards', async () => {
     // Stats cards should be visible
-    const cards = page.locator('.rounded-lg.border')
-    await expect(cards.first()).toBeVisible()
+    await expect(chatbotHubPage.statsCards.first()).toBeVisible()
   })
 
   test('should show total sessions stat', async ({ page }) => {
