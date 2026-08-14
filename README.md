@@ -65,9 +65,9 @@ The latest image is available on Docker Hub at [`hronak/whatomate:latest`](https
 
 ```bash
 # Download compose file, sample config, and env file
-curl -LO https://raw.githubusercontent.com/hronak/whatomate/main/docker/docker-compose.yml
+curl -LO https://raw.githubusercontent.com/hronak/whatomate/main/docker-compose.yml
 curl -LO https://raw.githubusercontent.com/hronak/whatomate/main/config.example.toml
-curl -L https://raw.githubusercontent.com/hronak/whatomate/main/docker/.env.example -o .env
+curl -L https://raw.githubusercontent.com/hronak/whatomate/main/.env.example -o .env
 
 # Copy and edit config
 cp config.example.toml config.toml
