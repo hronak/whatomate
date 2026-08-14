@@ -39,7 +39,7 @@ services:
       timeout: 5s
       retries: 6
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
 
   # Redis
   redis:
