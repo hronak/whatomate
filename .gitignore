@@ -60,3 +60,6 @@ test-results/
 
 # Docker
 .env
+
+# Local Claude Code guidance
+CLAUDE.md
