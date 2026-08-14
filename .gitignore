@@ -58,5 +58,5 @@ audio/
 # Test results
 test-results/
 
-# Docker 
-docker/.env
+# Docker
+.env
