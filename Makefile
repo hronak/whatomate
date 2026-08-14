@@ -1,4 +1,4 @@
-.PHONY: all build build-prod run test clean docker-build docker-up docker-down migrate frontend-dev frontend-build
+.PHONY: all build build-prod run test test-e2e test-e2e-embedded clean docker-build docker-up docker-down migrate dev dev-backend dev-frontend frontend-dev frontend-build
 
 # Go parameters
 GOCMD=go
@@ -11,6 +11,16 @@ BINARY_PATH=./cmd/whatomate
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 BUILD_TIME=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 LDFLAGS=-ldflags "-s -w -X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME)"
+
+# Dev ports. The frontend dev server (FRONTEND_PORT) proxies /api and /ws to
+# the backend (BACKEND_PORT) — see frontend/ports.ts for why the two URLs are
+# not interchangeable. Both are exported so vite and playwright read the same
+# values, and BACKEND_PORT is handed to the server as WHATOMATE_SERVER__PORT so
+# overriding it actually moves the backend.
+BACKEND_PORT ?= 8080
+FRONTEND_PORT ?= 3000
+export BACKEND_PORT
+export FRONTEND_PORT
 
 # Docker parameters
 DOCKER_COMPOSE=docker compose -f docker-compose.yml
@@ -64,6 +74,31 @@ test-coverage:
 		$(GOTEST) -v -coverprofile=coverage.out ./...; \
 	fi
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
+
+# E2E against the dev server: live frontend source, API proxied to the backend.
+# This is the one to use while working on the frontend. Playwright starts vite
+# itself (reusing yours if it's already up); the backend must be running.
+test-e2e:
+	cd frontend && npm run test:e2e
+
+# E2E against the frontend embedded in the built binary — what CI does, and the
+# only way to catch embed/build-only breakage. Rebuilds first so the snapshot
+# matches the working tree, then runs the binary under test itself.
+test-e2e-embedded: build-prod
+	@if curl -sf http://localhost:$(BACKEND_PORT)/health >/dev/null 2>&1; then \
+		echo "Something is already serving :$(BACKEND_PORT) — stop it first, or this would"; \
+		echo "test that server instead of the binary just built."; exit 1; \
+	fi
+	@./$(BINARY_NAME) server -config config.toml -migrate & \
+	BACKEND_PID=$$!; \
+	trap 'kill $$BACKEND_PID 2>/dev/null || true' INT TERM EXIT; \
+	echo "Waiting for the built binary on :$(BACKEND_PORT) ..."; \
+	for i in $$(seq 1 60); do \
+		if curl -sf http://localhost:$(BACKEND_PORT)/health >/dev/null 2>&1; then break; fi; \
+		if ! kill -0 $$BACKEND_PID 2>/dev/null; then echo "Binary exited during startup."; exit 1; fi; \
+		sleep 1; \
+	done; \
+	cd frontend && npm run test:embedded
 
 # Clean build artifacts
 clean:
@@ -121,11 +156,29 @@ frontend-build:
 frontend-preview:
 	cd frontend && npm run preview
 
-# Development - run both backend and frontend
-dev:
-	@echo "Starting backend and frontend in development mode..."
-	@make run-migrate &
-	@make frontend-dev
+# Development - run both backend and frontend.
+#
+# The one command to use for local work. Open http://localhost:$(FRONTEND_PORT)
+# — never the backend port, which serves the frontend snapshot embedded at the
+# last `make build-prod` and so will not show your frontend edits.
+#
+# Builds a real binary first rather than `go run`: $$! then points at the
+# server itself, so the trap can actually kill it. `go run` spawns the server
+# as a child and exits leave it holding the port — which is how you end up with
+# a phantom listener on :$(BACKEND_PORT).
+dev: build
+	@if [ ! -d "frontend/node_modules" ]; then \
+		echo "Installing frontend dependencies..."; \
+		cd frontend && npm install; \
+	fi
+	@BINARY=./$(BINARY_NAME) bash ./scripts/dev.sh
+
+# Backend only, for when the frontend is already running elsewhere.
+dev-backend: run-migrate
+
+# Frontend only. Expects a backend on :$(BACKEND_PORT); without one the dev
+# server answers /api with a 503 explaining that.
+dev-frontend: frontend-dev
 
 # Lint
 lint:
@@ -147,10 +200,15 @@ help:
 	@echo "  build-prod     - Build single binary with embedded frontend"
 	@echo ""
 	@echo "Development:"
+	@echo "  dev            - Run backend + frontend, then open http://localhost:$(FRONTEND_PORT)"
+	@echo "  dev-backend    - Backend only, on :$(BACKEND_PORT) (alias of run-migrate)"
+	@echo "  dev-frontend   - Frontend only, on :$(FRONTEND_PORT) (needs a backend)"
 	@echo "  build          - Build the backend binary (without frontend)"
 	@echo "  run            - Run the backend locally"
 	@echo "  run-migrate    - Run the backend with database migrations"
-	@echo "  dev            - Run both backend and frontend in development mode"
+	@echo ""
+	@echo "  Open :$(FRONTEND_PORT) while developing. :$(BACKEND_PORT) serves the frontend"
+	@echo "  snapshot embedded at the last 'make build-prod', not your edits."
 	@echo ""
 	@echo "Frontend:"
 	@echo "  frontend-install - Install frontend dependencies"
@@ -158,8 +216,10 @@ help:
 	@echo "  frontend-build - Build frontend for production"
 	@echo ""
 	@echo "Testing:"
-	@echo "  test           - Run tests"
-	@echo "  test-coverage  - Run tests with coverage report"
+	@echo "  test           - Run Go tests"
+	@echo "  test-coverage  - Run Go tests with coverage report"
+	@echo "  test-e2e       - Run Playwright e2e against the dev server (:$(FRONTEND_PORT))"
+	@echo "  test-e2e-embedded - Run Playwright against the built binary (:$(BACKEND_PORT))"
 	@echo ""
 	@echo "Docker:"
 	@echo "  docker-build   - Build Docker images"

@@ -399,38 +399,38 @@ Add new POMs to `pages/index.ts`. Tests should never instantiate raw
 
 ## Local vs CI
 
-| | Local (vite dev) | CI (vite preview / built) |
+| | Local (vite dev) | CI (built binary) |
 | --- | --- | --- |
-| `BASE_URL` | `http://localhost:3000` (dev server) | served from prod build |
+| `BASE_URL` | `http://localhost:3000` — the default, frontend from live source | `http://localhost:8080` — frontend embedded in the binary CI just built |
 | `page.goto` cold-start | seconds; `load` event hangs forever due to HMR | fast, deterministic |
 | Recommended `waitUntil` | `'domcontentloaded'` (what `helpers/auth.ts` uses) | default `'load'` works |
-| Browser test stability | flaky | reliable |
 
-**The login.spec.ts test currently fails locally on the dev server.** It's
-not a regression — it's environmental. Devs running e2e locally should
-either:
-1. Run only API-based tests (`--grep-invert "(page|UI|view|navigates)"`).
-2. Or run against a production build:
+Both are legitimate; they differ in *which build of the frontend* they serve.
+:3000 is the one to use while developing, because it is the only one that
+reflects unbuilt source. See `frontend/ports.ts`.
 
-```bash
-cd frontend
-npm run build
-npx vite preview --port 3000 &
-BASE_URL=http://localhost:3000 npx playwright test
-```
+Don't reach for `vite preview` or any other third way to serve the frontend —
+an extra port is how you end up testing one build while looking at another.
+To exercise the embedded build, use `make test-e2e-embedded`, which rebuilds
+via `build-prod` so the snapshot matches the working tree.
 
-(Phase 6 wraps this into a `npm run test:e2e:local` script.)
+`global-setup.ts` preflights `BASE_URL` before any spec runs and aborts with the
+specific cause (nothing listening / dev server up but backend down / backend up
+but unmigrated), so a missing backend no longer shows up as every test failing
+on "Invalid credentials".
 
 ---
 
 ## Running
 
+Start the stack with `make dev`, then from `frontend/`:
+
 ```bash
-# All tests, against whatever's at BASE_URL (defaults to localhost:3000).
-BASE_URL=http://localhost:3000 npx playwright test
+# All tests, against BASE_URL (defaults to the dev server on :3000).
+npx playwright test
 
 # Single spec, serial.
-BASE_URL=http://localhost:3000 npx playwright test e2e/tests/settings/webhooks.spec.ts -j 1
+npx playwright test e2e/tests/settings/webhooks.spec.ts -j 1
 
 # Filter by test name regex.
 npx playwright test --grep "audit log"
@@ -452,7 +452,9 @@ npx playwright show-report
 | 500 on PUT after DELETE | Soft-delete + unique index without `deleted_at`. | Use `Unscoped().Delete()` in the handler, or change the index. |
 | `Login failed` in tests using `api.loginAsAdmin()` | `admin@test.com` not created (global-setup failed). | Use `api.login('admin@admin.com', 'admin')` instead. |
 | `expect(...).toBeDefined()` fails right after PUT | Silent server error; `api.put` doesn't throw on non-2xx. | Add `expect(resp.ok(), await resp.text()).toBe(true)` before reading data. |
-| `page.goto` 30 s timeout on `/login` | Vite dev server cold-start; `load` event hangs. | Use prod build via `vite preview`, or `waitUntil: 'domcontentloaded'`. |
+| `page.goto` 30 s timeout on `/login` | Vite dev server cold-start; `load` event hangs. | `waitUntil: 'domcontentloaded'` (what `helpers/auth.ts` already does). |
+| `Invalid credentials` on a correct password | Backend down; the proxy's error body isn't an envelope. | Start it — `make dev`. The proxy now returns a 503 saying this, and global-setup preflights it. |
+| A frontend fix doesn't show up | Looking at `:8080`, which serves the frontend embedded at the last `make build-prod`. | Use `:3000`, or re-run `make build-prod`. |
 | `should record a change to "role_id"` fails on user update | Audit diff records the preloaded relation's JSON tag (`role`), not the FK column. | Don't assert on a specific field name unless verified — drop `expectedFields` or use `role`. |
 | Tests pass alone, fail in suite | Cross-test state pollution (cookies, DB rows, current org). | Switch back to original org; explicitly clean in `beforeEach`. |
 
