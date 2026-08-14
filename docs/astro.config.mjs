@@ -9,7 +9,7 @@ export default defineConfig({
       title: 'Whatomate',
       description: 'A modern WhatsApp Business Platform',
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/shridarpatil/whatomate' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/hronak/whatomate' },
       ],
       sidebar: [
         {

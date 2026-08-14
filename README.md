@@ -59,13 +59,13 @@ Modern, open-source WhatsApp Business Platform. Single binary app.
 
 ### Docker
 
-The latest image is available on Docker Hub at [`shridh0r/whatomate:latest`](https://hub.docker.com/r/shridh0r/whatomate)
+The latest image is available on Docker Hub at [`hronak/whatomate:latest`](https://hub.docker.com/r/hronak/whatomate)
 
 ```bash
 # Download compose file, sample config, and env file
-curl -LO https://raw.githubusercontent.com/shridarpatil/whatomate/main/docker/docker-compose.yml
-curl -LO https://raw.githubusercontent.com/shridarpatil/whatomate/main/config.example.toml
-curl -L https://raw.githubusercontent.com/shridarpatil/whatomate/main/docker/.env.example -o .env
+curl -LO https://raw.githubusercontent.com/hronak/whatomate/main/docker/docker-compose.yml
+curl -LO https://raw.githubusercontent.com/hronak/whatomate/main/config.example.toml
+curl -L https://raw.githubusercontent.com/hronak/whatomate/main/docker/.env.example -o .env
 
 # Copy and edit config
 cp config.example.toml config.toml
@@ -81,7 +81,7 @@ __________________
 
 ### Binary
 
-Download the [latest release](https://github.com/shridarpatil/whatomate/releases) and extract the binary.
+Download the [latest release](https://github.com/hronak/whatomate/releases) and extract the binary.
 
 ```bash
 # Copy and edit config
@@ -98,7 +98,7 @@ __________________
 ### Build from Source
 
 ```bash
-git clone https://github.com/shridarpatil/whatomate.git
+git clone https://github.com/hronak/whatomate.git
 cd whatomate
 
 # Production build (single binary with embedded frontend)
