@@ -18,7 +18,9 @@ import OrganizationSwitcher from './OrganizationSwitcher.vue'
 import UserMenu from './UserMenu.vue'
 import ActiveCallPanel from '@/components/calling/ActiveCallPanel.vue'
 import { ScrollToTop } from '@/components/shared'
-import { navigationSections, type NavSection } from './navigation'
+import { navigationSections, type NavItem, type NavSection } from './navigation'
+
+type FilteredNavItem = NavItem & { active: boolean; children?: NavItem[] }
 
 useI18n() // Enable $t() in template
 
@@ -92,6 +94,34 @@ const navSections = computed(() => {
 const mainSections = computed(() => navSections.value.filter(s => !s.pinBottom))
 const bottomSections = computed(() => navSections.value.filter(s => s.pinBottom))
 
+/**
+ * The bottom-pinned item (Settings) whose sub-pages get their own column on
+ * md+, the way Chat splits contacts from the conversation. Below md the
+ * column is dropped and the same children render nested in the drawer.
+ */
+const activeSubNav = computed<FilteredNavItem | null>(() => {
+  for (const section of bottomSections.value) {
+    const item = section.items.find(i => i.active && i.children?.length)
+    if (item) return item
+  }
+  return null
+})
+
+/** Consecutive children sharing a `group` collapse into one labelled block. */
+const subNavGroups = computed(() => {
+  const groups: { label: string; items: NavItem[] }[] = []
+  for (const child of activeSubNav.value?.children ?? []) {
+    const label = child.group ?? ''
+    const last = groups[groups.length - 1]
+    if (last && last.label === label) {
+      last.items.push(child)
+    } else {
+      groups.push({ label, items: [child] })
+    }
+  }
+  return groups
+})
+
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
@@ -103,12 +133,12 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <div class="flex h-screen bg-background">
+  <div class="flex h-screen bg-shell">
     <!-- Skip link for accessibility -->
     <a href="#main-content" class="skip-link">{{ $t('nav.skipToMain') }}</a>
 
     <!-- Mobile header -->
-    <header class="fixed top-0 left-0 right-0 z-50 flex h-12 items-center justify-between border-b border-border bg-white/95 dark:bg-[#0a0a0b]/95 backdrop-blur-sm px-3 md:hidden">
+    <header class="fixed top-0 left-0 right-0 z-50 flex h-12 items-center justify-between border-b border-border bg-sidebar/95 backdrop-blur-sm px-3 md:hidden">
       <RouterLink to="/" class="flex items-center gap-2">
         <div class="size-7 rounded-lg bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
           <MessageSquare class="size-4 text-white" />
@@ -137,7 +167,7 @@ const handleLogout = async () => {
 
     <!-- Sidebar -->
     <aside
-      :class="[ 'flex flex-col border-r border-border bg-white dark:bg-[#0a0a0b] transition-all duration-300', 'fixed inset-y-0 left-0 z-40 md:relative', 'transform md:transform-none', isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0', isCollapsed ? 'w-64 md:w-16' : 'w-64' ]"
+      :class="[ 'flex flex-col border-r border-border bg-sidebar transition-all duration-300', 'fixed inset-y-0 left-0 z-40 md:relative', 'transform md:transform-none', isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0', isCollapsed ? 'w-64 md:w-16' : 'w-64' ]"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -179,7 +209,7 @@ const handleLogout = async () => {
             <!-- Section header -->
             <div
               v-if="section.label && !isCollapsed"
-              :class="['px-2.5 pt-4 pb-1 font-semibold uppercase tracking-wider text-foreground/30', sIdx === 0 && 'pt-1']"
+              :class="['px-2.5 pt-4 pb-1 font-semibold uppercase tracking-wider text-foreground/45', sIdx === 0 && 'pt-1']"
             >
               {{ $t(section.label) }}
             </div>
@@ -237,12 +267,13 @@ const handleLogout = async () => {
               <span :class="isCollapsed && 'md:sr-only'">{{ $t(item.name) }}</span>
             </RouterLink>
 
-            <template v-if="item.children && item.active && !isCollapsed">
+            <!-- Children live in the sub-nav column on md+; nest them in the drawer below it -->
+            <template v-if="item.children && item.active">
               <RouterLink
                 v-for="child in item.children"
                 :key="child.path"
                 :to="child.path"
-                :class="[ 'flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-medium transition-all duration-200 ml-4', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-accent' ]"
+                :class="[ 'md:hidden flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-medium transition-all duration-200 ml-4', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-accent' ]"
                 role="menuitem"
                 :aria-current="route.path === child.path ? 'page' : undefined"
                 @click="isMobileMenuOpen = false"
@@ -259,8 +290,47 @@ const handleLogout = async () => {
       <UserMenu :collapsed="isCollapsed" @logout="handleLogout" />
     </aside>
 
+    <!-- Sub-navigation column (Settings) -->
+    <aside
+      v-if="activeSubNav"
+      class="hidden md:flex w-56 shrink-0 flex-col border-r border-border bg-subnav"
+      role="navigation"
+      :aria-label="$t(activeSubNav.name)"
+    >
+      <div class="flex h-12 shrink-0 items-center gap-2 px-3 border-b border-border">
+        <component :is="activeSubNav.icon" class="size-4 shrink-0 text-foreground/60" aria-hidden="true" />
+        <span class="font-semibold text-foreground truncate">{{ $t(activeSubNav.name) }}</span>
+      </div>
+      <ScrollArea class="flex-1 py-2">
+        <nav class="px-2" role="menu">
+          <template v-for="(group, gIdx) in subNavGroups" :key="group.label || gIdx">
+            <div
+              v-if="group.label"
+              :class="['px-2.5 pt-4 pb-1 font-semibold uppercase tracking-wider text-foreground/45', gIdx === 0 && 'pt-1']"
+            >
+              {{ $t(group.label) }}
+            </div>
+            <div class="space-y-0.5">
+              <RouterLink
+                v-for="child in group.items"
+                :key="child.path"
+                :to="child.path"
+                :class="[ 'nav-active-indicator btn-press flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 font-medium transition-all duration-200', route.path === child.path ? 'bg-muted text-foreground' : 'text-foreground/50 hover:text-foreground hover:bg-accent' ]"
+                :data-active="route.path === child.path"
+                role="menuitem"
+                :aria-current="route.path === child.path ? 'page' : undefined"
+              >
+                <component :is="child.icon" class="size-4 shrink-0" aria-hidden="true" />
+                <span class="truncate">{{ $t(child.name) }}</span>
+              </RouterLink>
+            </div>
+          </template>
+        </nav>
+      </ScrollArea>
+    </aside>
+
     <!-- Main content -->
-    <main id="main-content" class="flex-1 overflow-hidden pt-12 md:pt-0 bg-background" role="main">
+    <main id="main-content" class="flex-1 overflow-hidden pt-12 md:pt-0 bg-shell" role="main">
       <RouterView v-slot="{ Component, route: viewRoute }">
         <Transition name="page" mode="out-in">
           <component :is="Component" :key="viewRoute.meta.stableKey ? String(viewRoute.name) : viewRoute.path" />
