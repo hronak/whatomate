@@ -22,6 +22,6 @@ const urlTitle = computed(() => props.data?.config?.url || props.data?.config?.a
 <template>
   <BaseNode :label="data?.label || 'API'" header-class="bg-orange-600" :has-input="!data?.isEntryNode">
     <template #icon><Globe class="size-4" /></template>
-    <p class="truncate font-mono text-[10px]" :title="urlTitle">{{ summary }}</p>
+    <p class="truncate font-mono" :title="urlTitle">{{ summary }}</p>
   </BaseNode>
 </template>

@@ -39,13 +39,13 @@ const headerGradient = computed(() => gradientMap[props.headerClass] || props.he
     />
 
     <!-- Header -->
-    <div :class="['px-3 py-2 rounded-t-lg text-white text-xs font-semibold flex items-center gap-2 overflow-hidden bg-linear-to-r', headerGradient]">
+    <div :class="['px-3 py-2 rounded-t-lg text-white font-semibold flex items-center gap-2 overflow-hidden bg-linear-to-r', headerGradient]">
       <slot name="icon" />
       <span class="truncate">{{ label }}</span>
     </div>
 
     <!-- Body -->
-    <div class="px-3 py-2.5 text-xs text-muted-foreground">
+    <div class="px-3 py-2.5 text-muted-foreground">
       <slot />
     </div>
 
@@ -67,7 +67,7 @@ const headerGradient = computed(() => gradientMap[props.headerClass] || props.he
       <span
         v-for="(handle, idx) in outputHandles"
         :key="'num-' + handle.id"
-        class="absolute text-[9px] font-bold text-muted-foreground pointer-events-none"
+        class="absolute font-bold text-muted-foreground pointer-events-none"
         :style="{
           left: outputHandles.length === 1 ? '50%' : `${((idx + 1) / (outputHandles.length + 1)) * 100}%`,
           bottom: '-18px',

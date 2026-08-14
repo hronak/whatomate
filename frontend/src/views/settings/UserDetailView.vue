@@ -207,7 +207,7 @@ onMounted(async () => {
       <Card>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <div class="flex items-center gap-2">
               <Badge v-if="isSelf" variant="outline">{{ $t('users.you') }}</Badge>
               <Badge v-if="user?.is_super_admin" variant="default">{{ $t('users.superAdmin') }}</Badge>
@@ -225,27 +225,27 @@ onMounted(async () => {
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ user?.full_name }}</p>
-              <p class="text-sm text-muted-foreground truncate">{{ user?.email }}</p>
+              <p class="text-muted-foreground truncate">{{ user?.email }}</p>
             </div>
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('users.fullName') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('users.fullName') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.full_name" :disabled="!canWrite || isMember" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('common.email') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('common.email') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.email" type="email" :disabled="!canWrite || isMember" />
           </div>
           <div v-if="!isMember" class="space-y-1.5">
-            <Label class="text-xs">
+            <Label>
               {{ $t('users.password') }}
               <span class="text-muted-foreground">{{ $t('users.keepExisting') }}</span>
             </Label>
             <Input v-model="form.password" type="password" :placeholder="$t('users.passwordPlaceholder')" :disabled="!canWrite" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('users.role') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('users.role') }} <span class="text-destructive">*</span></Label>
             <Select v-model="form.role_id" :disabled="!canWrite">
               <SelectTrigger>
                 <SelectValue :placeholder="$t('users.selectRole')">
@@ -258,14 +258,14 @@ onMounted(async () => {
                 <SelectItem v-for="role in rolesStore.roles" :key="role.id" :value="role.id">
                   <div class="flex items-center gap-2">
                     <span class="capitalize">{{ role.name }}</span>
-                    <Badge v-if="role.is_system" variant="secondary" class="text-xs">{{ $t('users.system') }}</Badge>
+                    <Badge v-if="role.is_system" variant="secondary">{{ $t('users.system') }}</Badge>
                   </div>
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div class="flex items-center justify-between">
-            <Label class="text-xs font-normal cursor-pointer">{{ $t('users.accountActive') }}</Label>
+            <Label class="font-normal cursor-pointer">{{ $t('users.accountActive') }}</Label>
             <Switch
               :checked="form.is_active"
               @update:checked="form.is_active = $event"
@@ -274,8 +274,8 @@ onMounted(async () => {
           </div>
           <div v-if="isSuperAdmin" class="flex items-center justify-between border-t pt-4">
             <div>
-              <Label class="text-xs font-normal cursor-pointer">{{ $t('users.superAdminLabel') }}</Label>
-              <p class="text-[11px] text-muted-foreground">{{ $t('users.superAdminDesc') }}</p>
+              <Label class="font-normal cursor-pointer">{{ $t('users.superAdminLabel') }}</Label>
+              <p class="text-muted-foreground">{{ $t('users.superAdminDesc') }}</p>
             </div>
             <Switch
               :checked="form.is_super_admin"

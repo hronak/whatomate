@@ -233,7 +233,7 @@ onMounted(async () => {
               <TableCell>
                 <div class="cursor-pointer" @click="openEdit(flow)">
                   <p class="font-medium hover:opacity-80">{{ flow.name }}</p>
-                  <p v-if="flow.description" class="text-sm text-muted-foreground">{{ flow.description }}</p>
+                  <p v-if="flow.description" class="text-muted-foreground">{{ flow.description }}</p>
                 </div>
               </TableCell>
               <TableCell>{{ flow.whatsapp_account }}</TableCell>

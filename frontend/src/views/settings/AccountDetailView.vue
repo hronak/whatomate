@@ -312,44 +312,44 @@ onMounted(async () => {
         <div v-if="testResult.success" class="space-y-2">
           <div class="flex items-center gap-2 text-success">
             <CheckCircle2 class="size-4" />
-            <span class="text-sm font-medium">{{ $t('accounts.connected', 'Connected') }}</span>
-            <span v-if="testResult.display_phone_number" class="text-sm text-muted-foreground">— {{ testResult.display_phone_number }}</span>
+            <span class="font-medium">{{ $t('accounts.connected', 'Connected') }}</span>
+            <span v-if="testResult.display_phone_number" class="text-muted-foreground">— {{ testResult.display_phone_number }}</span>
             <Badge v-if="testResult.is_test_number" variant="outline" class="border-amber-600 text-amber-600">
               <TestTube2 class="size-3 mr-1" /> {{ $t('accounts.testNumber', 'Test Number') }}
             </Badge>
           </div>
           <div v-if="testResult.warning" class="flex items-start gap-2 p-2 rounded-lg bg-warning/50 border border-warning">
             <AlertCircle class="size-4 text-warning mt-0.5 shrink-0" />
-            <span class="text-sm text-warning">{{ testResult.warning }}</span>
+            <span class="text-warning">{{ testResult.warning }}</span>
           </div>
           <!-- Meta Connection Details -->
           <div class="mt-4 border-t pt-4 border-border/40">
-            <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <h4 class="font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               {{ $t('accounts.metaConnectionDetails', 'Details') }}
             </h4>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-muted/20 p-3 rounded-lg border border-border/30">
               <!-- Verified Name -->
               <div v-if="testResult.verified_name" class="space-y-1">
-                <span class="text-[10px] text-muted-foreground block font-medium">{{ $t('accounts.verifiedName', 'Verified Name') }}</span>
-                <span class="text-sm font-semibold block text-foreground truncate" :title="testResult.verified_name">{{ testResult.verified_name }}</span>
+                <span class="text-muted-foreground block font-medium">{{ $t('accounts.verifiedName', 'Verified Name') }}</span>
+                <span class="font-semibold block text-foreground truncate" :title="testResult.verified_name">{{ testResult.verified_name }}</span>
               </div>
                <!-- Quality Rating -->
               <div class="space-y-1">
-                <span class="text-[10px] text-muted-foreground block font-medium">{{ $t('accounts.qualityRating', 'Quality Rating') }}</span>
+                <span class="text-muted-foreground block font-medium">{{ $t('accounts.qualityRating', 'Quality Rating') }}</span>
                 <Badge :class="getQualityBadgeClass(testResult.quality_rating || '')">
                   {{ getQualityRatingLabel(testResult.quality_rating || '', t) }}
                 </Badge>
               </div>
               <!-- Messaging Limit Tier -->
               <div class="space-y-1">
-                <span class="text-[10px] text-muted-foreground block font-medium">{{ $t('accounts.messagingLimitTier', 'Messaging Limit') }}</span>
-                <span class="text-sm font-semibold block text-foreground">
+                <span class="text-muted-foreground block font-medium">{{ $t('accounts.messagingLimitTier', 'Messaging Limit') }}</span>
+                <span class="font-semibold block text-foreground">
                   {{ formatLimitTier(testResult.messaging_limit_tier, testResult.is_test_number || testResult.account_mode === 'SANDBOX', t) }}
                 </span>
               </div>
               <!-- Verification Status -->
               <div v-if="testResult.code_verification_status" class="space-y-1">
-                <span class="text-[10px] text-muted-foreground block font-medium">{{ $t('accounts.codeVerificationStatus', 'Verification Status') }}</span>
+                <span class="text-muted-foreground block font-medium">{{ $t('accounts.codeVerificationStatus', 'Verification Status') }}</span>
                 <Badge :class="getVerificationBadgeClass(testResult.code_verification_status)">
                   {{ getVerificationStatusLabel(testResult.code_verification_status, t) }}
                 </Badge>
@@ -359,7 +359,7 @@ onMounted(async () => {
         </div>
         <div v-else class="flex items-center gap-2 text-destructive">
           <X class="size-4" />
-          <span class="text-sm">{{ testResult.error }}</span>
+          <span>{{ testResult.error }}</span>
         </div>
       </CardContent>
     </Card>
@@ -368,7 +368,7 @@ onMounted(async () => {
     <Card>
       <CardHeader class="pb-3">
         <div class="flex items-center justify-between">
-          <CardTitle class="text-sm font-medium">{{ $t('accounts.accountDetails', 'Account Details') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('accounts.accountDetails', 'Account Details') }}</CardTitle>
           <Badge v-if="account" :variant="account.status === 'active' ? 'default' : 'secondary'">
             {{ account.status }}
           </Badge>
@@ -376,7 +376,7 @@ onMounted(async () => {
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('accounts.accountName', 'Account Name') }} *</Label>
+          <Label>{{ $t('accounts.accountName', 'Account Name') }} *</Label>
           <Input v-model="form.name" :disabled="!canWrite" />
         </div>
 
@@ -384,19 +384,19 @@ onMounted(async () => {
 
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('accounts.metaAppId', 'Meta App ID') }}</Label>
+            <Label>{{ $t('accounts.metaAppId', 'Meta App ID') }}</Label>
             <Input v-model="form.app_id" :disabled="!canWrite" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('accounts.phoneNumberId', 'Phone Number ID') }} *</Label>
+            <Label>{{ $t('accounts.phoneNumberId', 'Phone Number ID') }} *</Label>
             <Input v-model="form.phone_id" :disabled="!canWrite" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('accounts.businessAccountId', 'Business Account ID') }} *</Label>
+            <Label>{{ $t('accounts.businessAccountId', 'Business Account ID') }} *</Label>
             <Input v-model="form.business_id" :disabled="!canWrite" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('accounts.apiVersion', 'API Version') }}</Label>
+            <Label>{{ $t('accounts.apiVersion', 'API Version') }}</Label>
             <Input v-model="form.api_version" :disabled="!canWrite" />
           </div>
         </div>
@@ -405,10 +405,10 @@ onMounted(async () => {
 
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1.5">
-            <Label class="text-xs">
+            <Label>
               {{ $t('accounts.accessToken', 'Access Token') }}
               <span v-if="isNew" class="text-destructive">*</span>
-              <span v-else class="text-muted-foreground text-[10px]">{{ $t('accounts.accessTokenKeepExisting', '(leave empty to keep existing)') }}</span>
+              <span v-else class="text-muted-foreground">{{ $t('accounts.accessTokenKeepExisting', '(leave empty to keep existing)') }}</span>
             </Label>
             <Input v-model="form.access_token" type="password" :disabled="!canWrite" />
             <Badge v-if="account?.has_access_token" variant="outline" class="border-green-600 text-green-600">
@@ -416,9 +416,9 @@ onMounted(async () => {
             </Badge>
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">
+            <Label>
               {{ $t('accounts.appSecret', 'App Secret') }}
-              <span v-if="!isNew" class="text-muted-foreground text-[10px]">{{ $t('accounts.accessTokenKeepExisting', '(leave empty to keep existing)') }}</span>
+              <span v-if="!isNew" class="text-muted-foreground">{{ $t('accounts.accessTokenKeepExisting', '(leave empty to keep existing)') }}</span>
             </Label>
             <Input v-model="form.app_secret" type="password" :disabled="!canWrite" />
             <Badge v-if="account?.has_app_secret" variant="outline" class="border-green-600 text-green-600">
@@ -431,21 +431,21 @@ onMounted(async () => {
 
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <Label class="text-xs">{{ $t('accounts.defaultIncoming', 'Default for Incoming') }}</Label>
+            <Label>{{ $t('accounts.defaultIncoming', 'Default for Incoming') }}</Label>
             <Switch :checked="form.is_default_incoming" @update:checked="form.is_default_incoming = $event" :disabled="!canWrite" />
           </div>
           <div class="flex items-center justify-between">
-            <Label class="text-xs">{{ $t('accounts.defaultOutgoing', 'Default for Outgoing') }}</Label>
+            <Label>{{ $t('accounts.defaultOutgoing', 'Default for Outgoing') }}</Label>
             <Switch :checked="form.is_default_outgoing" @update:checked="form.is_default_outgoing = $event" :disabled="!canWrite" />
           </div>
           <div class="flex items-center justify-between">
-            <Label class="text-xs">{{ $t('accounts.autoReadReceipt', 'Auto Read Receipt') }}</Label>
+            <Label>{{ $t('accounts.autoReadReceipt', 'Auto Read Receipt') }}</Label>
             <Switch :checked="form.auto_read_receipt" @update:checked="form.auto_read_receipt = $event" :disabled="!canWrite" />
           </div>
           <div class="flex items-start justify-between gap-3">
             <div class="space-y-0.5">
-              <Label class="text-xs">{{ $t('accounts.businessCallingEnabled', 'Business Calling enabled') }}</Label>
-              <p class="text-[11px] text-muted-foreground">
+              <Label>{{ $t('accounts.businessCallingEnabled', 'Business Calling enabled') }}</Label>
+              <p class="text-muted-foreground">
                 {{ $t('accounts.businessCallingEnabledDesc', 'Enable only after Meta enrolls this number in the WhatsApp Business Calling API. Required for click-to-call buttons in canned responses.') }}
               </p>
             </div>
@@ -458,20 +458,20 @@ onMounted(async () => {
     <!-- Webhook Config Card -->
     <Card v-if="!isNew">
       <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-medium">{{ $t('accounts.webhookConfig', 'Webhook Configuration') }}</CardTitle>
+        <CardTitle class="font-medium">{{ $t('accounts.webhookConfig', 'Webhook Configuration') }}</CardTitle>
       </CardHeader>
       <CardContent class="space-y-3">
         <div>
-          <Label class="text-xs text-muted-foreground">{{ $t('accounts.webhookUrl', 'Webhook URL') }}</Label>
+          <Label class="text-muted-foreground">{{ $t('accounts.webhookUrl', 'Webhook URL') }}</Label>
           <div class="flex items-center gap-2 mt-1">
-            <code class="px-2 py-1 bg-muted rounded text-xs font-mono flex-1 truncate">{{ webhookUrl }}</code>
+            <code class="px-2 py-1 bg-muted rounded font-mono flex-1 truncate">{{ webhookUrl }}</code>
             <IconButton :icon="Copy" label="Copy" @click="copyToClipboard(webhookUrl)" />
           </div>
         </div>
         <div>
-          <Label class="text-xs text-muted-foreground">{{ $t('accounts.verifyToken', 'Verify Token') }}</Label>
+          <Label class="text-muted-foreground">{{ $t('accounts.verifyToken', 'Verify Token') }}</Label>
           <div class="flex items-center gap-2 mt-1">
-            <code class="px-2 py-1 bg-muted rounded text-xs font-mono flex-1 truncate">{{ account?.webhook_verify_token }}</code>
+            <code class="px-2 py-1 bg-muted rounded font-mono flex-1 truncate">{{ account?.webhook_verify_token }}</code>
             <IconButton :icon="Copy" label="Copy" @click="copyToClipboard(account?.webhook_verify_token || '')" />
           </div>
         </div>
@@ -498,10 +498,10 @@ onMounted(async () => {
       <!-- Setup Guide -->
       <Card>
         <CardHeader class="pb-3">
-          <CardTitle class="text-sm font-medium">{{ $t('accounts.setupGuide', 'Setup Guide') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('accounts.setupGuide', 'Setup Guide') }}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ol class="list-decimal list-inside space-y-2.5 text-sm text-muted-foreground">
+          <ol class="list-decimal list-inside space-y-2.5 text-muted-foreground">
             <li>{{ $t('accounts.setupStep1', 'Go to') }} <a href="https://developers.facebook.com" target="_blank" class="text-primary hover:underline">Meta Developer Console</a> {{ $t('accounts.setupStep1End', 'and create an app') }}</li>
             <li>{{ $t('accounts.setupStep2', 'Add WhatsApp product to your app') }}</li>
             <li>{{ $t('accounts.setupStep3', 'Copy') }} <strong>{{ $t('accounts.setupStep3Bold1', 'Phone Number ID') }}</strong> {{ $t('accounts.setupStep3And', 'and') }} <strong>{{ $t('accounts.setupStep3Bold2', 'Business Account ID') }}</strong></li>

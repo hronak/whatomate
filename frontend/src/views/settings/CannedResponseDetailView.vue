@@ -318,7 +318,7 @@ onMounted(() => { loadResponse() })
       <Card>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <Badge v-if="!isNew" :variant="form.is_active ? 'default' : 'secondary'">
               {{ form.is_active ? $t('common.active') : $t('common.inactive') }}
             </Badge>
@@ -326,20 +326,20 @@ onMounted(() => { loadResponse() })
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('cannedResponses.name') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('cannedResponses.name') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.name" placeholder="Welcome Message" :disabled="!canWrite" />
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
-              <Label class="text-xs">{{ $t('cannedResponses.shortcut') }}</Label>
+              <Label>{{ $t('cannedResponses.shortcut') }}</Label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">/</span>
                 <Input v-model="form.shortcut" placeholder="welcome" class="pl-7" :disabled="!canWrite" />
               </div>
-              <p class="text-[11px] text-muted-foreground">{{ $t('cannedResponses.shortcutHint') }}</p>
+              <p class="text-muted-foreground">{{ $t('cannedResponses.shortcutHint') }}</p>
             </div>
             <div class="space-y-1.5">
-              <Label class="text-xs">{{ $t('cannedResponses.category') }}</Label>
+              <Label>{{ $t('cannedResponses.category') }}</Label>
               <Select v-model="form.category" :disabled="!canWrite">
                 <SelectTrigger>
                   <SelectValue :placeholder="$t('cannedResponses.category')" />
@@ -353,12 +353,12 @@ onMounted(() => { loadResponse() })
             </div>
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('cannedResponses.content') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('cannedResponses.content') }} <span class="text-destructive">*</span></Label>
             <Textarea v-model="form.content" :placeholder="$t('cannedResponses.contentPlaceholder')" :rows="6" :disabled="!canWrite" />
-            <p class="text-[11px] text-muted-foreground">{{ $t('cannedResponses.placeholderHint') }}</p>
+            <p class="text-muted-foreground">{{ $t('cannedResponses.placeholderHint') }}</p>
           </div>
           <div v-if="!isNew" class="flex items-center justify-between border-t pt-4">
-            <Label class="text-xs font-normal cursor-pointer">{{ $t('common.active') }}</Label>
+            <Label class="font-normal cursor-pointer">{{ $t('common.active') }}</Label>
             <Switch
               :checked="form.is_active"
               @update:checked="form.is_active = $event"
@@ -371,7 +371,7 @@ onMounted(() => { loadResponse() })
       <!-- Buttons -->
       <Card>
         <CardHeader class="pb-3">
-          <CardTitle class="text-sm font-medium">{{ $t('cannedResponses.buttons', 'Buttons') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('cannedResponses.buttons', 'Buttons') }}</CardTitle>
         </CardHeader>
         <CardContent class="space-y-4">
           <MessageButtonsEditor
@@ -383,16 +383,16 @@ onMounted(() => { loadResponse() })
 
           <p
             v-if="buttonsValidationError"
-            class="text-xs text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2"
+            class="text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2"
           >
             {{ buttonsValidationError }}
           </p>
 
           <!-- WhatsApp-style preview -->
           <div v-if="form.buttons.length > 0" class="border-t pt-3">
-            <p class="text-[11px] text-muted-foreground mb-2">{{ $t('common.preview', 'Preview') }}</p>
+            <p class="text-muted-foreground mb-2">{{ $t('common.preview', 'Preview') }}</p>
             <div class="max-w-sm bg-[#0a141a] dark:bg-[#0a141a] rounded-lg p-3 space-y-1">
-              <p v-if="form.content" class="text-sm text-white whitespace-pre-wrap">{{ form.content }}</p>
+              <p v-if="form.content" class="text-white whitespace-pre-wrap">{{ form.content }}</p>
               <PreviewButtonGroup :buttons="form.buttons" disabled />
             </div>
           </div>

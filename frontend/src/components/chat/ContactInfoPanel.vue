@@ -254,7 +254,7 @@ async function updateContactTags(tags: string[]) {
 
     <!-- Header -->
     <div class="h-12 px-3 border-b flex items-center justify-between">
-      <h3 class="font-medium text-sm">Contact Info</h3>
+      <h3 class="font-medium">Contact Info</h3>
       <Button variant="ghost" size="icon" class="size-8" @click="emit('close')">
         <X class="size-4" />
       </Button>
@@ -273,7 +273,7 @@ async function updateContactTags(tags: string[]) {
           <h4 class="font-medium">
             {{ contact.name || contact.phone_number }}
           </h4>
-          <div class="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+          <div class="flex items-center gap-1 text-muted-foreground mt-1">
             <Phone class="size-3" />
             <span>{{ contact.phone_number }}</span>
           </div>
@@ -282,7 +282,7 @@ async function updateContactTags(tags: string[]) {
         <!-- Tags Section (always shown) -->
         <div class="pb-4">
           <div class="flex items-center justify-between py-2">
-            <h5 class="text-sm font-medium flex items-center gap-2">
+            <h5 class="font-medium flex items-center gap-2">
               <Tags class="size-4 text-muted-foreground" />
               Tags
             </h5>
@@ -297,7 +297,7 @@ async function updateContactTags(tags: string[]) {
                   <CommandInput placeholder="Search tags..." />
                   <CommandList>
                     <CommandEmpty>
-                      <div class="py-4 text-center text-sm text-muted-foreground">
+                      <div class="py-4 text-center text-muted-foreground">
                         No tags found
                       </div>
                     </CommandEmpty>
@@ -341,7 +341,7 @@ async function updateContactTags(tags: string[]) {
                 </button>
               </TagBadge>
             </template>
-            <span v-else class="text-sm text-muted-foreground">No tags</span>
+            <span v-else class="text-muted-foreground">No tags</span>
             <Loader2 v-if="isUpdatingTags" class="size-4 animate-spin text-muted-foreground" />
           </div>
         </div>
@@ -366,15 +366,15 @@ async function updateContactTags(tags: string[]) {
         <!-- No Session Data or no panel config -->
         <div v-if="!props.sessionData || sortedSections.length === 0" class="text-center py-6 text-muted-foreground border-t">
           <User class="size-8 mx-auto mb-2 opacity-50" />
-          <p class="text-sm">No data configured</p>
-          <p class="text-xs mt-1">Configure panel display in the chatbot flow settings.</p>
+          <p>No data configured</p>
+          <p class="mt-1">Configure panel display in the chatbot flow settings.</p>
         </div>
 
         <!-- Session Data with panel config -->
         <template v-else>
           <!-- Flow Name Badge -->
           <div v-if="props.sessionData?.flow_name" class="flex items-center gap-2">
-            <Badge variant="outline" class="text-xs">
+            <Badge variant="outline">
               {{ props.sessionData?.flow_name }}
             </Badge>
           </div>
@@ -386,7 +386,7 @@ async function updateContactTags(tags: string[]) {
               :open="!isSectionCollapsed(section.id)"
               @update:open="toggleSection(section.id)"
             >
-              <CollapsibleTrigger class="flex items-center justify-between w-full py-2 text-sm font-medium hover:text-primary transition-colors">
+              <CollapsibleTrigger class="flex items-center justify-between w-full py-2 font-medium hover:text-primary transition-colors">
                 <span>{{ section.label }}</span>
                 <ChevronDown
                   :class="[
@@ -407,23 +407,23 @@ async function updateContactTags(tags: string[]) {
                     :key="field.key"
                     class="bg-muted/50 rounded-md px-3 py-2"
                   >
-                    <p class="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">{{ field.label }}</p>
+                    <p class="uppercase tracking-wide text-muted-foreground font-medium">{{ field.label }}</p>
                     <!-- Badge display -->
                     <span
                       v-if="field.display_type === 'badge'"
-                      :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold mt-1', getColorClass(field.color)]"
+                      :class="['inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold mt-1', getColorClass(field.color)]"
                     >
                       {{ getFieldValue(field.key) }}
                     </span>
                     <!-- Tag display -->
                     <span
                       v-else-if="field.display_type === 'tag'"
-                      :class="['inline-flex items-center rounded-md px-2 py-1 text-xs font-medium mt-1', getColorClass(field.color)]"
+                      :class="['inline-flex items-center rounded-md px-2 py-1 font-medium mt-1', getColorClass(field.color)]"
                     >
                       {{ getFieldValue(field.key) }}
                     </span>
                     <!-- Default text display -->
-                    <p v-else class="text-sm font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
+                    <p v-else class="font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -431,7 +431,7 @@ async function updateContactTags(tags: string[]) {
 
             <!-- Non-collapsible section -->
             <div v-else>
-              <h5 class="py-2 text-sm font-medium">{{ section.label }}</h5>
+              <h5 class="py-2 font-medium">{{ section.label }}</h5>
               <div
                 :class="[
                   'grid gap-2',
@@ -443,23 +443,23 @@ async function updateContactTags(tags: string[]) {
                   :key="field.key"
                   class="bg-muted/50 rounded-md px-3 py-2"
                 >
-                  <p class="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">{{ field.label }}</p>
+                  <p class="uppercase tracking-wide text-muted-foreground font-medium">{{ field.label }}</p>
                   <!-- Badge display -->
                   <span
                     v-if="field.display_type === 'badge'"
-                    :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold mt-1', getColorClass(field.color)]"
+                    :class="['inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold mt-1', getColorClass(field.color)]"
                   >
                     {{ getFieldValue(field.key) }}
                   </span>
                   <!-- Tag display -->
                   <span
                     v-else-if="field.display_type === 'tag'"
-                    :class="['inline-flex items-center rounded-md px-2 py-1 text-xs font-medium mt-1', getColorClass(field.color)]"
+                    :class="['inline-flex items-center rounded-md px-2 py-1 font-medium mt-1', getColorClass(field.color)]"
                   >
                     {{ getFieldValue(field.key) }}
                   </span>
                   <!-- Default text display -->
-                  <p v-else class="text-sm font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
+                  <p v-else class="font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
                 </div>
               </div>
             </div>

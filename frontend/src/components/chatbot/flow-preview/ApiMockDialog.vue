@@ -132,17 +132,17 @@ function handleSubmit() {
 
       <div class="space-y-4 py-4">
         <!-- API Info -->
-        <div v-if="step" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+        <div v-if="step" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div class="font-medium text-gray-700 dark:text-gray-300 mb-1">
             {{ step.step_name }}
           </div>
-          <div class="text-gray-500 dark:text-gray-400 font-mono text-xs">
+          <div class="text-gray-500 dark:text-gray-400 font-mono">
             {{ step.api_config?.method || 'GET' }} {{ step.api_config?.url || 'N/A' }}
           </div>
         </div>
 
         <!-- Response Mapping Info -->
-        <div v-if="responseMappingInfo.length > 0" class="text-xs">
+        <div v-if="responseMappingInfo.length > 0">
           <Label class="text-gray-500">Variables to extract:</Label>
           <div class="mt-1 flex flex-wrap gap-2">
             <span
@@ -192,7 +192,7 @@ function handleSubmit() {
             <Label>Response Body (JSON)</Label>
             <span
               v-if="parseError"
-              class="text-xs text-red-500 flex items-center gap-1"
+              class="text-red-500 flex items-center gap-1"
             >
               <AlertCircle class="size-3" />
               {{ parseError }}
@@ -200,7 +200,7 @@ function handleSubmit() {
           </div>
           <Textarea
             v-model="responseBody"
-            :class="'font-mono text-sm min-h-[150px]' + (parseError ? ' border-red-500' : '')"
+            :class="'font-mono min-h-[150px]' + (parseError ? ' border-red-500' : '')"
             placeholder='{"key": "value"}'
           />
         </div>

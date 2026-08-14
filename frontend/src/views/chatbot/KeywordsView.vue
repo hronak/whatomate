@@ -178,21 +178,20 @@ const emptyDescription = computed(() => {
               >
                 <template #cell-keywords="{ item: rule }">
                   <RouterLink :to="`/chatbot/keywords/${rule.id}`" class="flex flex-wrap gap-1 text-inherit no-underline hover:opacity-80">
-                    <Badge v-for="keyword in rule.keywords.slice(0, 3)" :key="keyword" variant="outline" class="text-xs">
+                    <Badge v-for="keyword in rule.keywords.slice(0, 3)" :key="keyword" variant="outline">
                       {{ keyword }}
                     </Badge>
-                    <Badge v-if="rule.keywords.length > 3" variant="outline" class="text-xs">
+                    <Badge v-if="rule.keywords.length > 3" variant="outline">
                       +{{ rule.keywords.length - 3 }}
                     </Badge>
                   </RouterLink>
                 </template>
                 <template #cell-match_type="{ item: rule }">
-                  <Badge class="text-xs capitalize bg-blue-500/20 text-blue-400 border-transparent">{{ rule.match_type }}</Badge>
+                  <Badge class="capitalize bg-blue-500/20 text-blue-400 border-transparent">{{ rule.match_type }}</Badge>
                 </template>
                 <template #cell-response_type="{ item: rule }">
                   <Badge
                     :class="rule.response_type === 'transfer' ? 'bg-destructive/20 text-destructive border-transparent' : 'bg-purple-500/20 text-purple-700 border-transparent dark:bg-purple-100 dark:text-purple-400'"
-                    class="text-xs"
                   >
                     {{ rule.response_type === 'transfer' ? $t('keywords.transfer') : $t('keywords.text') }}
                   </Badge>
@@ -203,7 +202,7 @@ const emptyDescription = computed(() => {
                 <template #cell-status="{ item: rule }">
                   <div class="flex items-center gap-2">
                     <Switch :checked="rule.enabled" @update:checked="toggleRule(rule)" />
-                    <span class="text-sm text-muted-foreground">{{ rule.enabled ? $t('keywords.active') : $t('keywords.inactive') }}</span>
+                    <span class="text-muted-foreground">{{ rule.enabled ? $t('keywords.active') : $t('keywords.inactive') }}</span>
                   </div>
                 </template>
                 <template #cell-actions="{ item: rule }">

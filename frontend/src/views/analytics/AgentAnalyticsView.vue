@@ -391,7 +391,7 @@ void _displayStats.value // Suppress unused warning
             <!-- Transfers Handled -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.transfersHandled') }}</span>
+                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.transfersHandled') }}</span>
                 <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                   <CheckCircle class="size-5 text-emerald-400" />
                 </div>
@@ -402,14 +402,14 @@ void _displayStats.value // Suppress unused warning
                     ? (analytics.summary?.total_transfers_handled ?? 0)
                     : (analytics.my_stats?.transfers_handled ?? 0) }}
                 </div>
-                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.completedConversations') }}</p>
+                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.completedConversations') }}</p>
               </div>
             </div>
 
             <!-- Active Conversations -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.activeConversations') }}</span>
+                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.activeConversations') }}</span>
                 <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                   <Activity class="size-5 text-blue-400" />
                 </div>
@@ -420,14 +420,14 @@ void _displayStats.value // Suppress unused warning
                     ? (analytics.summary?.active_transfers ?? 0)
                     : (analytics.my_stats?.active_transfers ?? 0) }}
                 </div>
-                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.currentlyInProgress') }}</p>
+                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.currentlyInProgress') }}</p>
               </div>
             </div>
 
             <!-- Avg Resolution Time -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.avgResolutionTime') }}</span>
+                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.avgResolutionTime') }}</span>
                 <div class="size-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
                   <Clock class="size-5 text-orange-400" />
                 </div>
@@ -438,14 +438,14 @@ void _displayStats.value // Suppress unused warning
                     ? (analytics.summary?.avg_resolution_mins ?? 0)
                     : (analytics.my_stats?.avg_resolution_mins ?? 0)) }}
                 </div>
-                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.timeToResolve') }}</p>
+                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.timeToResolve') }}</p>
               </div>
             </div>
 
             <!-- Messages Sent (for specific agent) or Queue Time (for all agents) -->
             <div v-if="isAdminOrManager && selectedAgentId === 'all'" class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.avgQueueTime') }}</span>
+                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.avgQueueTime') }}</span>
                 <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                   <Clock class="size-5 text-purple-400" />
                 </div>
@@ -454,12 +454,12 @@ void _displayStats.value // Suppress unused warning
                 <div class="text-3xl font-bold text-foreground">
                   {{ formatMinutes(analytics.summary?.avg_queue_time_mins || 0) }}
                 </div>
-                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.waitBeforeAssignment') }}</p>
+                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.waitBeforeAssignment') }}</p>
               </div>
             </div>
             <div v-else class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.messagesSent') }}</span>
+                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.messagesSent') }}</span>
                 <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                   <MessageSquare class="size-5 text-purple-400" />
                 </div>
@@ -468,14 +468,14 @@ void _displayStats.value // Suppress unused warning
                 <div class="text-3xl font-bold text-foreground">
                   {{ analytics.my_stats?.messages_sent || 0 }}
                 </div>
-                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.outgoingMessages') }}</p>
+                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.outgoingMessages') }}</p>
               </div>
             </div>
 
             <!-- Break Time -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.breakTime') }}</span>
+                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.breakTime') }}</span>
                 <div class="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
                   <Coffee class="size-5 text-amber-400" />
                 </div>
@@ -484,7 +484,7 @@ void _displayStats.value // Suppress unused warning
                 <div class="text-3xl font-bold text-foreground">
                   {{ formatMinutes(analytics.my_stats?.total_break_time_mins ?? analytics.summary?.total_break_time_mins ?? 0) }}
                 </div>
-                <p class="text-xs text-foreground/40 mt-1">
+                <p class="text-foreground/40 mt-1">
                   {{ $t('agentAnalytics.breaksTaken', { count: analytics.my_stats?.break_count ?? analytics.summary?.break_count ?? 0 }) }}
                 </p>
               </div>

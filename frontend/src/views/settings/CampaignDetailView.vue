@@ -963,7 +963,7 @@ onUnmounted(() => {
         <Badge
           v-if="!isNew && campaign"
           variant="outline"
-          :class="[getStatusClass(campaign.status), 'text-xs']"
+          :class="[getStatusClass(campaign.status), '']"
         >
           <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
           {{ campaign.status }}
@@ -1036,15 +1036,15 @@ onUnmounted(() => {
     <!-- Details Card -->
     <Card>
       <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-medium">{{ $t('campaigns.details', 'Details') }}</CardTitle>
+        <CardTitle class="font-medium">{{ $t('campaigns.details', 'Details') }}</CardTitle>
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('campaigns.name', 'Name') }} *</Label>
+          <Label>{{ $t('campaigns.name', 'Name') }} *</Label>
           <Input v-model="form.name" :disabled="!isDraft" :placeholder="$t('campaigns.namePlaceholder', 'Enter campaign name')" />
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('campaigns.whatsappAccount', 'WhatsApp Account') }}</Label>
+          <Label>{{ $t('campaigns.whatsappAccount', 'WhatsApp Account') }}</Label>
           <Select v-model="form.whatsapp_account" :disabled="!isDraft">
             <SelectTrigger>
               <SelectValue :placeholder="$t('campaigns.selectAccount', 'Select account')" />
@@ -1057,7 +1057,7 @@ onUnmounted(() => {
           </Select>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('campaigns.template', 'Template') }}</Label>
+          <Label>{{ $t('campaigns.template', 'Template') }}</Label>
           <Select v-model="form.template_id" :disabled="!isDraft || !form.whatsapp_account">
             <SelectTrigger>
               <SelectValue :placeholder="form.whatsapp_account ? $t('campaigns.selectTemplate', 'Select template') : $t('campaigns.selectAccountFirst', 'Select an account first')" />
@@ -1072,7 +1072,7 @@ onUnmounted(() => {
 
         <!-- Media Upload Section -->
         <div v-if="templateNeedsMedia" class="space-y-1.5">
-          <Label class="text-xs">{{ $t('campaigns.headerMedia', 'Header Media') }}</Label>
+          <Label>{{ $t('campaigns.headerMedia', 'Header Media') }}</Label>
           <!-- Show existing media with preview -->
           <div v-if="campaign?.header_media_filename && !mediaFile" class="rounded-lg border overflow-hidden">
             <!-- Image preview -->
@@ -1090,10 +1090,10 @@ onUnmounted(() => {
               class="w-full max-h-48"
             />
             <!-- File info bar -->
-            <div class="flex items-center gap-2 px-3 py-2 bg-muted/50 text-sm">
+            <div class="flex items-center gap-2 px-3 py-2 bg-muted/50">
               <Upload class="size-4 text-muted-foreground shrink-0" />
               <span class="truncate flex-1">{{ campaign.header_media_filename }}</span>
-              <Button v-if="isDraft" variant="ghost" size="sm" class="h-6 text-xs" @click="showMediaUpload = true">
+              <Button v-if="isDraft" variant="ghost" size="sm" class="h-6" @click="showMediaUpload = true">
                 {{ $t('campaigns.replace', 'Replace') }}
               </Button>
             </div>
@@ -1112,13 +1112,13 @@ onUnmounted(() => {
 
         <!-- Schedule field hidden until scheduling functionality is implemented -->
         <!-- <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('campaigns.scheduledAt', 'Schedule') }}</Label>
+          <Label>{{ $t('campaigns.scheduledAt', 'Schedule') }}</Label>
           <Input v-model="form.scheduled_at" type="datetime-local" :disabled="!isDraft" />
         </div> -->
         <div v-if="!isNew && campaign" class="space-y-1.5">
-          <Label class="text-xs">{{ $t('campaigns.status', 'Status') }}</Label>
+          <Label>{{ $t('campaigns.status', 'Status') }}</Label>
           <div>
-            <Badge variant="outline" :class="[getStatusClass(campaign.status), 'text-xs']">
+            <Badge variant="outline" :class="[getStatusClass(campaign.status), '']">
               <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
               {{ campaign.status }}
             </Badge>
@@ -1130,40 +1130,40 @@ onUnmounted(() => {
     <!-- Stats Card (existing campaigns only) -->
     <Card v-if="!isNew && campaign">
       <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-medium">{{ $t('campaigns.statistics', 'Statistics') }}</CardTitle>
+        <CardTitle class="font-medium">{{ $t('campaigns.statistics', 'Statistics') }}</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
             <Users class="size-4 text-muted-foreground" />
             <span class="text-lg font-semibold">{{ campaign.total_recipients }}</span>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.totalRecipients', 'Recipients') }}</span>
+            <span class="text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.totalRecipients', 'Recipients') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
             <Send class="size-4 text-blue-500" />
             <span class="text-lg font-semibold">{{ campaign.sent_count }}</span>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.sent', 'Sent') }}</span>
+            <span class="text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.sent', 'Sent') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
             <CheckCircle class="size-4 text-green-500" />
             <span class="text-lg font-semibold">{{ campaign.delivered_count }}</span>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.delivered', 'Delivered') }}</span>
+            <span class="text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.delivered', 'Delivered') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
             <Eye class="size-4 text-purple-500" />
             <span class="text-lg font-semibold">{{ campaign.read_count }}</span>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.read', 'Read') }}</span>
+            <span class="text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.read', 'Read') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
             <XCircle class="size-4 text-destructive" />
             <span class="text-lg font-semibold">{{ campaign.failed_count }}</span>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.failed', 'Failed') }}</span>
+            <span class="text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.failed', 'Failed') }}</span>
           </div>
         </div>
 
         <!-- Progress Bar -->
         <div v-if="campaign.total_recipients > 0" class="mt-4 space-y-2">
-          <div class="flex items-center justify-between text-xs text-muted-foreground">
+          <div class="flex items-center justify-between text-muted-foreground">
             <span>{{ $t('campaigns.progress', 'Progress') }}</span>
             <span>{{ Math.round(((campaign.sent_count + campaign.failed_count) / campaign.total_recipients) * 100) }}%</span>
           </div>
@@ -1181,7 +1181,7 @@ onUnmounted(() => {
               :style="{ width: `${(campaign.failed_count / campaign.total_recipients) * 100}%` }"
             />
           </div>
-          <div class="flex items-center gap-4 text-[10px] text-muted-foreground">
+          <div class="flex items-center gap-4 text-muted-foreground">
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-green-500" /> {{ $t('campaigns.delivered', 'Delivered') }}</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-blue-500" /> {{ $t('campaigns.sent', 'Sent') }}</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-destructive" /> {{ $t('campaigns.failed', 'Failed') }}</span>
@@ -1196,7 +1196,7 @@ onUnmounted(() => {
         <CardHeader class="pb-3 flex flex-row items-center justify-between">
           <CollapsibleTrigger class="flex items-center gap-2 cursor-pointer hover:opacity-80">
             <ChevronDown class="size-4 text-muted-foreground transition-transform in-data-[state=closed]:-rotate-90" />
-            <CardTitle class="text-sm font-medium">
+            <CardTitle class="font-medium">
               {{ $t('campaigns.recipients', 'Recipients') }} ({{ recipients.length }})
             </CardTitle>
           </CollapsibleTrigger>
@@ -1207,12 +1207,12 @@ onUnmounted(() => {
         </CardHeader>
         <CollapsibleContent>
         <CardContent>
-        <div v-if="isLoadingRecipients" class="text-center py-8 text-sm text-muted-foreground">
+        <div v-if="isLoadingRecipients" class="text-center py-8 text-muted-foreground">
           {{ $t('common.loading', 'Loading...') }}
         </div>
         <div v-else-if="recipients.length === 0" class="text-center py-8">
           <Users class="size-8 mx-auto text-muted-foreground mb-2" />
-          <p class="text-sm text-muted-foreground">{{ $t('campaigns.noRecipients', 'No recipients yet') }}</p>
+          <p class="text-muted-foreground">{{ $t('campaigns.noRecipients', 'No recipients yet') }}</p>
           <Button v-if="isDraft" variant="outline" size="sm" class="mt-3" @click="openAddRecipientsDialog">
             <UserPlus class="size-4 mr-1" />
             {{ $t('campaigns.addRecipients', 'Add Recipients') }}
@@ -1231,23 +1231,23 @@ onUnmounted(() => {
             </TableHeader>
             <TableBody>
               <TableRow v-for="recipient in recipients" :key="recipient.id">
-                <TableCell class="font-mono text-xs">{{ recipient.phone_number }}</TableCell>
-                <TableCell class="text-sm">{{ recipient.recipient_name || '-' }}</TableCell>
+                <TableCell class="font-mono">{{ recipient.phone_number }}</TableCell>
+                <TableCell>{{ recipient.recipient_name || '-' }}</TableCell>
                 <TableCell>
                   <div class="flex flex-col gap-0.5">
-                    <Badge variant="outline" :class="[getRecipientStatusClass(recipient.status), 'text-xs w-fit']">
+                    <Badge variant="outline" :class="[getRecipientStatusClass(recipient.status), 'w-fit']">
                       {{ recipient.status }}
                     </Badge>
                     <span
                       v-if="recipient.status === 'failed' && recipient.error_message"
-                      class="text-[10px] text-destructive max-w-[180px] truncate block"
+                      class="text-destructive max-w-[180px] truncate block"
                       :title="recipient.error_message"
                     >
                       {{ recipient.error_message }}
                     </span>
                   </div>
                 </TableCell>
-                <TableCell class="text-xs text-muted-foreground">
+                <TableCell class="text-muted-foreground">
                   {{ recipient.sent_at ? formatDateTime(recipient.sent_at) : '-' }}
                 </TableCell>
                 <TableCell v-if="isDraft">
@@ -1360,25 +1360,25 @@ onUnmounted(() => {
         <!-- Manual Entry Tab -->
         <TabsContent value="manual" class="space-y-3 mt-3">
           <div class="space-y-1.5">
-            <Label class="text-xs text-muted-foreground">
-              {{ $t('campaigns.formatHint', 'Format') }}: <code class="text-[10px] bg-muted px-1 rounded">{{ manualEntryFormat }}</code>
+            <Label class="text-muted-foreground">
+              {{ $t('campaigns.formatHint', 'Format') }}: <code class="bg-muted px-1 rounded">{{ manualEntryFormat }}</code>
             </Label>
-            <p class="text-[10px] text-muted-foreground mb-1">
+            <p class="text-muted-foreground mb-1">
               {{ $t('campaigns.recipientFormatNote', 'One recipient per line. Name is optional. Template parameters must match the selected template.') }}
             </p>
             <Textarea
               v-model="recipientsInput"
               :placeholder="recipientPlaceholder"
               :rows="8"
-              class="font-mono text-sm"
+              class="font-mono"
             />
           </div>
           <!-- Validation Feedback -->
           <div v-if="recipientsInput.trim()">
-            <p v-if="manualInputValidation.isValid" class="text-xs text-green-600">
+            <p v-if="manualInputValidation.isValid" class="text-green-600">
               {{ manualInputValidation.validLines }} valid recipient{{ manualInputValidation.validLines !== 1 ? 's' : '' }}
             </p>
-            <div v-else-if="manualInputValidation.invalidLines.length > 0" class="text-xs space-y-1">
+            <div v-else-if="manualInputValidation.invalidLines.length > 0" class="space-y-1">
               <p class="text-destructive font-medium">
                 {{ manualInputValidation.invalidLines.length }} of {{ manualInputValidation.totalLines }} lines have errors:
               </p>
@@ -1406,10 +1406,10 @@ onUnmounted(() => {
         <!-- CSV Upload Tab -->
         <TabsContent value="csv" class="space-y-3 mt-3">
           <div class="space-y-1.5">
-            <Label class="text-xs text-muted-foreground">
+            <Label class="text-muted-foreground">
               {{ $t('campaigns.csvFormatHint', 'CSV must include a phone_number (or phone, mobile, number) column. Optionally include a name column. For templates with a TEXT header variable, add a "header" column. Then one column per body parameter.') }}
             </Label>
-            <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center justify-between">
               <code class="bg-muted px-1.5 py-0.5 rounded">{{ csvHeaderRow }}</code>
               <button
                 type="button"
@@ -1425,7 +1425,7 @@ onUnmounted(() => {
               @click="($refs.csvInput as HTMLInputElement)?.click()"
             >
               <Upload class="size-6 mx-auto text-muted-foreground mb-1" />
-              <p class="text-sm text-muted-foreground">
+              <p class="text-muted-foreground">
                 {{ csvFile ? csvFile.name : $t('campaigns.clickToUploadCSV', 'Click to select CSV file') }}
               </p>
             </div>

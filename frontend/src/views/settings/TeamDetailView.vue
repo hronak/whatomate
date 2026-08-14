@@ -258,7 +258,7 @@ onMounted(async () => {
     <Card>
       <CardHeader class="pb-3">
         <div class="flex items-center justify-between">
-          <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
           <Badge :variant="(team?.is_active ?? true) ? 'default' : 'secondary'">
             {{ (team?.is_active ?? true) ? $t('common.active', 'Active') : $t('common.inactive', 'Inactive') }}
           </Badge>
@@ -266,15 +266,15 @@ onMounted(async () => {
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('teams.name', 'Name') }} *</Label>
+          <Label>{{ $t('teams.name', 'Name') }} *</Label>
           <Input v-model="form.name" :disabled="!canWrite" />
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('common.description', 'Description') }}</Label>
+          <Label>{{ $t('common.description', 'Description') }}</Label>
           <Textarea v-model="form.description" :rows="2" :disabled="!canWrite" />
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('teams.assignmentStrategy', 'Assignment Strategy') }}</Label>
+          <Label>{{ $t('teams.assignmentStrategy', 'Assignment Strategy') }}</Label>
           <Select v-model="form.assignment_strategy" :disabled="!canWrite">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -285,12 +285,12 @@ onMounted(async () => {
           </Select>
         </div>
         <div v-if="form.assignment_strategy !== 'manual'" class="space-y-1.5">
-          <Label class="text-xs">{{ $t('teams.perAgentTimeout', 'Per-Agent Timeout') }} ({{ $t('common.seconds', 'seconds') }})</Label>
+          <Label>{{ $t('teams.perAgentTimeout', 'Per-Agent Timeout') }} ({{ $t('common.seconds', 'seconds') }})</Label>
           <Input v-model.number="form.per_agent_timeout_secs" type="number" min="0" max="300" :disabled="!canWrite" />
         </div>
         <div class="flex items-center gap-2">
           <Switch :checked="form.is_active" @update:checked="form.is_active = $event" :disabled="!canWrite" />
-          <Label class="text-xs">{{ $t('common.active', 'Active') }}</Label>
+          <Label>{{ $t('common.active', 'Active') }}</Label>
         </div>
       </CardContent>
     </Card>
@@ -299,7 +299,7 @@ onMounted(async () => {
     <Card>
       <CardHeader class="pb-3">
         <div class="flex items-center justify-between">
-          <CardTitle class="text-sm font-medium">{{ $t('teams.members', 'Members') }} ({{ members.length }})</CardTitle>
+          <CardTitle class="font-medium">{{ $t('teams.members', 'Members') }} ({{ members.length }})</CardTitle>
         </div>
       </CardHeader>
       <CardContent class="space-y-4">
@@ -311,13 +311,13 @@ onMounted(async () => {
             class="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
           >
             <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <span class="text-xs font-medium text-primary">{{ (member.full_name || '?')[0].toUpperCase() }}</span>
+              <span class="font-medium text-primary">{{ (member.full_name || '?')[0].toUpperCase() }}</span>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate">{{ member.full_name }}</p>
-              <p class="text-xs text-muted-foreground truncate">{{ member.email }}</p>
+              <p class="font-medium truncate">{{ member.full_name }}</p>
+              <p class="text-muted-foreground truncate">{{ member.email }}</p>
             </div>
-            <Badge variant="outline" class="text-xs shrink-0">
+            <Badge variant="outline" class="shrink-0">
               <Shield v-if="member.role === 'manager'" class="size-3 mr-1" />
               {{ member.role }}
             </Badge>
@@ -332,15 +332,15 @@ onMounted(async () => {
             </Button>
           </div>
         </div>
-        <p v-else class="text-sm text-muted-foreground text-center py-4">{{ $t('teams.noMembers', 'No members yet') }}</p>
+        <p v-else class="text-muted-foreground text-center py-4">{{ $t('teams.noMembers', 'No members yet') }}</p>
 
         <!-- Add Members -->
         <template v-if="canWrite">
           <Separator />
           <div>
             <div class="flex items-center justify-between mb-2">
-              <Label class="text-xs text-muted-foreground">{{ $t('teams.addMembers', 'Add Members') }}</Label>
-              <Input v-model="memberSearch" :placeholder="$t('teams.searchUsers', 'Search...')" class="h-6 text-[10px] w-40" />
+              <Label class="text-muted-foreground">{{ $t('teams.addMembers', 'Add Members') }}</Label>
+              <Input v-model="memberSearch" :placeholder="$t('teams.searchUsers', 'Search...')" class="h-6 w-40" />
             </div>
             <div v-if="availableUsers.length > 0" class="space-y-1 max-h-48 overflow-y-auto">
               <div
@@ -349,24 +349,24 @@ onMounted(async () => {
                 class="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div class="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                  <span class="text-xs font-medium">{{ (user.full_name || '?')[0].toUpperCase() }}</span>
+                  <span class="font-medium">{{ (user.full_name || '?')[0].toUpperCase() }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium truncate">{{ user.full_name }}</p>
-                  <p class="text-xs text-muted-foreground truncate">{{ user.email }}</p>
+                  <p class="font-medium truncate">{{ user.full_name }}</p>
+                  <p class="text-muted-foreground truncate">{{ user.email }}</p>
                 </div>
                 <div class="flex gap-1 shrink-0">
-                  <Button variant="outline" size="sm" class="h-7 text-xs" @click="addMember(user.id, 'agent')">
+                  <Button variant="outline" size="sm" class="h-7" @click="addMember(user.id, 'agent')">
                     <UserPlus class="size-3 mr-1" /> {{ $t('teams.agent', 'Agent') }}
                   </Button>
-                  <Button variant="outline" size="sm" class="h-7 text-xs" @click="addMember(user.id, 'manager')">
+                  <Button variant="outline" size="sm" class="h-7" @click="addMember(user.id, 'manager')">
                     <Shield class="size-3 mr-1" /> {{ $t('teams.manager', 'Manager') }}
                   </Button>
                 </div>
               </div>
             </div>
-            <p v-else-if="memberSearch" class="text-xs text-muted-foreground text-center py-2">{{ $t('teams.noMatchingUsers', 'No matching users') }}</p>
-            <p v-else class="text-xs text-muted-foreground text-center py-2">{{ $t('teams.allUsersInTeam', 'All users are already in this team') }}</p>
+            <p v-else-if="memberSearch" class="text-muted-foreground text-center py-2">{{ $t('teams.noMatchingUsers', 'No matching users') }}</p>
+            <p v-else class="text-muted-foreground text-center py-2">{{ $t('teams.allUsersInTeam', 'All users are already in this team') }}</p>
           </div>
         </template>
       </CardContent>

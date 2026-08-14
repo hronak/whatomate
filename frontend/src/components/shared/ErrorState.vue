@@ -31,7 +31,7 @@ defineEmits<{
     <h3 class="text-lg font-semibold text-foreground">
       <slot name="title">{{ title }}</slot>
     </h3>
-    <p class="mt-1 max-w-sm text-sm text-muted-foreground">
+    <p class="mt-1 max-w-sm text-muted-foreground">
       <slot name="description">{{ description }}</slot>
     </p>
     <div class="mt-4">

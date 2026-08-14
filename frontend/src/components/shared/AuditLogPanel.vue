@@ -81,7 +81,7 @@ onMounted(() => loadLogs())
     <CardHeader class="pb-3">
       <div class="flex items-center gap-2">
         <History class="size-4 text-muted-foreground" />
-        <CardTitle class="text-sm font-medium">{{ $t('common.activityLog', 'Activity Log') }}</CardTitle>
+        <CardTitle class="font-medium">{{ $t('common.activityLog', 'Activity Log') }}</CardTitle>
       </div>
     </CardHeader>
     <CardContent>
@@ -91,7 +91,7 @@ onMounted(() => loadLogs())
       </div>
 
       <!-- Empty state -->
-      <p v-else-if="logs.length === 0" class="text-sm text-muted-foreground text-center py-6">
+      <p v-else-if="logs.length === 0" class="text-muted-foreground text-center py-6">
         {{ $t('common.noActivity', 'No activity recorded yet') }}
       </p>
 
@@ -112,11 +112,11 @@ onMounted(() => loadLogs())
           <!-- Content -->
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm font-medium">{{ log.user_name }}</span>
-              <Badge variant="outline" class="text-[10px] px-1.5 py-0">
+              <span class="font-medium">{{ log.user_name }}</span>
+              <Badge variant="outline" class="px-1.5 py-0">
                 {{ actionConfig[log.action]?.label || log.action }}
               </Badge>
-              <span class="text-xs text-muted-foreground">{{ formatDateTime(log.created_at) }}</span>
+              <span class="text-muted-foreground">{{ formatDateTime(log.created_at) }}</span>
             </div>
 
             <!-- Changes -->
@@ -124,7 +124,7 @@ onMounted(() => loadLogs())
               <div
                 v-for="(change, idx) in log.changes"
                 :key="idx"
-                class="text-xs rounded-md bg-muted/50 px-2.5 py-1.5 overflow-hidden min-w-0"
+                class="rounded-md bg-muted/50 px-2.5 py-1.5 overflow-hidden min-w-0"
               >
                 <span class="font-medium text-foreground">{{ formatLabel(change.field) }}:</span>
                 <div class="mt-0.5 text-muted-foreground break-all">
@@ -137,7 +137,7 @@ onMounted(() => loadLogs())
 
             <!-- Created fields summary -->
             <div v-else-if="log.action === 'created' && log.changes?.length > 0" class="mt-1">
-              <span class="text-xs text-muted-foreground">
+              <span class="text-muted-foreground">
                 {{ log.changes.length }} field{{ log.changes.length !== 1 ? 's' : '' }} set
               </span>
             </div>
@@ -147,7 +147,7 @@ onMounted(() => loadLogs())
 
       <!-- Load more -->
       <div v-if="logs.length < total" class="mt-4 flex justify-center">
-        <Button variant="ghost" size="sm" class="text-xs" :disabled="isLoading" @click="loadMore">
+        <Button variant="ghost" size="sm" :disabled="isLoading" @click="loadMore">
           <ChevronDown class="size-3.5 mr-1" />
           {{ isLoading ? $t('common.loading') + '...' : $t('common.loadMore', 'Load more') }}
         </Button>

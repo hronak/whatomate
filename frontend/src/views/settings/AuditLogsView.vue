@@ -213,7 +213,7 @@ onMounted(async () => {
 
                 <template #cell-action="{ item: log }">
                   <div class="py-1">
-                    <Badge variant="outline" :class="[actionVariant(log.action), 'text-xs']">
+                    <Badge variant="outline" :class="[actionVariant(log.action), '']">
                       {{ t(`auditLogs.${log.action}`) }}
                     </Badge>
                   </div>
@@ -221,19 +221,19 @@ onMounted(async () => {
 
                 <template #cell-resource_type="{ item: log }">
                   <div class="py-1">
-                    <span class="text-sm text-muted-foreground">{{ formatLabel(log.resource_type) }}</span>
+                    <span class="text-muted-foreground">{{ formatLabel(log.resource_type) }}</span>
                   </div>
                 </template>
 
                 <template #cell-changes="{ item: log }">
                   <div class="py-1">
-                    <span class="text-sm text-muted-foreground">{{ changeSummary(log) }}</span>
+                    <span class="text-muted-foreground">{{ changeSummary(log) }}</span>
                   </div>
                 </template>
 
                 <template #cell-created_at="{ item: log }">
                   <div class="py-1">
-                    <span class="text-muted-foreground text-sm">{{ formatDate(log.created_at) }}</span>
+                    <span class="text-muted-foreground">{{ formatDate(log.created_at) }}</span>
                   </div>
                 </template>
               </DataTable>

@@ -215,7 +215,7 @@ function getColorLabel(color: string): string {
         <div class="space-y-2">
           <Label>{{ $t('tags.name') }} <span class="text-destructive">*</span></Label>
           <Input v-model="formData.name" :placeholder="$t('tags.namePlaceholder')" maxlength="50" />
-          <p class="text-xs text-muted-foreground">{{ $t('tags.maxCharacters') }}</p>
+          <p class="text-muted-foreground">{{ $t('tags.maxCharacters') }}</p>
         </div>
         <div class="space-y-2">
           <Label>{{ $t('tags.color') }}</Label>
@@ -234,7 +234,7 @@ function getColorLabel(color: string): string {
           </Select>
         </div>
         <div class="pt-2">
-          <Label class="text-sm text-muted-foreground">{{ $t('tags.preview') }}</Label>
+          <Label class="text-muted-foreground">{{ $t('tags.preview') }}</Label>
           <div class="mt-2">
             <TagBadge :color="formData.color">{{ formData.name || $t('tags.tagPreview') }}</TagBadge>
           </div>
@@ -243,7 +243,7 @@ function getColorLabel(color: string): string {
     </CrudFormDialog>
 
     <DeleteConfirmDialog v-model:open="deleteDialogOpen" :title="$t('tags.deleteTag')" :item-name="tagToDelete?.name" :is-submitting="isDeleting" @confirm="confirmDelete">
-      <p class="text-sm text-muted-foreground">{{ $t('tags.deleteWarning') }}</p>
+      <p class="text-muted-foreground">{{ $t('tags.deleteWarning') }}</p>
     </DeleteConfirmDialog>
   </div>
 </template>

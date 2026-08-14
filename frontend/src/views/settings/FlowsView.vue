@@ -241,7 +241,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                   <CardDescription>{{ $t('flows.yourFlowsDesc') }}</CardDescription>
                 </div>
                 <div class="flex items-center gap-2">
-                  <Label class="text-sm text-muted-foreground">{{ $t('flows.account') }}:</Label>
+                  <Label class="text-muted-foreground">{{ $t('flows.account') }}:</Label>
                   <Select v-model="selectedAccount" @update:model-value="onAccountChange">
                     <SelectTrigger class="w-[180px]"><SelectValue :placeholder="$t('flows.allAccounts')" /></SelectTrigger>
                     <SelectContent><SelectItem value="all">{{ $t('flows.allAccounts') }}</SelectItem><SelectItem v-for="account in accounts" :key="account.id" :value="account.name">{{ account.name }}</SelectItem></SelectContent>
@@ -270,21 +270,21 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                 <template #cell-name="{ item: flow }">
                   <div>
                     <span class="font-medium">{{ flow.name }}</span>
-                    <p class="text-xs text-muted-foreground">{{ flow.whatsapp_account }}</p>
+                    <p class="text-muted-foreground">{{ flow.whatsapp_account }}</p>
                   </div>
                 </template>
                 <template #cell-status="{ item: flow }">
-                  <Badge v-if="flow.status?.toUpperCase() === 'DEPRECATED'" variant="destructive" class="text-xs">
+                  <Badge v-if="flow.status?.toUpperCase() === 'DEPRECATED'" variant="destructive">
                     <Archive class="size-3 mr-1" />{{ $t('flows.deprecated') }}
                   </Badge>
-                  <Badge v-else variant="outline" :class="[getStatusClass(flow.status), 'text-xs']">{{ flow.status }}</Badge>
+                  <Badge v-else variant="outline" :class="[getStatusClass(flow.status), '']">{{ flow.status }}</Badge>
                 </template>
                 <template #cell-category="{ item: flow }">
-                  <Badge v-if="flow.category" variant="outline" class="text-xs">{{ flow.category }}</Badge>
+                  <Badge v-if="flow.category" variant="outline">{{ flow.category }}</Badge>
                   <span v-else class="text-muted-foreground">—</span>
                 </template>
                 <template #cell-created_at="{ item: flow }">
-                  <span class="text-muted-foreground text-sm">{{ formatDate(flow.created_at) }}</span>
+                  <span class="text-muted-foreground">{{ formatDate(flow.created_at) }}</span>
                 </template>
                 <template #cell-actions="{ item: flow }">
                   <div class="flex items-center justify-end gap-1">
@@ -334,12 +334,12 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
         <DialogHeader><DialogTitle>{{ $t('flows.createWhatsAppFlow') }}</DialogTitle><DialogDescription>{{ $t('flows.createFlowDesc') }}</DialogDescription></DialogHeader>
         <div class="flex gap-4 py-2 border-b">
           <div class="flex items-center gap-2">
-            <Label class="text-sm whitespace-nowrap">{{ $t('flows.account') }}:</Label>
+            <Label class="whitespace-nowrap">{{ $t('flows.account') }}:</Label>
             <Select v-model="formData.whatsapp_account" :disabled="isCreating"><SelectTrigger class="w-[180px]"><SelectValue :placeholder="$t('flows.selectAccount')" /></SelectTrigger><SelectContent><SelectItem v-for="account in accounts" :key="account.id" :value="account.name">{{ account.name }}</SelectItem></SelectContent></Select>
           </div>
-          <div class="flex items-center gap-2"><Label class="text-sm whitespace-nowrap">{{ $t('flows.name') }}:</Label><Input v-model="formData.name" :placeholder="$t('flows.flowName')" class="w-48" :disabled="isCreating" /></div>
+          <div class="flex items-center gap-2"><Label class="whitespace-nowrap">{{ $t('flows.name') }}:</Label><Input v-model="formData.name" :placeholder="$t('flows.flowName')" class="w-48" :disabled="isCreating" /></div>
           <div class="flex items-center gap-2">
-            <Label class="text-sm whitespace-nowrap">{{ $t('flows.category') }}:</Label>
+            <Label class="whitespace-nowrap">{{ $t('flows.category') }}:</Label>
             <Select v-model="formData.category" :disabled="isCreating"><SelectTrigger class="w-[180px]"><SelectValue :placeholder="$t('flows.selectCategory')" /></SelectTrigger><SelectContent><SelectItem v-for="cat in flowCategories" :key="cat.value" :value="cat.value">{{ cat.label }}</SelectItem></SelectContent></Select>
           </div>
         </div>
@@ -353,10 +353,10 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
       <DialogContent class="max-w-6xl h-[85vh] flex flex-col">
         <DialogHeader><DialogTitle>{{ $t('flows.editWhatsAppFlow') }}</DialogTitle><DialogDescription>{{ $t('flows.editFlowDesc') }}</DialogDescription></DialogHeader>
         <div class="flex gap-4 py-2 border-b">
-          <div class="flex items-center gap-2"><Label class="text-sm whitespace-nowrap">{{ $t('flows.account') }}:</Label><span class="text-sm text-muted-foreground">{{ flowToEdit?.whatsapp_account }}</span></div>
-          <div class="flex items-center gap-2"><Label class="text-sm whitespace-nowrap">{{ $t('flows.name') }}:</Label><Input v-model="editFormData.name" :placeholder="$t('flows.flowName')" class="w-48" :disabled="isUpdating" /></div>
+          <div class="flex items-center gap-2"><Label class="whitespace-nowrap">{{ $t('flows.account') }}:</Label><span class="text-muted-foreground">{{ flowToEdit?.whatsapp_account }}</span></div>
+          <div class="flex items-center gap-2"><Label class="whitespace-nowrap">{{ $t('flows.name') }}:</Label><Input v-model="editFormData.name" :placeholder="$t('flows.flowName')" class="w-48" :disabled="isUpdating" /></div>
           <div class="flex items-center gap-2">
-            <Label class="text-sm whitespace-nowrap">{{ $t('flows.category') }}:</Label>
+            <Label class="whitespace-nowrap">{{ $t('flows.category') }}:</Label>
             <Select v-model="editFormData.category" :disabled="isUpdating"><SelectTrigger class="w-[180px]"><SelectValue :placeholder="$t('flows.selectCategory')" /></SelectTrigger><SelectContent><SelectItem v-for="cat in flowCategories" :key="cat.value" :value="cat.value">{{ cat.label }}</SelectItem></SelectContent></Select>
           </div>
           <div v-if="flowToEdit?.meta_flow_id" class="flex items-center gap-2 ml-auto"><Badge variant="outline">Meta ID: {{ flowToEdit.meta_flow_id }}</Badge></div>

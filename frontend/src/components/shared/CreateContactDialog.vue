@@ -133,7 +133,7 @@ function closeDialog() {
         <div class="space-y-2">
           <Label>{{ $t('contacts.phoneNumber') }} <span class="text-destructive">*</span></Label>
           <Input v-model="formData.phone_number" :placeholder="$t('contacts.phonePlaceholder')" />
-          <p class="text-xs text-muted-foreground">{{ $t('contacts.phoneHint') }}</p>
+          <p class="text-muted-foreground">{{ $t('contacts.phoneHint') }}</p>
         </div>
         <div class="space-y-2">
           <Label>{{ $t('contacts.profileName') }}</Label>

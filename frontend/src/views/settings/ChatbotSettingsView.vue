@@ -446,7 +446,7 @@ function removeEscalationUser(userId: string) {
                   />
                   <div class="mt-2">
                     <div class="flex items-center justify-between mb-2">
-                      <Label class="text-sm text-muted-foreground">{{ $t('chatbotSettings.quickReplyButtons') }}</Label>
+                      <Label class="text-muted-foreground">{{ $t('chatbotSettings.quickReplyButtons') }}</Label>
                       <Button
                         variant="outline"
                         size="sm"
@@ -473,7 +473,7 @@ function removeEscalationUser(userId: string) {
                           <X class="size-4" />
                         </Button>
                       </div>
-                      <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.buttonHint') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.buttonHint') }}</p>
                     </div>
                   </div>
                 </div>
@@ -490,7 +490,7 @@ function removeEscalationUser(userId: string) {
                   />
                   <div class="mt-2">
                     <div class="flex items-center justify-between mb-2">
-                      <Label class="text-sm text-muted-foreground">{{ $t('chatbotSettings.quickReplyButtons') }}</Label>
+                      <Label class="text-muted-foreground">{{ $t('chatbotSettings.quickReplyButtons') }}</Label>
                       <Button
                         variant="outline"
                         size="sm"
@@ -517,7 +517,7 @@ function removeEscalationUser(userId: string) {
                           <X class="size-4" />
                         </Button>
                       </div>
-                      <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.buttonHint') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.buttonHint') }}</p>
                     </div>
                   </div>
                 </div>
@@ -534,7 +534,7 @@ function removeEscalationUser(userId: string) {
                     max="120"
                     class="w-32"
                   />
-                  <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.sessionTimeoutHint') }}</p>
+                  <p class="text-muted-foreground">{{ $t('chatbotSettings.sessionTimeoutHint') }}</p>
                 </div>
 
                 <div class="flex justify-end pt-2">
@@ -561,7 +561,7 @@ function removeEscalationUser(userId: string) {
                 <div class="flex items-center justify-between py-2">
                   <div>
                     <p class="font-medium">{{ $t('chatbotSettings.allowQueuePickup') }}</p>
-                    <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.allowQueuePickupDesc') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.allowQueuePickupDesc') }}</p>
                   </div>
                   <Switch
                     :checked="chatbotSettings.allow_agent_queue_pickup"
@@ -574,7 +574,7 @@ function removeEscalationUser(userId: string) {
                 <div class="flex items-center justify-between py-2">
                   <div>
                     <p class="font-medium">{{ $t('chatbotSettings.assignSameAgent') }}</p>
-                    <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.assignSameAgentDesc') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.assignSameAgentDesc') }}</p>
                   </div>
                   <Switch
                     :checked="chatbotSettings.assign_to_same_agent"
@@ -587,7 +587,7 @@ function removeEscalationUser(userId: string) {
                 <div class="flex items-center justify-between py-2">
                   <div>
                     <p class="font-medium">{{ $t('chatbotSettings.currentConversationOnly') }}</p>
-                    <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.currentConversationOnlyDesc') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.currentConversationOnlyDesc') }}</p>
                   </div>
                   <Switch
                     :checked="chatbotSettings.agent_current_conversation_only"
@@ -619,7 +619,7 @@ function removeEscalationUser(userId: string) {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium">{{ $t('chatbotSettings.enableBusinessHours') }}</p>
-                    <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.enableBusinessHoursDesc') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.enableBusinessHoursDesc') }}</p>
                   </div>
                   <Switch
                     :checked="chatbotSettings.business_hours_enabled"
@@ -677,7 +677,7 @@ function removeEscalationUser(userId: string) {
                   <div class="flex items-center justify-between py-2">
                     <div>
                       <p class="font-medium">{{ $t('chatbotSettings.allowAutomatedOutsideHours') }}</p>
-                      <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.allowAutomatedOutsideHoursDesc') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.allowAutomatedOutsideHoursDesc') }}</p>
                     </div>
                     <Switch
                       :checked="chatbotSettings.allow_automated_outside_hours"
@@ -710,7 +710,7 @@ function removeEscalationUser(userId: string) {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium">{{ $t('chatbotSettings.enableSlaTracking') }}</p>
-                    <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.enableSlaTrackingDesc') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.enableSlaTrackingDesc') }}</p>
                   </div>
                   <Switch
                     :checked="isSLAEnabled"
@@ -725,12 +725,12 @@ function removeEscalationUser(userId: string) {
                     <div class="space-y-2">
                       <Label>{{ $t('chatbotSettings.responseTime') }}</Label>
                       <Input v-model.number="slaSettings.sla_response_minutes" type="number" min="1" max="1440" />
-                      <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.responseTimeHint') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.responseTimeHint') }}</p>
                     </div>
                     <div class="space-y-2">
                       <Label>{{ $t('chatbotSettings.escalationTime') }}</Label>
                       <Input v-model.number="slaSettings.sla_escalation_minutes" type="number" min="1" max="1440" />
-                      <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.escalationTimeHint') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.escalationTimeHint') }}</p>
                     </div>
                   </div>
 
@@ -738,12 +738,12 @@ function removeEscalationUser(userId: string) {
                     <div class="space-y-2">
                       <Label>{{ $t('chatbotSettings.resolutionTime') }}</Label>
                       <Input v-model.number="slaSettings.sla_resolution_minutes" type="number" min="1" max="10080" />
-                      <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.resolutionTimeHint') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.resolutionTimeHint') }}</p>
                     </div>
                     <div class="space-y-2">
                       <Label>{{ $t('chatbotSettings.autoCloseHours') }}</Label>
                       <Input v-model.number="slaSettings.sla_auto_close_hours" type="number" min="1" max="168" />
-                      <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.autoCloseHoursHint') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.autoCloseHoursHint') }}</p>
                     </div>
                   </div>
 
@@ -771,7 +771,7 @@ function removeEscalationUser(userId: string) {
                     <div class="flex items-center justify-between">
                       <div>
                         <Label>{{ $t('chatbotSettings.escalationNotifyContacts') }}</Label>
-                        <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.escalationNotifyHint') }}</p>
+                        <p class="text-muted-foreground">{{ $t('chatbotSettings.escalationNotifyHint') }}</p>
                       </div>
                       <Popover v-model:open="escalationComboboxOpen">
                         <PopoverTrigger as-child>
@@ -806,7 +806,7 @@ function removeEscalationUser(userId: string) {
                       <div
                         v-for="user in selectedEscalationUsers"
                         :key="user.id"
-                        class="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full text-sm"
+                        class="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full"
                       >
                         <span>{{ user.full_name }}</span>
                         <button type="button" @click="removeEscalationUser(user.id)" class="text-muted-foreground hover:text-foreground">
@@ -814,7 +814,7 @@ function removeEscalationUser(userId: string) {
                         </button>
                       </div>
                     </div>
-                    <p v-else class="text-sm text-muted-foreground italic">{{ $t('chatbotSettings.noUsersSelected') }}</p>
+                    <p v-else class="text-muted-foreground italic">{{ $t('chatbotSettings.noUsersSelected') }}</p>
                   </div>
                 </div>
 
@@ -825,7 +825,7 @@ function removeEscalationUser(userId: string) {
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="font-medium">{{ $t('chatbotSettings.clientInactivityReminders') }}</p>
-                      <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.clientInactivityRemindersDesc') }}</p>
+                      <p class="text-muted-foreground">{{ $t('chatbotSettings.clientInactivityRemindersDesc') }}</p>
                     </div>
                     <Switch
                       :checked="isClientReminderEnabled"
@@ -838,12 +838,12 @@ function removeEscalationUser(userId: string) {
                       <div class="space-y-2">
                         <Label>{{ $t('chatbotSettings.reminderAfter') }}</Label>
                         <Input v-model.number="slaSettings.client_reminder_minutes" type="number" min="1" max="1440" />
-                        <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.reminderAfterHint') }}</p>
+                        <p class="text-muted-foreground">{{ $t('chatbotSettings.reminderAfterHint') }}</p>
                       </div>
                       <div class="space-y-2">
                         <Label>{{ $t('chatbotSettings.autoCloseAfter') }}</Label>
                         <Input v-model.number="slaSettings.client_auto_close_minutes" type="number" min="1" max="1440" />
-                        <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.autoCloseAfterHint') }}</p>
+                        <p class="text-muted-foreground">{{ $t('chatbotSettings.autoCloseAfterHint') }}</p>
                       </div>
                     </div>
 
@@ -891,7 +891,7 @@ function removeEscalationUser(userId: string) {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium">{{ $t('chatbotSettings.enableAiResponses') }}</p>
-                    <p class="text-sm text-muted-foreground">{{ $t('chatbotSettings.enableAiResponsesDesc') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.enableAiResponsesDesc') }}</p>
                   </div>
                   <Switch
                     :checked="isAIEnabled"
@@ -938,7 +938,7 @@ function removeEscalationUser(userId: string) {
                       type="password"
                       :placeholder="$t('chatbotSettings.apiKeyPlaceholder') + '...'"
                     />
-                    <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.apiKeyHint') }}</p>
+                    <p class="text-muted-foreground">{{ $t('chatbotSettings.apiKeyHint') }}</p>
                   </div>
 
                   <div class="space-y-2">

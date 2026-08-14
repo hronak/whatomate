@@ -711,7 +711,7 @@ onMounted(() => {
         </div>
         <div class="flex-1">
           <h1 class="text-xl font-semibold text-foreground">{{ $t('dashboard.title') }}</h1>
-          <p class="text-sm text-foreground/50">{{ $t('dashboard.subtitle') }}</p>
+          <p class="text-foreground/50">{{ $t('dashboard.subtitle') }}</p>
         </div>
 
         <!-- Time Range Filter -->
@@ -800,7 +800,7 @@ onMounted(() => {
 
               <div class="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div class="flex-1">
-                  <span class="text-sm font-medium text-foreground/50">
+                  <span class="font-medium text-foreground/50">
                     {{ getWidgetById(item.i)!.name }}
                   </span>
                 </div>
@@ -846,7 +846,7 @@ onMounted(() => {
                     </Transition>
                   </template>
                 </div>
-                <div v-if="getWidgetById(item.i)!.show_change && widgetData[item.i]" class="flex items-center text-xs text-foreground/40 mt-1">
+                <div v-if="getWidgetById(item.i)!.show_change && widgetData[item.i]" class="flex items-center text-foreground/40 mt-1">
                   <component
                     :is="widgetData[item.i]?.change > 0 ? TrendingUp : widgetData[item.i]?.change < 0 ? TrendingDown : Minus"
                     :class="[
@@ -874,8 +874,8 @@ onMounted(() => {
 
               <div class="flex flex-row items-center justify-between pb-2">
                 <div>
-                  <span class="text-sm font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
-                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
+                  <span class="font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
+                  <p v-if="getWidgetById(item.i)!.description" class="text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -934,8 +934,8 @@ onMounted(() => {
 
               <div class="p-6 pb-3 flex flex-row items-center justify-between">
                 <div>
-                  <span class="text-sm font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
-                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
+                  <span class="font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
+                  <p v-if="getWidgetById(item.i)!.description" class="text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -958,14 +958,14 @@ onMounted(() => {
                   <table class="w-full">
                     <thead>
                       <tr class="border-b border-border">
-                        <th class="text-left py-2 text-xs font-medium text-foreground/40 uppercase">{{ getWidgetById(item.i)!.group_by_field }}</th>
-                        <th class="text-right py-2 text-xs font-medium text-foreground/40 uppercase">{{ $t('dashboard.count') }}</th>
+                        <th class="text-left py-2 font-medium text-foreground/40 uppercase">{{ getWidgetById(item.i)!.group_by_field }}</th>
+                        <th class="text-right py-2 font-medium text-foreground/40 uppercase">{{ $t('dashboard.count') }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="dp in widgetData[item.i]?.data_points" :key="dp.label" class="border-b border-border">
-                        <td class="py-2 text-sm text-foreground/70">{{ dp.label }}</td>
-                        <td class="py-2 text-sm text-right text-foreground font-medium">{{ dp.value }}</td>
+                        <td class="py-2 text-foreground/70">{{ dp.label }}</td>
+                        <td class="py-2 text-right text-foreground font-medium">{{ dp.value }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -980,7 +980,7 @@ onMounted(() => {
                     >
                       <div
                         :class="[
-                          'size-10 rounded-lg flex items-center justify-center text-sm font-medium shrink-0',
+                          'size-10 rounded-lg flex items-center justify-center font-medium shrink-0',
                           row.direction === 'incoming' ? 'bg-linear-to-br from-emerald-500 to-green-600 text-white' : 'bg-linear-to-br from-blue-500 to-cyan-600 text-white'
                         ]"
                       >
@@ -988,18 +988,18 @@ onMounted(() => {
                       </div>
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
-                          <p class="text-sm font-medium truncate text-foreground">{{ row.label }}</p>
-                          <span class="text-xs text-foreground/40 flex items-center gap-1 shrink-0">
+                          <p class="font-medium truncate text-foreground">{{ row.label }}</p>
+                          <span class="text-foreground/40 flex items-center gap-1 shrink-0">
                             <Clock class="size-3" />
                             {{ formatTime(row.created_at) }}
                           </span>
                         </div>
-                        <p class="text-sm text-foreground/50 truncate">{{ row.sub_label }}</p>
+                        <p class="text-foreground/50 truncate">{{ row.sub_label }}</p>
                         <div class="flex items-center gap-2 mt-1">
                           <span
                             v-if="row.direction"
                             :class="[
-                              'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
+                              'px-1.5 py-0.5 rounded-full font-medium',
                               row.direction === 'incoming' ? 'bg-success/20 text-success' : 'bg-info/20 text-info'
                             ]"
                           >
@@ -1008,7 +1008,7 @@ onMounted(() => {
                           <span
                             v-if="row.status"
                             :class="[
-                              'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
+                              'px-1.5 py-0.5 rounded-full font-medium',
                               row.status === 'delivered' ? 'bg-info/20 text-info' :
                               row.status === 'read' ? 'bg-success/20 text-success' :
                               row.status === 'failed' ? 'bg-destructive/20 text-destructive' :
@@ -1042,8 +1042,8 @@ onMounted(() => {
 
               <div class="p-6 pb-3 flex flex-row items-center justify-between">
                 <div>
-                  <span class="text-sm font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
-                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
+                  <span class="font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
+                  <p v-if="getWidgetById(item.i)!.description" class="text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1068,7 +1068,7 @@ onMounted(() => {
                       <div :class="['size-12 rounded-lg bg-linear-to-br flex items-center justify-center mb-2 shadow-lg', SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].gradient, 'shadow-' + (key as string) + '-500/20']">
                         <component :is="SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].icon" class="size-6 text-white" />
                       </div>
-                      <span class="text-sm font-medium text-foreground">{{ SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].label }}</span>
+                      <span class="font-medium text-foreground">{{ SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].label }}</span>
                     </RouterLink>
                   </template>
                 </div>
@@ -1228,7 +1228,7 @@ onMounted(() => {
                   <div :class="['size-8 rounded-lg bg-linear-to-br flex items-center justify-center', shortcut.gradient]">
                     <component :is="shortcut.icon" class="size-4 text-white" />
                   </div>
-                  <span class="text-sm text-foreground/70">{{ shortcut.label }}</span>
+                  <span class="text-foreground/70">{{ shortcut.label }}</span>
                 </div>
               </label>
             </div>
@@ -1243,13 +1243,13 @@ onMounted(() => {
                 {{ $t('dashboard.addFilter') }}
               </Button>
             </div>
-            <p v-if="!widgetForm.data_source && widgetForm.filters.length === 0" class="text-xs text-foreground/40">
+            <p v-if="!widgetForm.data_source && widgetForm.filters.length === 0" class="text-foreground/40">
               {{ $t('dashboard.selectDataSourceFirst') }}
             </p>
             <div v-for="(filter, index) in widgetForm.filters" :key="index" class="flex items-center gap-2">
               <div class="flex-1">
                 <Select :model-value="filter.field" @update:model-value="(val) => filter.field = String(val)">
-                  <SelectTrigger class="w-full bg-card border-border text-foreground text-sm">
+                  <SelectTrigger class="w-full bg-card border-border text-foreground">
                     <SelectValue :placeholder="$t('dashboard.field')" />
                   </SelectTrigger>
                   <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
@@ -1266,7 +1266,7 @@ onMounted(() => {
               </div>
               <div class="w-36">
                 <Select :model-value="filter.operator" @update:model-value="(val) => filter.operator = String(val)">
-                  <SelectTrigger class="w-full bg-card border-border text-foreground text-sm">
+                  <SelectTrigger class="w-full bg-card border-border text-foreground">
                     <SelectValue :placeholder="$t('dashboard.operator')" />
                   </SelectTrigger>
                   <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
@@ -1284,7 +1284,7 @@ onMounted(() => {
               <Input
                 v-model="filter.value"
                 :placeholder="$t('dashboard.value')"
-                class="flex-1 bg-card border-border text-foreground text-sm placeholder:text-muted-foreground"
+                class="flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground"
               />
               <Button variant="ghost" size="icon" @click="removeFilter(index)" class="text-foreground/50 hover:text-destructive shrink-0">
                 <X class="size-4" />

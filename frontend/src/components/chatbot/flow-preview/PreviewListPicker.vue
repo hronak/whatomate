@@ -24,7 +24,7 @@ function handleSelect(button: ButtonConfig) {
   <div class="mt-1">
     <!-- Trigger Button -->
     <button
-      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] text-sm font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2 transition-colors"
+      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2 transition-colors"
       :class="{
         'hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer': !disabled,
         'opacity-50 cursor-not-allowed': disabled
@@ -58,7 +58,7 @@ function handleSelect(button: ButtonConfig) {
             >
               <X class="size-5" />
             </button>
-            <span class="font-medium text-sm">Select an option</span>
+            <span class="font-medium">Select an option</span>
             <div class="w-7" />
           </div>
 
@@ -80,9 +80,9 @@ function handleSelect(button: ButtonConfig) {
                 v-else
                 class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
               >
-                <span class="text-[10px] text-[#00a884] font-medium">{{ idx + 1 }}</span>
+                <span class="text-[#00a884] font-medium">{{ idx + 1 }}</span>
               </div>
-              <span class="text-sm text-gray-800 dark:text-gray-200 flex-1">
+              <span class="text-gray-800 dark:text-gray-200 flex-1">
                 {{ btn.title || `Option ${idx + 1}` }}
               </span>
               <ExternalLink v-if="btn.type === 'url'" class="size-3 text-gray-400" />

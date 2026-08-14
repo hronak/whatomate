@@ -37,7 +37,7 @@ function goToPage(page: number | '...') {
 
 <template>
   <div class="flex items-center justify-between">
-    <p class="text-sm text-muted-foreground">
+    <p class="text-muted-foreground">
       Showing {{ paginationInfo.start }} to {{ paginationInfo.end }} of {{ totalItems }} {{ itemName || 'items' }}
     </p>
     <div class="flex items-center gap-1">

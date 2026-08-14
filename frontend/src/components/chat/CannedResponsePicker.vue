@@ -134,13 +134,13 @@ function selectResponse(response: CannedResponse) {
           <Loader2 class="size-6 animate-spin text-muted-foreground" />
         </div>
 
-        <div v-else-if="filteredResponses.length === 0" class="py-8 text-center text-muted-foreground text-sm">
+        <div v-else-if="filteredResponses.length === 0" class="py-8 text-center text-muted-foreground">
           No canned responses found
         </div>
 
         <div v-else class="p-2">
           <template v-for="(items, category) in groupedResponses" :key="category">
-            <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <div class="px-2 py-1.5 font-medium text-muted-foreground uppercase tracking-wider">
               {{ getCategoryLabel(category) }}
             </div>
             <button
@@ -150,12 +150,12 @@ function selectResponse(response: CannedResponse) {
               class="w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors"
             >
               <div class="flex items-center justify-between">
-                <span class="font-medium text-sm">{{ response.name }}</span>
-                <span v-if="response.shortcut" class="text-xs font-mono text-muted-foreground">
+                <span class="font-medium">{{ response.name }}</span>
+                <span v-if="response.shortcut" class="font-mono text-muted-foreground">
                   /{{ response.shortcut }}
                 </span>
               </div>
-              <p class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+              <p class="text-muted-foreground mt-0.5 line-clamp-2">
                 {{ response.content }}
               </p>
             </button>

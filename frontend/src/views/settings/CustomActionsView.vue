@@ -224,7 +224,7 @@ onMounted(() => fetchActions())
                 <template #cell-type="{ item: action }"><Badge :variant="getActionTypeBadge(action.action_type).variant">{{ getActionTypeBadge(action.action_type).label }}</Badge></template>
                 <template #cell-target="{ item: action }"><span class="max-w-[200px] truncate text-muted-foreground block">{{ action.action_type === 'javascript' ? $t('customActions.customScript') : action.config.url }}</span></template>
                 <template #cell-status="{ item: action }">
-                  <div class="flex items-center gap-2"><Switch :checked="action.is_active" @update:checked="handleToggleAction(action)" /><span class="text-sm text-muted-foreground">{{ action.is_active ? $t('common.active') : $t('common.inactive') }}</span></div>
+                  <div class="flex items-center gap-2"><Switch :checked="action.is_active" @update:checked="handleToggleAction(action)" /><span class="text-muted-foreground">{{ action.is_active ? $t('common.active') : $t('common.inactive') }}</span></div>
                 </template>
                 <template #cell-created="{ item: action }"><span class="text-muted-foreground">{{ formatDate(action.created_at) }}</span></template>
                 <template #cell-actions="{ item: action }">
@@ -279,16 +279,16 @@ onMounted(() => fetchActions())
                 <Label>{{ $t('customActions.headers') }}</Label>
                 <div class="space-y-2">
                   <div v-for="(value, key) in formData.config.headers" :key="key" class="flex items-center gap-2">
-                    <Badge variant="secondary" class="shrink-0">{{ key }}</Badge><span class="text-sm truncate flex-1">{{ value }}</span>
+                    <Badge variant="secondary" class="shrink-0">{{ key }}</Badge><span class="truncate flex-1">{{ value }}</span>
                     <Button variant="ghost" size="icon" class="size-6 shrink-0" @click="removeHeader(key as string)"><Trash2 class="size-3" /></Button>
                   </div>
                   <div class="flex gap-2"><Input v-model="newHeaderKey" :placeholder="$t('webhooks.headerName')" class="flex-1" /><Input v-model="newHeaderValue" :placeholder="$t('webhooks.headerValue')" class="flex-1" /><Button variant="outline" size="sm" @click="addHeader">{{ $t('common.add') }}</Button></div>
                 </div>
               </div>
               <div class="space-y-2">
-                <div class="flex items-center justify-between"><Label for="body">{{ $t('customActions.requestBody') }}</Label><Button variant="link" size="sm" class="h-auto p-0 text-xs" @click="formData.config.body = defaultBodyTemplate">{{ $t('customActions.insertTemplate') }}</Button></div>
-                <Textarea id="body" v-model="formData.config.body" placeholder='{"subject": "{{contact.name}}"}' class="font-mono text-sm min-h-[120px]" />
-                <p class="text-xs text-muted-foreground">{{ $t('customActions.bodyVariables') }}</p>
+                <div class="flex items-center justify-between"><Label for="body">{{ $t('customActions.requestBody') }}</Label><Button variant="link" size="sm" class="h-auto p-0" @click="formData.config.body = defaultBodyTemplate">{{ $t('customActions.insertTemplate') }}</Button></div>
+                <Textarea id="body" v-model="formData.config.body" placeholder='{"subject": "{{contact.name}}"}' class="font-mono min-h-[120px]" />
+                <p class="text-muted-foreground">{{ $t('customActions.bodyVariables') }}</p>
               </div>
             </div>
           </template>
@@ -296,7 +296,7 @@ onMounted(() => fetchActions())
           <!-- URL Configuration -->
           <template v-if="formData.action_type === 'url'">
             <div class="border-t pt-4 space-y-4">
-              <div class="space-y-2"><Label for="url">{{ $t('customActions.urlLabel') }}</Label><Input id="url" v-model="formData.config.url" type="url" :placeholder="$t('customActions.urlPlaceholder')" /><p class="text-xs text-muted-foreground">{{ $t('customActions.urlHint') }}</p></div>
+              <div class="space-y-2"><Label for="url">{{ $t('customActions.urlLabel') }}</Label><Input id="url" v-model="formData.config.url" type="url" :placeholder="$t('customActions.urlPlaceholder')" /><p class="text-muted-foreground">{{ $t('customActions.urlHint') }}</p></div>
               <div class="flex items-center space-x-2"><Switch id="new-tab" :checked="formData.config.open_in_new_tab" @update:checked="formData.config.open_in_new_tab = $event" /><Label for="new-tab" class="cursor-pointer">{{ $t('customActions.openInNewTab') }}</Label></div>
             </div>
           </template>
@@ -306,8 +306,8 @@ onMounted(() => fetchActions())
             <div class="border-t pt-4 space-y-4">
               <div class="space-y-2">
                 <Label for="code">{{ $t('customActions.jsCode') }}</Label>
-                <Textarea id="code" v-model="formData.config.code" :placeholder="$t('customActions.jsCodePlaceholder')" class="font-mono text-sm min-h-[200px]" />
-                <p class="text-xs text-muted-foreground">{{ $t('customActions.jsReturnHint') }}</p>
+                <Textarea id="code" v-model="formData.config.code" :placeholder="$t('customActions.jsCodePlaceholder')" class="font-mono min-h-[200px]" />
+                <p class="text-muted-foreground">{{ $t('customActions.jsReturnHint') }}</p>
               </div>
             </div>
           </template>

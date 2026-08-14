@@ -321,10 +321,10 @@ function getProgressPercentage(campaign: Campaign): number {
                   <RouterLink :to="`/campaigns/${campaign.id}`" class="font-medium text-inherit no-underline hover:opacity-80">{{ campaign.name }}</RouterLink>
                 </template>
                 <template #cell-template="{ item: campaign }">
-                  <span class="text-sm text-muted-foreground">{{ campaign.template_name || '—' }}</span>
+                  <span class="text-muted-foreground">{{ campaign.template_name || '—' }}</span>
                 </template>
                 <template #cell-status="{ item: campaign }">
-                  <Badge variant="outline" :class="[getStatusClass(campaign.status), 'text-xs']">
+                  <Badge variant="outline" :class="[getStatusClass(campaign.status), '']">
                     <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
                     {{ campaign.status }}
                   </Badge>
@@ -333,9 +333,9 @@ function getProgressPercentage(campaign: Campaign): number {
                   <div class="space-y-1">
                     <div v-if="campaign.status === 'running' || campaign.status === 'processing'" class="w-32">
                       <Progress :model-value="getProgressPercentage(campaign)" class="h-1.5" />
-                      <span class="text-xs text-muted-foreground">{{ getProgressPercentage(campaign) }}%</span>
+                      <span class="text-muted-foreground">{{ getProgressPercentage(campaign) }}%</span>
                     </div>
-                    <div class="flex items-center gap-3 text-xs">
+                    <div class="flex items-center gap-3">
                       <span title="Recipients"><Users class="size-3 inline mr-0.5" />{{ campaign.total_recipients }}</span>
                       <span class="text-green-600" title="Delivered">{{ campaign.delivered_count }}</span>
                       <span class="text-blue-600" title="Read">{{ campaign.read_count }}</span>
@@ -344,7 +344,7 @@ function getProgressPercentage(campaign: Campaign): number {
                   </div>
                 </template>
                 <template #cell-created_at="{ item: campaign }">
-                  <span class="text-muted-foreground text-sm">{{ formatDate(campaign.created_at) }}</span>
+                  <span class="text-muted-foreground">{{ formatDate(campaign.created_at) }}</span>
                 </template>
                 <template #cell-actions="{ item: campaign }">
                   <div class="flex items-center justify-end gap-1">

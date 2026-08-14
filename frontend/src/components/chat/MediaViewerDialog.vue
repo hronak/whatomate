@@ -178,10 +178,10 @@ function closeOnBackdrop() { open.value = false }
       <div class="flex items-center gap-1 shrink-0 px-3 py-2 pr-14 text-white">
         <!-- The filename doubles as the dialog's accessible name (inbound images
              carry no filename, hence the generic fallback). -->
-        <DialogTitle class="text-sm font-normal truncate max-w-[40vw]" :title="filename">
+        <DialogTitle class="font-normal truncate max-w-[40vw]" :title="filename">
           {{ filename || $t('chat.mediaViewer.title') }}
         </DialogTitle>
-        <span v-if="total > 1" class="text-xs text-white/60 ml-1">{{ index + 1 }} / {{ total }}</span>
+        <span v-if="total > 1" class="text-white/60 ml-1">{{ index + 1 }} / {{ total }}</span>
         <div class="ml-auto flex items-center gap-1">
           <template v-if="currentKind === 'image'">
             <IconButton
@@ -279,7 +279,7 @@ function closeOnBackdrop() { open.value = false }
           />
           <div v-else class="flex flex-col items-center gap-3 text-white/80 px-6 text-center">
             <FileText class="size-12" />
-            <p class="text-sm">{{ pdfError ? $t('chat.mediaViewer.pdfError') : filename }}</p>
+            <p>{{ pdfError ? $t('chat.mediaViewer.pdfError') : filename }}</p>
             <div class="flex gap-2">
               <a :href="currentUrl" :download="filename || 'file'">
                 <Button variant="secondary"><Download class="mr-2 size-4" />{{ $t('chat.mediaViewer.download') }}</Button>
@@ -294,7 +294,7 @@ function closeOnBackdrop() { open.value = false }
         <!-- Other documents (docx, xlsx, …): no inline viewer -->
         <div v-else-if="current" class="flex flex-col items-center gap-3 text-white/80 px-6 text-center">
           <FileText class="size-12" />
-          <p class="text-sm truncate max-w-[60vw]">{{ filename }}</p>
+          <p class="truncate max-w-[60vw]">{{ filename }}</p>
           <div class="flex gap-2">
             <a :href="currentUrl" :download="filename || 'file'">
               <Button variant="secondary"><Download class="mr-2 size-4" />{{ $t('chat.mediaViewer.download') }}</Button>

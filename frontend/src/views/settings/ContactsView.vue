@@ -206,16 +206,16 @@ function getDisplayName(contact: Contact): string {
                 <template #cell-profile_name="{ item: contact }">
                   <div class="flex flex-col">
                     <RouterLink :to="`/settings/contacts/${contact.id}`" class="font-medium text-inherit no-underline hover:opacity-80">{{ getDisplayName(contact) }}</RouterLink>
-                    <span v-if="contact.last_message_preview" class="text-xs text-muted-foreground truncate max-w-[200px]">{{ contact.last_message_preview }}</span>
+                    <span v-if="contact.last_message_preview" class="text-muted-foreground truncate max-w-[200px]">{{ contact.last_message_preview }}</span>
                   </div>
                 </template>
                 <template #cell-phone_number="{ item: contact }">
-                  <code class="text-sm">{{ contact.phone_number }}</code>
+                  <code>{{ contact.phone_number }}</code>
                 </template>
                 <template #cell-tags="{ item: contact }">
                   <div class="flex flex-wrap gap-1">
-                    <TagBadge v-for="tag in (contact.tags || []).slice(0, 3)" :key="tag" color="gray" class="text-xs">{{ tag }}</TagBadge>
-                    <Badge v-if="(contact.tags || []).length > 3" variant="outline" class="text-xs">+{{ contact.tags.length - 3 }}</Badge>
+                    <TagBadge v-for="tag in (contact.tags || []).slice(0, 3)" :key="tag" color="gray">{{ tag }}</TagBadge>
+                    <Badge v-if="(contact.tags || []).length > 3" variant="outline">+{{ contact.tags.length - 3 }}</Badge>
                   </div>
                 </template>
                 <template #cell-last_message_at="{ item: contact }">

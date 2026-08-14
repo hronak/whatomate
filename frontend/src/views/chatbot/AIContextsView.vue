@@ -203,20 +203,19 @@ async function toggleContext(context: AIContext) {
                     :class="context.context_type === 'api'
                       ? 'bg-blue-500/20 text-blue-400 border-transparent'
                       : 'bg-orange-500/20 text-orange-400 border-transparent'"
-                    class="text-xs"
                   >
                     {{ context.context_type === 'api' ? $t('aiContexts.apiFetch') : $t('aiContexts.static') }}
                   </Badge>
                 </template>
                 <template #cell-trigger_keywords="{ item: context }">
                   <div class="flex flex-wrap gap-1">
-                    <Badge v-for="kw in context.trigger_keywords?.slice(0, 2)" :key="kw" variant="secondary" class="text-xs">
+                    <Badge v-for="kw in context.trigger_keywords?.slice(0, 2)" :key="kw" variant="secondary">
                       {{ kw }}
                     </Badge>
-                    <Badge v-if="context.trigger_keywords?.length > 2" variant="outline" class="text-xs">
+                    <Badge v-if="context.trigger_keywords?.length > 2" variant="outline">
                       +{{ context.trigger_keywords.length - 2 }}
                     </Badge>
-                    <span v-if="!context.trigger_keywords?.length" class="text-muted-foreground text-sm">{{ $t('aiContexts.always') }}</span>
+                    <span v-if="!context.trigger_keywords?.length" class="text-muted-foreground">{{ $t('aiContexts.always') }}</span>
                   </div>
                 </template>
                 <template #cell-priority="{ item: context }">
@@ -225,7 +224,7 @@ async function toggleContext(context: AIContext) {
                 <template #cell-status="{ item: context }">
                   <div class="flex items-center gap-2">
                     <Switch :checked="context.enabled" @update:checked="toggleContext(context)" />
-                    <span class="text-sm text-muted-foreground">{{ context.enabled ? $t('aiContexts.active') : $t('aiContexts.inactive') }}</span>
+                    <span class="text-muted-foreground">{{ context.enabled ? $t('aiContexts.active') : $t('aiContexts.inactive') }}</span>
                   </div>
                 </template>
                 <template #cell-actions="{ item: context }">

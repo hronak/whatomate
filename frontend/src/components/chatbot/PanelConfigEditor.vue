@@ -131,7 +131,7 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
 
 <template>
   <div class="space-y-3 min-w-0 overflow-hidden">
-    <div v-if="availableVariables.length > 0" class="text-[10px] text-muted-foreground space-y-1">
+    <div v-if="availableVariables.length > 0" class="text-muted-foreground space-y-1">
       <div class="font-medium">Available variables</div>
       <div class="flex flex-wrap gap-1">
         <code
@@ -141,21 +141,21 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
         >{{ v.key }}</code>
       </div>
     </div>
-    <div v-else class="text-[10px] text-muted-foreground p-2 border rounded bg-muted/30">
+    <div v-else class="text-muted-foreground p-2 border rounded bg-muted/30">
       No variables captured yet. Add a Prompt node with a "Store response as" value, or an API node with response mapping.
     </div>
 
     <div class="space-y-2">
       <div class="flex items-center justify-between">
-        <Label class="text-xs">Sections</Label>
-        <Button variant="outline" size="sm" class="h-7 px-2 text-xs gap-1" @click="addSection">
+        <Label>Sections</Label>
+        <Button variant="outline" size="sm" class="h-7 px-2 gap-1" @click="addSection">
           <Plus class="size-3.5" /> Add Section
         </Button>
       </div>
 
       <div
         v-if="panelConfig.sections.length === 0"
-        class="text-[10px] text-muted-foreground p-2 border rounded bg-muted/30 text-center"
+        class="text-muted-foreground p-2 border rounded bg-muted/30 text-center"
       >
         No sections configured.
       </div>
@@ -170,21 +170,21 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
             :model-value="section.label"
             @update:model-value="(v) => setSection(sectionIdx, { label: String(v ?? '') })"
             placeholder="Section label"
-            class="h-7 text-xs flex-1"
+            class="h-7 flex-1"
           />
           <Button variant="ghost" size="icon" class="size-7" @click="removeSection(sectionIdx)">
             <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
 
-        <div class="flex items-center gap-3 text-[10px]">
+        <div class="flex items-center gap-3">
           <div class="flex items-center gap-1">
             <span class="text-muted-foreground">Columns:</span>
             <Select
               :model-value="String(section.columns)"
               @update:model-value="(v) => setSection(sectionIdx, { columns: (Number(v) === 2 ? 2 : 1) })"
             >
-              <SelectTrigger class="h-6 w-14 text-[10px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger class="h-6 w-14"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">1</SelectItem>
                 <SelectItem value="2">2</SelectItem>
@@ -211,9 +211,9 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
 
         <div class="space-y-1">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] text-muted-foreground">Fields:</span>
+            <span class="text-muted-foreground">Fields:</span>
             <Select @update:model-value="(v: any) => addField(sectionIdx, v)">
-              <SelectTrigger class="h-6 w-32 text-[10px]">
+              <SelectTrigger class="h-6 w-32">
                 <SelectValue placeholder="Add field…" />
               </SelectTrigger>
               <SelectContent>
@@ -226,7 +226,7 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
                 </SelectItem>
                 <div
                   v-if="unassignedVariables.length === 0"
-                  class="p-2 text-[10px] text-muted-foreground"
+                  class="p-2 text-muted-foreground"
                 >
                   No unused variables left.
                 </div>
@@ -236,7 +236,7 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
 
           <div
             v-if="section.fields.length === 0"
-            class="text-[10px] text-muted-foreground text-center py-1"
+            class="text-muted-foreground text-center py-1"
           >
             No fields added.
           </div>
@@ -247,12 +247,12 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
             class="bg-background rounded p-2 space-y-2"
           >
             <div class="flex items-center gap-1">
-              <Badge variant="secondary" class="text-[10px] font-mono">{{ field.key }}</Badge>
+              <Badge variant="secondary" class="font-mono">{{ field.key }}</Badge>
               <Input
                 :model-value="field.label"
                 @update:model-value="(v) => setField(sectionIdx, fieldIdx, { label: String(v ?? '') })"
                 placeholder="Display label"
-                class="h-6 text-[10px] flex-1"
+                class="h-6 flex-1"
               />
               <Button variant="ghost" size="icon" class="size-6" @click="removeField(sectionIdx, fieldIdx)">
                 <Trash2 class="size-3 text-destructive" />
@@ -263,7 +263,7 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
                 :model-value="field.display_type || 'text'"
                 @update:model-value="(v: any) => setField(sectionIdx, fieldIdx, { display_type: v })"
               >
-                <SelectTrigger class="h-6 text-[10px] w-20"><SelectValue /></SelectTrigger>
+                <SelectTrigger class="h-6 w-20"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="text">Text</SelectItem>
                   <SelectItem value="badge">Badge</SelectItem>
@@ -275,7 +275,7 @@ function setField(sectionIndex: number, fieldIndex: number, patch: Partial<Panel
                 :disabled="(field.display_type || 'text') === 'text'"
                 @update:model-value="(v: any) => setField(sectionIdx, fieldIdx, { color: v })"
               >
-                <SelectTrigger class="h-6 text-[10px] flex-1"><SelectValue /></SelectTrigger>
+                <SelectTrigger class="h-6 flex-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="default">Default</SelectItem>
                   <SelectItem value="success">Success</SelectItem>

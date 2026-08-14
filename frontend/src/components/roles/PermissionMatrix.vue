@@ -185,12 +185,12 @@ watch(() => props.selectedPermissions, (newPerms, oldPerms) => {
               <div class="grid gap-0.5 leading-none">
                 <Label
                   :for="permission.key"
-                  class="text-sm font-medium cursor-pointer"
+                  class="font-medium cursor-pointer"
                   :class="{ 'text-muted-foreground': disabled }"
                 >
                   {{ getActionLabel(permission.action) }}
                 </Label>
-                <p v-if="permission.description" class="text-xs text-muted-foreground">
+                <p v-if="permission.description" class="text-muted-foreground">
                   {{ permission.description }}
                 </p>
               </div>

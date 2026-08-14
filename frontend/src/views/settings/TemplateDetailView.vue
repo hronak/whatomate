@@ -696,7 +696,7 @@ onMounted(async () => {
       <CardHeader class="pb-3 cursor-pointer" @click="isDetailsOpen = !isDetailsOpen">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <CardTitle class="text-sm font-medium">{{ $t('templates.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('templates.details', 'Details') }}</CardTitle>
             <Badge v-if="!isNew && template?.status" :variant="statusVariant">
               {{ template.status }}
             </Badge>
@@ -709,12 +709,12 @@ onMounted(async () => {
       </CardHeader>
       <CardContent v-show="isDetailsOpen" class="space-y-4">
         <!-- Edit limits info for approved templates -->
-        <div v-if="template?.status?.toUpperCase() === 'APPROVED'" class="flex items-start gap-2 rounded-md bg-blue-500/10 border border-blue-500/20 px-3 py-2 text-xs text-info">
+        <div v-if="template?.status?.toUpperCase() === 'APPROVED'" class="flex items-start gap-2 rounded-md bg-blue-500/10 border border-blue-500/20 px-3 py-2 text-info">
           <Info class="size-3.5 shrink-0 mt-0.5" />
           <span>{{ $t('templates.editLimitsInfo', 'Approved templates can be edited up to 10 times in 30 days (1 edit per 24 hours). Editing triggers a new review which may take up to 24 hours. Name, language, and category cannot be changed.') }}</span>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.whatsappAccount', 'WhatsApp Account') }}</Label>
+          <Label>{{ $t('templates.whatsappAccount', 'WhatsApp Account') }}</Label>
           <Select v-model="form.whatsapp_account" :disabled="!canWrite || !!template?.meta_template_id">
             <SelectTrigger><SelectValue :placeholder="$t('templates.selectAccount', 'Select account')" /></SelectTrigger>
             <SelectContent>
@@ -725,15 +725,15 @@ onMounted(async () => {
           </Select>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.name', 'Name') }} *</Label>
+          <Label>{{ $t('templates.name', 'Name') }} *</Label>
           <Input v-model="form.name" :disabled="!canWrite || !!template?.meta_template_id" />
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.displayName', 'Display Name') }}</Label>
+          <Label>{{ $t('templates.displayName', 'Display Name') }}</Label>
           <Input v-model="form.display_name" :disabled="!canWrite || !isEditable" />
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.language', 'Language') }}</Label>
+          <Label>{{ $t('templates.language', 'Language') }}</Label>
           <Select v-model="form.language" :disabled="!canWrite || !!template?.meta_template_id">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -744,7 +744,7 @@ onMounted(async () => {
           </Select>
         </div>
         <div class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.category', 'Category') }}</Label>
+          <Label>{{ $t('templates.category', 'Category') }}</Label>
           <Select v-model="form.category" :disabled="!canWrite || !isEditable || (!!template?.meta_template_id && template?.status?.toUpperCase() === 'APPROVED')">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -760,11 +760,11 @@ onMounted(async () => {
     <!-- Content Card -->
     <Card>
       <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-medium">{{ $t('templates.content', 'Content') }}</CardTitle>
+        <CardTitle class="font-medium">{{ $t('templates.content', 'Content') }}</CardTitle>
       </CardHeader>
       <CardContent class="space-y-4">
         <div v-if="!isAuthentication" class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.headerType', 'Header Type') }}</Label>
+          <Label>{{ $t('templates.headerType', 'Header Type') }}</Label>
           <Select v-model="form.header_type" :disabled="!canWrite || !isEditable">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -775,14 +775,14 @@ onMounted(async () => {
           </Select>
         </div>
         <div v-if="form.header_type === 'TEXT'" class="space-y-1.5">
-          <Label class="text-xs" for="header-content">{{ $t('templates.headerContent', 'Header Content') }}</Label>
+          <Label for="header-content">{{ $t('templates.headerContent', 'Header Content') }}</Label>
           <Input id="header-content" v-model="form.header_content" :disabled="!canWrite || !isEditable" />
-          <p v-if="hasTooManyHeaderVariables" class="text-xs text-destructive" v-text="headerTooManyVariablesHint" />
+          <p v-if="hasTooManyHeaderVariables" class="text-destructive" v-text="headerTooManyVariablesHint" />
         </div>
 
         <!-- Header Media Upload for IMAGE/VIDEO/DOCUMENT -->
         <div v-else-if="['IMAGE', 'VIDEO', 'DOCUMENT'].includes(form.header_type)" class="space-y-3">
-          <Label class="text-xs">{{ $t('templates.headerSample', 'Header') }} {{ form.header_type.toLowerCase() }}</Label>
+          <Label>{{ $t('templates.headerSample', 'Header') }} {{ form.header_type.toLowerCase() }}</Label>
           <div class="flex items-center gap-2">
             <div class="flex-1">
               <input
@@ -790,7 +790,7 @@ onMounted(async () => {
                 :accept="getAcceptedFileTypes()"
                 :disabled="!canWrite || !isEditable"
                 @change="onHeaderMediaFileChange"
-                class="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                class="w-full file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
               />
             </div>
             <Button
@@ -804,19 +804,19 @@ onMounted(async () => {
               {{ $t('templates.uploadMedia', 'Upload') }}
             </Button>
           </div>
-          <div v-if="headerMediaFilename && !headerMediaHandle" class="text-xs text-muted-foreground">
+          <div v-if="headerMediaFilename && !headerMediaHandle" class="text-muted-foreground">
             {{ headerMediaFilename }}
           </div>
           <div v-if="headerMediaHandle" class="bg-success border border-success rounded-lg p-2.5">
             <div class="flex items-center gap-2">
               <Check class="size-3.5 text-green-600" />
-              <span class="text-xs text-success">{{ $t('templates.mediaUploadedSuccess', 'Media uploaded') }}</span>
+              <span class="text-success">{{ $t('templates.mediaUploadedSuccess', 'Media uploaded') }}</span>
             </div>
-            <p class="text-xs text-muted-foreground mt-1 font-mono truncate">
+            <p class="text-muted-foreground mt-1 font-mono truncate">
               Handle: {{ headerMediaHandle.substring(0, 40) }}...
             </p>
           </div>
-          <p class="text-xs text-muted-foreground">
+          <p class="text-muted-foreground">
             <span v-if="form.header_type === 'IMAGE'">JPEG or PNG, max 5MB</span>
             <span v-else-if="form.header_type === 'VIDEO'">MP4, max 16MB</span>
             <span v-else-if="form.header_type === 'DOCUMENT'">PDF, max 100MB</span>
@@ -827,9 +827,9 @@ onMounted(async () => {
         <div v-if="isAuthentication" class="space-y-4">
           <!-- OTP Code Delivery Method -->
           <div class="space-y-2">
-            <Label class="text-xs">{{ $t('templates.codeDelivery', 'Code Delivery Method') }}</Label>
+            <Label>{{ $t('templates.codeDelivery', 'Code Delivery Method') }}</Label>
             <Select :model-value="authOtpType" @update:model-value="setAuthOtpType" :disabled="!canWrite || !isEditable">
-              <SelectTrigger class="h-8 text-xs">
+              <SelectTrigger class="h-8">
                 <SelectValue placeholder="Select delivery method" />
               </SelectTrigger>
               <SelectContent>
@@ -838,7 +838,7 @@ onMounted(async () => {
                 <SelectItem value="ZERO_TAP">Zero-Tap (Android only)</SelectItem>
               </SelectContent>
             </Select>
-            <p class="text-xs text-muted-foreground">
+            <p class="text-muted-foreground">
               <span v-if="authOtpType === 'COPY_CODE'">User taps a button to copy the code to clipboard.</span>
               <span v-else-if="authOtpType === 'ONE_TAP'">User taps a button to autofill the code in your app. Requires app configuration.</span>
               <span v-else-if="authOtpType === 'ZERO_TAP'">Code is delivered to your app automatically. Requires app configuration.</span>
@@ -846,12 +846,12 @@ onMounted(async () => {
           </div>
 
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('templates.bodyContent', 'Body Content') }}</Label>
-            <div class="rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
+            <Label>{{ $t('templates.bodyContent', 'Body Content') }}</Label>
+            <div class="rounded-md border bg-muted/50 p-3 text-muted-foreground">
               <span class="font-mono">{'{{1}}'}</span> is your verification code.
               <span v-if="form.add_security_recommendation" class="block mt-1">For your security, do not share this code.</span>
             </div>
-            <p class="text-xs text-muted-foreground">Authentication templates use fixed preset text defined by Meta.</p>
+            <p class="text-muted-foreground">Authentication templates use fixed preset text defined by Meta.</p>
           </div>
           <div class="flex items-center gap-2">
             <input
@@ -861,7 +861,7 @@ onMounted(async () => {
               :disabled="!canWrite || !isEditable"
               class="size-4 rounded border-gray-300"
             />
-            <Label for="security-rec" class="text-xs cursor-pointer">{{ $t('templates.addSecurityRecommendation', 'Add security recommendation') }}</Label>
+            <Label for="security-rec" class="cursor-pointer">{{ $t('templates.addSecurityRecommendation', 'Add security recommendation') }}</Label>
           </div>
           <div class="space-y-2">
             <div class="flex items-center gap-2">
@@ -873,7 +873,7 @@ onMounted(async () => {
                 :disabled="!canWrite || !isEditable"
                 class="size-4 rounded border-gray-300"
               />
-              <Label for="code-expiration" class="text-xs cursor-pointer">{{ $t('templates.addCodeExpiration', 'Add expiration time for the code') }}</Label>
+              <Label for="code-expiration" class="cursor-pointer">{{ $t('templates.addCodeExpiration', 'Add expiration time for the code') }}</Label>
             </div>
             <div v-if="form.code_expiration_minutes > 0" class="flex items-center gap-2 ml-6">
               <Input
@@ -882,12 +882,12 @@ onMounted(async () => {
                 @update:model-value="(val: string | number) => form.code_expiration_minutes = String(val) ? parseInt(String(val)) : 0"
                 min="1"
                 max="90"
-                class="h-8 text-xs w-24"
+                class="h-8 w-24"
                 :disabled="!canWrite || !isEditable"
               />
-              <span class="text-xs text-muted-foreground">minutes (1-90)</span>
+              <span class="text-muted-foreground">minutes (1-90)</span>
             </div>
-            <p v-if="form.code_expiration_minutes > 0" class="text-xs text-muted-foreground ml-6">
+            <p v-if="form.code_expiration_minutes > 0" class="text-muted-foreground ml-6">
               Footer: "This code expires in {{ form.code_expiration_minutes }} minutes."
             </p>
           </div>
@@ -901,7 +901,7 @@ onMounted(async () => {
                 :disabled="!canWrite || !isEditable"
                 class="size-4 mt-0.5 rounded border-gray-300"
               />
-              <Label for="zero-tap-tos" class="text-xs cursor-pointer leading-relaxed">
+              <Label for="zero-tap-tos" class="cursor-pointer leading-relaxed">
                 By selecting zero-tap, I understand that my business's use of zero-tap authentication is subject to the
                 <a href="https://www.whatsapp.com/legal/business-terms/" target="_blank" class="underline text-primary">WhatsApp Business Terms of Service</a>.
                 It is my business's responsibility to ensure its customers expect that the code will be automatically filled in on their behalf when they choose to receive the zero-tap code through WhatsApp.
@@ -912,15 +912,15 @@ onMounted(async () => {
           <!-- ONE_TAP: autofill text + supported apps -->
           <div v-if="authOtpType === 'ONE_TAP'" class="space-y-3 border rounded-lg p-3">
             <div class="space-y-1">
-              <Label class="text-xs">{{ $t('templates.autofillText', 'Autofill Text') }}</Label>
-              <Input v-model="form.buttons[0].autofill_text" placeholder="Autofill" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+              <Label>{{ $t('templates.autofillText', 'Autofill Text') }}</Label>
+              <Input v-model="form.buttons[0].autofill_text" placeholder="Autofill" class="h-8" :disabled="!canWrite || !isEditable" />
             </div>
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <Label class="text-xs">{{ $t('templates.supportedApps', 'Supported Apps') }} *</Label>
+                <Label>{{ $t('templates.supportedApps', 'Supported Apps') }} *</Label>
                 <Button
                   v-if="canWrite && isEditable && (form.buttons[0]?.supported_apps?.length || 0) < 5"
-                  type="button" variant="outline" size="xs" class="h-6 text-xs"
+                  type="button" variant="outline" size="xs" class="h-6"
                   @click="addSupportedApp"
                 >
                   <Plus class="size-3 mr-1" /> Add App
@@ -928,12 +928,12 @@ onMounted(async () => {
               </div>
               <div v-for="(app, i) in form.buttons[0]?.supported_apps || []" :key="i" class="flex items-end gap-2">
                 <div class="flex-1 space-y-1">
-                  <Label class="text-xs">Package Name *</Label>
-                  <Input v-model="app.package_name" placeholder="com.example.app" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                  <Label>Package Name *</Label>
+                  <Input v-model="app.package_name" placeholder="com.example.app" class="h-8" :disabled="!canWrite || !isEditable" />
                 </div>
                 <div class="flex-1 space-y-1">
-                  <Label class="text-xs">Signature Hash *</Label>
-                  <Input v-model="app.signature_hash" placeholder="K8a/AINcGX7" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                  <Label>Signature Hash *</Label>
+                  <Input v-model="app.signature_hash" placeholder="K8a/AINcGX7" class="h-8" :disabled="!canWrite || !isEditable" />
                 </div>
                 <Button
                   v-if="canWrite && isEditable && (form.buttons[0]?.supported_apps?.length || 0) > 1"
@@ -950,10 +950,10 @@ onMounted(async () => {
           <div v-if="authOtpType === 'ZERO_TAP'" class="space-y-3 border rounded-lg p-3">
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <Label class="text-xs">{{ $t('templates.supportedApps', 'Supported Apps') }} *</Label>
+                <Label>{{ $t('templates.supportedApps', 'Supported Apps') }} *</Label>
                 <Button
                   v-if="canWrite && isEditable && (form.buttons[0]?.supported_apps?.length || 0) < 5"
-                  type="button" variant="outline" size="xs" class="h-6 text-xs"
+                  type="button" variant="outline" size="xs" class="h-6"
                   @click="addSupportedApp"
                 >
                   <Plus class="size-3 mr-1" /> Add App
@@ -961,12 +961,12 @@ onMounted(async () => {
               </div>
               <div v-for="(app, i) in form.buttons[0]?.supported_apps || []" :key="i" class="flex items-end gap-2">
                 <div class="flex-1 space-y-1">
-                  <Label class="text-xs">Package Name *</Label>
-                  <Input v-model="app.package_name" placeholder="com.example.app" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                  <Label>Package Name *</Label>
+                  <Input v-model="app.package_name" placeholder="com.example.app" class="h-8" :disabled="!canWrite || !isEditable" />
                 </div>
                 <div class="flex-1 space-y-1">
-                  <Label class="text-xs">Signature Hash *</Label>
-                  <Input v-model="app.signature_hash" placeholder="K8a/AINcGX7" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                  <Label>Signature Hash *</Label>
+                  <Input v-model="app.signature_hash" placeholder="K8a/AINcGX7" class="h-8" :disabled="!canWrite || !isEditable" />
                 </div>
                 <Button
                   v-if="canWrite && isEditable && (form.buttons[0]?.supported_apps?.length || 0) > 1"
@@ -982,31 +982,31 @@ onMounted(async () => {
 
         <!-- Standard template: editable body -->
         <div v-else class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.bodyContent', 'Body Content') }} *</Label>
+          <Label>{{ $t('templates.bodyContent', 'Body Content') }} *</Label>
           <Textarea
             v-model="form.body_content"
             :rows="6"
             :disabled="!canWrite || !isEditable"
           />
-          <p v-if="hasMixedVariables" class="text-xs text-destructive" v-text="mixedVariablesHint" />
-          <p v-else-if="hasDuplicateVariables" class="text-xs text-destructive" v-text="duplicateVariablesHint" />
-          <p v-else-if="hasVariableAtEdge" class="text-xs text-destructive" v-text="variablePositionHint" />
-          <p v-else class="text-xs text-muted-foreground" v-text="bodyHint" />
+          <p v-if="hasMixedVariables" class="text-destructive" v-text="mixedVariablesHint" />
+          <p v-else-if="hasDuplicateVariables" class="text-destructive" v-text="duplicateVariablesHint" />
+          <p v-else-if="hasVariableAtEdge" class="text-destructive" v-text="variablePositionHint" />
+          <p v-else class="text-muted-foreground" v-text="bodyHint" />
         </div>
 
         <!-- Sample Values for Variables -->
         <div v-if="!isAuthentication && allVariables.length > 0" class="space-y-3">
           <div>
-            <Label class="text-xs">{{ $t('templates.sampleValues', 'Sample Values for Variables') }}</Label>
-            <p class="text-xs text-muted-foreground mt-0.5">{{ $t('templates.sampleValuesHint', 'Provide example values for your variables. This helps Meta review and approve your template faster.') }}</p>
+            <Label>{{ $t('templates.sampleValues', 'Sample Values for Variables') }}</Label>
+            <p class="text-muted-foreground mt-0.5">{{ $t('templates.sampleValuesHint', 'Provide example values for your variables. This helps Meta review and approve your template faster.') }}</p>
           </div>
           <div v-for="v in allVariables" :key="`${v.component}-${v.index}`" class="flex items-center gap-3">
-            <span class="text-xs text-muted-foreground w-28 shrink-0 font-mono">{{ v.component }}:{{ v.label }}</span>
+            <span class="text-muted-foreground w-28 shrink-0 font-mono">{{ v.component }}:{{ v.label }}</span>
             <Input
               :model-value="getSampleValueForVar(v.component, v.index)"
               @update:model-value="(val: string | number) => setSampleValueForVar(v.component, v.index, String(val))"
               :placeholder="$t('templates.sampleValuePlaceholder', 'e.g. John Doe')"
-              class="h-8 text-xs"
+              class="h-8"
               :disabled="!canWrite || !isEditable"
             />
           </div>
@@ -1015,13 +1015,13 @@ onMounted(async () => {
         <!-- Buttons (hidden for auth templates — OTP managed via selector above) -->
         <div v-if="!isAuthentication" class="space-y-3">
           <div class="flex items-center justify-between">
-            <Label class="text-xs">{{ $t('templates.buttons', 'Buttons') }} <span class="text-muted-foreground font-normal">({{ $t('templates.maxButtonsHint', 'up to 3, optional') }})</span></Label>
+            <Label>{{ $t('templates.buttons', 'Buttons') }} <span class="text-muted-foreground font-normal">({{ $t('templates.maxButtonsHint', 'up to 3, optional') }})</span></Label>
             <Button
               v-if="canWrite && isEditable"
               type="button"
               variant="outline"
               size="xs"
-              class="h-7 text-xs"
+              class="h-7"
               @click="addButton"
               :disabled="form.buttons.length >= 3"
             >
@@ -1031,16 +1031,16 @@ onMounted(async () => {
           </div>
           <div v-for="(button, index) in form.buttons" :key="index" class="border rounded-lg p-3 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-medium">{{ $t('templates.button', 'Button') }} {{ index + 1 }}</span>
+              <span class="font-medium">{{ $t('templates.button', 'Button') }} {{ index + 1 }}</span>
               <Button v-if="canWrite && isEditable" type="button" variant="ghost" size="sm" class="size-7 p-0" @click="removeButton(index)">
                 <X class="size-3.5 text-destructive" />
               </Button>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.buttonType', 'Type') }}</Label>
+                <Label>{{ $t('templates.buttonType', 'Type') }}</Label>
                 <Select v-model="button.type" :disabled="!canWrite || !isEditable">
-                  <SelectTrigger class="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectTrigger class="h-8"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem v-for="bt in buttonTypes" :key="bt.value" :value="bt.value">
                       {{ bt.label }}
@@ -1049,31 +1049,31 @@ onMounted(async () => {
                 </Select>
               </div>
               <div class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.buttonText', 'Text') }}</Label>
-                <Input v-model="button.text" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                <Label>{{ $t('templates.buttonText', 'Text') }}</Label>
+                <Input v-model="button.text" class="h-8" :disabled="!canWrite || !isEditable" />
               </div>
             </div>
             <div v-if="button.type === 'URL'" class="space-y-1">
-              <Label class="text-xs">{{ $t('templates.buttonUrl', 'URL') }}</Label>
-              <Input v-model="button.url" placeholder="https://example.com" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+              <Label>{{ $t('templates.buttonUrl', 'URL') }}</Label>
+              <Input v-model="button.url" placeholder="https://example.com" class="h-8" :disabled="!canWrite || !isEditable" />
               <div v-if="button.url && button.url.includes('{')" class="space-y-1 mt-1">
-                <Label class="text-xs">{{ $t('templates.buttonUrlExample', 'URL Example') }}</Label>
-                <Input v-model="button.example" placeholder="https://example.com/order/123" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                <Label>{{ $t('templates.buttonUrlExample', 'URL Example') }}</Label>
+                <Input v-model="button.example" placeholder="https://example.com/order/123" class="h-8" :disabled="!canWrite || !isEditable" />
               </div>
             </div>
             <div v-if="button.type === 'PHONE_NUMBER'" class="space-y-1">
-              <Label class="text-xs">{{ $t('templates.buttonPhoneNumber', 'Phone Number') }}</Label>
-              <Input v-model="button.phone_number" placeholder="+1234567890" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+              <Label>{{ $t('templates.buttonPhoneNumber', 'Phone Number') }}</Label>
+              <Input v-model="button.phone_number" placeholder="+1234567890" class="h-8" :disabled="!canWrite || !isEditable" />
             </div>
             <div v-if="button.type === 'COPY_CODE'" class="space-y-1">
-              <Label class="text-xs">{{ $t('templates.copyCodeExample', 'Example Code') }}</Label>
-              <Input v-model="button.example" placeholder="SAVE20" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+              <Label>{{ $t('templates.copyCodeExample', 'Example Code') }}</Label>
+              <Input v-model="button.example" placeholder="SAVE20" class="h-8" :disabled="!canWrite || !isEditable" />
             </div>
             <div v-if="button.type === 'FLOW'" class="space-y-2">
               <div class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.flow', 'Flow') }}</Label>
+                <Label>{{ $t('templates.flow', 'Flow') }}</Label>
                 <Select v-model="button.flow_id" :disabled="!canWrite || !isEditable">
-                  <SelectTrigger class="h-8 text-xs">
+                  <SelectTrigger class="h-8">
                     <SelectValue :placeholder="$t('templates.selectFlow', 'Select a Flow')" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1084,9 +1084,9 @@ onMounted(async () => {
                 </Select>
               </div>
               <div class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.flowAction', 'Flow Action') }}</Label>
+                <Label>{{ $t('templates.flowAction', 'Flow Action') }}</Label>
                 <Select v-model="button.flow_action" :disabled="!canWrite || !isEditable">
-                  <SelectTrigger class="h-8 text-xs">
+                  <SelectTrigger class="h-8">
                     <SelectValue placeholder="navigate" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1096,9 +1096,9 @@ onMounted(async () => {
                 </Select>
               </div>
               <div v-if="button.flow_action === 'navigate' && button.flow_id && getFlowScreens(button.flow_id).length > 0" class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.navigateScreen', 'Screen') }}</Label>
+                <Label>{{ $t('templates.navigateScreen', 'Screen') }}</Label>
                 <Select v-model="button.navigate_screen" :disabled="!canWrite || !isEditable">
-                  <SelectTrigger class="h-8 text-xs">
+                  <SelectTrigger class="h-8">
                     <SelectValue :placeholder="$t('templates.selectScreen', 'Select Screen')" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1109,15 +1109,15 @@ onMounted(async () => {
                 </Select>
               </div>
               <div v-else-if="button.flow_action === 'navigate'" class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.navigateScreen', 'Screen') }}</Label>
-                <Input v-model="button.navigate_screen" placeholder="SCREEN_ID" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                <Label>{{ $t('templates.navigateScreen', 'Screen') }}</Label>
+                <Input v-model="button.navigate_screen" placeholder="SCREEN_ID" class="h-8" :disabled="!canWrite || !isEditable" />
               </div>
             </div>
             <div v-if="button.type === 'OTP'" class="space-y-2">
               <div class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.otpType', 'OTP Type') }}</Label>
+                <Label>{{ $t('templates.otpType', 'OTP Type') }}</Label>
                 <Select v-model="button.otp_type" :disabled="!canWrite || !isEditable">
-                  <SelectTrigger class="h-8 text-xs">
+                  <SelectTrigger class="h-8">
                     <SelectValue placeholder="Copy Code" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1128,21 +1128,21 @@ onMounted(async () => {
                 </Select>
               </div>
               <div v-if="button.otp_type === 'ONE_TAP'" class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.autofillText', 'Autofill Text') }}</Label>
-                <Input v-model="button.autofill_text" placeholder="Autofill" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                <Label>{{ $t('templates.autofillText', 'Autofill Text') }}</Label>
+                <Input v-model="button.autofill_text" placeholder="Autofill" class="h-8" :disabled="!canWrite || !isEditable" />
               </div>
               <div v-if="button.otp_type === 'ONE_TAP' || button.otp_type === 'ZERO_TAP'" class="space-y-1">
-                <Label class="text-xs">{{ $t('templates.packageName', 'Package Name') }}</Label>
-                <Input v-model="button.package_name" placeholder="com.example.app" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
-                <Label class="text-xs">{{ $t('templates.signatureHash', 'Signature Hash') }}</Label>
-                <Input v-model="button.signature_hash" placeholder="App signature hash" class="h-8 text-xs" :disabled="!canWrite || !isEditable" />
+                <Label>{{ $t('templates.packageName', 'Package Name') }}</Label>
+                <Input v-model="button.package_name" placeholder="com.example.app" class="h-8" :disabled="!canWrite || !isEditable" />
+                <Label>{{ $t('templates.signatureHash', 'Signature Hash') }}</Label>
+                <Input v-model="button.signature_hash" placeholder="App signature hash" class="h-8" :disabled="!canWrite || !isEditable" />
               </div>
             </div>
           </div>
         </div>
 
         <div v-if="!isAuthentication" class="space-y-1.5">
-          <Label class="text-xs">{{ $t('templates.footerContent', 'Footer Content') }}</Label>
+          <Label>{{ $t('templates.footerContent', 'Footer Content') }}</Label>
           <Textarea
             v-model="form.footer_content"
             :rows="2"
@@ -1172,10 +1172,10 @@ onMounted(async () => {
       <!-- Editing Guidelines -->
       <Card v-if="template?.meta_template_id">
         <CardHeader class="pb-3">
-          <CardTitle class="text-sm font-medium">{{ $t('templates.editingGuidelines', 'Editing Guidelines') }}</CardTitle>
+          <CardTitle class="font-medium">{{ $t('templates.editingGuidelines', 'Editing Guidelines') }}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul class="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+          <ul class="list-disc list-inside space-y-2 text-muted-foreground">
             <li>{{ $t('templates.guideEditLimit', 'Approved templates can be edited up to 10 times in a 30-day window') }}</li>
             <li>{{ $t('templates.guideDailyLimit', 'Within a 24-hour period, you are limited to 1 edit') }}</li>
             <li>{{ $t('templates.guideReview', 'Editing triggers a new review process, which can take up to 24 hours') }}</li>
@@ -1218,25 +1218,25 @@ onMounted(async () => {
             <div v-if="template.header_type && template.header_type !== 'NONE'" class="p-3 border-b">
               <div v-if="template.header_type === 'TEXT'" class="font-semibold">{{ previewHeader }}</div>
               <div v-else class="h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
-                <span class="text-sm text-gray-400">{{ template.header_type }}</span>
+                <span class="text-gray-400">{{ template.header_type }}</span>
               </div>
             </div>
             <div class="p-3">
-              <p class="text-sm whitespace-pre-wrap">{{ previewBody }}</p>
+              <p class="whitespace-pre-wrap">{{ previewBody }}</p>
             </div>
             <div v-if="template.footer_content" class="px-3 pb-3">
-              <p class="text-xs text-gray-500">{{ template.footer_content }}</p>
+              <p class="text-gray-500">{{ template.footer_content }}</p>
             </div>
             <div v-if="template.buttons && template.buttons.length > 0" class="border-t">
               <div v-for="(btn, idx) in template.buttons" :key="idx" class="border-b last:border-b-0">
-                <button class="w-full py-2 text-sm text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <button class="w-full py-2 text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600">
                   {{ btn.text || btn.title || 'Button' }}
                 </button>
               </div>
             </div>
           </div>
         </div>
-        <div class="mt-4 space-y-2 text-sm">
+        <div class="mt-4 space-y-2">
           <div class="flex justify-between">
             <span class="text-muted-foreground">{{ $t('templates.status', 'Status') }}:</span>
             <Badge :variant="statusVariant">{{ template.status }}</Badge>
@@ -1257,7 +1257,7 @@ onMounted(async () => {
           </div>
           <div v-if="template.meta_template_id" class="flex justify-between">
             <span class="text-muted-foreground">Meta ID:</span>
-            <span class="font-mono text-xs">{{ template.meta_template_id }}</span>
+            <span class="font-mono">{{ template.meta_template_id }}</span>
           </div>
         </div>
       </div>

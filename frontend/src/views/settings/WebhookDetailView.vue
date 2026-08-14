@@ -248,7 +248,7 @@ onMounted(async () => {
       <Card>
         <CardHeader class="pb-3">
           <div class="flex items-center justify-between">
-            <CardTitle class="text-sm font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{ $t('teams.details', 'Details') }}</CardTitle>
             <Badge v-if="!isNew" :variant="(webhook?.is_active ?? true) ? 'default' : 'secondary'">
               {{ (webhook?.is_active ?? true) ? $t('common.active') : $t('common.inactive') }}
             </Badge>
@@ -256,15 +256,15 @@ onMounted(async () => {
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('webhooks.name') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('webhooks.name') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.name" :placeholder="$t('webhooks.namePlaceholder')" :disabled="!canWrite" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('webhooks.webhookUrl', 'URL') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('webhooks.webhookUrl', 'URL') }} <span class="text-destructive">*</span></Label>
             <Input v-model="form.url" type="url" :placeholder="$t('webhooks.webhookUrlPlaceholder')" :disabled="!canWrite" />
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('webhooks.events') }} <span class="text-destructive">*</span></Label>
+            <Label>{{ $t('webhooks.events') }} <span class="text-destructive">*</span></Label>
             <div class="grid grid-cols-1 gap-2 border rounded-lg p-3">
               <div v-for="event in availableEvents" :key="event.value" class="flex items-start gap-2">
                 <Checkbox
@@ -275,22 +275,22 @@ onMounted(async () => {
                 />
                 <div class="grid gap-0.5">
                   <Label :for="event.value" class="cursor-pointer">{{ event.label }}</Label>
-                  <p class="text-xs text-muted-foreground">{{ event.description }}</p>
+                  <p class="text-muted-foreground">{{ event.description }}</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('webhooks.secret') }}</Label>
+            <Label>{{ $t('webhooks.secret') }}</Label>
             <Input v-model="form.secret" type="password" :placeholder="$t('webhooks.secretPlaceholder')" :disabled="!canWrite" />
-            <p class="text-xs text-muted-foreground">{{ $t('webhooks.secretHint') }}</p>
+            <p class="text-muted-foreground">{{ $t('webhooks.secretHint') }}</p>
           </div>
           <div class="space-y-1.5">
-            <Label class="text-xs">{{ $t('webhooks.customHeaders') }}</Label>
+            <Label>{{ $t('webhooks.customHeaders') }}</Label>
             <div class="space-y-2">
               <div v-for="(value, key) in form.headers" :key="key" class="flex items-center gap-2">
                 <Badge variant="secondary" class="shrink-0">{{ key }}</Badge>
-                <span class="text-sm truncate flex-1">{{ value }}</span>
+                <span class="truncate flex-1">{{ value }}</span>
                 <Button v-if="canWrite" variant="ghost" size="icon" class="size-6 shrink-0" @click="removeHeader(key as string)">
                   <Trash2 class="size-3" />
                 </Button>
@@ -305,7 +305,7 @@ onMounted(async () => {
             </div>
           </div>
           <div v-if="!isNew" class="flex items-center justify-between">
-            <Label class="text-xs font-normal cursor-pointer">{{ $t('common.active') }}</Label>
+            <Label class="font-normal cursor-pointer">{{ $t('common.active') }}</Label>
             <Switch
               :checked="form.is_active"
               @update:checked="form.is_active = $event"

@@ -330,7 +330,7 @@ function getHeaderIcon(type: string) {
                 </div>
                 <div class="flex items-center gap-4 flex-wrap">
                   <div class="flex items-center gap-2">
-                    <Label class="text-sm text-muted-foreground">{{ $t('templates.account') }}:</Label>
+                    <Label class="text-muted-foreground">{{ $t('templates.account') }}:</Label>
                     <Select v-model="selectedAccount" @update:model-value="onAccountChange">
                       <SelectTrigger class="w-[180px]">
                         <SelectValue :placeholder="$t('templates.allAccounts')" />
@@ -367,24 +367,24 @@ function getHeaderIcon(type: string) {
                 <template #cell-name="{ item: template }">
                   <RouterLink :to="`/templates/${template.id}`" class="text-inherit no-underline hover:opacity-80">
                     <span class="font-medium">{{ template.display_name || template.name }}</span>
-                    <p class="text-xs font-mono text-muted-foreground">{{ template.name }}</p>
+                    <p class="font-mono text-muted-foreground">{{ template.name }}</p>
                   </RouterLink>
                 </template>
                 <template #cell-category="{ item: template }">
-                  <Badge :class="getCategoryBadgeClass(template.category)" class="text-xs">
+                  <Badge :class="getCategoryBadgeClass(template.category)">
                     {{ template.category }}
                   </Badge>
                 </template>
                 <template #cell-status="{ item: template }">
-                  <Badge :class="getStatusBadgeClass(template.status)" class="text-xs">
+                  <Badge :class="getStatusBadgeClass(template.status)">
                     {{ template.status }}
                   </Badge>
                 </template>
                 <template #cell-quality_rating="{ item: template }">
-                  <Badge v-if="template.quality_rating" :class="getQualityBadgeClass(template.quality_rating)" class="text-xs">
+                  <Badge v-if="template.quality_rating" :class="getQualityBadgeClass(template.quality_rating)">
                     {{ getQualityRatingLabel(template.quality_rating, t) }}
                   </Badge>
-                  <span v-else class="text-muted-foreground text-xs">—</span>
+                  <span v-else class="text-muted-foreground">—</span>
                 </template>
                 <template #cell-language="{ item: template }">
                   <span class="text-muted-foreground">{{ getLanguageName(template.language) }}</span>
@@ -392,7 +392,7 @@ function getHeaderIcon(type: string) {
                 <template #cell-header_type="{ item: template }">
                   <div class="flex items-center gap-1">
                     <component :is="getHeaderIcon(template.header_type)" class="size-4 text-muted-foreground" />
-                    <span class="text-muted-foreground text-sm">{{ template.header_type || 'NONE' }}</span>
+                    <span class="text-muted-foreground">{{ template.header_type || 'NONE' }}</span>
                   </div>
                 </template>
                 <template #cell-actions="{ item: template }">

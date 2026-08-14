@@ -53,7 +53,7 @@ defineProps<{
             </BreadcrumbList>
           </Breadcrumb>
         </template>
-        <p v-else-if="description" class="text-sm text-foreground/50">
+        <p v-else-if="description" class="text-foreground/50">
           {{ description }}
         </p>
       </div>

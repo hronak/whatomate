@@ -140,7 +140,7 @@ async function changePassword() {
                   <EyeOff v-else class="size-4" />
                 </button>
               </div>
-              <p class="text-xs text-muted-foreground">{{ $t('profile.passwordMinLength') }}</p>
+              <p class="text-muted-foreground">{{ $t('profile.passwordMinLength') }}</p>
             </div>
             <div class="space-y-2">
               <Label for="confirm_password">{{ $t('profile.confirmNewPassword') }}</Label>

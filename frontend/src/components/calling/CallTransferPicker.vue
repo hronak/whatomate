@@ -76,11 +76,11 @@ async function doTransfer(agentId?: string) {
 
       <!-- Step 1: Team list -->
       <div v-if="step === 'teams'">
-        <p class="text-sm text-muted-foreground mb-3">{{ t('callTransfers.selectTeam') }}</p>
+        <p class="text-muted-foreground mb-3">{{ t('callTransfers.selectTeam') }}</p>
         <div v-if="loading" class="flex justify-center py-8">
           <Loader2 class="size-5 animate-spin text-muted-foreground" />
         </div>
-        <div v-else-if="teams.length === 0" class="text-center py-8 text-sm text-muted-foreground">
+        <div v-else-if="teams.length === 0" class="text-center py-8 text-muted-foreground">
           {{ t('callTransfers.noTeams') }}
         </div>
         <div v-else class="space-y-1 max-h-64 overflow-y-auto">
@@ -94,8 +94,8 @@ async function doTransfer(agentId?: string) {
               <Users class="size-4 text-primary" />
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-medium truncate">{{ team.name }}</p>
-              <p class="text-xs text-muted-foreground">{{ team.member_count }} members</p>
+              <p class="font-medium truncate">{{ team.name }}</p>
+              <p class="text-muted-foreground">{{ team.member_count }} members</p>
             </div>
           </button>
         </div>
@@ -107,7 +107,7 @@ async function doTransfer(agentId?: string) {
           <Button variant="ghost" size="sm" class="size-7 p-0" @click="goBack">
             <ArrowLeft class="size-4" />
           </Button>
-          <p class="text-sm text-muted-foreground">{{ selectedTeam?.name }}</p>
+          <p class="text-muted-foreground">{{ selectedTeam?.name }}</p>
         </div>
 
         <Button
@@ -120,7 +120,7 @@ async function doTransfer(agentId?: string) {
           {{ t('callTransfers.transferToTeam') }}
         </Button>
 
-        <p class="text-xs text-muted-foreground mb-2">{{ t('callTransfers.selectAgent') }}</p>
+        <p class="text-muted-foreground mb-2">{{ t('callTransfers.selectAgent') }}</p>
 
         <div v-if="membersLoading" class="flex justify-center py-6">
           <Loader2 class="size-5 animate-spin text-muted-foreground" />
@@ -138,8 +138,8 @@ async function doTransfer(agentId?: string) {
               :class="member.is_available ? 'bg-green-500' : 'bg-zinc-400'"
             />
             <div class="min-w-0">
-              <p class="text-sm font-medium truncate">{{ member.full_name }}</p>
-              <p class="text-xs text-muted-foreground truncate">{{ member.email }}</p>
+              <p class="font-medium truncate">{{ member.full_name }}</p>
+              <p class="text-muted-foreground truncate">{{ member.email }}</p>
             </div>
           </button>
         </div>

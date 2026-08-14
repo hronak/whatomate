@@ -84,7 +84,7 @@ const TreeNodes = defineComponent({
             if (step.digit) {
               flowParts.push(
                 h('div', {
-                  class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted text-xs font-mono font-bold shrink-0'
+                  class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0'
                 }, step.digit)
               )
               flowParts.push(
@@ -98,7 +98,7 @@ const TreeNodes = defineComponent({
               }, [h(Phone, { class: 'h-3 w-3 text-primary-foreground' })])
             )
             flowParts.push(
-              h('span', { class: 'font-semibold text-sm' }, step.flow || step.label || '?')
+              h('span', { class: 'font-semibold' }, step.flow || step.label || '?')
             )
 
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, flowParts)
@@ -109,48 +109,48 @@ const TreeNodes = defineComponent({
               : step.label || '-'
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
               h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted text-xs font-mono font-bold shrink-0'
+                class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0'
               }, step.digit),
-              h('span', { class: 'text-sm font-medium' }, displayLabel),
+              h('span', { class: 'font-medium' }, displayLabel),
             ])
           } else if (step.type === 'menu') {
             // Menu without digit (timeout/max_retries)
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
               h('div', {
-                class: 'flex items-center justify-center h-6 px-1.5 rounded bg-muted text-xs font-medium shrink-0'
+                class: 'flex items-center justify-center h-6 px-1.5 rounded bg-muted font-medium shrink-0'
               }, 'menu'),
-              h('span', { class: 'text-sm' }, step.label || '-'),
-              step.outcome ? h('span', { class: 'text-xs text-muted-foreground' }, `(${step.outcome})`) : null,
+              h('span', { class: '' }, step.label || '-'),
+              step.outcome ? h('span', { class: 'text-muted-foreground' }, `(${step.outcome})`) : null,
             ])
           } else if (step.type === 'transfer') {
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
               h('div', {
                 class: 'flex items-center justify-center h-6 w-6 rounded-full bg-amber-600 shrink-0'
               }, [h(ArrowRight, { class: 'h-3 w-3 text-white' })]),
-              h('span', { class: 'text-sm' }, step.label || 'Transfer'),
+              h('span', { class: '' }, step.label || 'Transfer'),
             ])
           } else if (step.type === 'hangup') {
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
               h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded-full bg-red-600 shrink-0 text-white text-xs'
+                class: 'flex items-center justify-center h-6 w-6 rounded-full bg-red-600 shrink-0 text-white'
               }, 'x'),
-              h('span', { class: 'text-sm' }, step.label || 'Hangup'),
+              h('span', { class: '' }, step.label || 'Hangup'),
             ])
           } else if (step.type) {
             // greeting, timing, http_callback, gather, etc.
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
               h('div', {
-                class: 'flex items-center justify-center h-6 px-1.5 rounded bg-muted text-xs font-medium shrink-0 capitalize'
+                class: 'flex items-center justify-center h-6 px-1.5 rounded bg-muted font-medium shrink-0 capitalize'
               }, step.type.replace('_', ' ')),
-              h('span', { class: 'text-sm' }, step.label || '-'),
+              h('span', { class: '' }, step.label || '-'),
             ])
           } else {
             // Fallback
             rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
               h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted text-xs font-mono font-bold shrink-0'
+                class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0'
               }, step.digit || '?'),
-              h('span', { class: 'text-sm' }, step.label || '-'),
+              h('span', { class: '' }, step.label || '-'),
             ])
           }
 

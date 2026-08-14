@@ -194,7 +194,7 @@ const statCards = computed(() => [
           <template v-else>
             <div v-for="card in statCards" :key="card.key" class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-foreground/50">{{ card.title }}</span>
+                <span class="font-medium text-foreground/50">{{ card.title }}</span>
                 <div :class="[
                   'size-10 rounded-lg flex items-center justify-center',
                   card.key === 'total_sessions' ? 'bg-blue-500/20' : '',
@@ -230,12 +230,12 @@ const statCards = computed(() => [
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.keywordRules') }}</h3>
-                  <p class="text-sm text-foreground/40">{{ $t('chatbot.rulesConfigured', { count: stats.keywords_count }) }}</p>
+                  <p class="text-foreground/40">{{ $t('chatbot.rulesConfigured', { count: stats.keywords_count }) }}</p>
                 </div>
               </div>
             </div>
             <div class="px-6 pb-6">
-              <p class="text-sm text-foreground/50">
+              <p class="text-foreground/50">
                 {{ $t('chatbot.keywordRulesDesc') }}
               </p>
             </div>
@@ -249,12 +249,12 @@ const statCards = computed(() => [
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.conversationFlows') }}</h3>
-                  <p class="text-sm text-foreground/40">{{ $t('chatbot.flowsCreated', { count: stats.flows_count }) }}</p>
+                  <p class="text-foreground/40">{{ $t('chatbot.flowsCreated', { count: stats.flows_count }) }}</p>
                 </div>
               </div>
             </div>
             <div class="px-6 pb-6">
-              <p class="text-sm text-foreground/50">
+              <p class="text-foreground/50">
                 {{ $t('chatbot.flowsDesc') }}
               </p>
             </div>
@@ -268,12 +268,12 @@ const statCards = computed(() => [
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.aiContexts') }}</h3>
-                  <p class="text-sm text-foreground/40">{{ $t('chatbot.contextsActive', { count: stats.ai_contexts_count }) }}</p>
+                  <p class="text-foreground/40">{{ $t('chatbot.contextsActive', { count: stats.ai_contexts_count }) }}</p>
                 </div>
               </div>
             </div>
             <div class="px-6 pb-6">
-              <p class="text-sm text-foreground/50">
+              <p class="text-foreground/50">
                 {{ $t('chatbot.aiContextsDesc') }}
               </p>
             </div>
@@ -286,7 +286,7 @@ const statCards = computed(() => [
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.currentConfiguration') }}</h3>
-                <p class="text-sm text-foreground/40">{{ $t('chatbot.configOverview') }}</p>
+                <p class="text-foreground/40">{{ $t('chatbot.configOverview') }}</p>
               </div>
               <RouterLink to="/settings/chatbot">
                 <Button variant="outline" size="sm">
@@ -299,26 +299,26 @@ const statCards = computed(() => [
           <div class="px-6 pb-6">
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
-                <h4 class="font-medium text-sm text-foreground/70">{{ $t('chatbot.greetingMessage') }}</h4>
-                <p class="text-sm text-foreground/50 bg-muted p-3 rounded-lg">
+                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.greetingMessage') }}</h4>
+                <p class="text-foreground/50 bg-muted p-3 rounded-lg">
                   {{ settings.greeting_message || $t('chatbot.notConfigured') }}
                 </p>
               </div>
               <div class="space-y-2">
-                <h4 class="font-medium text-sm text-foreground/70">{{ $t('chatbot.fallbackMessage') }}</h4>
-                <p class="text-sm text-foreground/50 bg-muted p-3 rounded-lg">
+                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.fallbackMessage') }}</h4>
+                <p class="text-foreground/50 bg-muted p-3 rounded-lg">
                   {{ settings.fallback_message || $t('chatbot.notConfigured') }}
                 </p>
               </div>
               <div class="space-y-2">
-                <h4 class="font-medium text-sm text-foreground/70">{{ $t('chatbot.sessionTimeout') }}</h4>
-                <div class="flex items-center gap-2 text-sm text-foreground/50">
+                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.sessionTimeout') }}</h4>
+                <div class="flex items-center gap-2 text-foreground/50">
                   <Clock class="size-4" />
                   {{ $t('chatbot.minutes', { count: settings.session_timeout_minutes }) }}
                 </div>
               </div>
               <div class="space-y-2">
-                <h4 class="font-medium text-sm text-foreground/70">{{ $t('chatbot.aiProvider') }}</h4>
+                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.aiProvider') }}</h4>
                 <div class="flex items-center gap-2">
                   <Badge v-if="settings.ai_enabled" class="bg-success/20 text-success">
                     {{ settings.ai_provider || $t('chatbot.notConfigured') }}
