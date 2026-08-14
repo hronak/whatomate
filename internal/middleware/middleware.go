@@ -51,7 +51,7 @@ func RequestLogger(log logf.Logger) fastglue.FastMiddleware {
 // ParseAllowedOrigins parses a comma-separated list of allowed origins into a set.
 func ParseAllowedOrigins(allowedOrigins string) map[string]bool {
 	origins := make(map[string]bool)
-	for _, o := range strings.Split(allowedOrigins, ",") {
+	for o := range strings.SplitSeq(allowedOrigins, ",") {
 		o = strings.TrimSpace(o)
 		if o != "" {
 			origins[o] = true

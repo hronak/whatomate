@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"encoding/json"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -231,13 +232,13 @@ func TestApp_CreateTag(t *testing.T) {
 		role := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
-		longName := ""
+		var longName strings.Builder
 		for range 51 {
-			longName += "a"
+			longName.WriteString("a")
 		}
 
 		req := testutil.NewJSONRequest(t, map[string]any{
-			"name": longName,
+			"name": longName.String(),
 		})
 		testutil.SetAuthContext(req, org.ID, user.ID)
 

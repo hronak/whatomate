@@ -1,0 +1,37 @@
+// Package whatsapp is a client for Meta's WhatsApp Business Cloud API.
+//
+// It is the only place in Whatomate that speaks to the Graph API: handlers and
+// workers call methods here rather than assembling Graph requests themselves.
+// The package covers the outbound surface — messages, templates, media, calls,
+// flows, catalogs, business profiles and analytics — plus the inbound webhook
+// payload types that Meta POSTs back.
+//
+// # Client
+//
+// A Client is safe for concurrent use and is normally constructed once per
+// process, then shared. [New] takes production defaults; [NewWithTimeout] and
+// [NewWithBaseURL] override one setting each:
+//
+//	client := whatsapp.New(logger)
+//
+// Per-request credentials travel in an [Account], so one Client serves every
+// WhatsApp business account in a multi-tenant deployment:
+//
+//	msgID, err := client.SendTextMessage(ctx, account, whatsapp.Recipient{Phone: "+15551234567"}, "hello")
+//
+// Every network method takes a context as its first argument and honors its
+// cancellation and deadline.
+//
+// # Errors
+//
+// Calls that reach Meta and receive a non-2xx response return an error built
+// from Meta's structured error body, carrying its numeric code and any
+// user-facing message. See [ParseMetaAPIError].
+//
+// # Webhooks
+//
+// Inbound traffic is modeled by [WebhookPayload] and its nested types, which
+// mirror Meta's notification schema — messages, statuses, template status
+// updates, user preferences and call events. Verify the X-Hub-Signature-256
+// header against the account's app secret before trusting a payload.
+package whatsapp

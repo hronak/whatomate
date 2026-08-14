@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -225,7 +226,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 	if displayType == "" {
 		displayType = "number"
 	}
-	if !contains(widgetDisplayTypes, displayType) {
+	if !slices.Contains(widgetDisplayTypes, displayType) {
 		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid display type", nil, "")
 	}
 
@@ -247,7 +248,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 		}
 
 		// Validate metric
-		if !contains(widgetMetrics, req.Metric) {
+		if !slices.Contains(widgetMetrics, req.Metric) {
 			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid metric", nil, "")
 		}
 	}
@@ -287,7 +288,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 	// Validate group_by_field if provided (only for non-static types)
 	if req.GroupByField != "" && !staticDisplayTypes[displayType] {
 		fields := widgetDataSources[req.DataSource]
-		if !contains(fields, req.GroupByField) {
+		if !slices.Contains(fields, req.GroupByField) {
 			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid group by field for this data source", nil, "")
 		}
 	}
@@ -403,7 +404,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 		widget.DataSource = req.DataSource
 	}
 	if req.Metric != "" {
-		if !contains(widgetMetrics, req.Metric) {
+		if !slices.Contains(widgetMetrics, req.Metric) {
 			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid metric", nil, "")
 		}
 		widget.Metric = req.Metric
@@ -423,7 +424,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 		widget.Filters = filters
 	}
 	if req.DisplayType != "" {
-		if !contains(widgetDisplayTypes, req.DisplayType) {
+		if !slices.Contains(widgetDisplayTypes, req.DisplayType) {
 			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid display type", nil, "")
 		}
 		widget.DisplayType = req.DisplayType
@@ -438,7 +439,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 			ds = req.DataSource
 		}
 		fields := widgetDataSources[ds]
-		if !contains(fields, req.GroupByField) {
+		if !slices.Contains(fields, req.GroupByField) {
 			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid group by field for this data source", nil, "")
 		}
 	}
@@ -648,15 +649,6 @@ func widgetGetString(m map[string]any, key string) string {
 		}
 	}
 	return ""
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }
 
 func formatLabel(s string) string {

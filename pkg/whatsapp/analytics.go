@@ -190,14 +190,14 @@ type metaPagingCursors struct {
 
 // metaPaging represents the pagination info in Meta API response
 type metaPaging struct {
-	Cursors metaPagingCursors `json:"cursors,omitempty"`
+	Cursors metaPagingCursors `json:"cursors,omitzero"`
 	Next    string            `json:"next,omitempty"`
 }
 
 // templateAnalyticsWithPaging represents template analytics response with pagination
 type templateAnalyticsWithPaging struct {
 	Data   []TemplateAnalyticsDataEntry `json:"data"`
-	Paging metaPaging                   `json:"paging,omitempty"`
+	Paging metaPaging                   `json:"paging,omitzero"`
 }
 
 // GetAnalytics fetches analytics from Meta API

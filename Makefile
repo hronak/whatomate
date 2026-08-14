@@ -8,6 +8,8 @@ GOGET=$(GOCMD) get
 GOMOD=$(GOCMD) mod
 BINARY_NAME=whatomate
 BINARY_PATH=./cmd/whatomate
+# Must match .github/workflows/test.yml; .golangci.yml is written for v2.
+GOLANGCI_VERSION=v2.11.4
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 BUILD_TIME=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 LDFLAGS=-ldflags "-s -w -X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME)"
@@ -182,6 +184,11 @@ dev-frontend: frontend-dev
 
 # Lint
 lint:
+	@golangci-lint version 2>/dev/null | grep -q "version 2\." || { \
+		echo "golangci-lint v2 required (CI pins $(GOLANGCI_VERSION)); found:"; \
+		golangci-lint version 2>/dev/null || echo "  not installed"; \
+		echo "install: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)"; \
+		exit 1; }
 	golangci-lint run ./...
 
 # Format code

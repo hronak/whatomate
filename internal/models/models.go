@@ -80,10 +80,13 @@ func (s *StringArray) Scan(value any) error {
 
 // BaseModel contains common fields for all models
 type BaseModel struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	CreatedAt time.Time      `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	// omitzero, not omitempty: gorm.DeletedAt is a struct, and omitempty never
+	// omits struct values — every response carried an inert
+	// {"Time":"0001-01-01T00:00:00Z","Valid":false}. No client reads the field.
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitzero"`
 }
 
 // Organization represents a tenant in the multi-tenant system

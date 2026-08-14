@@ -48,7 +48,7 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		}
 
 		// Clean up any existing data before tests start
-		cleanupTables(testDB)
+		TruncateTables(testDB)
 	})
 
 	if testDBInitErr != nil {
@@ -57,23 +57,6 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 
 	// Return a new session for this test to avoid connection conflicts
 	return testDB.Session(&gorm.Session{})
-}
-
-// SetupTestDBWithCleanup is like SetupTestDB but allows controlling cleanup behavior.
-func SetupTestDBWithCleanup(t *testing.T, cleanup bool) *gorm.DB {
-	t.Helper()
-
-	db := SetupTestDB(t)
-
-	if cleanup {
-		t.Cleanup(func() {
-			// Clean up only the data created by this test
-			// Note: In parallel tests, this may affect other tests
-			// Consider using unique identifiers instead
-		})
-	}
-
-	return db
 }
 
 // runMigrations runs all model migrations.
@@ -131,99 +114,67 @@ func runMigrations(db *gorm.DB) error {
 	)
 }
 
-// cleanupTables removes all data from tables (for PostgreSQL cleanup).
-// Uses TRUNCATE CASCADE to handle foreign key constraints properly.
-func cleanupTables(db *gorm.DB) {
-	tables := []string{
-		// Dashboard tables
-		"widgets",
-		// Catalog tables
-		"catalog_products",
-		"catalogs",
-		// Canned responses
-		"canned_responses",
-		// Bulk message tables
-		"bulk_message_recipients",
-		"bulk_message_campaigns",
-		"notification_rules",
-		// Chatbot tables
-		"chatbot_session_messages",
-		"chatbot_sessions",
-		"chatbot_flow_steps",
-		"chatbot_flows",
-		"keyword_rules",
-		"chatbot_settings",
-		"ai_contexts",
-		"agent_transfers",
-		// WhatsApp tables
-		"messages",
-		"tags",
-		"contacts",
-		"templates",
-		"whatsapp_flows",
-		"whatsapp_accounts",
-		// Roles and permissions
-		"role_permissions",
-		"custom_roles",
-		"permissions",
-		// Core tables
-		"team_members",
-		"teams",
-		"api_keys",
-		"sso_providers",
-		"webhooks",
-		"custom_actions",
-		"user_availability_logs",
-		"user_organizations",
-		"users",
-		"organizations",
-	}
-
-	for _, table := range tables {
-		db.Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table))
-	}
+// truncatableTables lists every table created by runMigrations, ordered
+// child-before-parent. Keep it in sync with runMigrations above: a model added
+// there but missing here leaks rows between packages sharing the test database.
+var truncatableTables = []string{
+	// Dashboard tables
+	"widgets",
+	// Catalog tables
+	"catalog_products",
+	"catalogs",
+	// Canned responses
+	"canned_responses",
+	// Bulk message tables
+	"bulk_message_recipients",
+	"bulk_message_campaigns",
+	"notification_rules",
+	// Chatbot tables
+	"chatbot_session_messages",
+	"chatbot_sessions",
+	"chatbot_flow_steps",
+	"chatbot_flows",
+	"keyword_rules",
+	"chatbot_settings",
+	"ai_contexts",
+	"agent_transfers",
+	// Conversation notes
+	"conversation_notes",
+	// Calling / IVR tables
+	"call_transfers",
+	"call_permissions",
+	"call_logs",
+	"ivr_flows",
+	// WhatsApp tables
+	"messages",
+	"tags",
+	"contacts",
+	"templates",
+	"whatsapp_flows",
+	"whatsapp_accounts",
+	// Roles and permissions
+	"role_permissions",
+	"custom_roles",
+	"permissions",
+	// Audit
+	"audit_logs",
+	// Core tables
+	"team_members",
+	"teams",
+	"api_keys",
+	"sso_providers",
+	"webhooks",
+	"custom_actions",
+	"user_availability_logs",
+	"user_organizations",
+	"users",
+	"organizations",
 }
 
-// TruncateTables truncates all tables (PostgreSQL only, faster than DELETE).
+// TruncateTables removes all data from every migrated table.
+// Uses TRUNCATE CASCADE to handle foreign key constraints properly.
 func TruncateTables(db *gorm.DB) {
-	tables := []string{
-		"widgets",
-		"catalog_products",
-		"catalogs",
-		"canned_responses",
-		"bulk_message_recipients",
-		"bulk_message_campaigns",
-		"notification_rules",
-		"chatbot_session_messages",
-		"chatbot_sessions",
-		"chatbot_flow_steps",
-		"chatbot_flows",
-		"keyword_rules",
-		"chatbot_settings",
-		"ai_contexts",
-		"agent_transfers",
-		"messages",
-		"tags",
-		"contacts",
-		"templates",
-		"whatsapp_flows",
-		"whatsapp_accounts",
-		"role_permissions",
-		"custom_roles",
-		"permissions",
-		"team_members",
-		"teams",
-		"api_keys",
-		"sso_providers",
-		"webhooks",
-		"custom_actions",
-		"user_availability_logs",
-		"user_organizations",
-		"users",
-		"organizations",
-	}
-
-	for _, table := range tables {
+	for _, table := range truncatableTables {
 		db.Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table))
 	}
 }

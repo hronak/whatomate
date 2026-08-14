@@ -937,7 +937,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"account", account.ID, models.AuditActionUpdated, &oldAccount, account)
 
-	return r.SendEnvelope(map[string]interface{}{
+	return r.SendEnvelope(map[string]any{
 		"success": true,
 		"message": "Phone number registered successfully",
 		"pin":     pin,
@@ -946,7 +946,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 
 func generateNumericPIN(length int) (string, error) {
 	b := make([]byte, length)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		num, err := rand.Int(rand.Reader, big.NewInt(10))
 		if err != nil {
 			return "", err

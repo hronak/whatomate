@@ -2,6 +2,7 @@ package whatsapp
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -45,7 +46,7 @@ type MetaAPIError struct {
 	} `json:"error"`
 }
 
-// ParseError attempts to parse respBody as a Meta API error. If successful,
+// ParseMetaAPIError attempts to parse respBody as a Meta API error. If successful,
 // it returns a formatted error including code, message, details, and user message.
 // If parsing fails, it returns a generic error with the status code and raw body.
 func ParseMetaAPIError(statusCode int, respBody []byte) error {
@@ -58,7 +59,7 @@ func ParseMetaAPIError(statusCode int, respBody []byte) error {
 		if apiErr.Error.ErrorUserMsg != "" {
 			errMsg += " - " + apiErr.Error.ErrorUserMsg
 		}
-		return fmt.Errorf("%s", errMsg)
+		return errors.New(errMsg)
 	}
 	return fmt.Errorf("API returned status %d: %s", statusCode, string(respBody))
 }

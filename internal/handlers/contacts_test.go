@@ -28,7 +28,7 @@ func TestApp_ListContacts(t *testing.T) {
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 
 		// Create 3 contacts
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			testutil.CreateTestContact(t, app.DB, org.ID)
 		}
 
@@ -629,7 +629,7 @@ func TestApp_GetMessages(t *testing.T) {
 
 		// Create messages with staggered timestamps
 		now := time.Now()
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			msg := &models.Message{
 				BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
 				OrganizationID:  org.ID,
@@ -786,7 +786,7 @@ func TestApp_GetMessages(t *testing.T) {
 		// Create messages with staggered timestamps
 		now := time.Now()
 		var msgIDs []uuid.UUID
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			msg := &models.Message{
 				BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
 				OrganizationID:  org.ID,
@@ -1392,7 +1392,7 @@ func TestApp_ListContacts_Page2(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 
 	// Create 5 contacts
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		testutil.CreateTestContact(t, app.DB, org.ID)
 	}
 
@@ -1519,7 +1519,7 @@ func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 	// Create 3 unread incoming messages
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		msg := &models.Message{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,

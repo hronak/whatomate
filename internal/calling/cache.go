@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/shridarpatil/whatomate/internal/utils"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 )
 
 const (
@@ -181,5 +181,5 @@ func (m *Manager) maybeMaskPhone(orgID uuid.UUID, phone string) string {
 	if !settings.MaskPhoneNumbers {
 		return phone
 	}
-	return utils.MaskPhoneNumber(phone)
+	return privacy.MaskPhoneNumber(phone)
 }

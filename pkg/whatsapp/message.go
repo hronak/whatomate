@@ -1,9 +1,11 @@
 package whatsapp
 
 import (
+	"cmp"
 	"context"
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -290,26 +292,23 @@ type TemplateParam struct {
 // sorted numerically — required so that "1","2",..,"10","11" stay in order
 // instead of becoming "1","10","11",..,"2","9".
 func sortParamKeys(paramMap map[string]string, forceLexical bool) []string {
-	keys := make([]string, 0, len(paramMap))
-	for k := range paramMap {
-		keys = append(keys, k)
-	}
 	if forceLexical {
-		sort.Strings(keys)
-		return keys
+		return slices.Sorted(maps.Keys(paramMap))
 	}
-	for _, k := range keys {
-		if _, err := strconv.Atoi(k); err != nil {
-			// Mixed/named keys — fall back to lexical to keep behaviour stable.
-			sort.Strings(keys)
-			return keys
+
+	// Parse each key exactly once. A single non-numeric key means mixed/named
+	// keys, where lexical order is the stable fallback.
+	nums := make(map[string]int, len(paramMap))
+	for k := range paramMap {
+		n, err := strconv.Atoi(k)
+		if err != nil {
+			return slices.Sorted(maps.Keys(paramMap))
 		}
+		nums[k] = n
 	}
-	sort.Slice(keys, func(i, j int) bool {
-		ni, _ := strconv.Atoi(keys[i])
-		nj, _ := strconv.Atoi(keys[j])
-		return ni < nj
-	})
+
+	keys := slices.Collect(maps.Keys(paramMap))
+	slices.SortFunc(keys, func(a, b string) int { return cmp.Compare(nums[a], nums[b]) })
 	return keys
 }
 

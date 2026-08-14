@@ -28,7 +28,7 @@ func TestRateLimit_AllowsUnderLimit(t *testing.T) {
 		KeyPrefix: "test_allow_" + uuid.New().String()[:8],
 	})
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		req := newTestRequest()
 		req.RequestCtx.SetRemoteAddr(mockAddr("10.0.0.1:12345"))
 		result := rl(req)
@@ -52,7 +52,7 @@ func TestRateLimit_BlocksOverLimit(t *testing.T) {
 		KeyPrefix: prefix,
 	})
 
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		req := newTestRequest()
 		req.RequestCtx.SetRemoteAddr(mockAddr("10.0.0.2:12345"))
 		result := rl(req)
@@ -85,7 +85,7 @@ func TestRateLimit_DifferentIPsGetSeparateLimits(t *testing.T) {
 	})
 
 	// Exhaust limit for IP A
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		req := newTestRequest()
 		req.RequestCtx.SetRemoteAddr(mockAddr("10.0.0.3:12345"))
 		require.NotNil(t, rl(req))
@@ -118,7 +118,7 @@ func TestUserAwareRateLimit_KeysByUserID(t *testing.T) {
 	userB := uuid.New()
 
 	// Exhaust limit for user A (same IP for both users — simulates VPN)
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		req := newTestRequest()
 		req.RequestCtx.SetRemoteAddr(mockAddr("10.0.0.5:12345"))
 		req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, userA)
@@ -155,7 +155,7 @@ func TestUserAwareRateLimit_FallsBackToIP_WhenUnauthenticated(t *testing.T) {
 	})
 
 	// No user ID set — should key by IP
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		req := newTestRequest()
 		req.RequestCtx.SetRemoteAddr(mockAddr("10.0.0.6:12345"))
 		require.NotNil(t, rl(req))

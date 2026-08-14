@@ -75,28 +75,38 @@ func TestLogger() logf.Logger {
 }
 
 // StringPtr returns a pointer to the given string.
+//
+//go:fix inline
 func StringPtr(s string) *string {
-	return &s
+	return new(s)
 }
 
 // IntPtr returns a pointer to the given int.
+//
+//go:fix inline
 func IntPtr(i int) *int {
-	return &i
+	return new(i)
 }
 
 // TimePtr returns a pointer to the given time.
+//
+//go:fix inline
 func TimePtr(t time.Time) *time.Time {
-	return &t
+	return new(t)
 }
 
 // UUIDPtr returns a pointer to the given UUID.
+//
+//go:fix inline
 func UUIDPtr(id uuid.UUID) *uuid.UUID {
-	return &id
+	return new(id)
 }
 
 // BoolPtr returns a pointer to the given bool.
+//
+//go:fix inline
 func BoolPtr(b bool) *bool {
-	return &b
+	return new(b)
 }
 
 // AssertEventually retries an assertion function until it passes or times out.

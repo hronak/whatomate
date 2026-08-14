@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 
@@ -61,14 +62,12 @@ const maxConcurrentWebhooks = 10
 
 // DispatchWebhook sends an event to all matching webhooks for the organization
 func (a *App) DispatchWebhook(orgID uuid.UUID, eventType models.WebhookEvent, data any) {
-	a.wg.Add(1)
-	go func() {
-		defer a.wg.Done()
+	a.wg.Go(func() {
 		// Use detached context with timeout for webhook delivery
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 		defer cancel()
 		a.dispatchWebhookAsync(ctx, orgID, string(eventType), data)
-	}()
+	})
 }
 
 func (a *App) dispatchWebhookAsync(ctx context.Context, orgID uuid.UUID, eventType string, data any) {
@@ -85,7 +84,7 @@ func (a *App) dispatchWebhookAsync(ctx context.Context, orgID uuid.UUID, eventTy
 
 	for _, webhook := range webhooks {
 		// Check if webhook subscribes to this event
-		if !containsEvent(webhook.Events, eventType) {
+		if !slices.Contains(webhook.Events, eventType) {
 			continue
 		}
 
@@ -108,15 +107,6 @@ func (a *App) dispatchWebhookAsync(ctx context.Context, orgID uuid.UUID, eventTy
 	wg.Wait()
 }
 
-func containsEvent(events models.StringArray, event string) bool {
-	for _, e := range events {
-		if e == event {
-			return true
-		}
-	}
-	return false
-}
-
 func (a *App) sendWebhook(ctx context.Context, webhook models.Webhook, eventType string, data any) {
 	payload := OutboundWebhookPayload{
 		Event:     eventType,
@@ -132,7 +122,7 @@ func (a *App) sendWebhook(ctx context.Context, webhook models.Webhook, eventType
 
 	// Retry logic with exponential backoff
 	maxRetries := 3
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := range maxRetries {
 		// Check if context was cancelled before retry
 		if ctx.Err() != nil {
 			a.Log.Warn("webhook delivery cancelled", "reason", ctx.Err(), "webhook_id", webhook.ID)

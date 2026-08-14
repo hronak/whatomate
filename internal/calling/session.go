@@ -583,10 +583,7 @@ func (m *Manager) finalizeRecording(orgID, callLogID uuid.UUID, callerRec, agent
 		"agent_path", agentPath,
 	)
 
-	maxCount := callerCount
-	if agentCount > maxCount {
-		maxCount = agentCount
-	}
+	maxCount := max(agentCount, callerCount)
 	if maxCount == 0 {
 		return
 	}

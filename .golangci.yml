@@ -1,0 +1,81 @@
+# golangci-lint configuration.
+#
+# Pinned to the version CI runs (see .github/workflows/test.yml). `make lint`
+# must use the same major version or results will not match.
+version: "2"
+
+run:
+  timeout: 10m
+  build-tags:
+    - embed
+
+issues:
+  # Report everything. The defaults (50 per linter, 3 per identical message)
+  # silently truncate, which makes a "clean" run impossible to trust.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  default: none
+  enable:
+    # Unchecked errors are a live bug class here: GORM writes and Redis cache
+    # invalidations that silently fail serve stale data.
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    # Keeps the Phase 0 idiom sweep from regressing: flags hand-rolled loops
+    # that slices/maps/cmp/min/max now cover.
+    - modernize
+    # Tests must use t.Context()/t.Chdir()/t.Setenv() over the manual forms.
+    - usetesting
+
+  settings:
+    errcheck:
+      # Deferred Close on readers and the fastglue envelope writers are checked
+      # explicitly at the sites that matter; excluding them keeps signal high.
+      exclude-functions:
+        - (io.Closer).Close
+        - (*database/sql.Rows).Close
+
+    govet:
+      enable:
+        # nilness catches provably-nil dereferences and impossible conditions.
+        # `shadow` is deliberately left off: its ~50 hits here are all the
+        # idiomatic `if err := f(); err != nil` reuse, which is not a defect.
+        - nilness
+
+    staticcheck:
+      checks:
+        - all
+        # ST1000: package comments are being added domain by domain in Phase 5.
+        - -ST1000
+        # ST1003: existing initialisms (Id, Url, Api) are load-bearing in JSON
+        # tags and model field names; renaming them is a separate migration.
+        - -ST1003
+
+  exclusions:
+    generated: lax
+    rules:
+      # Test files may ignore errors on setup helpers and shadow freely.
+      - path: _test\.go
+        linters:
+          - errcheck
+          - govet
+      # Frontend embeds a vendored Go package that is not ours to lint.
+      - path: frontend/node_modules/
+        linters:
+          - errcheck
+          - govet
+          - ineffassign
+          - modernize
+          - staticcheck
+          - unused
+
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    paths:
+      - frontend/node_modules/

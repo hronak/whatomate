@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"cmp"
 	"fmt"
-	"sort"
+	"slices"
 
 	"github.com/google/uuid"
 	"github.com/zerodha/logf"
@@ -96,10 +97,9 @@ func stepsToGraph(steps []models.ChatbotFlowStep, canvasLayout models.JSONB) mod
 		}
 	}
 
-	sorted := make([]models.ChatbotFlowStep, len(steps))
-	copy(sorted, steps)
-	sort.SliceStable(sorted, func(i, j int) bool {
-		return sorted[i].StepOrder < sorted[j].StepOrder
+	sorted := slices.Clone(steps)
+	slices.SortStableFunc(sorted, func(a, b models.ChatbotFlowStep) int {
+		return cmp.Compare(a.StepOrder, b.StepOrder)
 	})
 
 	positions := extractCanvasPositions(canvasLayout)

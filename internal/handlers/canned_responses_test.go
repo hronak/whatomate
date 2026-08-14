@@ -1379,7 +1379,7 @@ func TestApp_IncrementCannedResponseUsage(t *testing.T) {
 		cr := createTestCannedResponse(t, app, org.ID, user.ID, "Multi Usage", "/multi", "Count multiple", "general")
 
 		// Increment 3 times
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			req := testutil.NewJSONRequest(t, nil)
 			testutil.SetAuthContext(req, org.ID, user.ID)
 			testutil.SetPathParam(req, "id", cr.ID.String())

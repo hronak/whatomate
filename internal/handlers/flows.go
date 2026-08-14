@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
@@ -744,9 +745,7 @@ func sanitizeScreensForMeta(screens []any) []any {
 
 		// Create a new screen map
 		newScreen := make(map[string]any)
-		for k, v := range screenMap {
-			newScreen[k] = v
-		}
+		maps.Copy(newScreen, screenMap)
 
 		// Fix screen ID if it contains numbers
 		if id, ok := newScreen["id"].(string); ok {
@@ -758,9 +757,7 @@ func sanitizeScreensForMeta(screens []any) []any {
 			dataModel := make(map[string]any)
 			// Copy existing data model if present
 			if existingData, ok := newScreen["data"].(map[string]any); ok {
-				for k, v := range existingData {
-					dataModel[k] = v
-				}
+				maps.Copy(dataModel, existingData)
 			}
 			// Add entries for fields from previous screens
 			for _, fieldName := range fieldsFromPreviousScreens {
@@ -776,9 +773,7 @@ func sanitizeScreensForMeta(screens []any) []any {
 		isTerminal := false
 		if layout, ok := newScreen["layout"].(map[string]any); ok {
 			newLayout := make(map[string]any)
-			for k, v := range layout {
-				newLayout[k] = v
-			}
+			maps.Copy(newLayout, layout)
 
 			if children, ok := layout["children"].([]any); ok {
 				// Sanitize and auto-populate action payloads
@@ -970,9 +965,7 @@ func sanitizeComponentsWithPayload(children []any, allFieldNames []string, field
 
 		// Create a new component map
 		newComp := make(map[string]any)
-		for k, v := range compMap {
-			newComp[k] = v
-		}
+		maps.Copy(newComp, compMap)
 
 		// Check if this component type should not have an id
 		compType, _ := newComp["type"].(string)
@@ -991,9 +984,7 @@ func sanitizeComponentsWithPayload(children []any, allFieldNames []string, field
 			for j, opt := range dataSource {
 				if optMap, ok := opt.(map[string]any); ok {
 					newOpt := make(map[string]any)
-					for k, v := range optMap {
-						newOpt[k] = v
-					}
+					maps.Copy(newOpt, optMap)
 					if optID, ok := newOpt["id"].(string); ok {
 						newOpt["id"] = sanitizeID(optID)
 					}
@@ -1010,9 +1001,7 @@ func sanitizeComponentsWithPayload(children []any, allFieldNames []string, field
 			actionName, _ := action["name"].(string)
 
 			newAction := make(map[string]any)
-			for k, v := range action {
-				newAction[k] = v
-			}
+			maps.Copy(newAction, action)
 
 			switch actionName {
 			case "complete":

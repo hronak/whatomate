@@ -15,7 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/shridarpatil/whatomate/internal/utils"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
@@ -168,8 +168,8 @@ func (a *App) ListContacts(r *fastglue.Request) error {
 		phoneNumber := c.PhoneNumber
 		profileName := c.ProfileName
 		if shouldMask {
-			phoneNumber = utils.MaskPhoneNumber(phoneNumber)
-			profileName = utils.MaskIfPhoneNumber(profileName)
+			phoneNumber = privacy.MaskPhoneNumber(phoneNumber)
+			profileName = privacy.MaskIfPhoneNumber(profileName)
 		}
 
 		serviceWindowOpen := c.LastInboundAt != nil && time.Since(*c.LastInboundAt) < 24*time.Hour
@@ -477,9 +477,7 @@ func (a *App) markMessagesAsRead(orgID uuid.UUID, contactID uuid.UUID, contact *
 	if len(unreadMessages) > 0 && contact.WhatsAppAccount != "" {
 		if account, err := a.resolveWhatsAppAccount(orgID, contact.WhatsAppAccount); err == nil {
 			if account.AutoReadReceipt {
-				a.wg.Add(1)
-				go func() {
-					defer a.wg.Done()
+				a.wg.Go(func() {
 					// Use timeout context for external API calls
 					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 					defer cancel()
@@ -497,7 +495,7 @@ func (a *App) markMessagesAsRead(orgID uuid.UUID, contactID uuid.UUID, contact *
 							}
 						}
 					}
-				}()
+				})
 			}
 		}
 	}
@@ -1567,8 +1565,8 @@ func (a *App) buildContactResponse(contact *models.Contact, orgID uuid.UUID) Con
 	profileName := contact.ProfileName
 	shouldMask := a.ShouldMaskPhoneNumbers(orgID)
 	if shouldMask {
-		phoneNumber = utils.MaskPhoneNumber(phoneNumber)
-		profileName = utils.MaskIfPhoneNumber(profileName)
+		phoneNumber = privacy.MaskPhoneNumber(phoneNumber)
+		profileName = privacy.MaskIfPhoneNumber(profileName)
 	}
 
 	// 24-hour service window: open if customer messaged within the last 24 hours.

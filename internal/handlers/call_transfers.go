@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/shridarpatil/whatomate/internal/utils"
+	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
@@ -45,10 +45,10 @@ func (a *App) ListCallTransfers(r *fastglue.Request) error {
 	// Mask phone numbers if enabled for this organization
 	if a.ShouldMaskPhoneNumbers(orgID) {
 		for i := range transfers {
-			transfers[i].CallerPhone = utils.MaskPhoneNumber(transfers[i].CallerPhone)
+			transfers[i].CallerPhone = privacy.MaskPhoneNumber(transfers[i].CallerPhone)
 			if transfers[i].Contact != nil {
-				transfers[i].Contact.PhoneNumber = utils.MaskPhoneNumber(transfers[i].Contact.PhoneNumber)
-				transfers[i].Contact.ProfileName = utils.MaskIfPhoneNumber(transfers[i].Contact.ProfileName)
+				transfers[i].Contact.PhoneNumber = privacy.MaskPhoneNumber(transfers[i].Contact.PhoneNumber)
+				transfers[i].Contact.ProfileName = privacy.MaskIfPhoneNumber(transfers[i].Contact.ProfileName)
 			}
 		}
 	}
@@ -80,10 +80,10 @@ func (a *App) GetCallTransfer(r *fastglue.Request) error {
 	}
 
 	if a.ShouldMaskPhoneNumbers(orgID) {
-		transfer.CallerPhone = utils.MaskPhoneNumber(transfer.CallerPhone)
+		transfer.CallerPhone = privacy.MaskPhoneNumber(transfer.CallerPhone)
 		if transfer.Contact != nil {
-			transfer.Contact.PhoneNumber = utils.MaskPhoneNumber(transfer.Contact.PhoneNumber)
-			transfer.Contact.ProfileName = utils.MaskIfPhoneNumber(transfer.Contact.ProfileName)
+			transfer.Contact.PhoneNumber = privacy.MaskPhoneNumber(transfer.Contact.PhoneNumber)
+			transfer.Contact.ProfileName = privacy.MaskIfPhoneNumber(transfer.Contact.ProfileName)
 		}
 	}
 

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"cmp"
 	"crypto/hmac"
 	"crypto/sha1" //nolint:gosec // SHA-1 is mandated by the coturn TURN REST API (RFC draft)
 	"encoding/base64"
@@ -227,101 +228,51 @@ func Load(configPath string) (*Config, error) {
 }
 
 func setDefaults(cfg *Config) {
-	if cfg.App.Name == "" {
-		cfg.App.Name = "Whatomate"
-	}
-	if cfg.App.Environment == "" {
-		cfg.App.Environment = "development"
-	}
-	if cfg.Server.Host == "" {
-		cfg.Server.Host = "0.0.0.0"
-	}
-	if cfg.Server.Port == 0 {
-		cfg.Server.Port = 8080
-	}
-	if cfg.Server.ReadTimeout == 0 {
-		cfg.Server.ReadTimeout = 30
-	}
-	if cfg.Server.WriteTimeout == 0 {
-		cfg.Server.WriteTimeout = 30
-	}
-	if cfg.Database.Port == 0 {
-		cfg.Database.Port = 5432
-	}
-	if cfg.Database.SSLMode == "" {
-		cfg.Database.SSLMode = "disable"
-	}
-	if cfg.Database.MaxOpenConns == 0 {
-		cfg.Database.MaxOpenConns = 25
-	}
-	if cfg.Database.MaxIdleConns == 0 {
-		cfg.Database.MaxIdleConns = 5
-	}
-	if cfg.Database.ConnMaxLifetime == 0 {
-		cfg.Database.ConnMaxLifetime = 300
-	}
-	if cfg.Redis.Port == 0 {
-		cfg.Redis.Port = 6379
-	}
-	if cfg.JWT.AccessExpiryMins == 0 {
-		cfg.JWT.AccessExpiryMins = 15
-	}
-	if cfg.JWT.RefreshExpiryDays == 0 {
-		cfg.JWT.RefreshExpiryDays = 1
-	}
-	if cfg.WhatsApp.APIVersion == "" {
-		cfg.WhatsApp.APIVersion = whatsapp.DefaultAPIVersion
-	}
-	if cfg.WhatsApp.BaseURL == "" {
-		cfg.WhatsApp.BaseURL = "https://graph.facebook.com"
-	}
-	if cfg.Storage.Type == "" {
-		cfg.Storage.Type = "local"
-	}
-	if cfg.Storage.LocalPath == "" {
-		cfg.Storage.LocalPath = "./uploads"
-	}
+	cfg.App.Name = cmp.Or(cfg.App.Name, "Whatomate")
+	cfg.App.Environment = cmp.Or(cfg.App.Environment, "development")
+
+	cfg.Server.Host = cmp.Or(cfg.Server.Host, "0.0.0.0")
+	cfg.Server.Port = cmp.Or(cfg.Server.Port, 8080)
+	cfg.Server.ReadTimeout = cmp.Or(cfg.Server.ReadTimeout, 30)
+	cfg.Server.WriteTimeout = cmp.Or(cfg.Server.WriteTimeout, 30)
+
+	cfg.Database.Port = cmp.Or(cfg.Database.Port, 5432)
+	cfg.Database.SSLMode = cmp.Or(cfg.Database.SSLMode, "disable")
+	cfg.Database.MaxOpenConns = cmp.Or(cfg.Database.MaxOpenConns, 25)
+	cfg.Database.MaxIdleConns = cmp.Or(cfg.Database.MaxIdleConns, 5)
+	cfg.Database.ConnMaxLifetime = cmp.Or(cfg.Database.ConnMaxLifetime, 300)
+
+	cfg.Redis.Port = cmp.Or(cfg.Redis.Port, 6379)
+
+	cfg.JWT.AccessExpiryMins = cmp.Or(cfg.JWT.AccessExpiryMins, 15)
+	cfg.JWT.RefreshExpiryDays = cmp.Or(cfg.JWT.RefreshExpiryDays, 1)
+
+	cfg.WhatsApp.APIVersion = cmp.Or(cfg.WhatsApp.APIVersion, whatsapp.DefaultAPIVersion)
+	cfg.WhatsApp.BaseURL = cmp.Or(cfg.WhatsApp.BaseURL, "https://graph.facebook.com")
+
+	cfg.Storage.Type = cmp.Or(cfg.Storage.Type, "local")
+	cfg.Storage.LocalPath = cmp.Or(cfg.Storage.LocalPath, "./uploads")
+
 	// Default admin credentials (only used during initial setup)
-	if cfg.DefaultAdmin.Email == "" {
-		cfg.DefaultAdmin.Email = "admin@admin.com"
-	}
-	if cfg.DefaultAdmin.Password == "" {
-		cfg.DefaultAdmin.Password = "admin"
-	}
-	if cfg.DefaultAdmin.FullName == "" {
-		cfg.DefaultAdmin.FullName = "Admin"
-	}
-	// Cookie defaults
+	cfg.DefaultAdmin.Email = cmp.Or(cfg.DefaultAdmin.Email, "admin@admin.com")
+	cfg.DefaultAdmin.Password = cmp.Or(cfg.DefaultAdmin.Password, "admin")
+	cfg.DefaultAdmin.FullName = cmp.Or(cfg.DefaultAdmin.FullName, "Admin")
+
+	// Cookie defaults — not a zero-value fallback, so it stays a conditional.
 	if cfg.App.Environment == "production" {
 		cfg.Cookie.Secure = true
 	}
+
 	// Rate limiting defaults
-	if cfg.RateLimit.LoginMaxAttempts == 0 {
-		cfg.RateLimit.LoginMaxAttempts = 10
-	}
-	if cfg.RateLimit.RegisterMaxAttempts == 0 {
-		cfg.RateLimit.RegisterMaxAttempts = 10
-	}
-	if cfg.RateLimit.RefreshMaxAttempts == 0 {
-		cfg.RateLimit.RefreshMaxAttempts = 30
-	}
-	if cfg.RateLimit.SSOMaxAttempts == 0 {
-		cfg.RateLimit.SSOMaxAttempts = 10
-	}
-	if cfg.RateLimit.WindowSeconds == 0 {
-		cfg.RateLimit.WindowSeconds = 60
-	}
+	cfg.RateLimit.LoginMaxAttempts = cmp.Or(cfg.RateLimit.LoginMaxAttempts, 10)
+	cfg.RateLimit.RegisterMaxAttempts = cmp.Or(cfg.RateLimit.RegisterMaxAttempts, 10)
+	cfg.RateLimit.RefreshMaxAttempts = cmp.Or(cfg.RateLimit.RefreshMaxAttempts, 30)
+	cfg.RateLimit.SSOMaxAttempts = cmp.Or(cfg.RateLimit.SSOMaxAttempts, 10)
+	cfg.RateLimit.WindowSeconds = cmp.Or(cfg.RateLimit.WindowSeconds, 60)
+
 	// Calling defaults
-	if cfg.Calling.MaxCallDuration == 0 {
-		cfg.Calling.MaxCallDuration = 300
-	}
-	if cfg.Calling.AudioDir == "" {
-		cfg.Calling.AudioDir = "./audio"
-	}
-	if cfg.Calling.HoldMusicFile == "" {
-		cfg.Calling.HoldMusicFile = "hold_music.opus"
-	}
-	if cfg.Calling.TransferTimeoutSecs == 0 {
-		cfg.Calling.TransferTimeoutSecs = 120
-	}
+	cfg.Calling.MaxCallDuration = cmp.Or(cfg.Calling.MaxCallDuration, 300)
+	cfg.Calling.AudioDir = cmp.Or(cfg.Calling.AudioDir, "./audio")
+	cfg.Calling.HoldMusicFile = cmp.Or(cfg.Calling.HoldMusicFile, "hold_music.opus")
+	cfg.Calling.TransferTimeoutSecs = cmp.Or(cfg.Calling.TransferTimeoutSecs, 120)
 }

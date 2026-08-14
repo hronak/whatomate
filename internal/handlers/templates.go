@@ -742,12 +742,9 @@ func diffButtons(oldButtons, newButtons models.JSONBArray) []map[string]any {
 		return result
 	}
 
-	maxLen := len(oldButtons)
-	if len(newButtons) > maxLen {
-		maxLen = len(newButtons)
-	}
+	maxLen := max(len(oldButtons), len(newButtons))
 
-	for i := 0; i < maxLen; i++ {
+	for i := range maxLen {
 		label := fmt.Sprintf("Button %d", i+1)
 		if i >= len(oldButtons) {
 			// New button added

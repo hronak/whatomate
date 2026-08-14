@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -643,12 +644,12 @@ func TestSaveIncomingMessage_LongContent(t *testing.T) {
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 	// Create a message with content longer than 100 characters
-	longContent := ""
-	for i := 0; i < 120; i++ {
-		longContent += "x"
+	var longContent strings.Builder
+	for range 120 {
+		longContent.WriteString("x")
 	}
 	waMsgID := "wamid." + uuid.New().String()[:16]
-	app.saveIncomingMessage(account, contact, waMsgID, "text", longContent, nil, "")
+	app.saveIncomingMessage(account, contact, waMsgID, "text", longContent.String(), nil, "")
 
 	var dbContact models.Contact
 	require.NoError(t, app.DB.First(&dbContact, contact.ID).Error)

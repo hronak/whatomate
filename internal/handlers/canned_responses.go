@@ -395,14 +395,14 @@ func buttonsToAuditString(arr models.JSONBArray) string {
 			parts = append(parts, b.Title+" [reply]")
 		}
 	}
-	out := ""
+	var out strings.Builder
 	for i, p := range parts {
 		if i > 0 {
-			out += ", "
+			out.WriteString(", ")
 		}
-		out += p
+		out.WriteString(p)
 	}
-	return out
+	return out.String()
 }
 
 // validateCannedResponseButtons enforces the combo rules WhatsApp Cloud API

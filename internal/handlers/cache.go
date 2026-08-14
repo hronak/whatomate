@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -86,7 +87,7 @@ func (a *App) getChatbotSettingsCached(orgID uuid.UUID, whatsAppAccount string) 
 // getChatbotFlowsCached retrieves all enabled flows with steps from cache or database
 func (a *App) getChatbotFlowsCached(orgID uuid.UUID) ([]models.ChatbotFlow, error) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", flowsCachePrefix, orgID.String())
+	cacheKey := flowsCachePrefix + orgID.String()
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -184,7 +185,7 @@ func (a *App) InvalidateChatbotSettingsCache(orgID uuid.UUID) {
 // InvalidateChatbotFlowsCache invalidates the flows cache for an organization
 func (a *App) InvalidateChatbotFlowsCache(orgID uuid.UUID) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", flowsCachePrefix, orgID.String())
+	cacheKey := flowsCachePrefix + orgID.String()
 	a.Redis.Del(ctx, cacheKey)
 }
 
@@ -214,7 +215,7 @@ type whatsAppAccountCache struct {
 // getWhatsAppAccountCached retrieves WhatsApp account by phone_id from cache or database
 func (a *App) getWhatsAppAccountCached(phoneID string) (*models.WhatsAppAccount, error) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", whatsappAccountCachePrefix, phoneID)
+	cacheKey := whatsappAccountCachePrefix + phoneID
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -260,14 +261,14 @@ func (a *App) decryptAccountSecrets(account *models.WhatsAppAccount) {
 // InvalidateWhatsAppAccountCache invalidates the WhatsApp account cache
 func (a *App) InvalidateWhatsAppAccountCache(phoneID string) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", whatsappAccountCachePrefix, phoneID)
+	cacheKey := whatsappAccountCachePrefix + phoneID
 	a.Redis.Del(ctx, cacheKey)
 }
 
 // getWebhooksCached retrieves active webhooks for an organization from cache or database
 func (a *App) getWebhooksCached(orgID uuid.UUID) ([]models.Webhook, error) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", webhooksCachePrefix, orgID.String())
+	cacheKey := webhooksCachePrefix + orgID.String()
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -295,7 +296,7 @@ func (a *App) getWebhooksCached(orgID uuid.UUID) ([]models.Webhook, error) {
 // InvalidateWebhooksCache invalidates the webhooks cache for an organization
 func (a *App) InvalidateWebhooksCache(orgID uuid.UUID) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", webhooksCachePrefix, orgID.String())
+	cacheKey := webhooksCachePrefix + orgID.String()
 	a.Redis.Del(ctx, cacheKey)
 }
 
@@ -407,7 +408,7 @@ func (a *App) getUserPermissionsCached(userID uuid.UUID, orgIDs ...uuid.UUID) (*
 		orgID = orgIDs[0]
 		cacheKey = fmt.Sprintf("%s%s:%s", userPermissionsCachePrefix, userID.String(), orgID.String())
 	} else {
-		cacheKey = fmt.Sprintf("%s%s", userPermissionsCachePrefix, userID.String())
+		cacheKey = userPermissionsCachePrefix + userID.String()
 	}
 
 	// Try cache first (if Redis is available)
@@ -494,13 +495,7 @@ func (a *App) HasPermission(userID uuid.UUID, resource, action string, orgIDs ..
 	}
 
 	permKey := resource + ":" + action
-	for _, p := range perms.Permissions {
-		if p == permKey {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(perms.Permissions, permKey)
 }
 
 // HasAnyPermission checks if a user has any of the specified permissions.
@@ -556,7 +551,7 @@ func (a *App) ScopeToOrg(query *gorm.DB, userID, orgID uuid.UUID) *gorm.DB {
 // GetRolePermissionsCached retrieves role permissions from cache or database
 func (a *App) GetRolePermissionsCached(roleID uuid.UUID) ([]string, error) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", rolePermissionsCachePrefix, roleID.String())
+	cacheKey := rolePermissionsCachePrefix + roleID.String()
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -594,7 +589,7 @@ func (a *App) GetRolePermissionsCached(roleID uuid.UUID) ([]string, error) {
 func (a *App) InvalidateUserPermissionsCache(userID uuid.UUID) {
 	ctx := context.Background()
 	// Delete the base key (no org suffix)
-	cacheKey := fmt.Sprintf("%s%s", userPermissionsCachePrefix, userID.String())
+	cacheKey := userPermissionsCachePrefix + userID.String()
 	a.Redis.Del(ctx, cacheKey)
 	// Delete all org-specific keys
 	pattern := fmt.Sprintf("%s%s:*", userPermissionsCachePrefix, userID.String())
@@ -609,7 +604,7 @@ func (a *App) InvalidateRolePermissionsCache(roleID uuid.UUID) {
 	ctx := context.Background()
 
 	// Delete role cache
-	roleCacheKey := fmt.Sprintf("%s%s", rolePermissionsCachePrefix, roleID.String())
+	roleCacheKey := rolePermissionsCachePrefix + roleID.String()
 	a.Redis.Del(ctx, roleCacheKey)
 
 	// Collect all user IDs that have this role (deduplicated)
@@ -678,7 +673,7 @@ func (a *App) notifyUserPermissionsChanged(userID uuid.UUID) {
 // getTagsCached retrieves tags for an organization from cache or database
 func (a *App) getTagsCached(orgID uuid.UUID) ([]models.Tag, error) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", tagsCachePrefix, orgID.String())
+	cacheKey := tagsCachePrefix + orgID.String()
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -706,6 +701,6 @@ func (a *App) getTagsCached(orgID uuid.UUID) ([]models.Tag, error) {
 // InvalidateTagsCache invalidates the tags cache for an organization
 func (a *App) InvalidateTagsCache(orgID uuid.UUID) {
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("%s%s", tagsCachePrefix, orgID.String())
+	cacheKey := tagsCachePrefix + orgID.String()
 	a.Redis.Del(ctx, cacheKey)
 }

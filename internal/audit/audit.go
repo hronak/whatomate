@@ -197,7 +197,7 @@ func FormatFieldLabel(field string) string {
 	}
 	result := make([]byte, 0, len(field))
 	capitalize := true
-	for i := 0; i < len(field); i++ {
+	for i := range len(field) {
 		if field[i] == '_' {
 			result = append(result, ' ')
 			capitalize = true

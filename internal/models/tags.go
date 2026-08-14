@@ -1,6 +1,7 @@
 package models
 
 import (
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,10 +32,5 @@ func IsValidTagColor(color string) bool {
 	if color == "" {
 		return true // empty color is allowed (defaults to gray)
 	}
-	for _, c := range ValidTagColors {
-		if c == color {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ValidTagColors, color)
 }

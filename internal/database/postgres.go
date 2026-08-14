@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -147,7 +148,7 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) 
 		filled := int(percent * float64(barWidth))
 		empty := barWidth - filled
 
-		bar := repeatChar("█", filled) + "\033[90m" + repeatChar("░", empty) + "\033[0m"
+		bar := strings.Repeat("█", filled) + "\033[90m" + strings.Repeat("░", empty) + "\033[0m"
 		fmt.Printf("\r  Running migrations  %s %3d%%", bar, int(percent*100))
 		_ = os.Stdout.Sync()
 	}
@@ -218,15 +219,6 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) 
 	fmt.Printf("\n  \033[32m✓ Migration completed\033[0m\n\n")
 
 	return nil
-}
-
-// repeatChar repeats a character n times
-func repeatChar(char string, n int) string {
-	result := ""
-	for i := 0; i < n; i++ {
-		result += char
-	}
-	return result
 }
 
 // getIndexes returns all index creation SQL statements
