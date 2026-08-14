@@ -23,7 +23,7 @@ const summary = computed(() => {
     :output-handles="[]"
     :has-input="!data?.isEntryNode"
   >
-    <template #icon><ExternalLink class="w-4 h-4" /></template>
+    <template #icon><ExternalLink class="size-4" /></template>
     <p class="truncate" :title="summary">{{ summary }}</p>
   </BaseNode>
 </template>

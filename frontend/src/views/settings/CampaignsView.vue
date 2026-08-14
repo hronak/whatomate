@@ -242,7 +242,7 @@ function getProgressPercentage(campaign: Campaign): number {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader
       :title="$t('campaigns.title')"
       :subtitle="$t('campaigns.subtitle')"
@@ -252,7 +252,7 @@ function getProgressPercentage(campaign: Campaign): number {
       <template #actions>
         <RouterLink to="/campaigns/new">
           <Button variant="outline" size="sm">
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus class="size-4 mr-2" />
             {{ $t('campaigns.createCampaign') }}
           </Button>
         </RouterLink>
@@ -325,7 +325,7 @@ function getProgressPercentage(campaign: Campaign): number {
                 </template>
                 <template #cell-status="{ item: campaign }">
                   <Badge variant="outline" :class="[getStatusClass(campaign.status), 'text-xs']">
-                    <component :is="getStatusIcon(campaign.status)" class="h-3 w-3 mr-1" />
+                    <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
                     {{ campaign.status }}
                   </Badge>
                 </template>
@@ -336,7 +336,7 @@ function getProgressPercentage(campaign: Campaign): number {
                       <span class="text-xs text-muted-foreground">{{ getProgressPercentage(campaign) }}%</span>
                     </div>
                     <div class="flex items-center gap-3 text-xs">
-                      <span title="Recipients"><Users class="h-3 w-3 inline mr-0.5" />{{ campaign.total_recipients }}</span>
+                      <span title="Recipients"><Users class="size-3 inline mr-0.5" />{{ campaign.total_recipients }}</span>
                       <span class="text-green-600" title="Delivered">{{ campaign.delivered_count }}</span>
                       <span class="text-blue-600" title="Read">{{ campaign.read_count }}</span>
                       <span v-if="campaign.failed_count > 0" class="text-destructive" title="Failed">{{ campaign.failed_count }}</span>
@@ -348,11 +348,11 @@ function getProgressPercentage(campaign: Campaign): number {
                 </template>
                 <template #cell-actions="{ item: campaign }">
                   <div class="flex items-center justify-end gap-1">
-                    <RouterLink :to="`/campaigns/${campaign.id}`"><IconButton :icon="Pencil" :label="$t('campaigns.editCampaign')" class="h-8 w-8" /></RouterLink>
+                    <RouterLink :to="`/campaigns/${campaign.id}`"><IconButton :icon="Pencil" :label="$t('campaigns.editCampaign')" class="size-8" /></RouterLink>
                     <IconButton
                       :icon="Trash2"
                       :label="$t('campaigns.deleteCampaign')"
-                      class="h-8 w-8 text-destructive"
+                      class="size-8 text-destructive"
                       :disabled="campaign.status === 'running' || campaign.status === 'processing'"
                       @click="openDeleteDialog(campaign)"
                     />
@@ -361,7 +361,7 @@ function getProgressPercentage(campaign: Campaign): number {
                 <template #empty-action>
                   <RouterLink v-if="!searchQuery" to="/campaigns/new">
                     <Button variant="outline" size="sm">
-                      <Plus class="h-4 w-4 mr-2" />
+                      <Plus class="size-4 mr-2" />
                       {{ $t('campaigns.createCampaign') }}
                     </Button>
                   </RouterLink>

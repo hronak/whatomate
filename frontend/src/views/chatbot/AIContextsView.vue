@@ -139,7 +139,7 @@ async function toggleContext(context: AIContext) {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader
       :title="$t('aiContexts.title')"
       :icon="Sparkles"
@@ -150,7 +150,7 @@ async function toggleContext(context: AIContext) {
       <template #actions>
         <RouterLink to="/chatbot/ai/new">
           <Button variant="outline" size="sm">
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus class="size-4 mr-2" />
             {{ $t('aiContexts.addContext') }}
           </Button>
         </RouterLink>
@@ -230,14 +230,14 @@ async function toggleContext(context: AIContext) {
                 </template>
                 <template #cell-actions="{ item: context }">
                   <div class="flex items-center justify-end gap-1">
-                    <RouterLink :to="`/chatbot/ai/${context.id}`"><IconButton :icon="Pencil" :label="$t('aiContexts.editContextLabel')" class="h-8 w-8" /></RouterLink>
-                    <IconButton :icon="Trash2" :label="$t('aiContexts.deleteContextLabel')" class="h-8 w-8 text-destructive" @click="openDeleteDialog(context)" />
+                    <RouterLink :to="`/chatbot/ai/${context.id}`"><IconButton :icon="Pencil" :label="$t('aiContexts.editContextLabel')" class="size-8" /></RouterLink>
+                    <IconButton :icon="Trash2" :label="$t('aiContexts.deleteContextLabel')" class="size-8 text-destructive" @click="openDeleteDialog(context)" />
                   </div>
                 </template>
                 <template #empty-action>
                   <RouterLink v-if="!searchQuery" to="/chatbot/ai/new">
                     <Button variant="outline" size="sm">
-                      <Plus class="h-4 w-4 mr-2" />
+                      <Plus class="size-4 mr-2" />
                       {{ $t('aiContexts.addContext') }}
                     </Button>
                   </RouterLink>

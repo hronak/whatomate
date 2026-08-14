@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PrimitiveProps } from "reka-ui"
-import { MinusIcon } from '@radix-icons/vue'
+import { Minus } from '@lucide/vue'
 import { Primitive, useForwardProps } from "reka-ui"
 
 const props = defineProps<PrimitiveProps>()
@@ -10,7 +10,7 @@ const forwardedProps = useForwardProps(props)
 <template>
   <Primitive v-bind="forwardedProps">
     <slot>
-      <MinusIcon class="w-2" />
+      <Minus class="w-2" />
     </slot>
   </Primitive>
 </template>

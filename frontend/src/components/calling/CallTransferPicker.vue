@@ -78,7 +78,7 @@ async function doTransfer(agentId?: string) {
       <div v-if="step === 'teams'">
         <p class="text-sm text-muted-foreground mb-3">{{ t('callTransfers.selectTeam') }}</p>
         <div v-if="loading" class="flex justify-center py-8">
-          <Loader2 class="h-5 w-5 animate-spin text-muted-foreground" />
+          <Loader2 class="size-5 animate-spin text-muted-foreground" />
         </div>
         <div v-else-if="teams.length === 0" class="text-center py-8 text-sm text-muted-foreground">
           {{ t('callTransfers.noTeams') }}
@@ -90,8 +90,8 @@ async function doTransfer(agentId?: string) {
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent text-left transition-colors"
             @click="selectTeam(team)"
           >
-            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Users class="h-4 w-4 text-primary" />
+            <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Users class="size-4 text-primary" />
             </div>
             <div class="min-w-0">
               <p class="text-sm font-medium truncate">{{ team.name }}</p>
@@ -104,8 +104,8 @@ async function doTransfer(agentId?: string) {
       <!-- Step 2: Team members -->
       <div v-else>
         <div class="flex items-center gap-2 mb-3">
-          <Button variant="ghost" size="sm" class="h-7 w-7 p-0" @click="goBack">
-            <ArrowLeft class="h-4 w-4" />
+          <Button variant="ghost" size="sm" class="size-7 p-0" @click="goBack">
+            <ArrowLeft class="size-4" />
           </Button>
           <p class="text-sm text-muted-foreground">{{ selectedTeam?.name }}</p>
         </div>
@@ -116,14 +116,14 @@ async function doTransfer(agentId?: string) {
           :disabled="store.isTransferring"
           @click="doTransfer()"
         >
-          <Loader2 v-if="store.isTransferring" class="h-4 w-4 animate-spin mr-2" />
+          <Loader2 v-if="store.isTransferring" class="size-4 animate-spin mr-2" />
           {{ t('callTransfers.transferToTeam') }}
         </Button>
 
         <p class="text-xs text-muted-foreground mb-2">{{ t('callTransfers.selectAgent') }}</p>
 
         <div v-if="membersLoading" class="flex justify-center py-6">
-          <Loader2 class="h-5 w-5 animate-spin text-muted-foreground" />
+          <Loader2 class="size-5 animate-spin text-muted-foreground" />
         </div>
         <div v-else class="space-y-1 max-h-48 overflow-y-auto">
           <button
@@ -134,7 +134,7 @@ async function doTransfer(agentId?: string) {
             @click="doTransfer(member.user_id)"
           >
             <span
-              class="w-2 h-2 rounded-full shrink-0"
+              class="size-2 rounded-full shrink-0"
               :class="member.is_available ? 'bg-green-500' : 'bg-zinc-400'"
             />
             <div class="min-w-0">

@@ -132,11 +132,11 @@ onMounted(() => fetchWebhooks())
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('webhooks.title')" :subtitle="$t('webhooks.subtitle')" :icon="WebhookIcon" icon-gradient="bg-linear-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20" back-link="/settings">
       <template #actions>
         <RouterLink v-if="canWrite" to="/settings/webhooks/new">
-          <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('webhooks.addWebhook') }}</Button>
+          <Button variant="outline" size="sm"><Plus class="size-4 mr-2" />{{ $t('webhooks.addWebhook') }}</Button>
         </RouterLink>
       </template>
     </PageHeader>
@@ -184,16 +184,16 @@ onMounted(() => fetchWebhooks())
                 <template #cell-created="{ item: webhook }"><span class="text-muted-foreground">{{ formatDate(webhook.created_at) }}</span></template>
                 <template #cell-actions="{ item: webhook }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="Play" :label="$t('webhooks.testWebhook')" class="h-8 w-8" :disabled="isTesting === webhook.id" :loading="isTesting === webhook.id" @click="testWebhook(webhook)" />
+                    <IconButton :icon="Play" :label="$t('webhooks.testWebhook')" class="size-8" :disabled="isTesting === webhook.id" :loading="isTesting === webhook.id" @click="testWebhook(webhook)" />
                     <RouterLink :to="`/settings/webhooks/${webhook.id}`">
-                      <IconButton :icon="Pencil" :label="$t('common.edit')" class="h-8 w-8" />
+                      <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" />
                     </RouterLink>
-                    <IconButton v-if="canDelete" :icon="Trash2" :label="$t('common.delete')" class="h-8 w-8 text-destructive" @click="webhookToDelete = webhook; isDeleteDialogOpen = true" />
+                    <IconButton v-if="canDelete" :icon="Trash2" :label="$t('common.delete')" class="size-8 text-destructive" @click="webhookToDelete = webhook; isDeleteDialogOpen = true" />
                   </div>
                 </template>
                 <template #empty-action>
                   <RouterLink v-if="canWrite" to="/settings/webhooks/new">
-                    <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('webhooks.addWebhook') }}</Button>
+                    <Button variant="outline" size="sm"><Plus class="size-4 mr-2" />{{ $t('webhooks.addWebhook') }}</Button>
                   </RouterLink>
                 </template>
               </DataTable>

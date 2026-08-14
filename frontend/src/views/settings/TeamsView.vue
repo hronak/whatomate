@@ -116,10 +116,10 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('teams.title')" :icon="Users" icon-gradient="bg-linear-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20" back-link="/settings" :breadcrumbs="breadcrumbs">
       <template #actions>
-        <RouterLink v-if="canWriteTeams" to="/settings/teams/new"><Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('teams.addTeam') }}</Button></RouterLink>
+        <RouterLink v-if="canWriteTeams" to="/settings/teams/new"><Button variant="outline" size="sm"><Plus class="size-4 mr-2" />{{ $t('teams.addTeam') }}</Button></RouterLink>
       </template>
     </PageHeader>
 
@@ -148,17 +148,17 @@ async function confirmDelete() {
             <CardContent>
               <DataTable :items="teams" :columns="columns" :is-loading="isLoading" :empty-icon="Users" :empty-title="searchQuery ? $t('teams.noMatchingTeams') : $t('teams.noTeamsYet')" :empty-description="searchQuery ? $t('teams.noMatchingTeamsDesc') : $t('teams.noTeamsYetDesc')" v-model:sort-key="sortKey" v-model:sort-direction="sortDirection" server-pagination :current-page="currentPage" :total-items="totalItems" :page-size="pageSize" item-name="teams" @page-change="handlePageChange">
                 <template #empty-action>
-                  <RouterLink v-if="canWriteTeams" to="/settings/teams/new"><Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('teams.addTeam') }}</Button></RouterLink>
+                  <RouterLink v-if="canWriteTeams" to="/settings/teams/new"><Button variant="outline" size="sm"><Plus class="size-4 mr-2" />{{ $t('teams.addTeam') }}</Button></RouterLink>
                 </template>
                 <template #cell-team="{ item: team }">
                   <RouterLink :to="`/settings/teams/${team.id}`" class="flex items-center gap-3 text-inherit no-underline hover:opacity-80">
-                    <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Users class="h-4 w-4 text-primary" /></div>
+                    <div class="size-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Users class="size-4 text-primary" /></div>
                     <p class="font-medium truncate">{{ team.name }}</p>
                   </RouterLink>
                 </template>
                 <template #cell-strategy="{ item: team }">
                   <div class="flex items-center gap-2">
-                    <component :is="getStrategyIcon(team.assignment_strategy)" class="h-4 w-4 text-muted-foreground" />
+                    <component :is="getStrategyIcon(team.assignment_strategy)" class="size-4 text-muted-foreground" />
                     <span class="text-sm">{{ getStrategyLabel(team.assignment_strategy) }}</span>
                   </div>
                 </template>
@@ -173,8 +173,8 @@ async function confirmDelete() {
                 </template>
                 <template #cell-actions="{ item: team }">
                   <div class="flex items-center justify-end gap-1">
-                    <Tooltip><TooltipTrigger as-child><RouterLink :to="`/settings/teams/${team.id}`"><Button variant="ghost" size="icon" class="h-8 w-8"><Pencil class="h-4 w-4" /></Button></RouterLink></TooltipTrigger><TooltipContent>{{ $t('teams.editTeamTooltip') }}</TooltipContent></Tooltip>
-                    <Tooltip v-if="canDeleteTeams"><TooltipTrigger as-child><Button variant="ghost" size="icon" class="h-8 w-8" @click="openDeleteDialog(team)"><Trash2 class="h-4 w-4 text-destructive" /></Button></TooltipTrigger><TooltipContent>{{ $t('teams.deleteTeamTooltip') }}</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger as-child><RouterLink :to="`/settings/teams/${team.id}`"><Button variant="ghost" size="icon" class="size-8"><Pencil class="size-4" /></Button></RouterLink></TooltipTrigger><TooltipContent>{{ $t('teams.editTeamTooltip') }}</TooltipContent></Tooltip>
+                    <Tooltip v-if="canDeleteTeams"><TooltipTrigger as-child><Button variant="ghost" size="icon" class="size-8" @click="openDeleteDialog(team)"><Trash2 class="size-4 text-destructive" /></Button></TooltipTrigger><TooltipContent>{{ $t('teams.deleteTeamTooltip') }}</TooltipContent></Tooltip>
                   </div>
                 </template>
               </DataTable>

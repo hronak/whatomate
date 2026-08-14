@@ -188,10 +188,10 @@ onMounted(() => fetchActions())
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('customActions.title')" :subtitle="$t('customActions.subtitle')" :icon="Zap" icon-gradient="bg-linear-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20">
       <template #actions>
-        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('customActions.addAction') }}</Button>
+        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('customActions.addAction') }}</Button>
       </template>
     </PageHeader>
 
@@ -219,7 +219,7 @@ onMounted(() => fetchActions())
             </CardHeader>
             <CardContent>
               <DataTable :items="actions" :columns="columns" :is-loading="isLoading" :empty-icon="Zap" :empty-title="searchQuery ? $t('customActions.noMatchingActions') : $t('customActions.noActionsYet')" :empty-description="searchQuery ? $t('customActions.noMatchingActionsDesc') : $t('customActions.noActionsYetDesc')" v-model:sort-key="sortKey" v-model:sort-direction="sortDirection" server-pagination :current-page="currentPage" :total-items="totalItems" :page-size="pageSize" item-name="actions" @page-change="handlePageChange">
-                <template #cell-icon="{ item: action }"><component :is="getIconComponent(action.icon)" class="h-5 w-5 text-muted-foreground" /></template>
+                <template #cell-icon="{ item: action }"><component :is="getIconComponent(action.icon)" class="size-5 text-muted-foreground" /></template>
                 <template #cell-name="{ item: action }"><span class="font-medium">{{ action.name }}</span></template>
                 <template #cell-type="{ item: action }"><Badge :variant="getActionTypeBadge(action.action_type).variant">{{ getActionTypeBadge(action.action_type).label }}</Badge></template>
                 <template #cell-target="{ item: action }"><span class="max-w-[200px] truncate text-muted-foreground block">{{ action.action_type === 'javascript' ? $t('customActions.customScript') : action.config.url }}</span></template>
@@ -229,12 +229,12 @@ onMounted(() => fetchActions())
                 <template #cell-created="{ item: action }"><span class="text-muted-foreground">{{ formatDate(action.created_at) }}</span></template>
                 <template #cell-actions="{ item: action }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="Pencil" :label="$t('common.edit')" class="h-8 w-8" @click="openEditDialog(action)" />
-                    <IconButton :icon="Trash2" :label="$t('common.delete')" class="h-8 w-8 text-destructive" @click="actionToDelete = action; isDeleteDialogOpen = true" />
+                    <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" @click="openEditDialog(action)" />
+                    <IconButton :icon="Trash2" :label="$t('common.delete')" class="size-8 text-destructive" @click="actionToDelete = action; isDeleteDialogOpen = true" />
                   </div>
                 </template>
                 <template #empty-action>
-                  <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('customActions.addAction') }}</Button>
+                  <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('customActions.addAction') }}</Button>
                 </template>
               </DataTable>
             </CardContent>
@@ -255,15 +255,15 @@ onMounted(() => fetchActions())
           <div class="space-y-2">
             <Label>{{ $t('customActions.icon') }}</Label>
             <div class="flex flex-wrap gap-2">
-              <Button v-for="iconOpt in iconOptions" :key="iconOpt.value" variant="outline" size="icon" class="h-10 w-10" :class="{ 'ring-2 ring-primary': formData.icon === iconOpt.value }" @click="formData.icon = iconOpt.value"><component :is="iconOpt.icon" class="h-5 w-5" /></Button>
+              <Button v-for="iconOpt in iconOptions" :key="iconOpt.value" variant="outline" size="icon" class="size-10" :class="{ 'ring-2 ring-primary': formData.icon === iconOpt.value }" @click="formData.icon = iconOpt.value"><component :is="iconOpt.icon" class="size-5" /></Button>
             </div>
           </div>
           <div class="space-y-2">
             <Label>{{ $t('customActions.actionType') }}</Label>
             <RadioGroup v-model="formData.action_type" class="flex flex-col gap-2">
-              <div class="flex items-center space-x-2"><RadioGroupItem value="webhook" id="type-webhook" /><Label for="type-webhook" class="flex items-center gap-2 cursor-pointer font-normal"><Webhook class="h-4 w-4" />{{ $t('customActions.webhookType') }}</Label></div>
-              <div class="flex items-center space-x-2"><RadioGroupItem value="url" id="type-url" /><Label for="type-url" class="flex items-center gap-2 cursor-pointer font-normal"><Globe class="h-4 w-4" />{{ $t('customActions.urlType') }}</Label></div>
-              <div class="flex items-center space-x-2"><RadioGroupItem value="javascript" id="type-javascript" /><Label for="type-javascript" class="flex items-center gap-2 cursor-pointer font-normal"><Code class="h-4 w-4" />{{ $t('customActions.javascriptType') }}</Label></div>
+              <div class="flex items-center space-x-2"><RadioGroupItem value="webhook" id="type-webhook" /><Label for="type-webhook" class="flex items-center gap-2 cursor-pointer font-normal"><Webhook class="size-4" />{{ $t('customActions.webhookType') }}</Label></div>
+              <div class="flex items-center space-x-2"><RadioGroupItem value="url" id="type-url" /><Label for="type-url" class="flex items-center gap-2 cursor-pointer font-normal"><Globe class="size-4" />{{ $t('customActions.urlType') }}</Label></div>
+              <div class="flex items-center space-x-2"><RadioGroupItem value="javascript" id="type-javascript" /><Label for="type-javascript" class="flex items-center gap-2 cursor-pointer font-normal"><Code class="size-4" />{{ $t('customActions.javascriptType') }}</Label></div>
             </RadioGroup>
           </div>
 
@@ -280,7 +280,7 @@ onMounted(() => fetchActions())
                 <div class="space-y-2">
                   <div v-for="(value, key) in formData.config.headers" :key="key" class="flex items-center gap-2">
                     <Badge variant="secondary" class="shrink-0">{{ key }}</Badge><span class="text-sm truncate flex-1">{{ value }}</span>
-                    <Button variant="ghost" size="icon" class="h-6 w-6 shrink-0" @click="removeHeader(key as string)"><Trash2 class="h-3 w-3" /></Button>
+                    <Button variant="ghost" size="icon" class="size-6 shrink-0" @click="removeHeader(key as string)"><Trash2 class="size-3" /></Button>
                   </div>
                   <div class="flex gap-2"><Input v-model="newHeaderKey" :placeholder="$t('webhooks.headerName')" class="flex-1" /><Input v-model="newHeaderValue" :placeholder="$t('webhooks.headerValue')" class="flex-1" /><Button variant="outline" size="sm" @click="addHeader">{{ $t('common.add') }}</Button></div>
                 </div>
@@ -314,7 +314,7 @@ onMounted(() => fetchActions())
         </div>
         <DialogFooter>
           <Button variant="outline" @click="isDialogOpen = false">{{ $t('common.cancel') }}</Button>
-          <Button @click="saveAction" :disabled="isSaving"><Loader2 v-if="isSaving" class="h-4 w-4 mr-2 animate-spin" />{{ isEditing ? $t('common.update') : $t('common.create') }}</Button>
+          <Button @click="saveAction" :disabled="isSaving"><Loader2 v-if="isSaving" class="size-4 mr-2 animate-spin" />{{ isEditing ? $t('common.update') : $t('common.create') }}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -965,7 +965,7 @@ onUnmounted(() => {
           variant="outline"
           :class="[getStatusClass(campaign.status), 'text-xs']"
         >
-          <component :is="getStatusIcon(campaign.status)" class="h-3 w-3 mr-1" />
+          <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
           {{ campaign.status }}
         </Badge>
 
@@ -976,7 +976,7 @@ onUnmounted(() => {
           size="sm"
           @click="startDialogOpen = true"
         >
-          <Play class="h-4 w-4 mr-1" />
+          <Play class="size-4 mr-1" />
           {{ campaign.status === 'paused' ? $t('campaigns.resume', 'Resume') : $t('campaigns.start', 'Start') }}
         </Button>
 
@@ -987,7 +987,7 @@ onUnmounted(() => {
           size="sm"
           @click="pauseDialogOpen = true"
         >
-          <Pause class="h-4 w-4 mr-1" />
+          <Pause class="size-4 mr-1" />
           {{ $t('campaigns.pause', 'Pause') }}
         </Button>
 
@@ -998,7 +998,7 @@ onUnmounted(() => {
           size="sm"
           @click="cancelDialogOpen = true"
         >
-          <XCircle class="h-4 w-4 mr-1" />
+          <XCircle class="size-4 mr-1" />
           {{ $t('campaigns.cancel', 'Cancel') }}
         </Button>
 
@@ -1009,7 +1009,7 @@ onUnmounted(() => {
           size="sm"
           @click="retryFailed"
         >
-          <RefreshCw class="h-4 w-4 mr-1" />
+          <RefreshCw class="size-4 mr-1" />
           {{ $t('campaigns.retryFailed', 'Retry Failed') }}
         </Button>
 
@@ -1019,7 +1019,7 @@ onUnmounted(() => {
           @click="save"
           :disabled="isSaving"
         >
-          <Save class="h-4 w-4 mr-1" />
+          <Save class="size-4 mr-1" />
           {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
         </Button>
         <Button
@@ -1028,7 +1028,7 @@ onUnmounted(() => {
           size="sm"
           @click="deleteDialogOpen = true"
         >
-          <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+          <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
         </Button>
       </div>
     </template>
@@ -1091,7 +1091,7 @@ onUnmounted(() => {
             />
             <!-- File info bar -->
             <div class="flex items-center gap-2 px-3 py-2 bg-muted/50 text-sm">
-              <Upload class="h-4 w-4 text-muted-foreground shrink-0" />
+              <Upload class="size-4 text-muted-foreground shrink-0" />
               <span class="truncate flex-1">{{ campaign.header_media_filename }}</span>
               <Button v-if="isDraft" variant="ghost" size="sm" class="h-6 text-xs" @click="showMediaUpload = true">
                 {{ $t('campaigns.replace', 'Replace') }}
@@ -1119,7 +1119,7 @@ onUnmounted(() => {
           <Label class="text-xs">{{ $t('campaigns.status', 'Status') }}</Label>
           <div>
             <Badge variant="outline" :class="[getStatusClass(campaign.status), 'text-xs']">
-              <component :is="getStatusIcon(campaign.status)" class="h-3 w-3 mr-1" />
+              <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
               {{ campaign.status }}
             </Badge>
           </div>
@@ -1135,27 +1135,27 @@ onUnmounted(() => {
       <CardContent>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
-            <Users class="h-4 w-4 text-muted-foreground" />
+            <Users class="size-4 text-muted-foreground" />
             <span class="text-lg font-semibold">{{ campaign.total_recipients }}</span>
             <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.totalRecipients', 'Recipients') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
-            <Send class="h-4 w-4 text-blue-500" />
+            <Send class="size-4 text-blue-500" />
             <span class="text-lg font-semibold">{{ campaign.sent_count }}</span>
             <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.sent', 'Sent') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
-            <CheckCircle class="h-4 w-4 text-green-500" />
+            <CheckCircle class="size-4 text-green-500" />
             <span class="text-lg font-semibold">{{ campaign.delivered_count }}</span>
             <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.delivered', 'Delivered') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
-            <Eye class="h-4 w-4 text-purple-500" />
+            <Eye class="size-4 text-purple-500" />
             <span class="text-lg font-semibold">{{ campaign.read_count }}</span>
             <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.read', 'Read') }}</span>
           </div>
           <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
-            <XCircle class="h-4 w-4 text-destructive" />
+            <XCircle class="size-4 text-destructive" />
             <span class="text-lg font-semibold">{{ campaign.failed_count }}</span>
             <span class="text-[10px] text-muted-foreground uppercase tracking-wide">{{ $t('campaigns.failed', 'Failed') }}</span>
           </div>
@@ -1182,9 +1182,9 @@ onUnmounted(() => {
             />
           </div>
           <div class="flex items-center gap-4 text-[10px] text-muted-foreground">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500" /> {{ $t('campaigns.delivered', 'Delivered') }}</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500" /> {{ $t('campaigns.sent', 'Sent') }}</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-destructive" /> {{ $t('campaigns.failed', 'Failed') }}</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-green-500" /> {{ $t('campaigns.delivered', 'Delivered') }}</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-blue-500" /> {{ $t('campaigns.sent', 'Sent') }}</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-destructive" /> {{ $t('campaigns.failed', 'Failed') }}</span>
           </div>
         </div>
       </CardContent>
@@ -1195,13 +1195,13 @@ onUnmounted(() => {
       <Collapsible :default-open="recipients.length > 0 && recipients.length <= 20">
         <CardHeader class="pb-3 flex flex-row items-center justify-between">
           <CollapsibleTrigger class="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <ChevronDown class="h-4 w-4 text-muted-foreground transition-transform in-data-[state=closed]:-rotate-90" />
+            <ChevronDown class="size-4 text-muted-foreground transition-transform in-data-[state=closed]:-rotate-90" />
             <CardTitle class="text-sm font-medium">
               {{ $t('campaigns.recipients', 'Recipients') }} ({{ recipients.length }})
             </CardTitle>
           </CollapsibleTrigger>
           <Button v-if="isDraft" variant="outline" size="sm" @click="openAddRecipientsDialog">
-            <UserPlus class="h-4 w-4 mr-1" />
+            <UserPlus class="size-4 mr-1" />
             {{ $t('campaigns.addRecipients', 'Add') }}
           </Button>
         </CardHeader>
@@ -1211,10 +1211,10 @@ onUnmounted(() => {
           {{ $t('common.loading', 'Loading...') }}
         </div>
         <div v-else-if="recipients.length === 0" class="text-center py-8">
-          <Users class="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+          <Users class="size-8 mx-auto text-muted-foreground mb-2" />
           <p class="text-sm text-muted-foreground">{{ $t('campaigns.noRecipients', 'No recipients yet') }}</p>
           <Button v-if="isDraft" variant="outline" size="sm" class="mt-3" @click="openAddRecipientsDialog">
-            <UserPlus class="h-4 w-4 mr-1" />
+            <UserPlus class="size-4 mr-1" />
             {{ $t('campaigns.addRecipients', 'Add Recipients') }}
           </Button>
         </div>
@@ -1254,11 +1254,11 @@ onUnmounted(() => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    class="h-7 w-7"
+                    class="size-7"
                     :disabled="deletingRecipientId === recipient.id"
                     @click="deleteRecipient(recipient.id)"
                   >
-                    <Trash2 class="h-3.5 w-3.5 text-destructive" />
+                    <Trash2 class="size-3.5 text-destructive" />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -1348,11 +1348,11 @@ onUnmounted(() => {
       <Tabs v-model="addRecipientsTab">
         <TabsList class="w-full">
           <TabsTrigger value="manual" class="flex-1">
-            <UserPlus class="h-4 w-4 mr-1" />
+            <UserPlus class="size-4 mr-1" />
             {{ $t('campaigns.manualEntry', 'Manual Entry') }}
           </TabsTrigger>
           <TabsTrigger value="csv" class="flex-1">
-            <FileSpreadsheet class="h-4 w-4 mr-1" />
+            <FileSpreadsheet class="size-4 mr-1" />
             {{ $t('campaigns.csvUpload', 'CSV Upload') }}
           </TabsTrigger>
         </TabsList>
@@ -1397,7 +1397,7 @@ onUnmounted(() => {
               @click="addRecipients"
               :disabled="isAddingRecipients || !manualInputValidation.isValid"
             >
-              <UserPlus class="h-4 w-4 mr-1" />
+              <UserPlus class="size-4 mr-1" />
               {{ isAddingRecipients ? $t('common.adding', 'Adding...') : $t('campaigns.addRecipients', 'Add Recipients') }}
             </Button>
           </DialogFooter>
@@ -1416,7 +1416,7 @@ onUnmounted(() => {
                 class="text-primary hover:underline inline-flex items-center gap-1"
                 @click="downloadSampleCSV"
               >
-                <Download class="h-3.5 w-3.5" />
+                <Download class="size-3.5" />
                 {{ $t('campaigns.downloadSampleCsv', 'Download sample CSV') }}
               </button>
             </div>
@@ -1424,7 +1424,7 @@ onUnmounted(() => {
               class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
               @click="($refs.csvInput as HTMLInputElement)?.click()"
             >
-              <Upload class="h-6 w-6 mx-auto text-muted-foreground mb-1" />
+              <Upload class="size-6 mx-auto text-muted-foreground mb-1" />
               <p class="text-sm text-muted-foreground">
                 {{ csvFile ? csvFile.name : $t('campaigns.clickToUploadCSV', 'Click to select CSV file') }}
               </p>
@@ -1436,7 +1436,7 @@ onUnmounted(() => {
               @click="addRecipientsFromCSV"
               :disabled="isAddingRecipients || !csvFile"
             >
-              <FileSpreadsheet class="h-4 w-4 mr-1" />
+              <FileSpreadsheet class="size-4 mr-1" />
               {{ isAddingRecipients ? $t('common.importing', 'Importing...') : $t('campaigns.importCSV', 'Import CSV') }}
             </Button>
           </DialogFooter>

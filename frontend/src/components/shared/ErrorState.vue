@@ -25,8 +25,8 @@ defineEmits<{
     :class="cn('flex flex-col items-center justify-center py-12 px-4 text-center', $props.class)"
     role="alert"
   >
-    <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-destructive/15 to-destructive/5 ring-1 ring-destructive/10">
-      <AlertCircle class="h-7 w-7 text-destructive" />
+    <div class="mb-4 flex size-14 items-center justify-center rounded-full bg-linear-to-br from-destructive/15 to-destructive/5 ring-1 ring-destructive/10">
+      <AlertCircle class="size-7 text-destructive" />
     </div>
     <h3 class="text-lg font-semibold text-foreground">
       <slot name="title">{{ title }}</slot>

@@ -234,13 +234,13 @@ onMounted(async () => {
       <template #actions>
         <div class="flex items-center gap-2">
           <Button v-if="canWrite && (hasChanges || isNew)" size="sm" @click="save" :disabled="isSaving">
-            <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
+            <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : isNew ? $t('common.create') : $t('common.save') }}
           </Button>
           <Button v-if="!isNew" variant="outline" size="sm" @click="testWebhook" :disabled="isTesting">
-            <Play class="h-4 w-4 mr-1" /> {{ isTesting ? $t('webhooks.testing', 'Testing...') : $t('webhooks.testWebhook') }}
+            <Play class="size-4 mr-1" /> {{ isTesting ? $t('webhooks.testing', 'Testing...') : $t('webhooks.testWebhook') }}
           </Button>
           <Button v-if="canDelete && !isNew" variant="destructive" size="sm" @click="deleteDialogOpen = true">
-            <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+            <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
           </Button>
         </div>
       </template>
@@ -291,15 +291,15 @@ onMounted(async () => {
               <div v-for="(value, key) in form.headers" :key="key" class="flex items-center gap-2">
                 <Badge variant="secondary" class="shrink-0">{{ key }}</Badge>
                 <span class="text-sm truncate flex-1">{{ value }}</span>
-                <Button v-if="canWrite" variant="ghost" size="icon" class="h-6 w-6 shrink-0" @click="removeHeader(key as string)">
-                  <Trash2 class="h-3 w-3" />
+                <Button v-if="canWrite" variant="ghost" size="icon" class="size-6 shrink-0" @click="removeHeader(key as string)">
+                  <Trash2 class="size-3" />
                 </Button>
               </div>
               <div v-if="canWrite" class="flex gap-2">
                 <Input v-model="newHeaderKey" :placeholder="$t('webhooks.headerName')" class="flex-1" />
                 <Input v-model="newHeaderValue" :placeholder="$t('webhooks.headerValue')" class="flex-1" />
                 <Button variant="outline" size="sm" @click="addHeader">
-                  <Plus class="h-3 w-3 mr-1" /> {{ $t('common.add') }}
+                  <Plus class="size-3 mr-1" /> {{ $t('common.add') }}
                 </Button>
               </div>
             </div>

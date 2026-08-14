@@ -169,7 +169,7 @@ function closeOnBackdrop() { open.value = false }
          from here, so without it the X renders near-black on this dark backdrop
          in light theme. -->
     <DialogContent
-      class="max-w-none w-screen h-screen p-0 gap-0 border-0 rounded-none sm:rounded-none bg-black/95 text-white shadow-none ring-0 flex flex-col"
+      class="max-w-none size-screen p-0 gap-0 border-0 rounded-none sm:rounded-none bg-black/95 text-white shadow-none ring-0 flex flex-col"
     >
       <!-- Screen-reader only: satisfies aria-describedby without visible chrome. -->
       <DialogDescription class="sr-only">{{ $t('chat.mediaViewer.description') }}</DialogDescription>
@@ -202,11 +202,11 @@ function closeOnBackdrop() { open.value = false }
             v-if="currentUrl"
             :href="currentUrl"
             :download="filename || 'file'"
-            class="inline-flex items-center justify-center h-9 w-9 rounded-md text-white hover:bg-white/20 transition-colors"
+            class="inline-flex items-center justify-center size-9 rounded-md text-white hover:bg-white/20 transition-colors"
             :title="$t('chat.mediaViewer.download')"
             :aria-label="$t('chat.mediaViewer.download')"
           >
-            <Download class="h-4 w-4" />
+            <Download class="size-4" />
           </a>
           <IconButton
             :icon="ExternalLink"
@@ -226,20 +226,20 @@ function closeOnBackdrop() { open.value = false }
         <button
           v-if="hasPrev"
           type="button"
-          class="absolute left-2 z-10 inline-flex items-center justify-center h-11 w-11 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors"
+          class="absolute left-2 z-10 inline-flex items-center justify-center size-11 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors"
           :aria-label="$t('chat.mediaViewer.previous')"
           @click="prev"
         >
-          <ChevronLeft class="h-6 w-6" />
+          <ChevronLeft class="size-6" />
         </button>
         <button
           v-if="hasNext"
           type="button"
-          class="absolute right-2 z-10 inline-flex items-center justify-center h-11 w-11 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors"
+          class="absolute right-2 z-10 inline-flex items-center justify-center size-11 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors"
           :aria-label="$t('chat.mediaViewer.next')"
           @click="next"
         >
-          <ChevronRight class="h-6 w-6" />
+          <ChevronRight class="size-6" />
         </button>
 
         <!-- Image / sticker -->
@@ -269,23 +269,23 @@ function closeOnBackdrop() { open.value = false }
         <!-- PDF -->
         <template v-else-if="current && currentKind === 'pdf'">
           <div v-if="pdfLoading" class="flex flex-col items-center gap-2 text-white/80">
-            <Loader2 class="h-8 w-8 animate-spin" />
+            <Loader2 class="size-8 animate-spin" />
           </div>
           <iframe
             v-else-if="pdfBlobUrl"
             :src="pdfBlobUrl"
-            class="w-full h-full bg-white"
+            class="size-full bg-white"
             :title="filename || 'PDF'"
           />
           <div v-else class="flex flex-col items-center gap-3 text-white/80 px-6 text-center">
-            <FileText class="h-12 w-12" />
+            <FileText class="size-12" />
             <p class="text-sm">{{ pdfError ? $t('chat.mediaViewer.pdfError') : filename }}</p>
             <div class="flex gap-2">
               <a :href="currentUrl" :download="filename || 'file'">
-                <Button variant="secondary"><Download class="mr-2 h-4 w-4" />{{ $t('chat.mediaViewer.download') }}</Button>
+                <Button variant="secondary"><Download class="mr-2 size-4" />{{ $t('chat.mediaViewer.download') }}</Button>
               </a>
               <Button variant="outline" class="text-white border-white/30 hover:bg-white/10" @click="openInTab">
-                <ExternalLink class="mr-2 h-4 w-4" />{{ $t('chat.mediaViewer.openInTab') }}
+                <ExternalLink class="mr-2 size-4" />{{ $t('chat.mediaViewer.openInTab') }}
               </Button>
             </div>
           </div>
@@ -293,14 +293,14 @@ function closeOnBackdrop() { open.value = false }
 
         <!-- Other documents (docx, xlsx, …): no inline viewer -->
         <div v-else-if="current" class="flex flex-col items-center gap-3 text-white/80 px-6 text-center">
-          <FileText class="h-12 w-12" />
+          <FileText class="size-12" />
           <p class="text-sm truncate max-w-[60vw]">{{ filename }}</p>
           <div class="flex gap-2">
             <a :href="currentUrl" :download="filename || 'file'">
-              <Button variant="secondary"><Download class="mr-2 h-4 w-4" />{{ $t('chat.mediaViewer.download') }}</Button>
+              <Button variant="secondary"><Download class="mr-2 size-4" />{{ $t('chat.mediaViewer.download') }}</Button>
             </a>
             <Button variant="outline" class="text-white border-white/30 hover:bg-white/10" @click="openInTab">
-              <ExternalLink class="mr-2 h-4 w-4" />{{ $t('chat.mediaViewer.openInTab') }}
+              <ExternalLink class="mr-2 size-4" />{{ $t('chat.mediaViewer.openInTab') }}
             </Button>
           </div>
         </div>

@@ -224,7 +224,7 @@ watch(phoneSearch, () => {
         <p class="text-muted-foreground">{{ t('calling.callLogsDesc') }}</p>
       </div>
       <Button variant="outline" size="sm" @click="fetchLogs">
-        <RefreshCw class="h-4 w-4 mr-2" />
+        <RefreshCw class="size-4 mr-2" />
         {{ t('common.refresh') }}
       </Button>
     </div>
@@ -317,21 +317,21 @@ watch(phoneSearch, () => {
           </template>
           <template #cell-direction="{ item: log }">
             <span class="inline-flex items-center gap-1.5 text-muted-foreground">
-              <PhoneIncoming v-if="log.direction === 'incoming'" class="h-3.5 w-3.5" />
-              <PhoneOutgoing v-else class="h-3.5 w-3.5" />
+              <PhoneIncoming v-if="log.direction === 'incoming'" class="size-3.5" />
+              <PhoneOutgoing v-else class="size-3.5" />
               {{ t(`calling.${log.direction}`) }}
             </span>
           </template>
           <template #cell-status="{ item: log }">
             <Badge :variant="statusVariant(log.status)">
-              <component :is="statusIcon(log.status)" class="h-3 w-3 mr-1" />
+              <component :is="statusIcon(log.status)" class="size-3 mr-1" />
               {{ t(`calling.${log.status}`) }}
             </Badge>
           </template>
           <template #cell-duration="{ item: log }">
             <span class="inline-flex items-center gap-1.5">
               {{ formatDuration(log.duration) }}
-              <Mic v-if="log.recording_s3_key" class="h-3.5 w-3.5 text-muted-foreground" :title="t('calling.recording')" />
+              <Mic v-if="log.recording_s3_key" class="size-3.5 text-muted-foreground" :title="t('calling.recording')" />
             </span>
           </template>
           <template #cell-agent="{ item: log }">
@@ -340,7 +340,7 @@ watch(phoneSearch, () => {
           </template>
           <template #cell-disconnected_by="{ item: log }">
             <Badge v-if="log.disconnected_by" :variant="disconnectedByVariant(log.disconnected_by)">
-              <component :is="disconnectedByIcon(log.disconnected_by)" class="h-3 w-3 mr-1" />
+              <component :is="disconnectedByIcon(log.disconnected_by)" class="size-3 mr-1" />
               {{ t(`calling.disconnectedBy${log.disconnected_by.charAt(0).toUpperCase() + log.disconnected_by.slice(1)}`) }}
             </Badge>
             <span v-else class="text-muted-foreground">-</span>
@@ -376,8 +376,8 @@ watch(phoneSearch, () => {
             <div>
               <p class="text-muted-foreground">{{ t('calling.direction') }}</p>
               <p class="font-medium inline-flex items-center gap-1.5">
-                <PhoneIncoming v-if="selectedLog.direction === 'incoming'" class="h-3.5 w-3.5" />
-                <PhoneOutgoing v-else class="h-3.5 w-3.5" />
+                <PhoneIncoming v-if="selectedLog.direction === 'incoming'" class="size-3.5" />
+                <PhoneOutgoing v-else class="size-3.5" />
                 {{ t(`calling.${selectedLog.direction}`) }}
               </p>
             </div>
@@ -406,14 +406,14 @@ watch(phoneSearch, () => {
             <div v-if="selectedLog.disconnected_by">
               <p class="text-muted-foreground">{{ t('calling.disconnectedBy') }}</p>
               <Badge :variant="disconnectedByVariant(selectedLog.disconnected_by)">
-                <component :is="disconnectedByIcon(selectedLog.disconnected_by)" class="h-3 w-3 mr-1" />
+                <component :is="disconnectedByIcon(selectedLog.disconnected_by)" class="size-3 mr-1" />
                 {{ t(`calling.disconnectedBy${selectedLog.disconnected_by.charAt(0).toUpperCase() + selectedLog.disconnected_by.slice(1)}`) }}
               </Badge>
             </div>
             <div v-if="selectedLog.agent">
               <p class="text-muted-foreground">{{ t('calling.pickedBy') }}</p>
               <p class="font-medium inline-flex items-center gap-1.5">
-                <Headphones class="h-3.5 w-3.5" />
+                <Headphones class="size-3.5" />
                 {{ selectedLog.agent.full_name }}
               </p>
             </div>
@@ -421,7 +421,7 @@ watch(phoneSearch, () => {
 
           <div v-if="selectedTransfers.length > 0" class="space-y-2">
             <p class="text-sm text-muted-foreground flex items-center gap-1.5">
-              <ArrowRightLeft class="h-3.5 w-3.5" />
+              <ArrowRightLeft class="size-3.5" />
               {{ t('calling.transferHistory') }}
             </p>
             <div class="space-y-2">
@@ -462,7 +462,7 @@ watch(phoneSearch, () => {
           <div v-if="selectedLog.recording_s3_key" class="space-y-2">
             <p class="text-sm text-muted-foreground">{{ t('calling.recording') }}</p>
             <div v-if="recordingLoading" class="flex items-center gap-2 text-sm text-muted-foreground">
-              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+              <div class="animate-spin rounded-full size-4 border-b-2 border-primary" />
               {{ t('common.loading') }}
             </div>
             <audio

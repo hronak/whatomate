@@ -5,8 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TagBadge } from '@/components/ui/tag-badge'
-import { PageHeader, SearchInput, DataTable, DeleteConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { TagBadge, PageHeader, SearchInput, DataTable, DeleteConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { contactsService, accountsService, type ImportResult } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { Plus, Users, Pencil, Trash2, MessageSquare, Download } from '@lucide/vue'
@@ -154,13 +153,13 @@ function getDisplayName(contact: Contact): string {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('contacts.title')" :subtitle="$t('contacts.subtitle')" :icon="Users" icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20" back-link="/settings">
       <template v-if="canWriteContacts || canImportContacts || canExportContacts" #actions>
         <Button v-if="canImportContacts || canExportContacts" variant="outline" size="sm" @click="isImportExportOpen = true">
-          <Download class="h-4 w-4 mr-2" />{{ $t('common.import') }}/{{ $t('common.export') }}
+          <Download class="size-4 mr-2" />{{ $t('common.import') }}/{{ $t('common.export') }}
         </Button>
-        <Button v-if="canWriteContacts" variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('contacts.addContact') }}</Button>
+        <Button v-if="canWriteContacts" variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('contacts.addContact') }}</Button>
       </template>
     </PageHeader>
 
@@ -227,18 +226,18 @@ function getDisplayName(contact: Contact): string {
                 </template>
                 <template #cell-actions="{ item: contact }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="MessageSquare" :label="$t('contacts.openChat')" class="h-8 w-8" @click="openChat(contact)" />
+                    <IconButton :icon="MessageSquare" :label="$t('contacts.openChat')" class="size-8" @click="openChat(contact)" />
                     <RouterLink :to="`/settings/contacts/${contact.id}`">
-                      <IconButton :icon="Pencil" :label="$t('common.edit')" class="h-8 w-8" />
+                      <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" />
                     </RouterLink>
-                    <IconButton :label="$t('common.delete')" class="h-8 w-8" @click="openDeleteDialog(contact)">
-                      <Trash2 class="h-4 w-4 text-destructive" />
+                    <IconButton :label="$t('common.delete')" class="size-8" @click="openDeleteDialog(contact)">
+                      <Trash2 class="size-4 text-destructive" />
                     </IconButton>
                   </div>
                 </template>
                 <template v-if="canWriteContacts" #empty-action>
                   <Button variant="outline" size="sm" @click="openCreateDialog">
-                    <Plus class="h-4 w-4 mr-2" />
+                    <Plus class="size-4 mr-2" />
                     {{ $t('contacts.addContact') }}
                   </Button>
                 </template>

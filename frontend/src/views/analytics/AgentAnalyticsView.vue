@@ -316,7 +316,7 @@ void _displayStats.value // Suppress unused warning
             <PopoverTrigger as-child>
               <Button variant="outline" role="combobox" :aria-expanded="agentComboboxOpen" class="w-[200px] justify-between">
                 <span class="truncate">{{ selectedAgentName }}</span>
-                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent class="w-[200px] p-0">
@@ -329,7 +329,7 @@ void _displayStats.value // Suppress unused warning
                       value="all"
                       @select="() => { selectedAgentId = 'all'; agentComboboxOpen = false }"
                     >
-                      <Check :class="['mr-2 h-4 w-4', selectedAgentId === 'all' ? 'opacity-100' : 'opacity-0']" />
+                      <Check :class="['mr-2 size-4', selectedAgentId === 'all' ? 'opacity-100' : 'opacity-0']" />
                       {{ $t('agentAnalytics.allAgents') }}
                     </CommandItem>
                     <CommandItem
@@ -338,7 +338,7 @@ void _displayStats.value // Suppress unused warning
                       :value="agent.full_name"
                       @select="() => { selectedAgentId = agent.id; agentComboboxOpen = false }"
                     >
-                      <Check :class="['mr-2 h-4 w-4', selectedAgentId === agent.id ? 'opacity-100' : 'opacity-0']" />
+                      <Check :class="['mr-2 size-4', selectedAgentId === agent.id ? 'opacity-100' : 'opacity-0']" />
                       {{ agent.full_name }}
                     </CommandItem>
                   </CommandGroup>
@@ -376,115 +376,115 @@ void _displayStats.value // Suppress unused warning
         <!-- Stats Cards -->
         <div v-if="!error" class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <template v-if="isLoading">
-            <div v-for="i in 5" :key="i" class="rounded-xl border border-white/8 bg-white/2 p-6 light:bg-white light:border-gray-200">
+            <div v-for="i in 5" :key="i" class="rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton class="h-4 w-24 bg-white/8 light:bg-gray-200" />
-                <Skeleton class="h-10 w-10 rounded-lg bg-white/8 light:bg-gray-200" />
+                <Skeleton class="h-4 w-24 bg-muted" />
+                <Skeleton class="size-10 rounded-lg bg-muted" />
               </div>
               <div class="pt-2">
-                <Skeleton class="h-8 w-20 mb-2 bg-white/8 light:bg-gray-200" />
-                <Skeleton class="h-3 w-32 bg-white/8 light:bg-gray-200" />
+                <Skeleton class="h-8 w-20 mb-2 bg-muted" />
+                <Skeleton class="h-3 w-32 bg-muted" />
               </div>
             </div>
           </template>
           <template v-else-if="analytics">
             <!-- Transfers Handled -->
-            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.transfersHandled') }}</span>
-                <div class="h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle class="h-5 w-5 text-emerald-400" />
+                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.transfersHandled') }}</span>
+                <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle class="size-5 text-emerald-400" />
                 </div>
               </div>
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   {{ selectedAgentId === 'all'
                     ? (analytics.summary?.total_transfers_handled ?? 0)
                     : (analytics.my_stats?.transfers_handled ?? 0) }}
                 </div>
-                <p class="text-xs text-white/40 light:text-gray-500 mt-1">{{ $t('agentAnalytics.completedConversations') }}</p>
+                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.completedConversations') }}</p>
               </div>
             </div>
 
             <!-- Active Conversations -->
-            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.activeConversations') }}</span>
-                <div class="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <Activity class="h-5 w-5 text-blue-400" />
+                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.activeConversations') }}</span>
+                <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <Activity class="size-5 text-blue-400" />
                 </div>
               </div>
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   {{ selectedAgentId === 'all'
                     ? (analytics.summary?.active_transfers ?? 0)
                     : (analytics.my_stats?.active_transfers ?? 0) }}
                 </div>
-                <p class="text-xs text-white/40 light:text-gray-500 mt-1">{{ $t('agentAnalytics.currentlyInProgress') }}</p>
+                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.currentlyInProgress') }}</p>
               </div>
             </div>
 
             <!-- Avg Resolution Time -->
-            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.avgResolutionTime') }}</span>
-                <div class="h-10 w-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                  <Clock class="h-5 w-5 text-orange-400" />
+                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.avgResolutionTime') }}</span>
+                <div class="size-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                  <Clock class="size-5 text-orange-400" />
                 </div>
               </div>
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   {{ formatMinutes(selectedAgentId === 'all'
                     ? (analytics.summary?.avg_resolution_mins ?? 0)
                     : (analytics.my_stats?.avg_resolution_mins ?? 0)) }}
                 </div>
-                <p class="text-xs text-white/40 light:text-gray-500 mt-1">{{ $t('agentAnalytics.timeToResolve') }}</p>
+                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.timeToResolve') }}</p>
               </div>
             </div>
 
             <!-- Messages Sent (for specific agent) or Queue Time (for all agents) -->
-            <div v-if="isAdminOrManager && selectedAgentId === 'all'" class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
+            <div v-if="isAdminOrManager && selectedAgentId === 'all'" class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.avgQueueTime') }}</span>
-                <div class="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                  <Clock class="h-5 w-5 text-purple-400" />
+                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.avgQueueTime') }}</span>
+                <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                  <Clock class="size-5 text-purple-400" />
                 </div>
               </div>
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   {{ formatMinutes(analytics.summary?.avg_queue_time_mins || 0) }}
                 </div>
-                <p class="text-xs text-white/40 light:text-gray-500 mt-1">{{ $t('agentAnalytics.waitBeforeAssignment') }}</p>
+                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.waitBeforeAssignment') }}</p>
               </div>
             </div>
-            <div v-else class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
+            <div v-else class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.messagesSent') }}</span>
-                <div class="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                  <MessageSquare class="h-5 w-5 text-purple-400" />
+                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.messagesSent') }}</span>
+                <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                  <MessageSquare class="size-5 text-purple-400" />
                 </div>
               </div>
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   {{ analytics.my_stats?.messages_sent || 0 }}
                 </div>
-                <p class="text-xs text-white/40 light:text-gray-500 mt-1">{{ $t('agentAnalytics.outgoingMessages') }}</p>
+                <p class="text-xs text-foreground/40 mt-1">{{ $t('agentAnalytics.outgoingMessages') }}</p>
               </div>
             </div>
 
             <!-- Break Time -->
-            <div class="card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200">
+            <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ $t('agentAnalytics.breakTime') }}</span>
-                <div class="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Coffee class="h-5 w-5 text-amber-400" />
+                <span class="text-sm font-medium text-foreground/50">{{ $t('agentAnalytics.breakTime') }}</span>
+                <div class="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                  <Coffee class="size-5 text-amber-400" />
                 </div>
               </div>
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   {{ formatMinutes(analytics.my_stats?.total_break_time_mins ?? analytics.summary?.total_break_time_mins ?? 0) }}
                 </div>
-                <p class="text-xs text-white/40 light:text-gray-500 mt-1">
+                <p class="text-xs text-foreground/40 mt-1">
                   {{ $t('agentAnalytics.breaksTaken', { count: analytics.my_stats?.break_count ?? analytics.summary?.break_count ?? 0 }) }}
                 </p>
               </div>
@@ -503,7 +503,7 @@ void _displayStats.value // Suppress unused warning
             <CardContent>
               <div class="h-64">
                 <template v-if="isLoading">
-                  <Skeleton class="h-full w-full" />
+                  <Skeleton class="size-full" />
                 </template>
                 <template v-else-if="trendChartData.labels.length > 0">
                   <Line :data="trendChartData" :options="trendChartOptions" />
@@ -526,7 +526,7 @@ void _displayStats.value // Suppress unused warning
             <CardContent>
               <div class="h-64">
                 <template v-if="isLoading">
-                  <Skeleton class="h-full w-full" />
+                  <Skeleton class="size-full" />
                 </template>
                 <template v-else-if="sourceChartData.labels.length > 0">
                   <Doughnut :data="sourceChartData" :options="sourceChartOptions" />
@@ -551,7 +551,7 @@ void _displayStats.value // Suppress unused warning
             <CardContent>
               <div class="h-64">
                 <template v-if="isLoading">
-                  <Skeleton class="h-full w-full" />
+                  <Skeleton class="size-full" />
                 </template>
                 <template v-else-if="comparisonChartData.labels.length > 0">
                   <Bar :data="comparisonChartData" :options="comparisonChartOptions" />

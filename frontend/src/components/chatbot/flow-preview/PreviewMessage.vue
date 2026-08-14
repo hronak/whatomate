@@ -49,7 +49,7 @@ const isDebug = computed(() => props.message.type === 'debug')
         <p class="text-sm text-gray-800 dark:text-gray-100 whitespace-pre-wrap">{{ message.content }}</p>
         <p class="text-[10px] text-gray-500 dark:text-gray-300 text-right mt-1 flex items-center justify-end gap-1">
           {{ formattedTime }}
-          <svg class="h-4 w-4 text-[#53bdeb]" viewBox="0 0 24 24" fill="currentColor">
+          <svg class="size-4 text-[#53bdeb]" viewBox="0 0 24 24" fill="currentColor">
             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
           </svg>
         </p>
@@ -60,7 +60,7 @@ const isDebug = computed(() => props.message.type === 'debug')
   <!-- System Message -->
   <div v-else-if="isSystem" class="flex justify-center">
     <div class="bg-amber-100 dark:bg-amber-900/30 text-xs text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-      <Info class="h-3 w-3" />
+      <Info class="size-3" />
       <span>{{ message.content }}</span>
     </div>
   </div>
@@ -68,7 +68,7 @@ const isDebug = computed(() => props.message.type === 'debug')
   <!-- Debug Message -->
   <div v-else-if="isDebug" class="flex justify-center">
     <div class="bg-purple-100 dark:bg-purple-900/30 text-xs text-purple-700 dark:text-purple-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5 max-w-[90%]">
-      <Bug class="h-3 w-3 shrink-0" />
+      <Bug class="size-3 shrink-0" />
       <span class="break-all">{{ message.content }}</span>
     </div>
   </div>

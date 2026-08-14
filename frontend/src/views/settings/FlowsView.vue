@@ -213,11 +213,11 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('flows.title')" :subtitle="$t('flows.subtitle')" :icon="Workflow" icon-gradient="bg-linear-to-br from-violet-500 to-purple-600 shadow-violet-500/20">
       <template #actions>
-        <Button variant="outline" size="sm" @click="syncFlows" :disabled="isSyncing || !selectedAccount || selectedAccount === 'all'"><RefreshCw :class="['h-4 w-4 mr-2', isSyncing && 'animate-spin']" />{{ $t('flows.syncFromMeta') }}</Button>
-        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="h-4 w-4 mr-2" />{{ $t('flows.createFlow') }}</Button>
+        <Button variant="outline" size="sm" @click="syncFlows" :disabled="isSyncing || !selectedAccount || selectedAccount === 'all'"><RefreshCw :class="['size-4 mr-2', isSyncing && 'animate-spin']" />{{ $t('flows.syncFromMeta') }}</Button>
+        <Button variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('flows.createFlow') }}</Button>
       </template>
     </PageHeader>
 
@@ -275,7 +275,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                 </template>
                 <template #cell-status="{ item: flow }">
                   <Badge v-if="flow.status?.toUpperCase() === 'DEPRECATED'" variant="destructive" class="text-xs">
-                    <Archive class="h-3 w-3 mr-1" />{{ $t('flows.deprecated') }}
+                    <Archive class="size-3 mr-1" />{{ $t('flows.deprecated') }}
                   </Badge>
                   <Badge v-else variant="outline" :class="[getStatusClass(flow.status), 'text-xs']">{{ flow.status }}</Badge>
                 </template>
@@ -288,14 +288,14 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                 </template>
                 <template #cell-actions="{ item: flow }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="Pencil" :label="$t('flows.editTooltip')" class="h-8 w-8" @click="openEditDialog(flow)" />
-                    <IconButton :icon="duplicatingFlowId === flow.id ? Loader2 : Copy" :label="$t('flows.duplicateTooltip')" class="h-8 w-8" :disabled="duplicatingFlowId === flow.id" @click="duplicateFlow(flow)" />
-                    <IconButton v-if="flow.preview_url" :icon="ExternalLink" :label="$t('flows.previewTooltip')" class="h-8 w-8" @click="openPreviewUrl(flow.preview_url!)" />
+                    <IconButton :icon="Pencil" :label="$t('flows.editTooltip')" class="size-8" @click="openEditDialog(flow)" />
+                    <IconButton :icon="duplicatingFlowId === flow.id ? Loader2 : Copy" :label="$t('flows.duplicateTooltip')" class="size-8" :disabled="duplicatingFlowId === flow.id" @click="duplicateFlow(flow)" />
+                    <IconButton v-if="flow.preview_url" :icon="ExternalLink" :label="$t('flows.previewTooltip')" class="size-8" @click="openPreviewUrl(flow.preview_url!)" />
                     <IconButton
                       v-if="flow.status?.toUpperCase() !== 'DEPRECATED' && (flow.has_local_changes || !flow.meta_flow_id)"
                       :icon="savingToMetaFlowId === flow.id ? Loader2 : Upload"
                       :label="flow.meta_flow_id ? $t('flows.updateOnMeta') : $t('flows.saveToMeta')"
-                      class="h-8 w-8"
+                      class="size-8"
                       :disabled="savingToMetaFlowId === flow.id || publishingFlowId === flow.id"
                       @click="openSaveToMetaDialog(flow)"
                     />
@@ -303,14 +303,14 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                       v-if="isFlowDraft(flow) && flow.meta_flow_id"
                       :icon="publishingFlowId === flow.id ? Loader2 : Play"
                       :label="$t('flows.publishTooltip')"
-                      class="h-8 w-8 text-green-600"
+                      class="size-8 text-green-600"
                       :disabled="savingToMetaFlowId === flow.id || publishingFlowId === flow.id"
                       @click="openPublishDialog(flow)"
                     />
                     <IconButton
                       :icon="Trash2"
                       :label="$t('flows.deleteTooltip')"
-                      class="h-8 w-8 text-destructive"
+                      class="size-8 text-destructive"
                       :disabled="flow.status?.toUpperCase() === 'PUBLISHED'"
                       @click="flowToDelete = flow; deleteDialogOpen = true"
                     />
@@ -318,7 +318,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                 </template>
                 <template #empty-action>
                   <Button v-if="!searchQuery" variant="outline" size="sm" @click="openCreateDialog">
-                    <Plus class="h-4 w-4 mr-2" />{{ $t('flows.createFlow') }}
+                    <Plus class="size-4 mr-2" />{{ $t('flows.createFlow') }}
                   </Button>
                 </template>
               </DataTable>
@@ -344,7 +344,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
           </div>
         </div>
         <div class="flex-1 overflow-hidden py-4"><FlowBuilder v-model="flowBuilderData" /></div>
-        <DialogFooter><Button variant="outline" size="sm" @click="showCreateDialog = false" :disabled="isCreating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="createFlow" :disabled="isCreating"><Loader2 v-if="isCreating" class="h-4 w-4 mr-2 animate-spin" />{{ $t('flows.createFlow') }}</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" size="sm" @click="showCreateDialog = false" :disabled="isCreating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="createFlow" :disabled="isCreating"><Loader2 v-if="isCreating" class="size-4 mr-2 animate-spin" />{{ $t('flows.createFlow') }}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
 
@@ -362,7 +362,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
           <div v-if="flowToEdit?.meta_flow_id" class="flex items-center gap-2 ml-auto"><Badge variant="outline">Meta ID: {{ flowToEdit.meta_flow_id }}</Badge></div>
         </div>
         <div class="flex-1 overflow-hidden py-4"><FlowBuilder v-model="editFlowBuilderData" /></div>
-        <DialogFooter><Button variant="outline" size="sm" @click="showEditDialog = false" :disabled="isUpdating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="updateFlow" :disabled="isUpdating"><Loader2 v-if="isUpdating" class="h-4 w-4 mr-2 animate-spin" />{{ $t('flows.saveChanges') }}</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" size="sm" @click="showEditDialog = false" :disabled="isUpdating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="updateFlow" :disabled="isUpdating"><Loader2 v-if="isUpdating" class="size-4 mr-2 animate-spin" />{{ $t('flows.saveChanges') }}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
 

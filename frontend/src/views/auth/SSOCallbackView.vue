@@ -43,18 +43,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 to-gray-800 light:from-violet-50 light:to-violet-100 p-4">
+  <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-violet-50 to-violet-100 dark:from-gray-900 dark:to-gray-800 p-4">
     <Card class="w-full max-w-md">
       <CardHeader class="text-center">
         <div class="flex justify-center mb-4">
-          <div v-if="status === 'loading'" class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Loader2 class="h-7 w-7 text-primary animate-spin" />
+          <div v-if="status === 'loading'" class="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Loader2 class="size-7 text-primary animate-spin" />
           </div>
-          <div v-else-if="status === 'success'" class="h-12 w-12 rounded-xl bg-green-900/30 light:bg-green-100 flex items-center justify-center">
-            <CheckCircle class="h-7 w-7 text-green-400 light:text-green-600" />
+          <div v-else-if="status === 'success'" class="size-12 rounded-xl bg-success/30 flex items-center justify-center">
+            <CheckCircle class="size-7 text-success" />
           </div>
-          <div v-else class="h-12 w-12 rounded-xl bg-red-900/30 light:bg-red-100 flex items-center justify-center">
-            <AlertCircle class="h-7 w-7 text-red-400 light:text-red-600" />
+          <div v-else class="size-12 rounded-xl bg-destructive/30 flex items-center justify-center">
+            <AlertCircle class="size-7 text-destructive" />
           </div>
         </div>
         <CardTitle class="text-xl">

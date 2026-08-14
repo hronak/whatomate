@@ -27,7 +27,7 @@ const outputHandles = [
     :output-handles="outputHandles"
     :has-input="!data?.isEntryNode"
   >
-    <template #icon><Clock class="w-4 h-4" /></template>
+    <template #icon><Clock class="size-4" /></template>
     <p class="truncate">{{ summary }}</p>
   </BaseNode>
 </template>

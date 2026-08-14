@@ -32,7 +32,7 @@ function handleSelect(button: ButtonConfig) {
       :disabled="disabled"
       @click="isOpen = !isOpen"
     >
-      <List class="h-4 w-4" />
+      <List class="size-4" />
       Select an option
     </button>
 
@@ -56,7 +56,7 @@ function handleSelect(button: ButtonConfig) {
               class="p-1 hover:bg-white/10 rounded transition-colors"
               @click="isOpen = false"
             >
-              <X class="h-5 w-5" />
+              <X class="size-5" />
             </button>
             <span class="font-medium text-sm">Select an option</span>
             <div class="w-7" />
@@ -72,20 +72,20 @@ function handleSelect(button: ButtonConfig) {
             >
               <div
                 v-if="btn.type === 'url'"
-                class="w-5 h-5 flex items-center justify-center shrink-0 text-[#00a884]"
+                class="size-5 flex items-center justify-center shrink-0 text-[#00a884]"
               >
-                <ExternalLink class="h-4 w-4" />
+                <ExternalLink class="size-4" />
               </div>
               <div
                 v-else
-                class="w-5 h-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
+                class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
               >
                 <span class="text-[10px] text-[#00a884] font-medium">{{ idx + 1 }}</span>
               </div>
               <span class="text-sm text-gray-800 dark:text-gray-200 flex-1">
                 {{ btn.title || `Option ${idx + 1}` }}
               </span>
-              <ExternalLink v-if="btn.type === 'url'" class="h-3 w-3 text-gray-400" />
+              <ExternalLink v-if="btn.type === 'url'" class="size-3 text-gray-400" />
             </div>
           </div>
         </div>

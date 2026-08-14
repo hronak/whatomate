@@ -235,7 +235,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('sso.title')" :subtitle="$t('sso.subtitle')" :icon="ShieldCheck" icon-gradient="bg-linear-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20" />
 
     <ErrorState
@@ -251,12 +251,12 @@ onMounted(() => {
       <div class="p-6">
         <div class="max-w-6xl mx-auto space-y-6">
         <!-- Info Card -->
-        <Card class="bg-blue-950/30 light:bg-blue-50 border-blue-800 light:border-blue-200">
+        <Card class="bg-info/30 border-info">
           <CardContent class="flex items-start gap-3 pt-6">
-            <Info class="h-5 w-5 text-blue-400 light:text-blue-600 shrink-0 mt-0.5" />
-            <div class="text-sm text-blue-200 light:text-blue-800">
+            <Info class="size-5 text-info shrink-0 mt-0.5" />
+            <div class="text-sm text-info">
               <p class="font-medium mb-1">{{ $t('sso.configuration') }}</p>
-              <p class="text-blue-300 light:text-blue-700">
+              <p class="text-info">
                 {{ $t('sso.configurationDesc') }}
               </p>
             </div>
@@ -273,8 +273,8 @@ onMounted(() => {
             <CardHeader class="pb-3">
               <div class="flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <div class="size-10 rounded-lg bg-muted flex items-center justify-center">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
                       <path :d="config.icon" />
                     </svg>
                   </div>
@@ -311,7 +311,7 @@ onMounted(() => {
                   class="flex-1"
                   @click="openEditDialog(key)"
                 >
-                  <Settings2 class="h-4 w-4 mr-2" />
+                  <Settings2 class="size-4 mr-2" />
                   {{ getConfiguredProvider(key) ? $t('sso.configure') : $t('sso.setUp') }}
                 </Button>
                 <Button
@@ -323,7 +323,7 @@ onMounted(() => {
                   :href="config.docUrl"
                   target="_blank"
                 >
-                  <ExternalLink class="h-4 w-4" />
+                  <ExternalLink class="size-4" />
                 </Button>
               </div>
             </CardContent>
@@ -338,7 +338,7 @@ onMounted(() => {
       <DialogContent class="max-w-lg">
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2">
-            <svg v-if="currentProviderConfig" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <svg v-if="currentProviderConfig" class="size-5" viewBox="0 0 24 24" fill="currentColor">
               <path :d="currentProviderConfig.icon" />
             </svg>
             {{ $t('sso.configure') }} {{ currentProviderConfig?.name }}
@@ -367,8 +367,8 @@ onMounted(() => {
                 class="shrink-0"
                 @click="copyRedirectUrl"
               >
-                <Check v-if="copiedRedirectUrl" class="h-4 w-4 text-green-500" />
-                <Copy v-else class="h-4 w-4" />
+                <Check v-if="copiedRedirectUrl" class="size-4 text-green-500" />
+                <Copy v-else class="size-4" />
               </Button>
             </div>
           </div>
@@ -490,7 +490,7 @@ onMounted(() => {
             {{ $t('common.cancel') }}
           </Button>
           <Button size="sm" @click="saveProvider" :disabled="isSaving">
-            <Loader2 v-if="isSaving" class="h-4 w-4 mr-2 animate-spin" />{{ $t('common.save') }}
+            <Loader2 v-if="isSaving" class="size-4 mr-2 animate-spin" />{{ $t('common.save') }}
           </Button>
         </DialogFooter>
       </DialogContent>

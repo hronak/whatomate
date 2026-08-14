@@ -400,30 +400,30 @@ function removeEscalationUser(userId: string) {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('chatbotSettings.title')" :subtitle="$t('chatbotSettings.subtitle')" :icon="Bot" icon-gradient="bg-linear-to-br from-purple-500 to-pink-600 shadow-purple-500/20" />
     <ScrollArea class="flex-1">
       <div class="p-6 space-y-4 max-w-4xl mx-auto">
         <Tabs default-value="messages" class="w-full">
           <TabsList class="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="messages">
-              <MessageSquare class="h-4 w-4 mr-2" />
+              <MessageSquare class="size-4 mr-2" />
               {{ $t('chatbotSettings.messages') }}
             </TabsTrigger>
             <TabsTrigger value="agents">
-              <Users class="h-4 w-4 mr-2" />
+              <Users class="size-4 mr-2" />
               {{ $t('chatbotSettings.agents') }}
             </TabsTrigger>
             <TabsTrigger value="hours">
-              <Clock class="h-4 w-4 mr-2" />
+              <Clock class="size-4 mr-2" />
               {{ $t('chatbotSettings.hours') }}
             </TabsTrigger>
             <TabsTrigger value="sla">
-              <AlertTriangle class="h-4 w-4 mr-2" />
+              <AlertTriangle class="size-4 mr-2" />
               {{ $t('chatbotSettings.sla') }}
             </TabsTrigger>
             <TabsTrigger value="ai">
-              <Brain class="h-4 w-4 mr-2" />
+              <Brain class="size-4 mr-2" />
               {{ $t('chatbotSettings.ai') }}
             </TabsTrigger>
           </TabsList>
@@ -453,7 +453,7 @@ function removeEscalationUser(userId: string) {
                         @click="addGreetingButton"
                         :disabled="chatbotSettings.greeting_buttons.length >= 10"
                       >
-                        <Plus class="h-4 w-4 mr-1" />
+                        <Plus class="size-4 mr-1" />
                         {{ $t('chatbotSettings.addButton') }}
                       </Button>
                     </div>
@@ -470,7 +470,7 @@ function removeEscalationUser(userId: string) {
                           class="flex-1"
                         />
                         <Button variant="ghost" size="icon" @click="removeGreetingButton(index)">
-                          <X class="h-4 w-4" />
+                          <X class="size-4" />
                         </Button>
                       </div>
                       <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.buttonHint') }}</p>
@@ -497,7 +497,7 @@ function removeEscalationUser(userId: string) {
                         @click="addFallbackButton"
                         :disabled="chatbotSettings.fallback_buttons.length >= 10"
                       >
-                        <Plus class="h-4 w-4 mr-1" />
+                        <Plus class="size-4 mr-1" />
                         {{ $t('chatbotSettings.addButton') }}
                       </Button>
                     </div>
@@ -514,7 +514,7 @@ function removeEscalationUser(userId: string) {
                           class="flex-1"
                         />
                         <Button variant="ghost" size="icon" @click="removeFallbackButton(index)">
-                          <X class="h-4 w-4" />
+                          <X class="size-4" />
                         </Button>
                       </div>
                       <p class="text-xs text-muted-foreground">{{ $t('chatbotSettings.buttonHint') }}</p>
@@ -539,7 +539,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveMessagesSettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -597,7 +597,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-4">
                   <Button @click="saveAgentSettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -688,7 +688,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveBusinessHoursSettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -776,7 +776,7 @@ function removeEscalationUser(userId: string) {
                       <Popover v-model:open="escalationComboboxOpen">
                         <PopoverTrigger as-child>
                           <Button variant="outline" size="sm" class="gap-2" :disabled="unselectedUsers.length === 0">
-                            <UserPlus class="h-4 w-4" />
+                            <UserPlus class="size-4" />
                             {{ $t('chatbotSettings.addUser') }}
                           </Button>
                         </PopoverTrigger>
@@ -810,7 +810,7 @@ function removeEscalationUser(userId: string) {
                       >
                         <span>{{ user.full_name }}</span>
                         <button type="button" @click="removeEscalationUser(user.id)" class="text-muted-foreground hover:text-foreground">
-                          <X class="h-3.5 w-3.5" />
+                          <X class="size-3.5" />
                         </button>
                       </div>
                     </div>
@@ -869,7 +869,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveSLASettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -958,7 +958,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveAISettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>

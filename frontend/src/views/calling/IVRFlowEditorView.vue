@@ -399,8 +399,8 @@ onMounted(() => {
   <div class="h-screen flex flex-col">
     <!-- Toolbar -->
     <div class="flex items-center gap-3 px-4 py-2 border-b bg-background shrink-0">
-      <Button variant="ghost" size="icon" class="h-8 w-8" :aria-label="t('calling.backToFlows')" @click="router.push({ name: 'ivr-flows' })">
-        <ArrowLeft class="h-4 w-4" />
+      <Button variant="ghost" size="icon" class="size-8" :aria-label="t('calling.backToFlows')" @click="router.push({ name: 'ivr-flows' })">
+        <ArrowLeft class="size-4" />
       </Button>
       <Input v-model="flowName" placeholder="Flow Name" class="h-8 text-sm max-w-[250px]" />
       <div class="flex items-center gap-2 ml-4">
@@ -417,7 +417,7 @@ onMounted(() => {
       </div>
       <div class="flex-1" />
       <Button :disabled="saving" size="sm" @click="saveFlow">
-        <Save class="h-4 w-4 mr-1" />
+        <Save class="size-4 mr-1" />
         {{ saving ? t('calling.flowSaving') : t('calling.flowSave') }}
       </Button>
     </div>
@@ -432,8 +432,8 @@ onMounted(() => {
         class="h-7 text-xs gap-1.5 shrink-0"
         @click="addNodeFromPalette(p.type)"
       >
-        <div :class="['w-2 h-2 rounded-full', p.color]" />
-        <component :is="p.icon" class="w-3 h-3" />
+        <div :class="['size-2 rounded-full', p.color]" />
+        <component :is="p.icon" class="size-3" />
         {{ p.label }}
       </Button>
     </div>
@@ -443,7 +443,7 @@ onMounted(() => {
       <!-- Canvas -->
       <div class="flex-1 relative">
         <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <div class="animate-spin rounded-full size-8 border-b-2 border-primary" />
         </div>
         <ErrorState
           v-else-if="loadError"

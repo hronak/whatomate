@@ -36,13 +36,12 @@ const providerIcons: Record<string, string> = {
   custom: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'
 }
 
-// Dark-first: default is dark mode, light: prefix for light mode
 const providerColors: Record<string, string> = {
-  google: 'hover:bg-red-950 border-red-800 hover:light:bg-red-50 light:border-red-200',
-  microsoft: 'hover:bg-blue-950 border-blue-800 hover:light:bg-blue-50 light:border-blue-200',
-  github: 'hover:bg-gray-800 border-gray-600 hover:light:bg-gray-100 light:border-gray-300',
-  facebook: 'hover:bg-blue-950 border-blue-800 hover:light:bg-blue-50 light:border-blue-200',
-  custom: 'hover:bg-purple-950 border-purple-800 hover:light:bg-purple-50 light:border-purple-200'
+  google: 'hover:bg-destructive border-destructive',
+  microsoft: 'hover:bg-info border-info',
+  github: 'hover:bg-gray-100 border-gray-300 dark:hover:bg-gray-800 dark:border-gray-600',
+  facebook: 'hover:bg-info border-info',
+  custom: 'hover:bg-purple-950 border-purple-800 dark:hover:bg-purple-50 dark:border-purple-200'
 }
 
 onMounted(async () => {
@@ -92,16 +91,16 @@ const initiateSSO = (provider: string) => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#0a0a0b] light:bg-linear-to-br light:from-gray-50 light:to-gray-100 p-4">
-    <div class="w-full max-w-md rounded-2xl border border-white/8 bg-white/2 backdrop-blur-sm light:bg-white light:border-gray-200 light:shadow-xl">
+  <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 dark:bg-none dark:bg-[#0a0a0b] p-4">
+    <div class="w-full max-w-md rounded-2xl border border-border bg-card backdrop-blur-sm shadow-xl">
       <div class="p-8 space-y-1 text-center">
         <div class="flex justify-center mb-4">
-          <div class="h-12 w-12 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <MessageSquare class="h-7 w-7 text-white" />
+          <div class="size-12 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <MessageSquare class="size-7 text-white" />
           </div>
         </div>
-        <h2 class="text-2xl font-bold text-white light:text-gray-900">{{ $t('auth.welcomeTitle') }}</h2>
-        <p class="text-white/50 light:text-gray-500">
+        <h2 class="text-2xl font-bold text-foreground">{{ $t('auth.welcomeTitle') }}</h2>
+        <p class="text-foreground/50">
           {{ $t('auth.welcomeSubtitle') }}
         </p>
       </div>
@@ -109,7 +108,7 @@ const initiateSSO = (provider: string) => {
       <form @submit.prevent="handleLogin">
         <div class="px-8 pb-4 space-y-4">
           <div class="space-y-2">
-            <Label for="email" class="text-white/70 light:text-gray-700">{{ $t('common.email') }}</Label>
+            <Label for="email" class="text-foreground/70">{{ $t('common.email') }}</Label>
             <Input
               id="email"
               v-model="email"
@@ -120,7 +119,7 @@ const initiateSSO = (provider: string) => {
             />
           </div>
           <div class="space-y-2">
-            <Label for="password" class="text-white/70 light:text-gray-700">{{ $t('auth.password') }}</Label>
+            <Label for="password" class="text-foreground/70">{{ $t('auth.password') }}</Label>
             <Input
               id="password"
               v-model="password"
@@ -131,7 +130,7 @@ const initiateSSO = (provider: string) => {
             />
           </div>
           <Button type="submit" class="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20" :disabled="isLoading">
-            <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 v-if="isLoading" class="mr-2 size-4 animate-spin" />
             {{ $t('auth.signIn') }}
           </Button>
         </div>
@@ -140,8 +139,8 @@ const initiateSSO = (provider: string) => {
       <!-- SSO Section -->
       <div v-if="ssoProviders.length > 0" class="px-8 pb-4 space-y-3">
         <div class="relative my-2">
-          <Separator class="bg-white/8 light:bg-gray-200" />
-          <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0a0a0b] light:bg-white px-2 text-xs text-white/40 light:text-gray-500">
+          <Separator class="bg-muted" />
+          <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#0a0a0b] px-2 text-xs text-foreground/40">
             {{ $t('auth.orContinueWith') }}
           </span>
         </div>
@@ -150,11 +149,11 @@ const initiateSSO = (provider: string) => {
           v-for="provider in ssoProviders"
           :key="provider.provider"
           variant="outline"
-          class="w-full justify-start gap-3 transition-colors bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700 hover:light:bg-gray-50"
+          class="w-full justify-start gap-3 transition-colors bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
           :class="providerColors[provider.provider] || providerColors.custom"
           @click="initiateSSO(provider.provider)"
         >
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+          <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
             <path :d="providerIcons[provider.provider] || providerIcons.custom" />
           </svg>
           {{ provider.name }}
@@ -162,9 +161,9 @@ const initiateSSO = (provider: string) => {
       </div>
 
       <div class="px-8 pb-8">
-        <p class="text-sm text-center text-white/40 light:text-gray-500">
+        <p class="text-sm text-center text-foreground/40">
           {{ $t('auth.noAccount') }}
-          <RouterLink to="/register" class="text-emerald-400 light:text-emerald-600 hover:underline">
+          <RouterLink to="/register" class="text-success hover:underline">
             {{ $t('auth.signUp') }}
           </RouterLink>
         </p>

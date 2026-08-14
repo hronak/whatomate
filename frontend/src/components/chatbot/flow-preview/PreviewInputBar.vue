@@ -87,7 +87,7 @@ function handleKeydown(event: KeyboardEvent) {
     </div>
 
     <button
-      class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+      class="size-10 rounded-full flex items-center justify-center transition-colors"
       :class="{
         'bg-[#00a884] hover:bg-[#008f6d] cursor-pointer': isEnabled && inputString,
         'bg-gray-300 dark:bg-gray-600 cursor-not-allowed': !isEnabled || !inputString
@@ -95,8 +95,8 @@ function handleKeydown(event: KeyboardEvent) {
       :disabled="!isEnabled || !inputString"
       @click="handleSubmit"
     >
-      <Send v-if="inputString" class="h-5 w-5 text-white" />
-      <Mic v-else class="h-5 w-5 text-white" />
+      <Send v-if="inputString" class="size-5 text-white" />
+      <Mic v-else class="size-5 text-white" />
     </button>
   </div>
 </template>

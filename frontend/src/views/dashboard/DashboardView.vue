@@ -702,22 +702,22 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <!-- Header -->
-    <header class="border-b border-white/8 light:border-gray-200 bg-[#0a0a0b]/95 light:bg-white/95 backdrop-blur-sm">
+    <header class="border-b border-border bg-white/95 dark:bg-[#0a0a0b]/95 backdrop-blur-sm">
       <div class="flex h-16 items-center px-6">
-        <div class="h-8 w-8 rounded-lg bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center mr-3 shadow-lg shadow-emerald-500/20">
-          <LayoutDashboard class="h-4 w-4 text-white" />
+        <div class="size-8 rounded-lg bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center mr-3 shadow-lg shadow-emerald-500/20">
+          <LayoutDashboard class="size-4 text-white" />
         </div>
         <div class="flex-1">
-          <h1 class="text-xl font-semibold text-white light:text-gray-900">{{ $t('dashboard.title') }}</h1>
-          <p class="text-sm text-white/50 light:text-gray-500">{{ $t('dashboard.subtitle') }}</p>
+          <h1 class="text-xl font-semibold text-foreground">{{ $t('dashboard.title') }}</h1>
+          <p class="text-sm text-foreground/50">{{ $t('dashboard.subtitle') }}</p>
         </div>
 
         <!-- Time Range Filter -->
         <div class="flex items-center gap-2">
-          <Button v-if="canCreateWidget" variant="outline" size="sm" @click="openAddWidgetDialog" class="bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700">
-            <Plus class="h-4 w-4 mr-2" />
+          <Button v-if="canCreateWidget" variant="outline" size="sm" @click="openAddWidgetDialog" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground">
+            <Plus class="size-4 mr-2" />
             {{ $t('dashboard.addWidget') }}
           </Button>
 
@@ -726,13 +726,9 @@ onMounted(() => {
             variant="outline"
             size="sm"
             @click="isDragMode = !isDragMode"
-            :class="[
-              isDragMode
-                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300'
-                : 'bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:text-white light:bg-white light:border-gray-200 light:text-gray-700'
-            ]"
+            :class="[ isDragMode ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300' : 'bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground' ]"
           >
-            <GripVertical class="h-4 w-4 mr-2" />
+            <GripVertical class="size-4 mr-2" />
             {{ isDragMode ? $t('common.done') : $t('dashboard.editLayout') }}
           </Button>
 
@@ -752,14 +748,14 @@ onMounted(() => {
       <div class="p-6 space-y-6">
         <!-- Loading Skeleton -->
         <div v-if="isLoading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div v-for="i in 4" :key="i" class="rounded-xl border border-white/8 bg-white/2 p-6 light:bg-white light:border-gray-200">
+          <div v-for="i in 4" :key="i" class="rounded-xl border border-border bg-card p-6">
             <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-              <Skeleton class="h-4 w-24 bg-white/8 light:bg-gray-200" />
-              <Skeleton class="h-10 w-10 rounded-lg bg-white/8 light:bg-gray-200" />
+              <Skeleton class="h-4 w-24 bg-muted" />
+              <Skeleton class="size-10 rounded-lg bg-muted" />
             </div>
             <div class="pt-2">
-              <Skeleton class="h-8 w-20 mb-2 bg-white/8 light:bg-gray-200" />
-              <Skeleton class="h-3 w-32 bg-white/8 light:bg-gray-200" />
+              <Skeleton class="h-8 w-20 mb-2 bg-muted" />
+              <Skeleton class="h-3 w-32 bg-muted" />
             </div>
           </div>
         </div>
@@ -792,19 +788,19 @@ onMounted(() => {
             <!-- Number widget card -->
             <div
               v-if="getWidgetById(item.i) && isNumberWidget(getWidgetById(item.i)!)"
-              class="group relative h-full card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200 hover:bg-white/6 hover:light:bg-gray-50 transition-colors overflow-hidden"
+              class="group relative h-full card-depth rounded-xl border border-border bg-card p-6 hover:bg-accent transition-colors overflow-hidden"
             >
               <!-- Gradient accent bar -->
               <div :class="['absolute top-0 inset-x-0 h-0.5', getWidgetColor(getWidgetById(item.i)!.color).gradient]" />
 
               <!-- Drag handle indicator -->
-              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-white/20 light:text-gray-300 cursor-grab active:cursor-grabbing z-10">
-                <GripVertical class="h-4 w-4" />
+              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-foreground/20 cursor-grab active:cursor-grabbing z-10">
+                <GripVertical class="size-4" />
               </div>
 
               <div class="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div class="flex-1">
-                  <span class="text-sm font-medium text-white/50 light:text-gray-500">
+                  <span class="text-sm font-medium text-foreground/50">
                     {{ getWidgetById(item.i)!.name }}
                   </span>
                 </div>
@@ -815,34 +811,34 @@ onMounted(() => {
                       v-if="canEditWidget"
                       variant="ghost"
                       size="icon"
-                      class="h-6 w-6 text-white/20 hover:text-white hover:bg-white/10 light:text-gray-300 hover:light:text-gray-700 hover:light:bg-gray-100"
+                      class="size-6 text-foreground/20 hover:text-foreground hover:bg-accent"
                       @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)"
                       :title="$t('dashboard.editWidgetTooltip')"
                     >
-                      <Pencil class="h-3 w-3" />
+                      <Pencil class="size-3" />
                     </Button>
                     <Button
                       v-if="canDeleteWidget"
                       variant="ghost"
                       size="icon"
-                      class="h-6 w-6 text-white/20 hover:text-red-400 hover:bg-red-500/10 light:text-gray-300 hover:light:text-red-600 hover:light:bg-red-50"
+                      class="size-6 text-foreground/20 hover:text-destructive hover:bg-destructive/10"
                       @click.stop="openDeleteDialog(getWidgetById(item.i)!)"
                       :title="$t('dashboard.deleteWidgetTooltip')"
                     >
-                      <Trash2 class="h-3 w-3" />
+                      <Trash2 class="size-3" />
                     </Button>
                   </div>
                   <!-- Icon -->
-                  <div :class="['h-10 w-10 rounded-lg flex items-center justify-center', getWidgetColor(getWidgetById(item.i)!.color).bg]">
-                    <component :is="getWidgetIcon(getWidgetById(item.i)!.data_source)" :class="['h-5 w-5', getWidgetColor(getWidgetById(item.i)!.color).text]" />
+                  <div :class="['size-10 rounded-lg flex items-center justify-center', getWidgetColor(getWidgetById(item.i)!.color).bg]">
+                    <component :is="getWidgetIcon(getWidgetById(item.i)!.data_source)" :class="['size-5', getWidgetColor(getWidgetById(item.i)!.color).text]" />
                   </div>
                 </div>
               </div>
 
               <div class="pt-2">
-                <div class="text-3xl font-bold text-white light:text-gray-900">
+                <div class="text-3xl font-bold text-foreground">
                   <template v-if="isWidgetDataLoading">
-                    <Skeleton class="h-8 w-20 bg-white/8 light:bg-gray-200" />
+                    <Skeleton class="h-8 w-20 bg-muted" />
                   </template>
                   <template v-else>
                     <Transition name="counter-fade" mode="out-in">
@@ -850,15 +846,15 @@ onMounted(() => {
                     </Transition>
                   </template>
                 </div>
-                <div v-if="getWidgetById(item.i)!.show_change && widgetData[item.i]" class="flex items-center text-xs text-white/40 light:text-gray-500 mt-1">
+                <div v-if="getWidgetById(item.i)!.show_change && widgetData[item.i]" class="flex items-center text-xs text-foreground/40 mt-1">
                   <component
                     :is="widgetData[item.i]?.change > 0 ? TrendingUp : widgetData[item.i]?.change < 0 ? TrendingDown : Minus"
                     :class="[
-                      'h-3 w-3 mr-1',
-                      widgetData[item.i]?.change > 0 ? 'text-emerald-400' : widgetData[item.i]?.change < 0 ? 'text-red-400' : 'text-white/30'
+                      'size-3 mr-1',
+                      widgetData[item.i]?.change > 0 ? 'text-emerald-400' : widgetData[item.i]?.change < 0 ? 'text-red-400' : 'text-foreground/30'
                     ]"
                   />
-                  <span :class="widgetData[item.i]?.change > 0 ? 'text-emerald-400' : widgetData[item.i]?.change < 0 ? 'text-red-400' : 'text-white/30 light:text-gray-400'">
+                  <span :class="widgetData[item.i]?.change > 0 ? 'text-emerald-400' : widgetData[item.i]?.change < 0 ? 'text-red-400' : 'text-foreground/30'">
                     {{ Math.abs(widgetData[item.i]?.change || 0).toFixed(1) }}%
                   </span>
                   <span class="ml-1">{{ comparisonPeriodLabel }}</span>
@@ -869,17 +865,17 @@ onMounted(() => {
             <!-- Chart widget card -->
             <div
               v-else-if="getWidgetById(item.i) && isChartWidget(getWidgetById(item.i)!)"
-              class="group relative h-full flex flex-col card-depth rounded-xl border border-white/8 bg-white/4 p-6 light:bg-white light:border-gray-200 hover:bg-white/6 hover:light:bg-gray-50 transition-colors overflow-hidden"
+              class="group relative h-full flex flex-col card-depth rounded-xl border border-border bg-card p-6 hover:bg-accent transition-colors overflow-hidden"
             >
               <!-- Drag handle indicator -->
-              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-white/20 light:text-gray-300 cursor-grab active:cursor-grabbing z-10">
-                <GripVertical class="h-4 w-4" />
+              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-foreground/20 cursor-grab active:cursor-grabbing z-10">
+                <GripVertical class="size-4" />
               </div>
 
               <div class="flex flex-row items-center justify-between pb-2">
                 <div>
-                  <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ getWidgetById(item.i)!.name }}</span>
-                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-white/30 light:text-gray-400 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
+                  <span class="text-sm font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
+                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -887,31 +883,31 @@ onMounted(() => {
                       v-if="canEditWidget"
                       variant="ghost"
                       size="icon"
-                      class="h-6 w-6 text-white/20 hover:text-white hover:bg-white/10 light:text-gray-300 hover:light:text-gray-700 hover:light:bg-gray-100"
+                      class="size-6 text-foreground/20 hover:text-foreground hover:bg-accent"
                       @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)"
                       :title="$t('dashboard.editWidgetTooltip')"
                     >
-                      <Pencil class="h-3 w-3" />
+                      <Pencil class="size-3" />
                     </Button>
                     <Button
                       v-if="canDeleteWidget"
                       variant="ghost"
                       size="icon"
-                      class="h-6 w-6 text-white/20 hover:text-red-400 hover:bg-red-500/10 light:text-gray-300 hover:light:text-red-600 hover:light:bg-red-50"
+                      class="size-6 text-foreground/20 hover:text-destructive hover:bg-destructive/10"
                       @click.stop="openDeleteDialog(getWidgetById(item.i)!)"
                       :title="$t('dashboard.deleteWidgetTooltip')"
                     >
-                      <Trash2 class="h-3 w-3" />
+                      <Trash2 class="size-3" />
                     </Button>
                   </div>
-                  <div :class="['h-10 w-10 rounded-lg flex items-center justify-center', getWidgetColor(getWidgetById(item.i)!.color).bg]">
-                    <component :is="getWidgetIcon(getWidgetById(item.i)!.data_source)" :class="['h-5 w-5', getWidgetColor(getWidgetById(item.i)!.color).text]" />
+                  <div :class="['size-10 rounded-lg flex items-center justify-center', getWidgetColor(getWidgetById(item.i)!.color).bg]">
+                    <component :is="getWidgetIcon(getWidgetById(item.i)!.data_source)" :class="['size-5', getWidgetColor(getWidgetById(item.i)!.color).text]" />
                   </div>
                 </div>
               </div>
               <div class="flex-1 min-h-0 pt-2">
                 <template v-if="isWidgetDataLoading">
-                  <Skeleton class="h-full w-full bg-white/8 light:bg-gray-200" />
+                  <Skeleton class="size-full bg-muted" />
                 </template>
                 <template v-else-if="(widgetData[item.i]?.chart_data?.length || 0) > 0 || (widgetData[item.i]?.data_points?.length || 0) > 0 || (widgetData[item.i]?.grouped_series?.datasets?.length || 0) > 0">
                   <Line v-if="getWidgetById(item.i)!.chart_type === 'line'" :data="getChartComponentData(getWidgetById(item.i)!)" :options="lineBarChartOptions" />
@@ -919,7 +915,7 @@ onMounted(() => {
                   <Pie v-else-if="getWidgetById(item.i)!.chart_type === 'pie'" :data="getChartComponentData(getWidgetById(item.i)!)" :options="pieChartOptions" />
                 </template>
                 <template v-else>
-                  <div class="h-full flex items-center justify-center text-white/40 light:text-gray-400">
+                  <div class="h-full flex items-center justify-center text-foreground/40">
                     {{ $t('common.noData') }}
                   </div>
                 </template>
@@ -929,25 +925,25 @@ onMounted(() => {
             <!-- Table widget card -->
             <div
               v-else-if="getWidgetById(item.i) && isTableWidget(getWidgetById(item.i)!)"
-              class="group relative h-full flex flex-col card-depth rounded-xl border border-white/8 bg-white/4 light:bg-white light:border-gray-200 hover:bg-white/6 hover:light:bg-gray-50 transition-colors overflow-hidden"
+              class="group relative h-full flex flex-col card-depth rounded-xl border border-border bg-card hover:bg-accent transition-colors overflow-hidden"
             >
               <!-- Drag handle -->
-              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-white/20 light:text-gray-300 cursor-grab active:cursor-grabbing z-10">
-                <GripVertical class="h-4 w-4" />
+              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-foreground/20 cursor-grab active:cursor-grabbing z-10">
+                <GripVertical class="size-4" />
               </div>
 
               <div class="p-6 pb-3 flex flex-row items-center justify-between">
                 <div>
-                  <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ getWidgetById(item.i)!.name }}</span>
-                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-white/30 light:text-gray-400 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
+                  <span class="text-sm font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
+                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button v-if="canEditWidget" variant="ghost" size="icon" class="h-6 w-6 text-white/20 hover:text-white hover:bg-white/10 light:text-gray-300 hover:light:text-gray-700 hover:light:bg-gray-100" @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)" :title="$t('dashboard.editWidgetTooltip')">
-                      <Pencil class="h-3 w-3" />
+                    <Button v-if="canEditWidget" variant="ghost" size="icon" class="size-6 text-foreground/20 hover:text-foreground hover:bg-accent" @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)" :title="$t('dashboard.editWidgetTooltip')">
+                      <Pencil class="size-3" />
                     </Button>
-                    <Button v-if="canDeleteWidget" variant="ghost" size="icon" class="h-6 w-6 text-white/20 hover:text-red-400 hover:bg-red-500/10 light:text-gray-300 hover:light:text-red-600 hover:light:bg-red-50" @click.stop="openDeleteDialog(getWidgetById(item.i)!)" :title="$t('dashboard.deleteWidgetTooltip')">
-                      <Trash2 class="h-3 w-3" />
+                    <Button v-if="canDeleteWidget" variant="ghost" size="icon" class="size-6 text-foreground/20 hover:text-destructive hover:bg-destructive/10" @click.stop="openDeleteDialog(getWidgetById(item.i)!)" :title="$t('dashboard.deleteWidgetTooltip')">
+                      <Trash2 class="size-3" />
                     </Button>
                   </div>
                 </div>
@@ -955,21 +951,21 @@ onMounted(() => {
 
               <div class="flex-1 min-h-0 overflow-auto px-6 pb-6">
                 <template v-if="isWidgetDataLoading">
-                  <Skeleton class="h-full w-full bg-white/8 light:bg-gray-200" />
+                  <Skeleton class="size-full bg-muted" />
                 </template>
                 <!-- Grouped table (group_by set) -->
                 <template v-else-if="getWidgetById(item.i)!.group_by_field && widgetData[item.i]?.data_points?.length">
                   <table class="w-full">
                     <thead>
-                      <tr class="border-b border-white/8 light:border-gray-200">
-                        <th class="text-left py-2 text-xs font-medium text-white/40 light:text-gray-500 uppercase">{{ getWidgetById(item.i)!.group_by_field }}</th>
-                        <th class="text-right py-2 text-xs font-medium text-white/40 light:text-gray-500 uppercase">{{ $t('dashboard.count') }}</th>
+                      <tr class="border-b border-border">
+                        <th class="text-left py-2 text-xs font-medium text-foreground/40 uppercase">{{ getWidgetById(item.i)!.group_by_field }}</th>
+                        <th class="text-right py-2 text-xs font-medium text-foreground/40 uppercase">{{ $t('dashboard.count') }}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="dp in widgetData[item.i]?.data_points" :key="dp.label" class="border-b border-white/4 light:border-gray-100">
-                        <td class="py-2 text-sm text-white/70 light:text-gray-700">{{ dp.label }}</td>
-                        <td class="py-2 text-sm text-right text-white light:text-gray-900 font-medium">{{ dp.value }}</td>
+                      <tr v-for="dp in widgetData[item.i]?.data_points" :key="dp.label" class="border-b border-border">
+                        <td class="py-2 text-sm text-foreground/70">{{ dp.label }}</td>
+                        <td class="py-2 text-sm text-right text-foreground font-medium">{{ dp.value }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -980,11 +976,11 @@ onMounted(() => {
                     <div
                       v-for="row in widgetData[item.i]?.table_rows"
                       :key="row.id"
-                      class="flex items-start gap-3 p-3 rounded-lg hover:bg-white/4 hover:light:bg-gray-50 transition-colors"
+                      class="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
                     >
                       <div
                         :class="[
-                          'h-10 w-10 rounded-lg flex items-center justify-center text-sm font-medium shrink-0',
+                          'size-10 rounded-lg flex items-center justify-center text-sm font-medium shrink-0',
                           row.direction === 'incoming' ? 'bg-linear-to-br from-emerald-500 to-green-600 text-white' : 'bg-linear-to-br from-blue-500 to-cyan-600 text-white'
                         ]"
                       >
@@ -992,19 +988,19 @@ onMounted(() => {
                       </div>
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
-                          <p class="text-sm font-medium truncate text-white light:text-gray-900">{{ row.label }}</p>
-                          <span class="text-xs text-white/40 light:text-gray-500 flex items-center gap-1 shrink-0">
-                            <Clock class="h-3 w-3" />
+                          <p class="text-sm font-medium truncate text-foreground">{{ row.label }}</p>
+                          <span class="text-xs text-foreground/40 flex items-center gap-1 shrink-0">
+                            <Clock class="size-3" />
                             {{ formatTime(row.created_at) }}
                           </span>
                         </div>
-                        <p class="text-sm text-white/50 light:text-gray-600 truncate">{{ row.sub_label }}</p>
+                        <p class="text-sm text-foreground/50 truncate">{{ row.sub_label }}</p>
                         <div class="flex items-center gap-2 mt-1">
                           <span
                             v-if="row.direction"
                             :class="[
                               'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-                              row.direction === 'incoming' ? 'bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700' : 'bg-blue-500/20 text-blue-400 light:bg-blue-100 light:text-blue-700'
+                              row.direction === 'incoming' ? 'bg-success/20 text-success' : 'bg-info/20 text-info'
                             ]"
                           >
                             {{ row.direction }}
@@ -1013,10 +1009,10 @@ onMounted(() => {
                             v-if="row.status"
                             :class="[
                               'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-                              row.status === 'delivered' ? 'bg-blue-500/20 text-blue-400 light:bg-blue-100 light:text-blue-700' :
-                              row.status === 'read' ? 'bg-emerald-500/20 text-emerald-400 light:bg-emerald-100 light:text-emerald-700' :
-                              row.status === 'failed' ? 'bg-red-500/20 text-red-400 light:bg-red-100 light:text-red-700' :
-                              'bg-white/10 text-white/50 light:bg-gray-100 light:text-gray-600'
+                              row.status === 'delivered' ? 'bg-info/20 text-info' :
+                              row.status === 'read' ? 'bg-success/20 text-success' :
+                              row.status === 'failed' ? 'bg-destructive/20 text-destructive' :
+                              'bg-muted text-foreground/50'
                             ]"
                           >
                             {{ row.status }}
@@ -1027,7 +1023,7 @@ onMounted(() => {
                   </div>
                 </template>
                 <template v-else>
-                  <div class="h-full flex items-center justify-center text-white/40 light:text-gray-400">
+                  <div class="h-full flex items-center justify-center text-foreground/40">
                     {{ $t('common.noData') }}
                   </div>
                 </template>
@@ -1037,25 +1033,25 @@ onMounted(() => {
             <!-- Shortcuts widget card -->
             <div
               v-else-if="getWidgetById(item.i) && isShortcutsWidget(getWidgetById(item.i)!)"
-              class="group relative h-full flex flex-col card-depth rounded-xl border border-white/8 bg-white/4 light:bg-white light:border-gray-200 hover:bg-white/6 hover:light:bg-gray-50 transition-colors overflow-hidden"
+              class="group relative h-full flex flex-col card-depth rounded-xl border border-border bg-card hover:bg-accent transition-colors overflow-hidden"
             >
               <!-- Drag handle -->
-              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-white/20 light:text-gray-300 cursor-grab active:cursor-grabbing z-10">
-                <GripVertical class="h-4 w-4" />
+              <div v-if="isDragMode" class="widget-drag-handle absolute top-2 left-2 text-foreground/20 cursor-grab active:cursor-grabbing z-10">
+                <GripVertical class="size-4" />
               </div>
 
               <div class="p-6 pb-3 flex flex-row items-center justify-between">
                 <div>
-                  <span class="text-sm font-medium text-white/50 light:text-gray-500">{{ getWidgetById(item.i)!.name }}</span>
-                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-white/30 light:text-gray-400 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
+                  <span class="text-sm font-medium text-foreground/50">{{ getWidgetById(item.i)!.name }}</span>
+                  <p v-if="getWidgetById(item.i)!.description" class="text-xs text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button v-if="canEditWidget" variant="ghost" size="icon" class="h-6 w-6 text-white/20 hover:text-white hover:bg-white/10 light:text-gray-300 hover:light:text-gray-700 hover:light:bg-gray-100" @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)" :title="$t('dashboard.editWidgetTooltip')">
-                      <Pencil class="h-3 w-3" />
+                    <Button v-if="canEditWidget" variant="ghost" size="icon" class="size-6 text-foreground/20 hover:text-foreground hover:bg-accent" @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)" :title="$t('dashboard.editWidgetTooltip')">
+                      <Pencil class="size-3" />
                     </Button>
-                    <Button v-if="canDeleteWidget" variant="ghost" size="icon" class="h-6 w-6 text-white/20 hover:text-red-400 hover:bg-red-500/10 light:text-gray-300 hover:light:text-red-600 hover:light:bg-red-50" @click.stop="openDeleteDialog(getWidgetById(item.i)!)" :title="$t('dashboard.deleteWidgetTooltip')">
-                      <Trash2 class="h-3 w-3" />
+                    <Button v-if="canDeleteWidget" variant="ghost" size="icon" class="size-6 text-foreground/20 hover:text-destructive hover:bg-destructive/10" @click.stop="openDeleteDialog(getWidgetById(item.i)!)" :title="$t('dashboard.deleteWidgetTooltip')">
+                      <Trash2 class="size-3" />
                     </Button>
                   </div>
                 </div>
@@ -1067,12 +1063,12 @@ onMounted(() => {
                     <RouterLink
                       v-if="SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY]"
                       :to="SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].to"
-                      class="card-interactive flex flex-col items-center justify-center p-4 rounded-xl border border-white/8 bg-white/2 light:bg-gray-50 light:border-gray-200"
+                      class="card-interactive flex flex-col items-center justify-center p-4 rounded-xl border border-border bg-muted"
                     >
-                      <div :class="['h-12 w-12 rounded-lg bg-linear-to-br flex items-center justify-center mb-2 shadow-lg', SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].gradient, 'shadow-' + (key as string) + '-500/20']">
-                        <component :is="SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].icon" class="h-6 w-6 text-white" />
+                      <div :class="['size-12 rounded-lg bg-linear-to-br flex items-center justify-center mb-2 shadow-lg', SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].gradient, 'shadow-' + (key as string) + '-500/20']">
+                        <component :is="SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].icon" class="size-6 text-white" />
                       </div>
-                      <span class="text-sm font-medium text-white light:text-gray-900">{{ SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].label }}</span>
+                      <span class="text-sm font-medium text-foreground">{{ SHORTCUT_REGISTRY[key as keyof typeof SHORTCUT_REGISTRY].label }}</span>
                     </RouterLink>
                   </template>
                 </div>
@@ -1086,10 +1082,10 @@ onMounted(() => {
 
     <!-- Widget Dialog -->
     <Dialog v-model:open="isWidgetDialogOpen">
-      <DialogContent class="sm:max-w-[500px] bg-[#141414] border-white/8 text-white light:bg-white light:border-gray-200 light:text-gray-900">
+      <DialogContent class="sm:max-w-[500px] bg-white border-border text-foreground dark:bg-[#141414]">
         <DialogHeader>
           <DialogTitle>{{ isEditMode ? $t('dashboard.editWidget') : $t('dashboard.createWidget') }}</DialogTitle>
-          <DialogDescription class="text-white/50 light:text-gray-500">
+          <DialogDescription class="text-foreground/50">
             {{ $t('dashboard.widgetDialogDesc') }}
           </DialogDescription>
         </DialogHeader>
@@ -1097,38 +1093,38 @@ onMounted(() => {
         <div class="space-y-4 py-4">
           <!-- Name -->
           <div class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.widgetName') }} *</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.widgetName') }} *</Label>
             <Input
               v-model="widgetForm.name"
               :placeholder="$t('dashboard.widgetNamePlaceholder')"
-              class="bg-white/4 border-white/10 text-white placeholder:text-white/30 light:bg-white light:border-gray-300 light:text-gray-900"
+              class="bg-card border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <!-- Description -->
           <div class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.widgetDescription') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.widgetDescription') }}</Label>
             <Textarea
               v-model="widgetForm.description"
               :placeholder="$t('dashboard.widgetDescriptionPlaceholder')"
-              class="bg-white/4 border-white/10 text-white placeholder:text-white/30 light:bg-white light:border-gray-300 light:text-gray-900"
+              class="bg-card border-border text-foreground placeholder:text-muted-foreground"
               :rows="2"
             />
           </div>
 
           <!-- Data Source (hidden for shortcuts) -->
           <div v-if="widgetForm.display_type !== 'shortcuts'" class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.dataSource') }} *</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.dataSource') }} *</Label>
             <Select :model-value="widgetForm.data_source" @update:model-value="(val) => widgetForm.data_source = String(val)">
-              <SelectTrigger class="bg-white/4 border-white/10 text-white light:bg-white light:border-gray-300 light:text-gray-900">
+              <SelectTrigger class="bg-card border-border text-foreground">
                 <SelectValue :placeholder="$t('dashboard.selectDataSource')" />
               </SelectTrigger>
-              <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
+              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
                 <SelectItem
                   v-for="source in dataSources"
                   :key="source.name"
                   :value="source.name"
-                  class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ source.label }}
                 </SelectItem>
@@ -1138,48 +1134,48 @@ onMounted(() => {
 
           <!-- Metric (hidden for shortcuts and table) -->
           <div v-if="widgetForm.display_type !== 'shortcuts' && widgetForm.display_type !== 'table'" class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.metric') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.metric') }}</Label>
             <Select :model-value="widgetForm.metric" @update:model-value="(val) => widgetForm.metric = String(val)">
-              <SelectTrigger class="bg-white/4 border-white/10 text-white light:bg-white light:border-gray-300 light:text-gray-900">
+              <SelectTrigger class="bg-card border-border text-foreground">
                 <SelectValue :placeholder="$t('dashboard.selectMetric')" />
               </SelectTrigger>
-              <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
-                <SelectItem value="count" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.metricCount') }}</SelectItem>
-                <SelectItem value="sum" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.metricSum') }}</SelectItem>
-                <SelectItem value="avg" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.metricAverage') }}</SelectItem>
+              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+                <SelectItem value="count" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.metricCount') }}</SelectItem>
+                <SelectItem value="sum" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.metricSum') }}</SelectItem>
+                <SelectItem value="avg" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.metricAverage') }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <!-- Display Type -->
           <div class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.displayType') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.displayType') }}</Label>
             <Select :model-value="widgetForm.display_type" @update:model-value="(val) => widgetForm.display_type = String(val)">
-              <SelectTrigger class="bg-white/4 border-white/10 text-white light:bg-white light:border-gray-300 light:text-gray-900">
+              <SelectTrigger class="bg-card border-border text-foreground">
                 <SelectValue :placeholder="$t('dashboard.selectDisplayType')" />
               </SelectTrigger>
-              <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
-                <SelectItem value="number" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.displayNumber') }}</SelectItem>
-                <SelectItem value="chart" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.displayChart') }}</SelectItem>
-                <SelectItem value="table" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.displayTable') }}</SelectItem>
-                <SelectItem value="shortcuts" class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100">{{ $t('dashboard.displayShortcuts') }}</SelectItem>
+              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+                <SelectItem value="number" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayNumber') }}</SelectItem>
+                <SelectItem value="chart" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayChart') }}</SelectItem>
+                <SelectItem value="table" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayTable') }}</SelectItem>
+                <SelectItem value="shortcuts" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayShortcuts') }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <!-- Chart Type (visible when display type is chart) -->
           <div v-if="widgetForm.display_type === 'chart'" class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.chartType') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.chartType') }}</Label>
             <Select :model-value="widgetForm.chart_type" @update:model-value="(val) => widgetForm.chart_type = String(val)">
-              <SelectTrigger class="bg-white/4 border-white/10 text-white light:bg-white light:border-gray-300 light:text-gray-900">
+              <SelectTrigger class="bg-card border-border text-foreground">
                 <SelectValue :placeholder="$t('dashboard.selectChartType')" />
               </SelectTrigger>
-              <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
+              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
                 <SelectItem
                   v-for="ct in chartTypeOptions"
                   :key="ct.value"
                   :value="ct.value"
-                  class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ ct.label }}
                 </SelectItem>
@@ -1189,15 +1185,15 @@ onMounted(() => {
 
           <!-- Group By (visible when display type is chart or table, and data source is selected) -->
           <div v-if="(widgetForm.display_type === 'chart' || widgetForm.display_type === 'table') && widgetForm.data_source" class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.groupBy') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.groupBy') }}</Label>
             <Select :model-value="widgetForm.group_by_field || 'none'" @update:model-value="(val) => widgetForm.group_by_field = val === 'none' ? '' : String(val)">
-              <SelectTrigger class="bg-white/4 border-white/10 text-white light:bg-white light:border-gray-300 light:text-gray-900">
+              <SelectTrigger class="bg-card border-border text-foreground">
                 <SelectValue :placeholder="$t('dashboard.noneTimeSeries')" />
               </SelectTrigger>
-              <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
+              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
                 <SelectItem
                   value="none"
-                  class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ $t('dashboard.noneTimeSeries') }}
                 </SelectItem>
@@ -1205,7 +1201,7 @@ onMounted(() => {
                   v-for="field in availableFields"
                   :key="field"
                   :value="field"
-                  class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ field }}
                 </SelectItem>
@@ -1215,24 +1211,24 @@ onMounted(() => {
 
           <!-- Shortcuts selector (only for shortcuts display type) -->
           <div v-if="widgetForm.display_type === 'shortcuts'" class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.selectShortcuts') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.selectShortcuts') }}</Label>
             <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
               <label
                 v-for="(shortcut, key) in SHORTCUT_REGISTRY"
                 :key="key"
-                class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/4 hover:light:bg-gray-50 cursor-pointer"
+                class="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
               >
                 <input
                   type="checkbox"
                   :value="key"
                   v-model="selectedShortcuts"
-                  class="rounded border-white/20 bg-white/4 text-emerald-500 focus:ring-emerald-500 light:border-gray-300 light:bg-white"
+                  class="rounded border-border bg-card text-emerald-500 focus:ring-emerald-500"
                 />
                 <div class="flex items-center gap-2">
-                  <div :class="['h-8 w-8 rounded-lg bg-linear-to-br flex items-center justify-center', shortcut.gradient]">
-                    <component :is="shortcut.icon" class="h-4 w-4 text-white" />
+                  <div :class="['size-8 rounded-lg bg-linear-to-br flex items-center justify-center', shortcut.gradient]">
+                    <component :is="shortcut.icon" class="size-4 text-white" />
                   </div>
-                  <span class="text-sm text-white/70 light:text-gray-700">{{ shortcut.label }}</span>
+                  <span class="text-sm text-foreground/70">{{ shortcut.label }}</span>
                 </div>
               </label>
             </div>
@@ -1241,27 +1237,27 @@ onMounted(() => {
           <!-- Filters (hidden for shortcuts) -->
           <div v-if="widgetForm.display_type !== 'shortcuts'" class="space-y-2">
             <div class="flex items-center justify-between">
-              <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.filters') }} ({{ widgetForm.filters.length }})</Label>
-              <Button type="button" variant="outline" size="sm" @click.stop.prevent="addFilter" class="border-white/20 text-white hover:bg-white/10 light:border-gray-300 light:text-gray-700">
-                <Plus class="h-4 w-4 mr-1" />
+              <Label class="text-foreground/70">{{ $t('dashboard.filters') }} ({{ widgetForm.filters.length }})</Label>
+              <Button type="button" variant="outline" size="sm" @click.stop.prevent="addFilter" class="border-border text-foreground hover:bg-accent">
+                <Plus class="size-4 mr-1" />
                 {{ $t('dashboard.addFilter') }}
               </Button>
             </div>
-            <p v-if="!widgetForm.data_source && widgetForm.filters.length === 0" class="text-xs text-white/40 light:text-gray-500">
+            <p v-if="!widgetForm.data_source && widgetForm.filters.length === 0" class="text-xs text-foreground/40">
               {{ $t('dashboard.selectDataSourceFirst') }}
             </p>
             <div v-for="(filter, index) in widgetForm.filters" :key="index" class="flex items-center gap-2">
               <div class="flex-1">
                 <Select :model-value="filter.field" @update:model-value="(val) => filter.field = String(val)">
-                  <SelectTrigger class="w-full bg-white/4 border-white/10 text-white text-sm light:bg-white light:border-gray-300 light:text-gray-900">
+                  <SelectTrigger class="w-full bg-card border-border text-foreground text-sm">
                     <SelectValue :placeholder="$t('dashboard.field')" />
                   </SelectTrigger>
-                  <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
+                  <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
                     <SelectItem
                       v-for="field in availableFields"
                       :key="field"
                       :value="field"
-                      class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                      class="text-foreground/70 focus:bg-accent focus:text-foreground"
                     >
                       {{ field }}
                     </SelectItem>
@@ -1270,15 +1266,15 @@ onMounted(() => {
               </div>
               <div class="w-36">
                 <Select :model-value="filter.operator" @update:model-value="(val) => filter.operator = String(val)">
-                  <SelectTrigger class="w-full bg-white/4 border-white/10 text-white text-sm light:bg-white light:border-gray-300 light:text-gray-900">
+                  <SelectTrigger class="w-full bg-card border-border text-foreground text-sm">
                     <SelectValue :placeholder="$t('dashboard.operator')" />
                   </SelectTrigger>
-                  <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
+                  <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
                     <SelectItem
                       v-for="op in operators"
                       :key="op.value"
                       :value="op.value"
-                      class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                      class="text-foreground/70 focus:bg-accent focus:text-foreground"
                     >
                       {{ op.label }}
                     </SelectItem>
@@ -1288,30 +1284,30 @@ onMounted(() => {
               <Input
                 v-model="filter.value"
                 :placeholder="$t('dashboard.value')"
-                class="flex-1 bg-white/4 border-white/10 text-white text-sm placeholder:text-white/30 light:bg-white light:border-gray-300 light:text-gray-900"
+                class="flex-1 bg-card border-border text-foreground text-sm placeholder:text-muted-foreground"
               />
-              <Button variant="ghost" size="icon" @click="removeFilter(index)" class="text-white/50 hover:text-red-400 shrink-0">
-                <X class="h-4 w-4" />
+              <Button variant="ghost" size="icon" @click="removeFilter(index)" class="text-foreground/50 hover:text-destructive shrink-0">
+                <X class="size-4" />
               </Button>
             </div>
           </div>
 
           <!-- Color (hidden for shortcuts and table) -->
           <div v-if="widgetForm.display_type !== 'shortcuts' && widgetForm.display_type !== 'table'" class="space-y-2">
-            <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.color') }}</Label>
+            <Label class="text-foreground/70">{{ $t('dashboard.color') }}</Label>
             <Select :model-value="widgetForm.color" @update:model-value="(val) => widgetForm.color = String(val)">
-              <SelectTrigger class="bg-white/4 border-white/10 text-white light:bg-white light:border-gray-300 light:text-gray-900">
+              <SelectTrigger class="bg-card border-border text-foreground">
                 <SelectValue :placeholder="$t('dashboard.selectColor')" />
               </SelectTrigger>
-              <SelectContent class="bg-[#1a1a1a] border-white/8 light:bg-white light:border-gray-200">
+              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
                 <SelectItem
                   v-for="color in colorOptions"
                   :key="color.value"
                   :value="color.value"
-                  class="text-white/70 focus:bg-white/8 focus:text-white light:text-gray-700 focus:light:bg-gray-100"
+                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   <span class="flex items-center gap-2">
-                    <span :class="['inline-block w-3 h-3 rounded-full', color.bg]"></span>
+                    <span :class="['inline-block size-3 rounded-full', color.bg]"></span>
                     {{ color.label }}
                   </span>
                 </SelectItem>
@@ -1323,17 +1319,17 @@ onMounted(() => {
           <div class="flex items-center justify-between">
             <div v-if="widgetForm.display_type === 'number' || widgetForm.display_type === 'percentage'" class="flex items-center gap-2">
               <Switch v-model:checked="widgetForm.show_change" />
-              <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.showPercentChange') }}</Label>
+              <Label class="text-foreground/70">{{ $t('dashboard.showPercentChange') }}</Label>
             </div>
             <div class="flex items-center gap-2">
               <Switch v-model:checked="widgetForm.is_shared" />
-              <Label class="text-white/70 light:text-gray-700">{{ $t('dashboard.shareWithTeam') }}</Label>
+              <Label class="text-foreground/70">{{ $t('dashboard.shareWithTeam') }}</Label>
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" @click="isWidgetDialogOpen = false" class="border-white/10 text-white/70 hover:bg-white/8 light:border-gray-300 light:text-gray-700">
+          <Button variant="outline" @click="isWidgetDialogOpen = false" class="border-border text-foreground/70 hover:bg-accent">
             {{ $t('common.cancel') }}
           </Button>
           <Button @click="saveWidget" :disabled="isSavingWidget">
@@ -1345,15 +1341,15 @@ onMounted(() => {
 
     <!-- Delete Confirmation Dialog -->
     <AlertDialog v-model:open="deleteDialogOpen">
-      <AlertDialogContent class="bg-[#141414] border-white/8 light:bg-white light:border-gray-200">
+      <AlertDialogContent class="bg-white border-border dark:bg-[#141414]">
         <AlertDialogHeader>
-          <AlertDialogTitle class="text-white light:text-gray-900">{{ $t('dashboard.deleteWidgetTitle') }}</AlertDialogTitle>
-          <AlertDialogDescription class="text-white/60 light:text-gray-500">
+          <AlertDialogTitle class="text-foreground">{{ $t('dashboard.deleteWidgetTitle') }}</AlertDialogTitle>
+          <AlertDialogDescription class="text-foreground/60">
             {{ $t('dashboard.deleteWidgetConfirm', { name: widgetToDelete?.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel class="bg-transparent border-white/10 text-white/70 hover:bg-white/8 light:border-gray-300 light:text-gray-700 hover:light:bg-gray-100">
+          <AlertDialogCancel class="bg-transparent border-border text-foreground/70 hover:bg-accent">
             {{ $t('common.cancel') }}
           </AlertDialogCancel>
           <AlertDialogAction @click="confirmDeleteWidget" class="bg-red-600 text-white hover:bg-red-700">
@@ -1390,14 +1386,14 @@ onMounted(() => {
   bottom: 4px;
   width: 8px;
   height: 8px;
-  border-right: 2px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  border-right: 2px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
   border-radius: 0 0 2px 0;
 }
 
-.light .vue-grid-item > .vue-resizable-handle::after {
-  border-right-color: rgba(0, 0, 0, 0.2);
-  border-bottom-color: rgba(0, 0, 0, 0.2);
+.dark .vue-grid-item > .vue-resizable-handle::after {
+  border-right-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Ensure grid items don't overflow */

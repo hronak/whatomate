@@ -102,11 +102,11 @@ function editTooltip(role: Role): string {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-[#0a0a0b] light:bg-gray-50">
+  <div class="flex flex-col h-full bg-background">
     <PageHeader :title="$t('roles.title')" :subtitle="$t('roles.subtitle')" :icon="Shield" icon-gradient="bg-linear-to-br from-purple-500 to-indigo-600 shadow-purple-500/20" back-link="/settings">
       <template #actions>
         <RouterLink v-if="canWrite" to="/settings/roles/new">
-          <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('roles.addRole') }}</Button>
+          <Button variant="outline" size="sm"><Plus class="size-4 mr-2" />{{ $t('roles.addRole') }}</Button>
         </RouterLink>
       </template>
     </PageHeader>
@@ -138,8 +138,8 @@ function editTooltip(role: Role): string {
                 <template #cell-role="{ item: role }">
                   <RouterLink :to="`/settings/roles/${role.id}`" class="flex items-center gap-2 text-inherit no-underline hover:opacity-80">
                     <span class="font-medium">{{ role.name }}</span>
-                    <Badge v-if="role.is_system" variant="secondary"><Lock class="h-3 w-3 mr-1" />{{ $t('roles.system') }}</Badge>
-                    <Badge v-if="role.is_default" variant="outline"><Star class="h-3 w-3 mr-1" />{{ $t('roles.default') }}</Badge>
+                    <Badge v-if="role.is_system" variant="secondary"><Lock class="size-3 mr-1" />{{ $t('roles.system') }}</Badge>
+                    <Badge v-if="role.is_default" variant="outline"><Star class="size-3 mr-1" />{{ $t('roles.default') }}</Badge>
                   </RouterLink>
                 </template>
                 <template #cell-description="{ item: role }">
@@ -149,7 +149,7 @@ function editTooltip(role: Role): string {
                   <Badge variant="outline">{{ role.permissions.length }}</Badge>
                 </template>
                 <template #cell-users="{ item: role }">
-                  <div class="flex items-center justify-center gap-1"><Users class="h-4 w-4 text-muted-foreground" /><span>{{ role.user_count }}</span></div>
+                  <div class="flex items-center justify-center gap-1"><Users class="size-4 text-muted-foreground" /><span>{{ role.user_count }}</span></div>
                 </template>
                 <template #cell-created="{ item: role }">
                   <span class="text-muted-foreground">{{ formatDate(role.created_at) }}</span>
@@ -157,22 +157,22 @@ function editTooltip(role: Role): string {
                 <template #cell-actions="{ item: role }">
                   <div class="flex items-center justify-end gap-1">
                     <RouterLink :to="`/settings/roles/${role.id}`">
-                      <IconButton :icon="Pencil" :label="editTooltip(role)" class="h-8 w-8" />
+                      <IconButton :icon="Pencil" :label="editTooltip(role)" class="size-8" />
                     </RouterLink>
                     <IconButton
                       v-if="canDelete && !role.is_system"
                       :label="role.user_count > 0 ? $t('roles.cannotDeleteUsers') : $t('roles.deleteRole')"
-                      class="h-8 w-8"
+                      class="size-8"
                       :disabled="role.user_count > 0"
                       @click="openDeleteDialog(role)"
                     >
-                      <Trash2 class="h-4 w-4 text-destructive" />
+                      <Trash2 class="size-4 text-destructive" />
                     </IconButton>
                   </div>
                 </template>
                 <template #empty-action>
                   <RouterLink v-if="canWrite" to="/settings/roles/new">
-                    <Button variant="outline" size="sm"><Plus class="h-4 w-4 mr-2" />{{ $t('roles.addRole') }}</Button>
+                    <Button variant="outline" size="sm"><Plus class="size-4 mr-2" />{{ $t('roles.addRole') }}</Button>
                   </RouterLink>
                 </template>
               </DataTable>

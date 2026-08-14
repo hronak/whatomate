@@ -16,14 +16,8 @@ function updateTheme() {
     isDark.value = colorMode.value === 'dark'
   }
 
-  // Dark-first: we use .light class for light mode, .dark class for dark mode
-  if (isDark.value) {
-    document.documentElement.classList.remove('light')
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    document.documentElement.classList.add('light')
-  }
+  // Stock convention: no class = light (the CSS default), .dark class overrides it
+  document.documentElement.classList.toggle('dark', isDark.value)
 }
 
 export function useColorMode() {

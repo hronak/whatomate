@@ -17,7 +17,7 @@ import AuditLogPanel from '@/components/shared/AuditLogPanel.vue'
 import UnsavedChangesDialog from '@/components/shared/UnsavedChangesDialog.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { TagBadge } from '@/components/ui/tag-badge'
+import { TagBadge } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -242,10 +242,10 @@ onMounted(async () => {
       <template #actions>
         <div class="flex items-center gap-2">
           <Button v-if="canWrite && hasChanges" size="sm" @click="save" :disabled="isSaving">
-            <Save class="h-4 w-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.save') }}
+            <Save class="size-4 mr-1" /> {{ isSaving ? $t('common.saving', 'Saving...') : $t('common.save') }}
           </Button>
           <Button variant="outline" size="sm" @click="openChat">
-            <MessageSquare class="h-4 w-4 mr-1" /> {{ $t('contacts.openChat', 'Open Chat') }}
+            <MessageSquare class="size-4 mr-1" /> {{ $t('contacts.openChat', 'Open Chat') }}
           </Button>
           <Button
             v-if="canDelete"
@@ -253,7 +253,7 @@ onMounted(async () => {
             size="sm"
             @click="deleteDialogOpen = true"
           >
-            <Trash2 class="h-4 w-4 mr-1" /> {{ $t('common.delete') }}
+            <Trash2 class="size-4 mr-1" /> {{ $t('common.delete') }}
           </Button>
         </div>
       </template>
@@ -269,8 +269,8 @@ onMounted(async () => {
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Phone class="h-5 w-5 text-primary" />
+            <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Phone class="size-5 text-primary" />
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ contact?.profile_name || contact?.name || contact?.phone_number }}</p>
@@ -313,7 +313,7 @@ onMounted(async () => {
                 <Button variant="outline" role="combobox" class="w-full justify-between" :disabled="!canWrite">
                   <span v-if="form.tags.length === 0" class="text-muted-foreground">{{ $t('contacts.selectTags') }}</span>
                   <span v-else>{{ form.tags.length }} {{ $t('contacts.tagsSelected') }}</span>
-                  <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent class="w-[300px] p-0" @interact-outside="(e: Event) => e.preventDefault()">
@@ -330,10 +330,10 @@ onMounted(async () => {
                         @select.prevent="toggleTag(tag.name)"
                       >
                         <div class="flex items-center gap-2 flex-1">
-                          <span :class="['w-2 h-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
+                          <span :class="['size-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
                           <span>{{ tag.name }}</span>
                         </div>
-                        <Check v-if="isTagSelected(tag.name)" class="h-4 w-4 text-primary" />
+                        <Check v-if="isTagSelected(tag.name)" class="size-4 text-primary" />
                       </CommandItem>
                     </CommandGroup>
                   </CommandList>
@@ -353,7 +353,7 @@ onMounted(async () => {
                   class="ml-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 p-0.5 transition-colors"
                   @click.stop="removeTag(tagName)"
                 >
-                  <X class="h-3 w-3" />
+                  <X class="size-3" />
                 </button>
               </TagBadge>
             </div>
@@ -366,10 +366,10 @@ onMounted(async () => {
                 <Button variant="outline" role="combobox" class="w-full justify-between" :disabled="!canWrite">
                   <span v-if="!assignedUserName" class="text-muted-foreground">{{ $t('contacts.selectAgent', 'Select agent') }}</span>
                   <span v-else class="flex items-center gap-2">
-                    <User class="h-3.5 w-3.5" />
+                    <User class="size-3.5" />
                     {{ assignedUserName }}
                   </span>
-                  <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent class="w-[300px] p-0" @interact-outside="(e: Event) => e.preventDefault()">
@@ -384,7 +384,7 @@ onMounted(async () => {
                         class="flex items-center gap-2 text-muted-foreground"
                         @select="selectAgent(null)"
                       >
-                        <X class="h-3.5 w-3.5" />
+                        <X class="size-3.5" />
                         <span>{{ $t('contacts.removeAssignment', 'Remove assignment') }}</span>
                       </CommandItem>
                       <CommandItem
@@ -394,9 +394,9 @@ onMounted(async () => {
                         class="flex items-center gap-2"
                         @select="selectAgent(u.id)"
                       >
-                        <User class="h-3.5 w-3.5" />
+                        <User class="size-3.5" />
                         <span class="flex-1">{{ u.full_name }}</span>
-                        <Check v-if="form.assigned_user_id === u.id" class="h-4 w-4 text-primary" />
+                        <Check v-if="form.assigned_user_id === u.id" class="size-4 text-primary" />
                       </CommandItem>
                     </CommandGroup>
                   </CommandList>

@@ -172,13 +172,13 @@ function getRowKey(item: T, index: number): string {
             <template v-if="col.sortable">
               <ArrowUp
                 v-if="sortKey === (col.sortKey || col.key) && sortDirection === 'asc'"
-                class="h-3 w-3"
+                class="size-3"
               />
               <ArrowDown
                 v-else-if="sortKey === (col.sortKey || col.key) && sortDirection === 'desc'"
-                class="h-3 w-3"
+                class="size-3"
               />
-              <ArrowUpDown v-else class="h-3 w-3 opacity-30" />
+              <ArrowUpDown v-else class="size-3 opacity-30" />
             </template>
           </div>
         </TableHead>
@@ -203,8 +203,8 @@ function getRowKey(item: T, index: number): string {
       <TableRow v-else-if="sortedItems.length === 0">
         <TableCell :colspan="columns.length" class="h-24 text-center text-muted-foreground">
           <slot name="empty">
-            <div v-if="emptyIcon" class="mb-3 mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10">
-              <component :is="emptyIcon" class="h-7 w-7 text-primary/60" />
+            <div v-if="emptyIcon" class="mb-3 mx-auto flex size-14 items-center justify-center rounded-full bg-linear-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10">
+              <component :is="emptyIcon" class="size-7 text-primary/60" />
             </div>
             <p v-if="emptyTitle">{{ emptyTitle }}</p>
             <p v-if="emptyDescription" class="text-sm">{{ emptyDescription }}</p>

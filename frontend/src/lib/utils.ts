@@ -86,19 +86,19 @@ export function formatLabel(key: string): string {
 }
 
 export function getQualityBadgeClass(rating: string): string {
-  if (!rating) return 'bg-gray-800 text-gray-400 light:bg-gray-100 light:text-gray-600'
+  if (!rating) return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
   switch (rating.toUpperCase()) {
     case 'GREEN':
     case 'HIGH':
-      return 'bg-green-950 text-green-400 border border-green-800/40 light:bg-green-100 light:text-green-800'
+      return 'bg-green-100 text-green-800 border border-green-800/40 dark:bg-green-950 dark:text-green-400'
     case 'YELLOW':
     case 'MEDIUM':
-      return 'bg-yellow-950 text-yellow-400 border border-yellow-800/40 light:bg-yellow-100 light:text-yellow-800'
+      return 'bg-yellow-100 text-yellow-800 border border-yellow-800/40 dark:bg-yellow-950 dark:text-yellow-400'
     case 'RED':
     case 'LOW':
-      return 'bg-red-950 text-red-400 border border-red-800/40 light:bg-red-100 light:text-red-800'
+      return 'bg-red-100 text-red-800 border border-red-800/40 dark:bg-red-950 dark:text-red-400'
     default:
-      return 'bg-gray-800 text-gray-400 light:bg-gray-100 light:text-gray-600'
+      return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
   }
 }
 
@@ -122,17 +122,17 @@ export function getQualityRatingLabel(rating: string | undefined, t: (key: strin
 }
 
 export function getVerificationBadgeClass(status: string): string {
-  if (!status) return 'bg-gray-800 text-gray-400 light:bg-gray-100 light:text-gray-600'
+  if (!status) return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
   switch (status.toUpperCase()) {
     case 'VERIFIED':
     case 'VERIFIED_CODE':
-      return 'bg-green-950 text-green-400 border border-green-800/40 light:bg-green-100 light:text-green-800'
+      return 'bg-green-100 text-green-800 border border-green-800/40 dark:bg-green-950 dark:text-green-400'
     case 'NOT_VERIFIED':
-      return 'bg-red-950 text-red-400 border border-red-800/40 light:bg-red-100 light:text-red-800'
+      return 'bg-red-100 text-red-800 border border-red-800/40 dark:bg-red-950 dark:text-red-400'
     case 'EXPIRED':
-      return 'bg-amber-950 text-amber-400 border border-amber-800/40 light:bg-amber-100 light:text-amber-800'
+      return 'bg-amber-100 text-amber-800 border border-amber-800/40 dark:bg-amber-950 dark:text-amber-400'
     default:
-      return 'bg-gray-800 text-gray-400 light:bg-gray-100 light:text-gray-600'
+      return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
   }
 }
 

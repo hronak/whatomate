@@ -2,7 +2,7 @@
 import type { ListboxFilterProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import { MagnifyingGlassIcon } from '@radix-icons/vue'
+import { Search } from '@lucide/vue'
 import { ListboxFilter, useForwardProps } from "reka-ui"
 import { cn } from "@/lib/utils"
 import { useCommand } from "."
@@ -24,7 +24,7 @@ const { filterState } = useCommand()
 
 <template>
   <div class="flex items-center border-b px-3" cmdk-input-wrapper>
-    <MagnifyingGlassIcon class="mr-2 h-4 w-4 shrink-0 opacity-50" />
+    <Search class="mr-2 size-4 shrink-0 opacity-50" />
     <ListboxFilter
       v-bind="{ ...forwardedProps, ...$attrs }"
       v-model="filterState.search"

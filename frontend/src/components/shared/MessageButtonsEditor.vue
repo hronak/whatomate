@@ -148,7 +148,7 @@ function typeIcon(type?: string) {
           :disabled="!canAdd('reply')"
           @click="addButton('reply')"
         >
-          <Reply class="h-3 w-3 mr-1" />
+          <Reply class="size-3 mr-1" />
           {{ $t('flowBuilder.replyButton', 'Reply') }}
         </Button>
         <Button
@@ -159,7 +159,7 @@ function typeIcon(type?: string) {
           :disabled="!canAdd('url')"
           @click="addButton('url')"
         >
-          <ExternalLink class="h-3 w-3 mr-1" />
+          <ExternalLink class="size-3 mr-1" />
           {{ $t('flowBuilder.urlButton', 'URL') }}
         </Button>
         <Button
@@ -170,7 +170,7 @@ function typeIcon(type?: string) {
           :disabled="!canAdd('phone')"
           @click="addButton('phone')"
         >
-          <Phone class="h-3 w-3 mr-1" />
+          <Phone class="size-3 mr-1" />
           {{ $t('flowBuilder.phoneButton', 'Phone') }}
         </Button>
         <Button
@@ -181,7 +181,7 @@ function typeIcon(type?: string) {
           :disabled="!canAdd('voice_call')"
           @click="addButton('voice_call')"
         >
-          <PhoneCall class="h-3 w-3 mr-1" />
+          <PhoneCall class="size-3 mr-1" />
           {{ $t('flowBuilder.voiceCallButton', 'Call') }}
         </Button>
         <Button
@@ -192,7 +192,7 @@ function typeIcon(type?: string) {
           :disabled="!canAdd('flow')"
           @click="addButton('flow')"
         >
-          <Workflow class="h-3 w-3 mr-1" />
+          <Workflow class="size-3 mr-1" />
           {{ $t('flowBuilder.flowButton', 'Flow') }}
         </Button>
       </div>
@@ -206,7 +206,7 @@ function typeIcon(type?: string) {
       >
         <div class="flex items-center gap-2">
           <Badge variant="outline" class="text-[10px] px-1.5">
-            <component :is="typeIcon(btn.type)" class="h-2.5 w-2.5 mr-1" />
+            <component :is="typeIcon(btn.type)" class="size-2.5 mr-1" />
             {{ typeLabel(btn.type) }}
           </Badge>
           <Input
@@ -219,11 +219,11 @@ function typeIcon(type?: string) {
           <Button
             variant="ghost"
             size="icon"
-            class="h-7 w-7"
+            class="size-7"
             :disabled="disabled"
             @click="removeButton(idx)"
           >
-            <Trash2 class="h-3 w-3 text-destructive" />
+            <Trash2 class="size-3 text-destructive" />
           </Button>
         </div>
 

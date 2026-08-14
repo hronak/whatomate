@@ -65,12 +65,12 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 to-gray-800 light:from-violet-50 light:to-violet-100 p-4">
+  <div class="min-h-screen flex items-center justify-center bg-linear-to-br from-violet-50 to-violet-100 dark:from-gray-900 dark:to-gray-800 p-4">
     <Card class="w-full max-w-md">
       <CardHeader class="space-y-1 text-center">
         <div class="flex justify-center mb-4">
-          <div class="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-            <MessageSquare class="h-7 w-7 text-primary-foreground" />
+          <div class="size-12 rounded-xl bg-primary flex items-center justify-center">
+            <MessageSquare class="size-7 text-primary-foreground" />
           </div>
         </div>
         <CardTitle class="text-2xl font-bold">{{ $t('auth.createAccount') }}</CardTitle>
@@ -147,7 +147,7 @@ const handleRegister = async () => {
         </CardContent>
         <CardFooter class="flex flex-col space-y-4">
           <Button type="submit" class="w-full" :disabled="isLoading">
-            <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 v-if="isLoading" class="mr-2 size-4 animate-spin" />
             {{ $t('auth.createAccountBtn') }}
           </Button>
           <p class="text-sm text-center text-muted-foreground">

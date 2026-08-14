@@ -6,20 +6,15 @@ export { default as AlertDescription } from "./AlertDescription.vue"
 export { default as AlertTitle } from "./AlertTitle.vue"
 
 export const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
+  "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
+        default: "bg-card text-card-foreground",
         destructive:
-          "border-destructive/50 text-destructive light:border-destructive [&>svg]:text-destructive",
-        // Dark-first: dark mode is default, light mode uses light: prefix
-        success:
-          "border-green-500/30 bg-green-950 text-green-200 [&>svg]:text-green-400 light:border-green-500/50 light:bg-green-50 light:text-green-800 [&>svg]:light:text-green-600",
+          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
         warning:
-          "border-yellow-500/30 bg-yellow-950 text-yellow-200 [&>svg]:text-yellow-400 light:border-yellow-500/50 light:bg-yellow-50 light:text-yellow-800 [&>svg]:light:text-yellow-600",
-        info:
-          "border-blue-500/30 bg-blue-950 text-blue-200 [&>svg]:text-blue-400 light:border-blue-500/50 light:bg-blue-50 light:text-blue-800 [&>svg]:light:text-blue-600",
+          "text-warning bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-warning/90",
       },
     },
     defaultVariants: {

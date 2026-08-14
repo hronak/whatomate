@@ -20,7 +20,7 @@ const completionMessage = computed(() => {
     :output-handles="[]"
     :has-input="!data?.isEntryNode"
   >
-    <template #icon><StopCircle class="w-4 h-4" /></template>
+    <template #icon><StopCircle class="size-4" /></template>
     <p v-if="completionMessage" class="truncate" :title="data?.config?.message || ''">{{ completionMessage }}</p>
     <p v-else>End of flow</p>
   </BaseNode>

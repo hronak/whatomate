@@ -44,20 +44,20 @@ function goToPage(page: number | '...') {
       <Button
         variant="outline"
         size="icon"
-        class="h-8 w-8"
+        class="size-8"
         :disabled="currentPage === 1"
         @click="goToPage(1)"
       >
-        <ChevronsLeft class="h-4 w-4" />
+        <ChevronsLeft class="size-4" />
       </Button>
       <Button
         variant="outline"
         size="icon"
-        class="h-8 w-8"
+        class="size-8"
         :disabled="currentPage === 1"
         @click="goToPage(currentPage - 1)"
       >
-        <ChevronLeft class="h-4 w-4" />
+        <ChevronLeft class="size-4" />
       </Button>
       <div class="flex items-center gap-1 mx-2">
         <template v-for="(page, index) in pageNumbers" :key="index">
@@ -65,7 +65,7 @@ function goToPage(page: number | '...') {
             v-if="page !== '...'"
             :variant="page === currentPage ? 'default' : 'outline'"
             size="icon"
-            class="h-8 w-8"
+            class="size-8"
             @click="goToPage(page)"
           >
             {{ page }}
@@ -76,20 +76,20 @@ function goToPage(page: number | '...') {
       <Button
         variant="outline"
         size="icon"
-        class="h-8 w-8"
+        class="size-8"
         :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
       >
-        <ChevronRight class="h-4 w-4" />
+        <ChevronRight class="size-4" />
       </Button>
       <Button
         variant="outline"
         size="icon"
-        class="h-8 w-8"
+        class="size-8"
         :disabled="currentPage === totalPages"
         @click="goToPage(totalPages)"
       >
-        <ChevronsRight class="h-4 w-4" />
+        <ChevronsRight class="size-4" />
       </Button>
     </div>
   </div>

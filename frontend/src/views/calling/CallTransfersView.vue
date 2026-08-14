@@ -107,7 +107,7 @@ onMounted(() => {
         <h1 class="text-2xl font-bold">{{ t('callTransfers.title') }}</h1>
       </div>
       <Button variant="outline" size="sm" @click="store.fetchWaitingTransfers(); fetchHistory()">
-        <RefreshCw class="h-4 w-4 mr-2" />
+        <RefreshCw class="size-4 mr-2" />
         {{ t('common.refresh') }}
       </Button>
     </div>
@@ -135,7 +135,7 @@ onMounted(() => {
             >
               <template #cell-caller_phone="{ item: transfer }">
                 <div class="flex items-center gap-2">
-                  <Phone class="h-4 w-4 text-green-400" />
+                  <Phone class="size-4 text-green-400" />
                   <span>{{ transfer.contact?.profile_name || transfer.caller_phone }}</span>
                 </div>
               </template>
@@ -153,7 +153,7 @@ onMounted(() => {
                   class="bg-green-600 hover:bg-green-500 text-white"
                   @click="handleAccept(transfer.id)"
                 >
-                  <Phone class="h-3.5 w-3.5 mr-1" />
+                  <Phone class="size-3.5 mr-1" />
                   {{ t('callTransfers.accept') }}
                 </Button>
               </template>
@@ -189,7 +189,7 @@ onMounted(() => {
               <template #cell-caller_phone="{ item: transfer }">
                 <div class="flex items-center gap-2">
                   <component :is="transfer.status === 'completed' ? Phone : PhoneOff"
-                    class="h-4 w-4"
+                    class="size-4"
                     :class="transfer.status === 'completed' ? 'text-green-400' : 'text-red-400'"
                   />
                   <span>{{ transfer.contact?.profile_name || transfer.caller_phone }}</span>

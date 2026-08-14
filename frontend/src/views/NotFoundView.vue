@@ -13,12 +13,12 @@ import { Home, ArrowLeft } from '@lucide/vue'
       </p>
       <div class="flex items-center justify-center gap-4 mt-8">
         <Button variant="outline" @click="$router.back()">
-          <ArrowLeft class="h-4 w-4 mr-2" />
+          <ArrowLeft class="size-4 mr-2" />
           {{ $t('notFound.goBack') }}
         </Button>
         <RouterLink to="/">
           <Button>
-            <Home class="h-4 w-4 mr-2" />
+            <Home class="size-4 mr-2" />
             {{ $t('notFound.goHome') }}
           </Button>
         </RouterLink>

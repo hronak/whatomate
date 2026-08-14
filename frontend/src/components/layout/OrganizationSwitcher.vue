@@ -129,10 +129,10 @@ const refreshOrgs = async () => {
           v-if="canCreateOrg"
           variant="ghost"
           size="icon"
-          class="h-5 w-5"
+          class="size-5"
           @click="isCreateDialogOpen = true"
         >
-          <Plus class="h-3 w-3" />
+          <Plus class="size-3" />
         </Button>
       </div>
       <Select
@@ -150,7 +150,7 @@ const refreshOrgs = async () => {
             :value="org.id"
           >
             <div class="flex items-center gap-2">
-              <Building2 class="h-3.5 w-3.5 text-muted-foreground" />
+              <Building2 class="size-3.5 text-muted-foreground" />
               <span>{{ org.name }}</span>
             </div>
           </SelectItem>
@@ -172,10 +172,10 @@ const refreshOrgs = async () => {
       <Button
         variant="ghost"
         size="icon"
-        class="h-8 w-8"
+        class="size-8"
         :title="organizationsStore.selectedOrganization?.name || 'All Organizations'"
       >
-        <Building2 class="h-4 w-4" />
+        <Building2 class="size-4" />
       </Button>
     </div>
   </div>
@@ -197,7 +197,7 @@ const refreshOrgs = async () => {
       <DialogFooter>
         <Button variant="outline" @click="isCreateDialogOpen = false">{{ t('common.cancel') }}</Button>
         <Button @click="submitCreateOrg" :disabled="isCreating || !newOrgName.trim()">
-          <Loader2 v-if="isCreating" class="h-4 w-4 mr-2 animate-spin" />
+          <Loader2 v-if="isCreating" class="size-4 mr-2 animate-spin" />
           {{ t('common.create') }}
         </Button>
       </DialogFooter>

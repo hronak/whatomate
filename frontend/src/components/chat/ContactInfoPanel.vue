@@ -23,7 +23,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { X, ChevronDown, Phone, User, Plus, Check, Tags, Loader2 } from '@lucide/vue'
-import { TagBadge } from '@/components/ui/tag-badge'
+import { TagBadge } from '@/components/shared'
 import MetadataSection from '@/components/chat/MetadataSection.vue'
 import { getInitials, getAvatarGradient, formatLabel } from '@/lib/utils'
 import { getTagColorClass } from '@/lib/constants'
@@ -255,8 +255,8 @@ async function updateContactTags(tags: string[]) {
     <!-- Header -->
     <div class="h-12 px-3 border-b flex items-center justify-between">
       <h3 class="font-medium text-sm">Contact Info</h3>
-      <Button variant="ghost" size="icon" class="h-8 w-8" @click="emit('close')">
-        <X class="h-4 w-4" />
+      <Button variant="ghost" size="icon" class="size-8" @click="emit('close')">
+        <X class="size-4" />
       </Button>
     </div>
 
@@ -264,7 +264,7 @@ async function updateContactTags(tags: string[]) {
       <div class="p-4 space-y-4">
         <!-- Contact Header -->
         <div class="flex flex-col items-center text-center pb-4 border-b">
-          <Avatar class="h-16 w-16 mb-3">
+          <Avatar class="size-16 mb-3">
             <AvatarImage :src="contact.avatar_url" />
             <AvatarFallback :class="'text-lg bg-linear-to-br text-white ' + getAvatarGradient(contact.name || contact.phone_number)">
               {{ getInitials(contact.name || contact.phone_number) }}
@@ -274,7 +274,7 @@ async function updateContactTags(tags: string[]) {
             {{ contact.name || contact.phone_number }}
           </h4>
           <div class="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-            <Phone class="h-3 w-3" />
+            <Phone class="size-3" />
             <span>{{ contact.phone_number }}</span>
           </div>
         </div>
@@ -283,13 +283,13 @@ async function updateContactTags(tags: string[]) {
         <div class="pb-4">
           <div class="flex items-center justify-between py-2">
             <h5 class="text-sm font-medium flex items-center gap-2">
-              <Tags class="h-4 w-4 text-muted-foreground" />
+              <Tags class="size-4 text-muted-foreground" />
               Tags
             </h5>
             <Popover v-if="canEditTags" v-model:open="tagSelectorOpen">
               <PopoverTrigger as-child>
                 <Button variant="ghost" size="sm" class="h-7 px-2">
-                  <Plus class="h-3.5 w-3.5" />
+                  <Plus class="size-3.5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent class="w-[200px] p-0" align="end">
@@ -310,10 +310,10 @@ async function updateContactTags(tags: string[]) {
                         @select="toggleTag(tag.name)"
                       >
                         <div class="flex items-center gap-2 flex-1">
-                          <span :class="['w-2 h-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
+                          <span :class="['size-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
                           <span>{{ tag.name }}</span>
                         </div>
-                        <Check v-if="isTagSelected(tag.name)" class="h-4 w-4 text-primary" />
+                        <Check v-if="isTagSelected(tag.name)" class="size-4 text-primary" />
                       </CommandItem>
                     </CommandGroup>
                   </CommandList>
@@ -337,12 +337,12 @@ async function updateContactTags(tags: string[]) {
                   :disabled="isUpdatingTags"
                   @click.stop="removeTag(tagName)"
                 >
-                  <X class="h-3 w-3" />
+                  <X class="size-3" />
                 </button>
               </TagBadge>
             </template>
             <span v-else class="text-sm text-muted-foreground">No tags</span>
-            <Loader2 v-if="isUpdatingTags" class="h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 v-if="isUpdatingTags" class="size-4 animate-spin text-muted-foreground" />
           </div>
         </div>
 
@@ -365,7 +365,7 @@ async function updateContactTags(tags: string[]) {
 
         <!-- No Session Data or no panel config -->
         <div v-if="!props.sessionData || sortedSections.length === 0" class="text-center py-6 text-muted-foreground border-t">
-          <User class="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <User class="size-8 mx-auto mb-2 opacity-50" />
           <p class="text-sm">No data configured</p>
           <p class="text-xs mt-1">Configure panel display in the chatbot flow settings.</p>
         </div>
@@ -390,7 +390,7 @@ async function updateContactTags(tags: string[]) {
                 <span>{{ section.label }}</span>
                 <ChevronDown
                   :class="[
-                    'h-4 w-4 transition-transform',
+                    'size-4 transition-transform',
                     isSectionCollapsed(section.id) ? '-rotate-90' : ''
                   ]"
                 />
