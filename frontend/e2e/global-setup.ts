@@ -1,7 +1,10 @@
 import { request } from '@playwright/test'
 import { cleanupE2EData } from './global-cleanup'
+import { DEV_URL, BACKEND_URL } from '../ports.ts'
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8080'
+// Must match playwright.config.ts's default, or setup seeds users into one
+// server while the tests run against another.
+const BASE_URL = process.env.BASE_URL || DEV_URL
 const DB_URL = process.env.TEST_DATABASE_URL || 'postgres://whatomate:whatomate@127.0.0.1:5432/whatomate'
 
 interface CreateUser {
@@ -23,8 +26,64 @@ function extractCSRFToken(response: { headersArray: () => Array<{ name: string; 
   return null
 }
 
+/**
+ * Fail before the suite runs, with the reason, rather than letting every spec
+ * fail on a login form that says "Invalid credentials" because a 502 body
+ * wasn't a valid envelope. Distinguishes the three ways this goes wrong:
+ * nothing listening, the proxy is up but the backend behind it isn't, and the
+ * backend is up but hasn't been migrated.
+ */
+async function preflight() {
+  const viaProxy = BASE_URL === DEV_URL
+  const ctx = await request.newContext({ baseURL: BASE_URL })
+
+  let status: number
+  let body: string
+  try {
+    const resp = await ctx.post('/api/auth/login', {
+      data: { email: 'admin@admin.com', password: 'admin' },
+    })
+    status = resp.status()
+    body = await resp.text()
+  } catch (err) {
+    throw new Error(
+      `Nothing is answering at ${BASE_URL}.\n` +
+        (viaProxy
+          ? '  Start the dev stack with `make dev` (backend + frontend).'
+          : `  Start the backend with \`make run-migrate\`, or use the dev server at ${DEV_URL}.`) +
+        `\n  Underlying error: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
+    )
+  } finally {
+    await ctx.dispose()
+  }
+
+  if (status === 502 || status === 503 || status === 504) {
+    throw new Error(
+      `The dev server at ${BASE_URL} is running, but it can't reach the backend at ${BACKEND_URL} (got ${status}).\n` +
+        '  Start the backend with `make run-migrate`, or run the whole stack with `make dev`.'
+    )
+  }
+
+  if (status === 401 || status === 403) {
+    throw new Error(
+      `Backend at ${BASE_URL} rejected the default super admin (admin@admin.com).\n` +
+        '  Migrations create that account — start the backend with `-migrate` (`make run-migrate`).'
+    )
+  }
+
+  if (status >= 400) {
+    throw new Error(`Unexpected ${status} from ${BASE_URL}/api/auth/login: ${body.slice(0, 300)}`)
+  }
+
+  console.log(`  ✅ Preflight: backend reachable via ${BASE_URL}`)
+}
+
 async function globalSetup() {
-  console.log('\n🔧 Global Setup: Cleaning leftover E2E data...')
+  console.log(`\n🔧 Global Setup: Preflight against ${BASE_URL} ...`)
+  await preflight()
+
+  console.log('🔧 Global Setup: Cleaning leftover E2E data...')
   await cleanupE2EData(DB_URL)
 
   console.log('🔧 Global Setup: Creating test users...')

@@ -2,6 +2,36 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import compression from 'vite-plugin-compression'
+import { FRONTEND_PORT, BACKEND_PORT, BACKEND_URL } from './ports.ts'
+
+/**
+ * Without this, a backend that isn't running surfaces as a bare 502 whose body
+ * isn't an API envelope — which the login page renders as "Invalid
+ * credentials". Return a real envelope so the actual cause reaches the screen,
+ * and say it once in the terminal too.
+ */
+let lastReported = 0
+function reportBackendDown(proxy: { on: (ev: string, cb: (...args: any[]) => void) => void }) {
+  proxy.on('error', (err: NodeJS.ErrnoException, _req: unknown, res: any) => {
+    const hint =
+      `Backend not reachable at ${BACKEND_URL} (${err.code || err.message}). ` +
+      'Start the whole dev stack with `make dev`, or just the backend with `make run-migrate`.'
+
+    if (Date.now() - lastReported > 5000) {
+      lastReported = Date.now()
+      console.error(`\n  ⚠  ${hint}\n`)
+    }
+
+    // A failed websocket upgrade hands us a raw socket, not a ServerResponse.
+    if (!res || typeof res.writeHead !== 'function') {
+      res?.destroy?.()
+      return
+    }
+    if (res.headersSent) return
+    res.writeHead(503, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ status: 'error', message: hint, data: null }))
+  })
+}
 
 export default defineConfig({
   base: './',
@@ -57,16 +87,21 @@ export default defineConfig({
     drop: ['console', 'debugger']
   },
   server: {
-    port: 3000,
+    port: FRONTEND_PORT,
+    // Fail rather than silently drifting to :3001 — a second frontend port is
+    // how you end up testing one app while looking at another.
+    strictPort: true,
     allowedHosts: [],
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+        target: BACKEND_URL,
+        changeOrigin: true,
+        configure: reportBackendDown
       },
       '/ws': {
-        target: 'ws://localhost:8080',
-        ws: true
+        target: `ws://localhost:${BACKEND_PORT}`,
+        ws: true,
+        configure: reportBackendDown
       }
     }
   }

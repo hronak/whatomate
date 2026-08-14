@@ -5,7 +5,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "strict": true
+    "strict": true,
+    // vite.config.ts imports ./ports.ts with its extension, which Vite's
+    // native config loader requires. That needs emitDeclarationOnly (or
+    // noEmit, which composite forbids) alongside it.
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "ports.ts"]
 }
