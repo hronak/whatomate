@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -1034,8 +1032,8 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 
 	// Send reaction to WhatsApp API
 	emoji := req.Emoji
-	a.spawn("send_reaction", func(context.Context) {
-		a.sendWhatsAppReaction(account, &contact, &message, emoji)
+	a.spawn("send_reaction", func(ctx context.Context) {
+		a.sendWhatsAppReaction(ctx, account, &contact, &message, emoji)
 	})
 
 	// Broadcast via WebSocket
@@ -1048,57 +1046,22 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 }
 
 // sendWhatsAppReaction sends a reaction to WhatsApp
-func (a *App) sendWhatsAppReaction(account *models.WhatsAppAccount, contact *models.Contact, message *models.Message, emoji string) {
+func (a *App) sendWhatsAppReaction(ctx context.Context, account *models.WhatsAppAccount, contact *models.Contact, message *models.Message, emoji string) {
 	if message.WhatsAppMessageID == "" {
 		a.Log.Warn("Cannot send reaction - message has no WhatsApp ID", "message_id", message.ID)
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%s/messages", a.Config.WhatsApp.BaseURL, account.APIVersion, account.PhoneID)
-
-	payload := map[string]any{
-		"messaging_product": "whatsapp",
-		"recipient_type":    "individual",
-		"to":                contact.PhoneNumber,
-		"type":              "reaction",
-		"reaction": map[string]any{
-			"message_id": message.WhatsAppMessageID,
-			"emoji":      emoji, // Empty string removes the reaction
-		},
-	}
-
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		a.Log.Error("Failed to marshal reaction payload", "error", err)
+	// Through the client rather than an inline Graph API request: this is the
+	// only place that hand-built a messages payload, so it missed the retry
+	// policy, the structured Meta errors and the shared URL construction.
+	rcpt := whatsapp.Recipient{Phone: contact.PhoneNumber, BSUID: contact.BSUID}
+	if err := a.WhatsApp.SendReaction(ctx, a.toWhatsAppAccount(account), rcpt, message.WhatsAppMessageID, emoji); err != nil {
+		a.Log.Error("Failed to send reaction", "error", err, "message_id", message.WhatsAppMessageID)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), metaRequestTimeout)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		a.Log.Error("Failed to create reaction request", "error", err)
-		return
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+account.AccessToken)
-
-	resp, err := a.HTTPClient.Do(req)
-	if err != nil {
-		a.Log.Error("Failed to send reaction", "error", err)
-		return
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != 200 {
-		body, _ := io.ReadAll(resp.Body)
-		a.Log.Error("WhatsApp API reaction error", "status", resp.StatusCode, "body", string(body))
-		return
-	}
-
-	a.Log.Info("Reaction sent successfully", "message_id", message.WhatsAppMessageID, "emoji", emoji)
+	a.Log.Debug("Reaction sent", "message_id", message.WhatsAppMessageID, "emoji", emoji)
 }
 
 // AssignContactRequest represents the request to assign a contact to a user

@@ -27,7 +27,7 @@ func testWorker(t *testing.T) *Worker {
 	w := &Worker{
 		DB:       db,
 		Log:      log,
-		WhatsApp: whatsapp.New(log),
+		WhatsApp: whatsapp.New(whatsapp.WithLogger(log)),
 	}
 
 	// Set up Publisher if Redis is available
@@ -472,7 +472,7 @@ func TestWorker_sendTemplateMessage_BuildsComponents(t *testing.T) {
 	defer server.Close()
 
 	// Create WhatsApp client pointing to mock server
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	account := &models.WhatsAppAccount{
 		PhoneID:     "123",
@@ -532,7 +532,7 @@ func TestWorker_sendTemplateMessage_HeaderParamsTakePrecedence(t *testing.T) {
 		})
 	}))
 	defer server.Close()
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	account := &models.WhatsAppAccount{PhoneID: "123", BusinessID: "456", AccessToken: "token", APIVersion: "v21.0"}
 	template := &models.Template{
@@ -584,7 +584,7 @@ func TestWorker_sendTemplateMessage_HeaderParamsFallbackToTemplateParams(t *test
 		})
 	}))
 	defer server.Close()
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	account := &models.WhatsAppAccount{PhoneID: "123", BusinessID: "456", AccessToken: "token", APIVersion: "v21.0"}
 	template := &models.Template{
@@ -633,7 +633,7 @@ func TestWorker_sendTemplateMessage_NoParams(t *testing.T) {
 	}))
 	defer server.Close()
 
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	account := &models.WhatsAppAccount{
 		PhoneID:     "123",
@@ -691,7 +691,7 @@ func TestWorker_HandleRecipientJob_Success(t *testing.T) {
 	// Update account's API version for URL building
 	require.NoError(t, w.DB.Model(account).Update("api_version", "v21.0").Error)
 
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	job := &queue.RecipientJob{
 		CampaignID:     campaign.ID,
@@ -742,7 +742,7 @@ func TestWorker_HandleRecipientJob_WhatsAppError(t *testing.T) {
 	defer server.Close()
 
 	require.NoError(t, w.DB.Model(account).Update("api_version", "v21.0").Error)
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	job := &queue.RecipientJob{
 		CampaignID:     campaign.ID,
@@ -784,7 +784,7 @@ func TestWorker_HandleRecipientJob_CreatesContact(t *testing.T) {
 	defer server.Close()
 
 	require.NoError(t, w.DB.Model(account).Update("api_version", "v21.0").Error)
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	// Use a new phone number that doesn't have a contact
 	newPhone := "9998887777"
@@ -822,7 +822,7 @@ func TestWorker_HandleRecipientJob_CampaignCompletion(t *testing.T) {
 	defer server.Close()
 
 	require.NoError(t, w.DB.Model(account).Update("api_version", "v21.0").Error)
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	job := &queue.RecipientJob{
 		CampaignID:     campaign.ID,
@@ -859,7 +859,7 @@ func TestWorker_HandleRecipientJob_TemplateParamSubstitution(t *testing.T) {
 	defer server.Close()
 
 	require.NoError(t, w.DB.Model(account).Update("api_version", "v21.0").Error)
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	job := &queue.RecipientJob{
 		CampaignID:     campaign.ID,
@@ -961,7 +961,7 @@ func TestWorker_HandleRecipientJob_WithEncryptedToken(t *testing.T) {
 	}))
 	defer server.Close()
 
-	w.WhatsApp = whatsapp.NewWithBaseURL(w.Log, server.URL)
+	w.WhatsApp = whatsapp.New(whatsapp.WithLogger(w.Log), whatsapp.WithBaseURL(server.URL))
 
 	job := &queue.RecipientJob{
 		CampaignID:     campaign.ID,

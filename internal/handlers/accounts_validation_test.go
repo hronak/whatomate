@@ -89,7 +89,7 @@ func (f *fakeMetaServer) URL() string { return f.server.URL }
 func newAppWithMeta(t *testing.T, meta *fakeMetaServer) *handlers.App {
 	t.Helper()
 	app := newTestApp(t)
-	app.WhatsApp = whatsapp.NewWithBaseURL(logf.New(logf.Opts{Level: logf.ErrorLevel}), meta.URL())
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(logf.New(logf.Opts{Level: logf.ErrorLevel})), whatsapp.WithBaseURL(meta.URL()))
 	app.Config = &config.Config{
 		JWT: config.JWTConfig{
 			Secret:            testutil.TestJWTSecret,

@@ -152,7 +152,7 @@ func newTemplateTestApp(t *testing.T, server *httptest.Server) *handlers.App {
 	t.Helper()
 
 	log := testutil.NopLogger()
-	waClient := whatsapp.NewWithBaseURL(log, server.URL)
+	waClient := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithBaseURL(server.URL))
 	return newTestApp(t, withWhatsApp(waClient))
 }
 

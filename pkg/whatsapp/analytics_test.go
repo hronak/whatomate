@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -48,9 +47,9 @@ func TestValidateAnalyticsType(t *testing.T) {
 
 func TestNormalizeGranularity(t *testing.T) {
 	type tc struct {
-		in   string
+		in   whatsapp.Granularity
 		typ  whatsapp.AnalyticsType
-		want string
+		want whatsapp.Granularity
 	}
 	cases := []tc{
 		// Template always uses DAILY regardless of input.
@@ -103,7 +102,7 @@ func TestClient_GetAnalytics_MessagingNestedData(t *testing.T) {
 		}`))
 	}))
 	t.Cleanup(srv.Close)
-	client := whatsapp.NewWithBaseURL(testutil.NopLogger(), srv.URL)
+	client := whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(srv.URL))
 
 	resp, err := client.GetAnalytics(context.Background(), &whatsapp.Account{
 		BusinessID: "WABA-1", APIVersion: "v18.0", AccessToken: "tok",
@@ -112,7 +111,7 @@ func TestClient_GetAnalytics_MessagingNestedData(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp.Analytics)
-	assert.Equal(t, "DAY", resp.Analytics.Granularity)
+	assert.Equal(t, whatsapp.GranularityDay, resp.Analytics.Granularity)
 	require.Len(t, resp.Analytics.DataPoints, 2)
 	assert.Equal(t, int64(5), resp.Analytics.DataPoints[0].Sent)
 	assert.Equal(t, int64(7), resp.Analytics.DataPoints[1].Sent)
@@ -134,7 +133,7 @@ func TestClient_GetAnalytics_MessagingFlattensPhoneEntries(t *testing.T) {
 		}`))
 	}))
 	t.Cleanup(srv.Close)
-	client := whatsapp.NewWithBaseURL(testutil.NopLogger(), srv.URL)
+	client := whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(srv.URL))
 
 	resp, err := client.GetAnalytics(context.Background(), &whatsapp.Account{
 		BusinessID: "WABA-1", APIVersion: "v18.0", AccessToken: "tok",
@@ -160,7 +159,7 @@ func TestClient_GetAnalytics_PricingIncludesDimensions(t *testing.T) {
 		}`))
 	}))
 	t.Cleanup(srv.Close)
-	client := whatsapp.NewWithBaseURL(testutil.NopLogger(), srv.URL)
+	client := whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(srv.URL))
 
 	resp, err := client.GetAnalytics(context.Background(), &whatsapp.Account{
 		BusinessID: "WABA-1", APIVersion: "v18.0", AccessToken: "tok",
@@ -185,7 +184,7 @@ func TestClient_GetAnalytics_CallIncludesDimensionsAndMetricTypes(t *testing.T) 
 		}`))
 	}))
 	t.Cleanup(srv.Close)
-	client := whatsapp.NewWithBaseURL(testutil.NopLogger(), srv.URL)
+	client := whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(srv.URL))
 
 	resp, err := client.GetAnalytics(context.Background(), &whatsapp.Account{
 		BusinessID: "WABA-1", APIVersion: "v18.0", AccessToken: "tok",
@@ -222,7 +221,7 @@ func TestClient_GetAnalytics_TemplatePaginatesAndFlattens(t *testing.T) {
 	t.Cleanup(srv.Close)
 	// Replace the second-page "next" URL with one pointing back at our server.
 	pageTwoURL := srv.URL + "/page-two"
-	client := whatsapp.NewWithBaseURL(testutil.NopLogger(), srv.URL)
+	client := whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(srv.URL))
 
 	// Tweak the response to put a real URL in `next` so the pagination loop can follow it.
 	srv.Config.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -260,7 +259,7 @@ func TestClient_GetAnalytics_APIErrorWrapped(t *testing.T) {
 		_, _ = w.Write([]byte(`{"error":{"message":"insufficient permissions","code":10}}`))
 	}))
 	t.Cleanup(srv.Close)
-	client := whatsapp.NewWithBaseURL(testutil.NopLogger(), srv.URL)
+	client := whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(srv.URL))
 
 	_, err := client.GetAnalytics(context.Background(), &whatsapp.Account{
 		BusinessID: "WABA-1", APIVersion: "v18.0", AccessToken: "tok",

@@ -5,38 +5,54 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"net/http"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/shridarpatil/whatomate/internal/templateutil"
 )
 
-// SendTextMessage sends a text message to a recipient with optional reply context
-func (c *Client) SendTextMessage(ctx context.Context, account *Account, rcpt Recipient, text string, replyToMsgID ...string) (string, error) {
-	payload := map[string]any{
-		"messaging_product": "whatsapp",
-		"recipient_type":    "individual",
-		"type":              "text",
-		"text": map[string]any{
-			"preview_url": false,
-			"body":        text,
-		},
+// SendReaction reacts to a message with an emoji. An empty emoji removes a
+// previously sent reaction.
+//
+// Meta returns no usable message ID for reactions, so there is nothing to
+// return but an error.
+func (c *Client) SendReaction(ctx context.Context, account *Account, rcpt Recipient, targetMessageID, emoji string) error {
+	if targetMessageID == "" {
+		return fmt.Errorf("reaction requires the target message ID")
 	}
-	rcpt.SetOnPayload(payload)
+
+	payload := newOutboundMessage(rcpt, MessageTypeReaction)
+	payload.Reaction = &reactionContent{MessageID: targetMessageID, Emoji: emoji}
+
+	url := c.buildMessagesURL(account)
+	c.log.Debug("Sending reaction", "message_id", targetMessageID, "emoji", emoji)
+
+	if _, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken); err != nil {
+		return fmt.Errorf("failed to send reaction: %w", err)
+	}
+	return nil
+}
+
+// SendTextMessage sends a text message. replyToMsgID quotes an earlier message
+// when non-empty.
+//
+// This took a variadic "optional" parameter, which let a caller pass two reply
+// IDs and silently ignored the second. An explicit argument says what the
+// function actually accepts.
+func (c *Client) SendTextMessage(ctx context.Context, account *Account, rcpt Recipient, text, replyToMsgID string) (string, error) {
+	payload := newOutboundMessage(rcpt, MessageTypeText)
+	payload.Text = &textContent{Body: text}
 
 	// Add reply context if provided
-	if len(replyToMsgID) > 0 && replyToMsgID[0] != "" {
-		payload["context"] = map[string]any{
-			"message_id": replyToMsgID[0],
-		}
+	if replyToMsgID != "" {
+		payload.Context = &messageContext{MessageID: replyToMsgID}
 	}
 
 	url := c.buildMessagesURL(account)
-	c.Log.Debug("Sending text message", "phone", rcpt.Phone, "url", url)
+	c.log.Debug("Sending text message", "phone", rcpt.Phone, "url", url)
 
-	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
+	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to send text message: %w", err)
 	}
@@ -45,7 +61,7 @@ func (c *Client) SendTextMessage(ctx context.Context, account *Account, rcpt Rec
 	if err != nil {
 		return "", err
 	}
-	c.Log.Debug("Text message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.log.Debug("Text message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -59,77 +75,41 @@ func (c *Client) SendInteractiveButtons(ctx context.Context, account *Account, r
 		return "", fmt.Errorf("maximum 10 buttons allowed")
 	}
 
-	var interactive map[string]any
+	interactive := &interactiveContent{
+		Body: &interactiveBody{Text: bodyText},
+	}
 
 	if len(buttons) <= 3 {
 		// Use button format
-		buttonsList := make([]map[string]any, 0, len(buttons))
+		replies := make([]replyButton, 0, len(buttons))
 		for _, btn := range buttons {
-			title := btn.Title
-			if len(title) > 20 {
-				title = title[:20]
-			}
-			buttonsList = append(buttonsList, map[string]any{
-				"type": "reply",
-				"reply": map[string]any{
-					"id":    btn.ID,
-					"title": title,
-				},
+			replies = append(replies, replyButton{
+				Type:  "reply",
+				Reply: buttonBody{ID: btn.ID, Title: clampRunes(btn.Title, maxButtonTitleLen)},
 			})
 		}
-
-		interactive = map[string]any{
-			"type": "button",
-			"body": map[string]any{
-				"text": bodyText,
-			},
-			"action": map[string]any{
-				"buttons": buttonsList,
-			},
-		}
+		interactive.Type = "button"
+		interactive.Action = &interactiveAction{Buttons: replies}
 	} else {
 		// Use list format for 4-10 items
-		rows := make([]map[string]any, 0, len(buttons))
+		rows := make([]listRow, 0, len(buttons))
 		for _, btn := range buttons {
-			title := btn.Title
-			if len(title) > 24 {
-				title = title[:24]
-			}
-			rows = append(rows, map[string]any{
-				"id":    btn.ID,
-				"title": title,
-			})
+			rows = append(rows, listRow{ID: btn.ID, Title: clampRunes(btn.Title, maxListRowTitleLen)})
 		}
-
-		interactive = map[string]any{
-			"type": "list",
-			"body": map[string]any{
-				"text": bodyText,
-			},
-			"action": map[string]any{
-				"button": "Select an option",
-				"sections": []map[string]any{
-					{
-						"title": "Options",
-						"rows":  rows,
-					},
-				},
-			},
+		interactive.Type = "list"
+		interactive.Action = &interactiveAction{
+			Button:   "Select an option",
+			Sections: []listSection{{Title: "Options", Rows: rows}},
 		}
 	}
 
-	payload := map[string]any{
-		"messaging_product": "whatsapp",
-		"recipient_type":    "individual",
-		"type":              "interactive",
-		"interactive":       interactive,
-	}
-	rcpt.SetOnPayload(payload)
+	payload := newOutboundMessage(rcpt, MessageTypeInteractive)
+	payload.Interactive = interactive
 
 	url := c.buildMessagesURL(account)
-	c.Log.Debug("Sending interactive message", "phone", rcpt.Phone, "button_count", len(buttons))
+	c.log.Debug("Sending interactive message", "phone", rcpt.Phone, "button_count", len(buttons))
 
-	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
+	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to send interactive message: %w", err)
 	}
@@ -138,7 +118,7 @@ func (c *Client) SendInteractiveButtons(ctx context.Context, account *Account, r
 	if err != nil {
 		return "", err
 	}
-	c.Log.Debug("Interactive message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.log.Debug("Interactive message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -154,32 +134,20 @@ func (c *Client) SendCTAURLButton(ctx context.Context, account *Account, rcpt Re
 		buttonText = buttonText[:20]
 	}
 
-	interactive := map[string]any{
-		"type": "cta_url",
-		"body": map[string]any{
-			"text": bodyText,
-		},
-		"action": map[string]any{
-			"name": "cta_url",
-			"parameters": map[string]any{
-				"display_text": buttonText,
-				"url":          url,
-			},
+	payload := newOutboundMessage(rcpt, MessageTypeInteractive)
+	payload.Interactive = &interactiveContent{
+		Type: "cta_url",
+		Body: &interactiveBody{Text: bodyText},
+		Action: &interactiveAction{
+			Name:       "cta_url",
+			Parameters: ctaURLParameters{DisplayText: buttonText, URL: url},
 		},
 	}
-
-	payload := map[string]any{
-		"messaging_product": "whatsapp",
-		"recipient_type":    "individual",
-		"type":              "interactive",
-		"interactive":       interactive,
-	}
-	rcpt.SetOnPayload(payload)
 
 	apiURL := c.buildMessagesURL(account)
-	c.Log.Debug("Sending CTA URL button message", "phone", rcpt.Phone, "url", url)
+	c.log.Debug("Sending CTA URL button message", "phone", rcpt.Phone, "url", url)
 
-	respBody, err := c.doRequest(ctx, "POST", apiURL, payload, account.AccessToken)
+	respBody, err := c.doRequest(ctx, http.MethodPost, apiURL, payload, account.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to send CTA URL button message: %w", err)
 	}
@@ -188,7 +156,7 @@ func (c *Client) SendCTAURLButton(ctx context.Context, account *Account, rcpt Re
 	if err != nil {
 		return "", err
 	}
-	c.Log.Debug("CTA URL button message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.log.Debug("CTA URL button message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -209,50 +177,35 @@ func (c *Client) SendVoiceCallButton(ctx context.Context, account *Account, rcpt
 	if displayText == "" {
 		return "", fmt.Errorf("display text is required")
 	}
-	if len(displayText) > 20 {
-		displayText = displayText[:20]
+	displayText = clampRunes(displayText, maxButtonTitleLen)
+
+	parameters := voiceCallParameters{
+		DisplayText: displayText,
+		TTLMinutes:  ttlMinutes,
+		Payload:     payload,
 	}
 
-	parameters := map[string]any{
-		"display_text": displayText,
-	}
-	if ttlMinutes > 0 {
-		parameters["ttl_minutes"] = ttlMinutes
-	}
-	if payload != "" {
-		parameters["payload"] = payload
-	}
-
-	interactive := map[string]any{
-		"type": "voice_call",
-		"body": map[string]any{
-			"text": bodyText,
-		},
-		"action": map[string]any{
-			"name":       "voice_call",
-			"parameters": parameters,
+	msg := newOutboundMessage(rcpt, MessageTypeInteractive)
+	msg.Interactive = &interactiveContent{
+		Type: "voice_call",
+		Body: &interactiveBody{Text: bodyText},
+		Action: &interactiveAction{
+			Name:       "voice_call",
+			Parameters: parameters,
 		},
 	}
-
-	msg := map[string]any{
-		"messaging_product": "whatsapp",
-		"recipient_type":    "individual",
-		"type":              "interactive",
-		"interactive":       interactive,
-	}
-	rcpt.SetOnPayload(msg)
 
 	url := c.buildMessagesURL(account)
 	// Logged at info during the sticky-routing rollout: confirms display_text,
 	// ttl_minutes, and the agent-id payload actually leave our box, so when
 	// the incoming-call webhook arrives we know whether Meta echoed it back.
 	// The payload is an opaque "agent:<uuid>" — not PII.
-	c.Log.Debug("Sending voice_call button message",
+	c.log.Debug("Sending voice_call button message",
 		"phone", rcpt.Phone,
 		"parameters", parameters,
 	)
 
-	respBody, err := c.doRequest(ctx, "POST", url, msg, account.AccessToken)
+	respBody, err := c.doRequest(ctx, http.MethodPost, url, msg, account.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to send voice_call button message: %w", err)
 	}
@@ -261,7 +214,7 @@ func (c *Client) SendVoiceCallButton(ctx context.Context, account *Account, rcpt
 	if err != nil {
 		return "", err
 	}
-	c.Log.Debug("voice_call button message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.log.Debug("voice_call button message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -364,7 +317,7 @@ func HeaderTextParamsComponent(headerContent string, params, fallback map[string
 	if !strings.Contains(headerContent, "{{") {
 		return nil, nil
 	}
-	names := templateutil.ExtParamNames(headerContent)
+	names := TemplateParamNames(headerContent)
 	if len(names) == 0 {
 		return nil, nil
 	}
@@ -494,7 +447,7 @@ func AutoButtonComponents(templateButtons []any) []map[string]any {
 // templateButtons is the JSONB buttons array from the template, used to determine button type.
 // URL buttons produce: {"type": "button", "sub_type": "url", "index": "0", "parameters": [{"type": "text", "text": "value"}]}
 // COPY_CODE buttons produce: {"type": "button", "sub_type": "copy_code", "index": "0", "parameters": [{"type": "coupon_code", "coupon_code": "value"}]}
-func ButtonURLParamsToComponents(buttonParams map[string]string, templateButtons ...[]any) []map[string]any {
+func ButtonURLParamsToComponents(buttonParams map[string]string, templateButtons []any) []map[string]any {
 	if len(buttonParams) == 0 {
 		return nil
 	}
@@ -506,8 +459,8 @@ func ButtonURLParamsToComponents(buttonParams map[string]string, templateButtons
 	// need sub_type "url" instead of "copy_code").
 	btnTypes := map[string]string{}
 	btnIsOTP := map[string]bool{}
-	if len(templateButtons) > 0 {
-		for i, raw := range templateButtons[0] {
+	{
+		for i, raw := range templateButtons {
 			if btn, ok := raw.(map[string]any); ok {
 				if t, ok := btn["type"].(string); ok {
 					key := fmt.Sprintf("%d", i)
@@ -580,51 +533,37 @@ func (c *Client) SendFlowMessage(ctx context.Context, account *Account, rcpt Rec
 		firstScreen = "FIRST_SCREEN" // Default fallback
 	}
 
-	// Truncate CTA text to 20 chars (WhatsApp limit)
-	if len(ctaText) > 20 {
-		ctaText = ctaText[:20]
-	}
+	// Truncate CTA text to Meta's limit
+	ctaText = clampRunes(ctaText, maxButtonTitleLen)
 
-	interactive := map[string]any{
-		"type": "flow",
-		"body": map[string]any{
-			"text": bodyText,
-		},
-		"action": map[string]any{
-			"name": "flow",
-			"parameters": map[string]any{
-				"flow_message_version": "3",
-				"flow_token":           flowToken,
-				"flow_id":              flowID,
-				"flow_cta":             ctaText,
-				"flow_action":          "navigate",
-				"flow_action_payload": map[string]any{
-					"screen": firstScreen,
-				},
+	interactive := &interactiveContent{
+		Type: "flow",
+		Body: &interactiveBody{Text: bodyText},
+		Action: &interactiveAction{
+			Name: "flow",
+			Parameters: flowParameters{
+				FlowMessageVersion: "3",
+				FlowToken:          flowToken,
+				FlowID:             flowID,
+				FlowCTA:            ctaText,
+				FlowAction:         "navigate",
+				FlowActionPayload:  flowActionPayload{Screen: firstScreen},
 			},
 		},
 	}
 
 	// Add header if provided
 	if headerText != "" {
-		interactive["header"] = map[string]any{
-			"type": "text",
-			"text": headerText,
-		}
+		interactive.Header = &interactiveHeader{Type: "text", Text: headerText}
 	}
 
-	payload := map[string]any{
-		"messaging_product": "whatsapp",
-		"recipient_type":    "individual",
-		"type":              "interactive",
-		"interactive":       interactive,
-	}
-	rcpt.SetOnPayload(payload)
+	payload := newOutboundMessage(rcpt, MessageTypeInteractive)
+	payload.Interactive = interactive
 
 	url := c.buildMessagesURL(account)
-	c.Log.Debug("Sending flow message", "phone", rcpt.Phone, "flow_id", flowID)
+	c.log.Debug("Sending flow message", "phone", rcpt.Phone, "flow_id", flowID)
 
-	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
+	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to send flow message: %w", err)
 	}
@@ -633,34 +572,26 @@ func (c *Client) SendFlowMessage(ctx context.Context, account *Account, rcpt Rec
 	if err != nil {
 		return "", err
 	}
-	c.Log.Debug("Flow message sent", "message_id", messageID, "phone", rcpt.Phone, "flow_id", flowID)
+	c.log.Debug("Flow message sent", "message_id", messageID, "phone", rcpt.Phone, "flow_id", flowID)
 	return messageID, nil
 }
 
 // SendTemplateMessage sends a template message with optional components (header, body, buttons, etc.)
 func (c *Client) SendTemplateMessage(ctx context.Context, account *Account, rcpt Recipient, templateName, languageCode string, components []map[string]any) (string, error) {
-	template := map[string]any{
-		"name": templateName,
-		"language": map[string]any{
-			"code": languageCode,
-		},
+	payload := newOutboundMessage(rcpt, MessageTypeTemplate)
+	// Template sends omit recipient_type, matching what this endpoint has
+	// always put on the wire.
+	payload.RecipientType = ""
+	payload.Template = &templateContent{
+		Name:       templateName,
+		Language:   templateLanguage{Code: languageCode},
+		Components: components,
 	}
-
-	if len(components) > 0 {
-		template["components"] = components
-	}
-
-	payload := map[string]any{
-		"messaging_product": "whatsapp",
-		"type":              "template",
-		"template":          template,
-	}
-	rcpt.SetOnPayload(payload)
 
 	url := c.buildMessagesURL(account)
-	c.Log.Debug("Sending template message with components", "phone", rcpt.Phone, "template", templateName)
+	c.log.Debug("Sending template message with components", "phone", rcpt.Phone, "template", templateName)
 
-	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
+	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to send template message: %w", err)
 	}
@@ -669,6 +600,6 @@ func (c *Client) SendTemplateMessage(ctx context.Context, account *Account, rcpt
 	if err != nil {
 		return "", err
 	}
-	c.Log.Debug("Template message sent", "message_id", messageID, "phone", rcpt.Phone, "template", templateName)
+	c.log.Debug("Template message sent", "message_id", messageID, "phone", rcpt.Phone, "template", templateName)
 	return messageID, nil
 }

@@ -43,11 +43,17 @@ func New(cfg *config.Config, db *gorm.DB, rdb *redis.Client, log logf.Logger) (*
 	publisher := queue.NewPublisher(rdb, log)
 
 	return &Worker{
-		Config:    cfg,
-		DB:        db,
-		Redis:     rdb,
-		Log:       log,
-		WhatsApp:  whatsapp.New(log),
+		Config: cfg,
+		DB:     db,
+		Redis:  rdb,
+		Log:    log,
+		// WithBaseURL, not bare New: the plain constructor hardcodes the
+		// production Graph API host and silently ignores whatsapp.base_url,
+		// so a worker pointed at a staging endpoint still called production.
+		WhatsApp: whatsapp.New(
+			whatsapp.WithLogger(log),
+			whatsapp.WithBaseURL(cfg.WhatsApp.BaseURL),
+		),
 		Consumer:  consumer,
 		Publisher: publisher,
 	}, nil

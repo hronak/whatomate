@@ -128,10 +128,16 @@ func newMsgTestApp(t *testing.T, mockServer *mockWhatsAppServer) *handlers.App {
 	t.Helper()
 
 	log := testutil.NopLogger()
-	waClient := whatsapp.NewWithTimeout(log, 5*time.Second)
-	waClient.HTTPClient = &http.Client{
-		Transport: &testServerTransport{serverURL: mockServer.server.URL},
-	}
+	waClient := whatsapp.New(
+		whatsapp.WithLogger(log),
+		whatsapp.WithHTTPClient(&http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &testServerTransport{serverURL: mockServer.server.URL},
+		}),
+		// Without this the client kept the production base URL and this test
+		// talked to the real graph.facebook.com.
+		whatsapp.WithBaseURL(mockServer.server.URL),
+	)
 
 	return newTestApp(t, withWhatsApp(waClient))
 }

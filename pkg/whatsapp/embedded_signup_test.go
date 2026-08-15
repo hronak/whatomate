@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,12 +32,16 @@ func TestClient_ExchangeCodeForToken(t *testing.T) {
 			appSecret:  "secret123",
 			apiVersion: "v21.0",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-				// Verify request
-				assert.Equal(t, http.MethodGet, r.Method)
+				// Credentials must travel in the POST form body, never the
+				// query string, where they would land in proxy and access logs.
+				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Contains(t, r.URL.Path, "/oauth/access_token")
-				assert.Contains(t, r.URL.RawQuery, "client_id=123456")
-				assert.Contains(t, r.URL.RawQuery, "client_secret=secret123")
-				assert.Contains(t, r.URL.RawQuery, "code=test_auth_code_123")
+				assert.NotContains(t, r.URL.RawQuery, "client_secret")
+
+				require.NoError(t, r.ParseForm())
+				assert.Equal(t, "123456", r.PostForm.Get("client_id"))
+				assert.Equal(t, "secret123", r.PostForm.Get("client_secret"))
+				assert.Equal(t, "test_auth_code_123", r.PostForm.Get("code"))
 
 				// Return success
 				w.WriteHeader(http.StatusOK)
@@ -112,10 +115,10 @@ func TestClient_ExchangeCodeForToken(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithBaseURL(log, server.URL)
+			log := nopLogger()
+			client := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithBaseURL(server.URL))
 
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			token, err := client.ExchangeCodeForToken(ctx, tt.code, tt.appID, tt.appSecret, tt.apiVersion)
 
@@ -208,10 +211,10 @@ func TestClient_GetPhoneNumberInfo(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithBaseURL(log, server.URL)
+			log := nopLogger()
+			client := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithBaseURL(server.URL))
 
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			info, err := client.GetPhoneNumberInfo(ctx, tt.phoneID, "test-token", "v21.0")
 
@@ -318,10 +321,10 @@ func TestClient_RegisterPhoneNumber(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithBaseURL(log, server.URL)
+			log := nopLogger()
+			client := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithBaseURL(server.URL))
 
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			err := client.RegisterPhoneNumber(ctx, tt.phoneID, tt.pin, "test-token", "v21.0")
 

@@ -4,11 +4,8 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"io"
 	"math/big"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -353,108 +350,57 @@ func (a *App) TestAccountConnection(r *fastglue.Request) error {
 		})
 	}
 
-	// Fetch additional details for display
-	phoneURL := fmt.Sprintf("%s/%s/%s?fields=display_phone_number,verified_name,code_verification_status,account_mode,quality_rating,messaging_limit_tier,whatsapp_business_manager_messaging_limit",
-		a.Config.WhatsApp.BaseURL, account.APIVersion, account.PhoneID)
+	// Fetch additional details for display through the typed client, rather
+	// than the hand-rolled Graph GET + map[string]any this used to do.
+	ctx, cancel := context.WithTimeout(context.Background(), metaRequestTimeout)
+	defer cancel()
 
-	result, status, err := a.fetchMetaJSON(phoneURL, account.AccessToken)
+	waAccount := a.toWhatsAppAccount(account)
+	details, err := a.WhatsApp.GetPhoneNumberDetails(ctx, waAccount)
 	if err != nil {
-		a.Log.Error("Failed to connect to WhatsApp API", "error", err)
+		a.Log.Error("Failed to fetch phone number details", "error", err, "account", account.Name)
 		return r.SendEnvelope(map[string]any{
 			"success": false,
 			"error":   "Failed to connect to WhatsApp API",
 		})
 	}
-	if status != http.StatusOK {
-		return r.SendEnvelope(map[string]any{
-			"success": false,
-			"error":   "API error",
-			"details": result,
-		})
-	}
 
-	// Check if this is a test/sandbox number
-	accountMode, _ := result["account_mode"].(string)
-	isTestNumber := accountMode == "SANDBOX"
-
-	// Resolve messaging limit tier, falling back to newer portfolio-based field if deprecated field is missing/null
-	messagingLimitTier := result["messaging_limit_tier"]
-	if messagingLimitTier == nil || messagingLimitTier == "" {
-		messagingLimitTier = result["whatsapp_business_manager_messaging_limit"]
-	}
-
-	// If still empty/null, query the WABA ID (BusinessID) as a fallback
-	if (messagingLimitTier == nil || messagingLimitTier == "") && account.BusinessID != "" {
-		wabaURL := fmt.Sprintf("%s/%s/%s?fields=whatsapp_business_manager_messaging_limit",
-			a.Config.WhatsApp.BaseURL, account.APIVersion, account.BusinessID)
-		wabaResult, wabaStatus, wabaErr := a.fetchMetaJSON(wabaURL, account.AccessToken)
+	// Meta populates either the per-number or the portfolio-level limit
+	// depending on the account; fall back to querying the WABA for it.
+	messagingLimitTier := details.MessagingLimit()
+	if messagingLimitTier == "" && account.BusinessID != "" {
+		limit, err := a.WhatsApp.GetBusinessMessagingLimit(ctx, waAccount)
 		switch {
-		case wabaErr != nil:
-			a.Log.Warn("WABA fallback request failed", "waba_id", account.BusinessID, "error", wabaErr)
-		case wabaStatus != http.StatusOK:
-			a.Log.Warn("WABA fallback returned non-200", "waba_id", account.BusinessID, "status", wabaStatus)
-		default:
-			if val, ok := wabaResult["whatsapp_business_manager_messaging_limit"]; ok && val != nil && val != "" {
-				messagingLimitTier = val
-				a.Log.Info("Resolved messaging limit tier from WABA as fallback", "waba_id", account.BusinessID, "limit", val)
-			}
+		case err != nil:
+			a.Log.Warn("WABA messaging-limit fallback failed", "waba_id", account.BusinessID, "error", err)
+		case limit != "":
+			messagingLimitTier = limit
+			a.Log.Debug("Resolved messaging limit tier from WABA", "waba_id", account.BusinessID, "limit", limit)
 		}
 	}
+
+	isTestNumber := details.IsTestNumber()
 
 	// Prepare response
 	response := map[string]any{
 		"success":                  true,
-		"display_phone_number":     result["display_phone_number"],
-		"verified_name":            result["verified_name"],
-		"quality_rating":           result["quality_rating"],
+		"display_phone_number":     details.DisplayPhoneNumber,
+		"verified_name":            details.VerifiedName,
+		"quality_rating":           details.QualityRating,
 		"messaging_limit_tier":     messagingLimitTier,
-		"code_verification_status": result["code_verification_status"],
-		"account_mode":             result["account_mode"],
+		"code_verification_status": details.CodeVerificationStatus,
+		"account_mode":             details.AccountMode,
 		"is_test_number":           isTestNumber,
 	}
 
 	// Add warning for test/sandbox numbers or expired verification
 	if isTestNumber {
 		response["warning"] = "This is a test/sandbox number. Not suitable for production use."
-	} else if verificationStatus, ok := result["code_verification_status"].(string); ok && verificationStatus == "EXPIRED" {
+	} else if details.CodeVerificationStatus == "EXPIRED" {
 		response["warning"] = "Phone verification has expired. Consider re-verifying at: https://business.facebook.com/wa/manage/phone-numbers/"
 	}
 
 	return r.SendEnvelope(response)
-}
-
-// fetchMetaJSON performs a Bearer-authenticated GET against the Meta Graph API
-// and decodes the JSON body into a generic map. The decoded body is returned
-// regardless of HTTP status, so callers can surface error envelopes from Meta.
-// Returns (nil, 0, err) only when the request itself fails (network/decode).
-func (a *App) fetchMetaJSON(url, accessToken string) (map[string]any, int, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), metaRequestTimeout)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, 0, err
-	}
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-
-	resp, err := a.HTTPClient.Do(req)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, resp.StatusCode, err
-	}
-
-	var out map[string]any
-	if len(body) > 0 {
-		if err := json.Unmarshal(body, &out); err != nil {
-			return nil, resp.StatusCode, err
-		}
-	}
-	return out, resp.StatusCode, nil
 }
 
 // Helper functions

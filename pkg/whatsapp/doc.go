@@ -9,10 +9,14 @@
 // # Client
 //
 // A Client is safe for concurrent use and is normally constructed once per
-// process, then shared. [New] takes production defaults; [NewWithTimeout] and
-// [NewWithBaseURL] override one setting each:
+// process, then shared. [New] takes production defaults; [Option] values
+// override them and compose freely:
 //
-//	client := whatsapp.New(logger)
+//	client := whatsapp.New(
+//		whatsapp.WithLogger(logger),
+//		whatsapp.WithBaseURL(cfg.WhatsApp.BaseURL),
+//		whatsapp.WithRetry(3, 500*time.Millisecond),
+//	)
 //
 // Per-request credentials travel in an [Account], so one Client serves every
 // WhatsApp business account in a multi-tenant deployment:
@@ -24,9 +28,15 @@
 //
 // # Errors
 //
-// Calls that reach Meta and receive a non-2xx response return an error built
-// from Meta's structured error body, carrying its numeric code and any
-// user-facing message. See [ParseMetaAPIError].
+// Calls that reach Meta and receive a non-2xx response return a
+// [MetaAPIError] carrying the status, Meta's numeric code and any user-facing
+// message. Branch on the failure modes worth handling with errors.Is:
+//
+//	if errors.Is(err, whatsapp.ErrRateLimited) { … }
+//
+// Transient failures — throttling, 5xx, and anything that never reached Meta —
+// are retried automatically with exponential backoff and jitter, honoring a
+// Retry-After header when Meta sends one. See [WithRetry].
 //
 // # Webhooks
 //

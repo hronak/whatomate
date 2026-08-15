@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -18,9 +17,7 @@ type FlowCreateRequest struct {
 }
 
 // FlowCreateResponse represents the response from creating a flow
-type FlowCreateResponse struct {
-	ID string `json:"id"`
-}
+type FlowCreateResponse = idResponse
 
 // FlowUpdateResponse represents the response from updating flow assets
 type FlowUpdateResponse struct {
@@ -35,11 +32,11 @@ type FlowPublishResponse struct {
 
 // FlowGetResponse represents a flow fetched from Meta
 type FlowGetResponse struct {
-	ID         string   `json:"id"`
-	Name       string   `json:"name"`
-	Status     string   `json:"status"`
-	Categories []string `json:"categories"`
-	PreviewURL string   `json:"preview_url,omitempty"`
+	ID         string     `json:"id"`
+	Name       string     `json:"name"`
+	Status     FlowStatus `json:"status"`
+	Categories []string   `json:"categories"`
+	PreviewURL string     `json:"preview_url,omitempty"`
 }
 
 // FlowListResponse represents the response from listing flows
@@ -70,7 +67,7 @@ func (c *Client) CreateFlow(ctx context.Context, account *Account, name string, 
 		Categories: categories,
 	}
 
-	c.Log.Debug("Creating flow in Meta", "name", name, "categories", categories, "url", url, "business_id", account.BusinessID)
+	c.log.Debug("Creating flow in Meta", "name", name, "categories", categories, "url", url, "business_id", account.BusinessID)
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
@@ -82,7 +79,7 @@ func (c *Client) CreateFlow(ctx context.Context, account *Account, name string, 
 		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	c.Log.Debug("Flow created in Meta", "flow_id", result.ID, "name", name)
+	c.log.Debug("Flow created in Meta", "flow_id", result.ID, "name", name)
 	return result.ID, nil
 }
 
@@ -128,30 +125,22 @@ func (c *Client) UpdateFlowJSON(ctx context.Context, account *Account, flowID st
 		return fmt.Errorf("failed to close multipart writer: %w", err)
 	}
 
-	// Create request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &buf)
+	c.log.Debug("Updating flow JSON", "flow_id", flowID)
+
+	contentType := writer.FormDataContentType()
+	payload := buf.Bytes()
+
+	respBody, err := c.send(ctx, func() (*http.Request, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payload))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create request: %w", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+account.AccessToken)
+		req.Header.Set("Content-Type", contentType)
+		return req, nil
+	})
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+account.AccessToken)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	c.Log.Debug("Updating flow JSON", "flow_id", flowID)
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return ParseMetaAPIError(resp.StatusCode, respBody)
+		return err
 	}
 
 	var result FlowUpdateResponse
@@ -166,7 +155,7 @@ func (c *Client) UpdateFlowJSON(ctx context.Context, account *Account, flowID st
 		return fmt.Errorf("failed to update flow JSON")
 	}
 
-	c.Log.Debug("Flow JSON updated", "flow_id", flowID)
+	c.log.Debug("Flow JSON updated", "flow_id", flowID)
 	return nil
 }
 
@@ -174,7 +163,7 @@ func (c *Client) UpdateFlowJSON(ctx context.Context, account *Account, flowID st
 func (c *Client) PublishFlow(ctx context.Context, account *Account, flowID string) error {
 	url := fmt.Sprintf("%s/%s/%s/publish", c.getBaseURL(), account.APIVersion, flowID)
 
-	c.Log.Debug("Publishing flow", "flow_id", flowID)
+	c.log.Debug("Publishing flow", "flow_id", flowID)
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, nil, account.AccessToken)
 	if err != nil {
@@ -190,7 +179,7 @@ func (c *Client) PublishFlow(ctx context.Context, account *Account, flowID strin
 		return fmt.Errorf("failed to publish flow")
 	}
 
-	c.Log.Debug("Flow published", "flow_id", flowID)
+	c.log.Debug("Flow published", "flow_id", flowID)
 	return nil
 }
 
@@ -198,7 +187,7 @@ func (c *Client) PublishFlow(ctx context.Context, account *Account, flowID strin
 func (c *Client) DeprecateFlow(ctx context.Context, account *Account, flowID string) error {
 	url := fmt.Sprintf("%s/%s/%s/deprecate", c.getBaseURL(), account.APIVersion, flowID)
 
-	c.Log.Debug("Deprecating flow", "flow_id", flowID)
+	c.log.Debug("Deprecating flow", "flow_id", flowID)
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, nil, account.AccessToken)
 	if err != nil {
@@ -214,7 +203,7 @@ func (c *Client) DeprecateFlow(ctx context.Context, account *Account, flowID str
 		return fmt.Errorf("failed to deprecate flow")
 	}
 
-	c.Log.Debug("Flow deprecated", "flow_id", flowID)
+	c.log.Debug("Flow deprecated", "flow_id", flowID)
 	return nil
 }
 
@@ -222,14 +211,14 @@ func (c *Client) DeprecateFlow(ctx context.Context, account *Account, flowID str
 func (c *Client) DeleteFlow(ctx context.Context, account *Account, flowID string) error {
 	url := fmt.Sprintf("%s/%s/%s", c.getBaseURL(), account.APIVersion, flowID)
 
-	c.Log.Debug("Deleting flow from Meta", "flow_id", flowID)
+	c.log.Debug("Deleting flow from Meta", "flow_id", flowID)
 
 	_, err := c.doRequest(ctx, http.MethodDelete, url, nil, account.AccessToken)
 	if err != nil {
 		return err
 	}
 
-	c.Log.Debug("Flow deleted from Meta", "flow_id", flowID)
+	c.log.Debug("Flow deleted from Meta", "flow_id", flowID)
 	return nil
 }
 
@@ -264,7 +253,7 @@ func (c *Client) GetFlowAssets(ctx context.Context, account *Account, flowID str
 	// First get the assets list to find the download URL
 	assetsURL := fmt.Sprintf("%s/%s/%s/assets", c.getBaseURL(), account.APIVersion, flowID)
 
-	c.Log.Debug("Fetching flow assets", "flow_id", flowID, "url", assetsURL)
+	c.log.Debug("Fetching flow assets", "flow_id", flowID, "url", assetsURL)
 
 	respBody, err := c.doRequest(ctx, http.MethodGet, assetsURL, nil, account.AccessToken)
 	if err != nil {
@@ -286,30 +275,21 @@ func (c *Client) GetFlowAssets(ctx context.Context, account *Account, flowID str
 	}
 
 	if downloadURL == "" {
-		c.Log.Debug("No FLOW_JSON asset found for flow", "flow_id", flowID)
+		c.log.Debug("No FLOW_JSON asset found for flow", "flow_id", flowID)
 		return nil, nil // No flow JSON yet
 	}
 
 	// Download the flow JSON
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create download request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+account.AccessToken)
-
-	resp, err := c.HTTPClient.Do(req)
+	flowJSONBody, err := c.send(ctx, func() (*http.Request, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create download request: %w", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+account.AccessToken)
+		return req, nil
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to download flow JSON: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	flowJSONBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read flow JSON: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to download flow JSON: status %d", resp.StatusCode)
 	}
 
 	var flowJSON FlowJSON
@@ -317,7 +297,7 @@ func (c *Client) GetFlowAssets(ctx context.Context, account *Account, flowID str
 		return nil, fmt.Errorf("failed to parse flow JSON: %w", err)
 	}
 
-	c.Log.Debug("Fetched flow JSON", "flow_id", flowID, "screens_count", len(flowJSON.Screens))
+	c.log.Debug("Fetched flow JSON", "flow_id", flowID, "screens_count", len(flowJSON.Screens))
 	return &flowJSON, nil
 }
 
@@ -335,7 +315,7 @@ func (c *Client) ListFlows(ctx context.Context, account *Account) ([]FlowGetResp
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	c.Log.Debug("Fetched flows from Meta", "count", len(result.Data))
+	c.log.Debug("Fetched flows from Meta", "count", len(result.Data))
 	return result.Data, nil
 }
 

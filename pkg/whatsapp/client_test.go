@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -126,18 +125,19 @@ func TestClient_SendTextMessage(t *testing.T) {
 			defer server.Close()
 
 			// Create client with custom HTTP client that redirects to test server
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-
-			// Override HTTP client to use test server
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := testAccount(server.URL)
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
-			msgID, err := client.SendTextMessage(ctx, account, whatsapp.Recipient{Phone: tt.phone}, tt.text)
+			msgID, err := client.SendTextMessage(ctx, account, whatsapp.Recipient{Phone: tt.phone}, tt.text, "")
 
 			if tt.wantErr {
 				require.Error(t, err)
@@ -218,14 +218,17 @@ func TestClient_GetMediaURL(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := testAccount(server.URL)
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			url, err := client.GetMediaURL(ctx, tt.mediaID, account)
 
@@ -282,10 +285,10 @@ func TestClient_DownloadMedia(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
+			log := nopLogger()
+			client := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithTimeout(5*time.Second))
 
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			data, err := client.DownloadMedia(ctx, server.URL+"/media/test", "test-access-token")
 
@@ -344,14 +347,17 @@ func TestClient_MarkMessageRead(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := testAccount(server.URL)
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			err := client.MarkMessageRead(ctx, account, tt.messageID)
 
@@ -384,14 +390,17 @@ func TestClient_SendImageMessage(t *testing.T) {
 	}))
 	defer server.Close()
 
-	log := testutil.NopLogger()
-	client := whatsapp.NewWithTimeout(log, 5*time.Second)
-	client.HTTPClient = &http.Client{
-		Transport: &testServerTransport{serverURL: server.URL},
-	}
+	log := nopLogger()
+	client := whatsapp.New(
+		whatsapp.WithLogger(log),
+		whatsapp.WithHTTPClient(&http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &testServerTransport{serverURL: server.URL},
+		}),
+	)
 
 	account := testAccount(server.URL)
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	msgID, err := client.SendImageMessage(ctx, account, whatsapp.Recipient{Phone: "1234567890"}, "media123", "Test caption")
 
@@ -419,14 +428,17 @@ func TestClient_SendDocumentMessage(t *testing.T) {
 	}))
 	defer server.Close()
 
-	log := testutil.NopLogger()
-	client := whatsapp.NewWithTimeout(log, 5*time.Second)
-	client.HTTPClient = &http.Client{
-		Transport: &testServerTransport{serverURL: server.URL},
-	}
+	log := nopLogger()
+	client := whatsapp.New(
+		whatsapp.WithLogger(log),
+		whatsapp.WithHTTPClient(&http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &testServerTransport{serverURL: server.URL},
+		}),
+	)
 
 	account := testAccount(server.URL)
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	msgID, err := client.SendDocumentMessage(ctx, account, whatsapp.Recipient{Phone: "1234567890"}, "media456", "report.pdf", "Monthly report")
 

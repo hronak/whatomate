@@ -9,18 +9,20 @@ import (
 	"time"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func newTestClient(t *testing.T, server *httptest.Server) *whatsapp.Client {
 	t.Helper()
-	log := testutil.NopLogger()
-	client := whatsapp.NewWithTimeout(log, 5*time.Second)
-	client.HTTPClient = &http.Client{
-		Transport: &testServerTransport{serverURL: server.URL},
-	}
+	log := nopLogger()
+	client := whatsapp.New(
+		whatsapp.WithLogger(log),
+		whatsapp.WithHTTPClient(&http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &testServerTransport{serverURL: server.URL},
+		}),
+	)
 	return client
 }
 
@@ -140,8 +142,8 @@ func TestClient_SubmitTemplate_MissingVariableSamples(t *testing.T) {
 	t.Parallel()
 
 	// SubmitTemplate should fail if body has variables but no samples
-	log := testutil.NopLogger()
-	client := whatsapp.NewWithTimeout(log, 5*time.Second)
+	log := nopLogger()
+	client := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithTimeout(5*time.Second))
 
 	account := &whatsapp.Account{
 		PhoneID:     "123",
@@ -189,7 +191,7 @@ func TestClient_FetchTemplates_Success(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, templates, 2)
 	assert.Equal(t, "hello", templates[0].Name)
-	assert.Equal(t, "APPROVED", templates[0].Status)
+	assert.Equal(t, whatsapp.TemplateStatusApproved, templates[0].Status)
 	assert.Equal(t, "HIGH", templates[0].QualityRating)
 	assert.Equal(t, "goodbye", templates[1].Name)
 	assert.Equal(t, "UNKNOWN", templates[1].QualityRating)
