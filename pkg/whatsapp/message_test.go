@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -115,11 +114,14 @@ func TestClient_SendInteractiveButtons(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := &whatsapp.Account{
 				PhoneID:     "123456789",
@@ -127,7 +129,7 @@ func TestClient_SendInteractiveButtons(t *testing.T) {
 				APIVersion:  "v21.0",
 				AccessToken: "test-token",
 			}
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			_, err := client.SendInteractiveButtons(ctx, account, whatsapp.Recipient{Phone: tt.phone}, tt.bodyText, tt.buttons)
 
@@ -163,11 +165,14 @@ func TestClient_SendInteractiveButtons_ButtonTruncation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	log := testutil.NopLogger()
-	client := whatsapp.NewWithTimeout(log, 5*time.Second)
-	client.HTTPClient = &http.Client{
-		Transport: &testServerTransport{serverURL: server.URL},
-	}
+	log := nopLogger()
+	client := whatsapp.New(
+		whatsapp.WithLogger(log),
+		whatsapp.WithHTTPClient(&http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &testServerTransport{serverURL: server.URL},
+		}),
+	)
 
 	account := &whatsapp.Account{
 		PhoneID:     "123456789",
@@ -175,7 +180,7 @@ func TestClient_SendInteractiveButtons_ButtonTruncation(t *testing.T) {
 		APIVersion:  "v21.0",
 		AccessToken: "test-token",
 	}
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	longTitle := "This title is definitely longer than 20 characters"
 	buttons := []whatsapp.Button{
@@ -256,11 +261,14 @@ func TestClient_SendTemplateMessage(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := &whatsapp.Account{
 				PhoneID:     "123456789",
@@ -268,7 +276,7 @@ func TestClient_SendTemplateMessage(t *testing.T) {
 				APIVersion:  "v21.0",
 				AccessToken: "test-token",
 			}
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			components := whatsapp.BodyParamsToComponents(tt.bodyParams)
 			msgID, err := client.SendTemplateMessage(ctx, account, whatsapp.Recipient{Phone: tt.phone}, tt.templateName, tt.language, components)
@@ -368,11 +376,14 @@ func TestClient_SendCTAURLButton(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := &whatsapp.Account{
 				PhoneID:     "123456789",
@@ -380,7 +391,7 @@ func TestClient_SendCTAURLButton(t *testing.T) {
 				APIVersion:  "v21.0",
 				AccessToken: "test-token",
 			}
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			msgID, err := client.SendCTAURLButton(ctx, account, whatsapp.Recipient{Phone: tt.phone}, tt.bodyText, tt.buttonText, tt.url)
 
@@ -497,11 +508,14 @@ func TestClient_SendVoiceCallButton(t *testing.T) {
 			}))
 			defer server.Close()
 
-			log := testutil.NopLogger()
-			client := whatsapp.NewWithTimeout(log, 5*time.Second)
-			client.HTTPClient = &http.Client{
-				Transport: &testServerTransport{serverURL: server.URL},
-			}
+			log := nopLogger()
+			client := whatsapp.New(
+				whatsapp.WithLogger(log),
+				whatsapp.WithHTTPClient(&http.Client{
+					Timeout:   5 * time.Second,
+					Transport: &testServerTransport{serverURL: server.URL},
+				}),
+			)
 
 			account := &whatsapp.Account{
 				PhoneID:     "123456789",
@@ -509,7 +523,7 @@ func TestClient_SendVoiceCallButton(t *testing.T) {
 				APIVersion:  "v21.0",
 				AccessToken: "test-token",
 			}
-			ctx := testutil.TestContext(t)
+			ctx := t.Context()
 
 			msgID, err := client.SendVoiceCallButton(ctx, account, whatsapp.Recipient{Phone: "1234567890"}, tt.bodyText, tt.displayText, tt.ttlMinutes, tt.payload)
 
@@ -567,11 +581,14 @@ func TestClient_SendTemplateMessage_WithComponents(t *testing.T) {
 	}))
 	defer server.Close()
 
-	log := testutil.NopLogger()
-	client := whatsapp.NewWithTimeout(log, 5*time.Second)
-	client.HTTPClient = &http.Client{
-		Transport: &testServerTransport{serverURL: server.URL},
-	}
+	log := nopLogger()
+	client := whatsapp.New(
+		whatsapp.WithLogger(log),
+		whatsapp.WithHTTPClient(&http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &testServerTransport{serverURL: server.URL},
+		}),
+	)
 
 	account := &whatsapp.Account{
 		PhoneID:     "123456789",
@@ -579,7 +596,7 @@ func TestClient_SendTemplateMessage_WithComponents(t *testing.T) {
 		APIVersion:  "v21.0",
 		AccessToken: "test-token",
 	}
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	// Test with header and body components
 	components := []map[string]any{
@@ -613,18 +630,18 @@ func TestButtonURLParamsToComponents(t *testing.T) {
 	t.Parallel()
 
 	t.Run("nil params returns nil", func(t *testing.T) {
-		result := whatsapp.ButtonURLParamsToComponents(nil)
+		result := whatsapp.ButtonURLParamsToComponents(nil, nil)
 		assert.Nil(t, result)
 	})
 
 	t.Run("empty params returns nil", func(t *testing.T) {
-		result := whatsapp.ButtonURLParamsToComponents(map[string]string{})
+		result := whatsapp.ButtonURLParamsToComponents(map[string]string{}, nil)
 		assert.Nil(t, result)
 	})
 
 	t.Run("single URL button param", func(t *testing.T) {
 		params := map[string]string{"0": "12345"}
-		result := whatsapp.ButtonURLParamsToComponents(params)
+		result := whatsapp.ButtonURLParamsToComponents(params, nil)
 
 		require.Len(t, result, 1)
 		assert.Equal(t, "button", result[0]["type"])
@@ -639,7 +656,7 @@ func TestButtonURLParamsToComponents(t *testing.T) {
 
 	t.Run("multiple URL button params sorted by index", func(t *testing.T) {
 		params := map[string]string{"1": "xyz", "0": "abc"}
-		result := whatsapp.ButtonURLParamsToComponents(params)
+		result := whatsapp.ButtonURLParamsToComponents(params, nil)
 
 		require.Len(t, result, 2)
 		assert.Equal(t, "0", result[0]["index"])
@@ -698,7 +715,7 @@ func TestButtonURLParamsToComponents(t *testing.T) {
 
 	t.Run("no template buttons defaults to URL", func(t *testing.T) {
 		params := map[string]string{"0": "value"}
-		result := whatsapp.ButtonURLParamsToComponents(params)
+		result := whatsapp.ButtonURLParamsToComponents(params, nil)
 
 		require.Len(t, result, 1)
 		assert.Equal(t, "url", result[0]["sub_type"])

@@ -24,6 +24,20 @@ type Button struct {
 	URL   string `json:"url,omitempty"`  // URL for type="url" buttons
 }
 
+// listResponse is Meta's standard collection envelope, {"data": [...]}.
+// Several endpoints declared their own copy of this shape; one generic type
+// covers them all.
+type listResponse[T any] struct {
+	Data   []T        `json:"data"`
+	Paging metaPaging `json:"paging,omitzero"`
+}
+
+// idResponse is Meta's standard creation response, {"id": "..."}. It replaces
+// nine identical struct declarations across this package.
+type idResponse struct {
+	ID string `json:"id"`
+}
+
 // MetaAPIResponse represents a successful API response from Meta
 type MetaAPIResponse struct {
 	Messages []struct {
@@ -112,6 +126,11 @@ type MetaAPIError struct {
 
 	// Body is the raw response body, retained when parsing failed.
 	Body string
+
+	// RetryAfter carries the response's Retry-After header, when Meta sent
+	// one. Zero means Meta gave no guidance and the caller should back off on
+	// its own schedule.
+	RetryAfter time.Duration
 }
 
 // Error implements error.
@@ -167,9 +186,7 @@ func ParseMetaAPIError(statusCode int, respBody []byte) error {
 }
 
 // TemplateResponse represents response from template submission
-type TemplateResponse struct {
-	ID string `json:"id"`
-}
+type TemplateResponse = idResponse
 
 // MetaQualityScore represents quality score information from Meta
 type MetaQualityScore struct {
@@ -181,8 +198,8 @@ type MetaTemplate struct {
 	ID            string              `json:"id"`
 	Name          string              `json:"name"`
 	Language      string              `json:"language"`
-	Category      string              `json:"category"`
-	Status        string              `json:"status"`
+	Category      TemplateCategory    `json:"category"`
+	Status        TemplateStatus      `json:"status"`
 	QualityRating string              `json:"quality_rating,omitempty"`
 	QualityScore  *MetaQualityScore   `json:"quality_score,omitempty"`
 	Components    []TemplateComponent `json:"components"`
@@ -190,8 +207,8 @@ type MetaTemplate struct {
 
 // TemplateComponent represents a component of a template
 type TemplateComponent struct {
-	Type    string           `json:"type"`
-	Format  string           `json:"format,omitempty"`
+	Type    ComponentType    `json:"type"`
+	Format  ComponentFormat  `json:"format,omitempty"`
 	Text    string           `json:"text,omitempty"`
 	Buttons []TemplateButton `json:"buttons,omitempty"`
 	Example *TemplateExample `json:"example,omitempty"`
@@ -200,7 +217,7 @@ type TemplateComponent struct {
 // TemplateButton represents a button in a template.
 // FlowID uses json.Number because Meta returns it as a numeric ID.
 type TemplateButton struct {
-	Type           string      `json:"type"`
+	Type           ButtonType  `json:"type"`
 	Text           string      `json:"text"`
 	URL            string      `json:"url,omitempty"`
 	PhoneNumber    string      `json:"phone_number,omitempty"`
@@ -208,7 +225,7 @@ type TemplateButton struct {
 	FlowID         json.Number `json:"flow_id,omitempty"`
 	FlowAction     string      `json:"flow_action,omitempty"`
 	NavigateScreen string      `json:"navigate_screen,omitempty"`
-	OTPType        string      `json:"otp_type,omitempty"`       // "COPY_CODE", "ONE_TAP", "ZERO_TAP"
+	OTPType        OTPType     `json:"otp_type,omitempty"`
 	AutofillText   string      `json:"autofill_text,omitempty"`  // For ONE_TAP OTP
 	PackageName    string      `json:"package_name,omitempty"`   // For ONE_TAP/ZERO_TAP OTP
 	SignatureHash  string      `json:"signature_hash,omitempty"` // For ONE_TAP/ZERO_TAP OTP
@@ -222,9 +239,7 @@ type TemplateExample struct {
 }
 
 // TemplateListResponse represents response from fetching templates
-type TemplateListResponse struct {
-	Data []MetaTemplate `json:"data"`
-}
+type TemplateListResponse = listResponse[MetaTemplate]
 
 // WebhookPayload represents the incoming webhook from Meta
 type WebhookPayload struct {
@@ -381,9 +396,7 @@ type CatalogInfo struct {
 }
 
 // CatalogListResponse represents response from listing catalogs
-type CatalogListResponse struct {
-	Data []CatalogInfo `json:"data"`
-}
+type CatalogListResponse = listResponse[CatalogInfo]
 
 // ProductInput represents input for creating/updating a product
 type ProductInput struct {
@@ -409,14 +422,10 @@ type ProductInfo struct {
 }
 
 // ProductListResponse represents response from listing products
-type ProductListResponse struct {
-	Data []ProductInfo `json:"data"`
-}
+type ProductListResponse = listResponse[ProductInfo]
 
 // ProductCreateResponse represents response from creating a product
-type ProductCreateResponse struct {
-	ID string `json:"id"`
-}
+type ProductCreateResponse = idResponse
 
 // BusinessProfile represents the business profile of a phone number
 type BusinessProfile struct {

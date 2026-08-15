@@ -45,7 +45,7 @@ func (f *fakeAnalyticsServer) Hits() int64 { return f.hits.Load() }
 func newAppForMetaAnalytics(t *testing.T, fakeURL string) *handlers.App {
 	t.Helper()
 	app := newTestApp(t)
-	app.WhatsApp = whatsapp.NewWithBaseURL(logf.New(logf.Opts{Level: logf.ErrorLevel}), fakeURL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(logf.New(logf.Opts{Level: logf.ErrorLevel})), whatsapp.WithBaseURL(fakeURL))
 	app.Config = &config.Config{
 		JWT:      config.JWTConfig{Secret: testutil.TestJWTSecret, AccessExpiryMins: 15, RefreshExpiryDays: 7},
 		WhatsApp: config.WhatsAppConfig{BaseURL: fakeURL, APIVersion: "v18.0"},

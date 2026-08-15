@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/shridarpatil/whatomate/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -51,7 +50,7 @@ func newCallServer(t *testing.T) *callServer {
 }
 
 func newCallTestClient(serverURL string) *whatsapp.Client {
-	return whatsapp.NewWithBaseURL(testutil.NopLogger(), serverURL)
+	return whatsapp.New(whatsapp.WithLogger(nopLogger()), whatsapp.WithBaseURL(serverURL))
 }
 
 // --- PreAcceptCall ---

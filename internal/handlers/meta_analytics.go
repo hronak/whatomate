@@ -176,7 +176,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 		req := &whatsapp.AnalyticsRequest{
 			Start:       startUnix,
 			End:         endUnix,
-			Granularity: granularity,
+			Granularity: whatsapp.Granularity(granularity),
 		}
 
 		// Get template IDs if this is template analytics (not template_group_analytics)

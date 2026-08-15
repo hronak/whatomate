@@ -508,8 +508,8 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 			Name:            metaTemplate.Name,
 			DisplayName:     metaTemplate.Name,
 			Language:        metaTemplate.Language,
-			Category:        metaTemplate.Category,
-			Status:          metaTemplate.Status,
+			Category:        string(metaTemplate.Category),
+			Status:          string(metaTemplate.Status),
 			QualityRating:   qualityRating,
 		}
 
@@ -517,7 +517,7 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 		for _, comp := range metaTemplate.Components {
 			switch comp.Type {
 			case "HEADER":
-				template.HeaderType = comp.Format
+				template.HeaderType = string(comp.Format)
 				if comp.Text != "" {
 					template.HeaderContent = comp.Text
 				}

@@ -66,7 +66,7 @@ func TestApp_ExchangeToken_Success_AutoRegistration(t *testing.T) {
 	defer metaServer.Close()
 
 	// Override WhatsApp client to use test server
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "test_auth_code_123",
@@ -158,7 +158,7 @@ func TestApp_ExchangeToken_Success_PendingRegistration(t *testing.T) {
 	}))
 	defer metaServer.Close()
 
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "test_code",
@@ -201,7 +201,7 @@ func TestApp_ExchangeToken_InvalidCode(t *testing.T) {
 	}))
 	defer metaServer.Close()
 
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		"code":     "invalid_code",
@@ -292,7 +292,7 @@ func TestApp_ExchangeToken_Success_CodeOnly_Discovery(t *testing.T) {
 	}))
 	defer metaServer.Close()
 
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	// Omit phone_id and waba_id
 	req := testutil.NewJSONRequest(t, map[string]any{
@@ -398,7 +398,7 @@ func TestApp_RegisterPhoneNumber_Success_WithPIN(t *testing.T) {
 	}))
 	defer metaServer.Close()
 
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "654321",
@@ -471,7 +471,7 @@ func TestApp_RegisterPhoneNumber_Success_GeneratedPIN(t *testing.T) {
 	}))
 	defer metaServer.Close()
 
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		// No PIN provided - should generate one
@@ -536,7 +536,7 @@ func TestApp_RegisterPhoneNumber_RegistrationFailed(t *testing.T) {
 	}))
 	defer metaServer.Close()
 
-	app.WhatsApp = whatsapp.NewWithBaseURL(app.Log, metaServer.URL)
+	app.WhatsApp = whatsapp.New(whatsapp.WithLogger(app.Log), whatsapp.WithBaseURL(metaServer.URL))
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		"pin": "123456",

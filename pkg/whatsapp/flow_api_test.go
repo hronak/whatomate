@@ -200,7 +200,7 @@ func TestClient_GetFlow_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "flow-123", flow.ID)
 	assert.Equal(t, "Test Flow", flow.Name)
-	assert.Equal(t, "DRAFT", flow.Status)
+	assert.Equal(t, whatsapp.FlowStatusDraft, flow.Status)
 }
 
 // --- ListFlows ---
@@ -229,7 +229,7 @@ func TestClient_ListFlows_Success(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, flows, 2)
 	assert.Equal(t, "Flow 1", flows[0].Name)
-	assert.Equal(t, "PUBLISHED", flows[1].Status)
+	assert.Equal(t, whatsapp.FlowStatusPublished, flows[1].Status)
 }
 
 func TestClient_ListFlows_Empty(t *testing.T) {

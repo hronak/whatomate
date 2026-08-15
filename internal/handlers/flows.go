@@ -280,7 +280,6 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 	}
 
 	// Create WhatsApp API client
-	waClient := whatsapp.New(a.Log)
 	waAccount := a.toWhatsAppAccount(account)
 
 	a.Log.Info("SaveFlowToMeta: Account details",
@@ -302,7 +301,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 		}
 
 		a.Log.Info("SaveFlowToMeta: Creating flow in Meta", "name", flow.Name, "categories", categories)
-		metaFlowID, err = waClient.CreateFlow(ctx, waAccount, flow.Name, categories)
+		metaFlowID, err = a.WhatsApp.CreateFlow(ctx, waAccount, flow.Name, categories)
 		if err != nil {
 			a.Log.Error("Failed to create flow in Meta", "error", err, "flow_id", id, "business_id", account.BusinessID)
 			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create flow in Meta", nil, "")
@@ -326,7 +325,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 			Screens: sanitizedScreens,
 		}
 
-		if err := waClient.UpdateFlowJSON(ctx, waAccount, metaFlowID, flowJSON); err != nil {
+		if err := a.WhatsApp.UpdateFlowJSON(ctx, waAccount, metaFlowID, flowJSON); err != nil {
 			a.Log.Error("Failed to update flow JSON in Meta", "error", err, "flow_id", id, "meta_flow_id", metaFlowID)
 			// Save the meta flow ID even if JSON update fails
 			a.logWrite("flow state", a.DB.Model(flow).Updates(map[string]any{
@@ -392,19 +391,18 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 	}
 
 	// Create WhatsApp API client
-	waClient := whatsapp.New(a.Log)
 	waAccount := a.toWhatsAppAccount(account)
 
 	ctx := context.Background()
 
 	// Publish the flow
-	if err := waClient.PublishFlow(ctx, waAccount, flow.MetaFlowID); err != nil {
+	if err := a.WhatsApp.PublishFlow(ctx, waAccount, flow.MetaFlowID); err != nil {
 		a.Log.Error("Failed to publish flow in Meta", "error", err, "flow_id", id, "meta_flow_id", flow.MetaFlowID)
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to publish flow", nil, "")
 	}
 
 	// Get the flow details including preview URL
-	metaFlow, err := waClient.GetFlow(ctx, waAccount, flow.MetaFlowID)
+	metaFlow, err := a.WhatsApp.GetFlow(ctx, waAccount, flow.MetaFlowID)
 	previewURL := ""
 	if err == nil && metaFlow != nil {
 		previewURL = metaFlow.PreviewURL
@@ -460,11 +458,10 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 			return a.sendError(r, invalidRequest("WhatsApp account not found"))
 		}
 
-		waClient := whatsapp.New(a.Log)
 		waAccount := a.toWhatsAppAccount(account)
 
 		ctx := context.Background()
-		if err := waClient.DeprecateFlow(ctx, waAccount, flow.MetaFlowID); err != nil {
+		if err := a.WhatsApp.DeprecateFlow(ctx, waAccount, flow.MetaFlowID); err != nil {
 			a.Log.Error("Failed to deprecate flow in Meta", "error", err, "flow_id", id, "meta_flow_id", flow.MetaFlowID)
 			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to deprecate flow in Meta", nil, "")
 		}
@@ -558,13 +555,12 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 	}
 
 	// Create WhatsApp API client
-	waClient := whatsapp.New(a.Log)
 	waAccount := a.toWhatsAppAccount(account)
 
 	ctx := context.Background()
 
 	// Fetch flows from Meta
-	metaFlows, err := waClient.ListFlows(ctx, waAccount)
+	metaFlows, err := a.WhatsApp.ListFlows(ctx, waAccount)
 	if err != nil {
 		a.Log.Error("Failed to fetch flows from Meta", "error", err)
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch flows from Meta", nil, "")
@@ -589,7 +585,7 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 		var screens models.JSONBArray
 		var jsonVersion string
 
-		flowAssets, assetsErr := waClient.GetFlowAssets(ctx, waAccount, mf.ID)
+		flowAssets, assetsErr := a.WhatsApp.GetFlowAssets(ctx, waAccount, mf.ID)
 		if assetsErr != nil {
 			a.Log.Warn("Failed to fetch flow assets", "error", assetsErr, "meta_flow_id", mf.ID)
 			// Continue without assets - flow will be synced without screens
@@ -612,7 +608,7 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 				WhatsAppAccount: req.WhatsAppAccount,
 				MetaFlowID:      mf.ID,
 				Name:            mf.Name,
-				Status:          mf.Status,
+				Status:          string(mf.Status),
 				Category:        category,
 				PreviewURL:      mf.PreviewURL,
 				FlowJSON:        flowJSON,

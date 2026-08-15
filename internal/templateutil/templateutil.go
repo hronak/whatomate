@@ -2,12 +2,14 @@ package templateutil
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
+
+	"github.com/shridarpatil/whatomate/pkg/whatsapp"
 )
 
-// ParameterPattern matches template parameters like {{1}}, {{name}}, {{order_id}}
-var ParameterPattern = regexp.MustCompile(`\{\{([^}]+)\}\}`)
+// ParameterPattern matches template parameters like {{1}}, {{name}}, {{order_id}}.
+// The pattern is Meta's, so it is defined alongside the API client.
+var ParameterPattern = whatsapp.ParameterPattern
 
 // isPositionalParam returns true if the parameter name is purely numeric (e.g. "1", "2").
 func isPositionalParam(name string) bool {
@@ -58,23 +60,7 @@ func ValidateNoMixedParams(content string) error {
 // Supports both positional ({{1}}, {{2}}) and named ({{name}}, {{order_id}}) parameters.
 // Returns parameter names in order of first occurrence, without duplicates.
 func ExtParamNames(content string) []string {
-	matches := ParameterPattern.FindAllStringSubmatch(content, -1)
-	if len(matches) == 0 {
-		return nil
-	}
-
-	seen := make(map[string]bool)
-	var names []string
-	for _, match := range matches {
-		if len(match) > 1 {
-			name := strings.TrimSpace(match[1])
-			if name != "" && !seen[name] {
-				seen[name] = true
-				names = append(names, name)
-			}
-		}
-	}
-	return names
+	return whatsapp.TemplateParamNames(content)
 }
 
 // ResolveParamsFromMap resolves both positional and named parameters to ordered values

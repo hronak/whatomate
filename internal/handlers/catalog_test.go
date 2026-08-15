@@ -94,7 +94,7 @@ func newCatalogTestApp(t *testing.T, mockServer *mockCatalogServer) *handlers.Ap
 	t.Helper()
 
 	log := testutil.NopLogger()
-	waClient := whatsapp.NewWithBaseURL(log, mockServer.server.URL)
+	waClient := whatsapp.New(whatsapp.WithLogger(log), whatsapp.WithBaseURL(mockServer.server.URL))
 
 	return newTestApp(t, withWhatsApp(waClient))
 }

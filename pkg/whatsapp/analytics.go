@@ -10,12 +10,12 @@ import (
 
 // AnalyticsRequest represents parameters for fetching analytics from Meta API
 type AnalyticsRequest struct {
-	Start        int64    `json:"start"`         // Unix timestamp (seconds)
-	End          int64    `json:"end"`           // Unix timestamp (seconds)
-	Granularity  string   `json:"granularity"`   // "HALF_HOUR", "DAY", "MONTH"
-	PhoneNumbers []string `json:"phone_numbers"` // Optional filter by phone numbers
-	TemplateIDs  []string `json:"template_ids"`  // Optional filter for template analytics
-	CountryCodes []string `json:"country_codes"` // Optional filter by country codes
+	Start        int64       `json:"start"` // Unix timestamp (seconds)
+	End          int64       `json:"end"`   // Unix timestamp (seconds)
+	Granularity  Granularity `json:"granularity"`
+	PhoneNumbers []string    `json:"phone_numbers"` // Optional filter by phone numbers
+	TemplateIDs  []string    `json:"template_ids"`  // Optional filter for template analytics
+	CountryCodes []string    `json:"country_codes"` // Optional filter by country codes
 }
 
 // AnalyticsType represents the type of analytics to fetch
@@ -27,142 +27,6 @@ const (
 	AnalyticsTypeTemplate  AnalyticsType = "template_analytics"
 	AnalyticsTypeCall      AnalyticsType = "call_analytics"
 )
-
-// MessagingAnalyticsDataPoint represents a single data point for messaging analytics
-type MessagingAnalyticsDataPoint struct {
-	Start     int64 `json:"start"`
-	End       int64 `json:"end"`
-	Sent      int64 `json:"sent"`
-	Delivered int64 `json:"delivered"`
-}
-
-// MessagingAnalyticsEntry represents a single phone number's messaging data
-type MessagingAnalyticsEntry struct {
-	PhoneNumber string                        `json:"phone_number,omitempty"`
-	DataPoints  []MessagingAnalyticsDataPoint `json:"data_points"`
-}
-
-// MessagingAnalyticsRaw represents the raw response from Meta API
-type MessagingAnalyticsRaw struct {
-	Granularity string                    `json:"granularity"`
-	Data        []MessagingAnalyticsEntry `json:"data"`
-	// Also support direct data_points for backward compatibility
-	DataPoints []MessagingAnalyticsDataPoint `json:"data_points,omitempty"`
-}
-
-// MessagingAnalytics represents messaging analytics response (flattened)
-type MessagingAnalytics struct {
-	Granularity string                        `json:"granularity"`
-	DataPoints  []MessagingAnalyticsDataPoint `json:"data_points"`
-}
-
-// PricingAnalyticsDataPoint represents a single data point for pricing analytics
-// With dimensions, this includes detailed breakdown by category, type, and country
-type PricingAnalyticsDataPoint struct {
-	Start           int64   `json:"start"`
-	End             int64   `json:"end"`
-	Volume          int64   `json:"volume"`                     // Message count
-	Cost            float64 `json:"cost"`                       // Cost in account currency
-	Country         string  `json:"country,omitempty"`          // Country code (IN, US, etc.)
-	PricingType     string  `json:"pricing_type,omitempty"`     // FREE_CUSTOMER_SERVICE, FREE_ENTRY_POINT, REGULAR
-	PricingCategory string  `json:"pricing_category,omitempty"` // MARKETING, UTILITY, AUTHENTICATION, SERVICE, etc.
-	Tier            string  `json:"tier,omitempty"`             // Pricing tier
-}
-
-// PricingAnalyticsEntry represents a single phone number's pricing data
-type PricingAnalyticsEntry struct {
-	PhoneNumber string                      `json:"phone_number,omitempty"`
-	DataPoints  []PricingAnalyticsDataPoint `json:"data_points"`
-}
-
-// PricingAnalyticsRaw represents the raw response from Meta API
-type PricingAnalyticsRaw struct {
-	Granularity string                  `json:"granularity"`
-	Data        []PricingAnalyticsEntry `json:"data"`
-	// Also support direct data_points for backward compatibility
-	DataPoints []PricingAnalyticsDataPoint `json:"data_points,omitempty"`
-}
-
-// PricingAnalytics represents pricing analytics response (flattened)
-type PricingAnalytics struct {
-	Granularity string                      `json:"granularity"`
-	DataPoints  []PricingAnalyticsDataPoint `json:"data_points"`
-}
-
-// TemplateCostItem represents a cost item in template analytics
-type TemplateCostItem struct {
-	Type  string  `json:"type"`            // amount_spent, cost_per_delivered, cost_per_url_button_click
-	Value float64 `json:"value,omitempty"` // The cost value
-}
-
-// TemplateClickItem represents a click item in template analytics
-type TemplateClickItem struct {
-	Type          string `json:"type"`           // quick_reply_button, unique_url_button
-	ButtonContent string `json:"button_content"` // The button text
-	Count         int64  `json:"count"`          // Number of clicks
-}
-
-// TemplateAnalyticsDataPoint represents a single data point for template analytics
-// This matches Meta's actual response where template_id is in each data point
-type TemplateAnalyticsDataPoint struct {
-	TemplateID string              `json:"template_id"`
-	Start      int64               `json:"start"`
-	End        int64               `json:"end"`
-	Sent       int64               `json:"sent"`
-	Delivered  int64               `json:"delivered"`
-	Read       int64               `json:"read"`
-	Replied    int64               `json:"replied,omitempty"`
-	Clicked    []TemplateClickItem `json:"clicked,omitempty"` // Array of button click details
-	Cost       []TemplateCostItem  `json:"cost,omitempty"`
-}
-
-// TemplateAnalyticsDataEntry represents one entry in the data array
-type TemplateAnalyticsDataEntry struct {
-	Granularity string                       `json:"granularity"`
-	ProductType string                       `json:"product_type"`
-	DataPoints  []TemplateAnalyticsDataPoint `json:"data_points"`
-}
-
-// TemplateAnalyticsRaw represents the raw response from Meta API for template analytics
-type TemplateAnalyticsRaw struct {
-	Data []TemplateAnalyticsDataEntry `json:"data"`
-}
-
-// TemplateAnalytics represents template analytics response (flattened for easier consumption)
-type TemplateAnalytics struct {
-	Granularity string                       `json:"granularity"`
-	DataPoints  []TemplateAnalyticsDataPoint `json:"data_points"`
-}
-
-// CallAnalyticsDataPoint represents a single data point for call analytics
-type CallAnalyticsDataPoint struct {
-	Start           int64   `json:"start"`
-	End             int64   `json:"end"`
-	Count           int64   `json:"count"`
-	Cost            float64 `json:"cost"`
-	AverageDuration int64   `json:"average_duration"`    // Average duration in seconds
-	Direction       string  `json:"direction,omitempty"` // USER_INITIATED or BUSINESS_INITIATED (from dimensions)
-}
-
-// CallAnalyticsEntry represents a single phone number's call data
-type CallAnalyticsEntry struct {
-	PhoneNumber string                   `json:"phone_number,omitempty"`
-	DataPoints  []CallAnalyticsDataPoint `json:"data_points"`
-}
-
-// CallAnalyticsRaw represents the raw response from Meta API
-type CallAnalyticsRaw struct {
-	Granularity string               `json:"granularity"`
-	Data        []CallAnalyticsEntry `json:"data"`
-	// Also support direct data_points for backward compatibility
-	DataPoints []CallAnalyticsDataPoint `json:"data_points,omitempty"`
-}
-
-// CallAnalytics represents call analytics response (flattened)
-type CallAnalytics struct {
-	Granularity string                   `json:"granularity"`
-	DataPoints  []CallAnalyticsDataPoint `json:"data_points"`
-}
 
 // MetaAnalyticsResponse is a generic response that holds any analytics type
 type MetaAnalyticsResponse struct {
@@ -203,7 +67,7 @@ type templateAnalyticsWithPaging struct {
 // GetAnalytics fetches analytics from Meta API
 func (c *Client) GetAnalytics(ctx context.Context, account *Account, analyticsType AnalyticsType, req *AnalyticsRequest) (*MetaAnalyticsResponse, error) {
 	url := c.buildAnalyticsURL(account, analyticsType, req)
-	c.Log.Debug("Fetching Meta analytics", "type", analyticsType, "url", url)
+	c.log.Debug("Fetching Meta analytics", "type", analyticsType, "url", url)
 
 	respBody, err := c.doRequest(ctx, http.MethodGet, url, nil, account.AccessToken)
 	if err != nil {
@@ -211,7 +75,7 @@ func (c *Client) GetAnalytics(ctx context.Context, account *Account, analyticsTy
 	}
 
 	// Log raw response for debugging
-	c.Log.Debug("Meta analytics raw response", "type", analyticsType, "response", string(respBody))
+	c.log.Debug("Meta analytics raw response", "type", analyticsType, "response", string(respBody))
 
 	// Template analytics uses a different endpoint that returns data directly (not nested under template_analytics)
 	if analyticsType == AnalyticsTypeTemplate {
@@ -361,9 +225,9 @@ func (c *Client) buildTemplateAnalyticsURL(account *Account, req *AnalyticsReque
 	if len(req.TemplateIDs) > 0 {
 		templateIDsStr := "[" + strings.Join(req.TemplateIDs, ",") + "]"
 		params = append(params, fmt.Sprintf("template_ids=%s", templateIDsStr))
-		c.Log.Debug("Template analytics request", "template_ids", templateIDsStr, "count", len(req.TemplateIDs))
+		c.log.Debug("Template analytics request", "template_ids", templateIDsStr, "count", len(req.TemplateIDs))
 	} else {
-		c.Log.Debug("Template analytics request without template_ids filter - will return all templates with activity")
+		c.log.Debug("Template analytics request without template_ids filter - will return all templates with activity")
 	}
 
 	return fmt.Sprintf("%s?%s", baseURL, strings.Join(params, "&"))
@@ -382,7 +246,7 @@ func ValidateGranularity(granularity string) bool {
 // NormalizeGranularity converts granularity to the correct format for each analytics type
 // Meta API is inconsistent - some endpoints use DAY/MONTH, others use DAILY/MONTHLY
 // Template analytics only supports DAILY
-func NormalizeGranularity(granularity string, analyticsType AnalyticsType) string {
+func NormalizeGranularity(granularity Granularity, analyticsType AnalyticsType) Granularity {
 	// Normalize input to standard format first
 	normalizedInput := granularity
 	switch granularity {
@@ -446,17 +310,17 @@ func (c *Client) parseTemplateAnalyticsResponse(ctx context.Context, account *Ac
 	maxPages := 50 // Safety limit
 
 	for nextURL != "" && pageCount < maxPages {
-		c.Log.Debug("Fetching next page of template analytics", "page", pageCount+1, "url", nextURL)
+		c.log.Debug("Fetching next page of template analytics", "page", pageCount+1, "url", nextURL)
 
 		pageRespBody, err := c.doRequest(ctx, http.MethodGet, nextURL, nil, account.AccessToken)
 		if err != nil {
-			c.Log.Warn("Failed to fetch template analytics page, returning partial results", "error", err, "page", pageCount+1)
+			c.log.Warn("Failed to fetch template analytics page, returning partial results", "error", err, "page", pageCount+1)
 			break
 		}
 
 		var pageResp templateAnalyticsWithPaging
 		if err := json.Unmarshal(pageRespBody, &pageResp); err != nil {
-			c.Log.Warn("Failed to parse template analytics page, returning partial results", "error", err, "page", pageCount+1)
+			c.log.Warn("Failed to parse template analytics page, returning partial results", "error", err, "page", pageCount+1)
 			break
 		}
 
@@ -468,7 +332,7 @@ func (c *Client) parseTemplateAnalyticsResponse(ctx context.Context, account *Ac
 		pageCount++
 	}
 
-	c.Log.Debug("Template analytics pagination complete", "total_pages", pageCount, "total_data_points", len(allDataPoints))
+	c.log.Debug("Template analytics pagination complete", "total_pages", pageCount, "total_data_points", len(allDataPoints))
 
 	response := &MetaAnalyticsResponse{
 		ID: account.BusinessID,

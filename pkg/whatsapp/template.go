@@ -82,7 +82,7 @@ func (c *Client) SubmitTemplate(ctx context.Context, account *Account, template 
 		action = "Updating"
 	}
 	payloadJSON, _ := json.MarshalIndent(payload, "", "  ")
-	c.Log.Debug(action+" template to Meta", "url", url, "name", template.Name, "payload", string(payloadJSON))
+	c.log.Debug(action+" template to Meta", "url", url, "name", template.Name, "payload", string(payloadJSON))
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
@@ -91,7 +91,7 @@ func (c *Client) SubmitTemplate(ctx context.Context, account *Account, template 
 
 	// For updates, return existing ID; for creates, parse response for new ID
 	if isUpdate {
-		c.Log.Debug("Template updated", "template_id", template.MetaTemplateID, "name", template.Name)
+		c.log.Debug("Template updated", "template_id", template.MetaTemplateID, "name", template.Name)
 		return template.MetaTemplateID, nil
 	}
 
@@ -100,7 +100,7 @@ func (c *Client) SubmitTemplate(ctx context.Context, account *Account, template 
 		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	c.Log.Debug("Template submitted", "template_id", result.ID, "name", template.Name)
+	c.log.Debug("Template submitted", "template_id", result.ID, "name", template.Name)
 	return result.ID, nil
 }
 
@@ -399,7 +399,7 @@ func (c *Client) FetchTemplates(ctx context.Context, account *Account) ([]MetaTe
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	c.Log.Debug("Fetched templates from Meta", "count", len(result.Data))
+	c.log.Debug("Fetched templates from Meta", "count", len(result.Data))
 	return result.Data, nil
 }
 
@@ -412,7 +412,7 @@ func (c *Client) DeleteTemplate(ctx context.Context, account *Account, templateN
 		return err
 	}
 
-	c.Log.Debug("Template deleted from Meta", "template", templateName)
+	c.log.Debug("Template deleted from Meta", "template", templateName)
 	return nil
 }
 
