@@ -15,6 +15,7 @@ import (
 	"github.com/shridarpatil/whatomate/internal/calling"
 	"github.com/shridarpatil/whatomate/internal/config"
 	"github.com/shridarpatil/whatomate/internal/queue"
+	"github.com/shridarpatil/whatomate/internal/rbac"
 	"github.com/shridarpatil/whatomate/internal/storage"
 	"github.com/shridarpatil/whatomate/internal/tts"
 	"github.com/shridarpatil/whatomate/internal/websocket"
@@ -59,6 +60,10 @@ type App struct {
 	// campaignSub is the Redis pub/sub subscriber, retained so shutdown can
 	// close its connection
 	campaignSub *queue.Subscriber
+
+	// rbac is the permission engine; built lazily by rbacEngine
+	rbacOnce sync.Once
+	rbac     *rbac.Engine
 }
 
 // WaitForBackgroundTasks blocks until all background goroutines complete.

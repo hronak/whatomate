@@ -464,42 +464,6 @@ func (a *App) getPermissionsByKeys(keys []string) ([]models.Permission, error) {
 	return permissions, nil
 }
 
-// loadRolePermissions loads permissions for roles via JOIN instead of GORM's
-// Preload, which generates a slow IN query with all permission UUIDs.
-func (a *App) loadRolePermissions(roles ...*models.CustomRole) error {
-	if len(roles) == 0 {
-		return nil
-	}
-	roleIDs := make([]uuid.UUID, len(roles))
-	roleMap := make(map[uuid.UUID]*models.CustomRole, len(roles))
-	for i, r := range roles {
-		roleIDs[i] = r.ID
-		r.Permissions = []models.Permission{}
-		roleMap[r.ID] = r
-	}
-
-	var results []struct {
-		models.Permission
-		CustomRoleID uuid.UUID `gorm:"column:custom_role_id"`
-	}
-	err := a.DB.Table("permissions").
-		Select("permissions.*, role_permissions.custom_role_id").
-		Joins("JOIN role_permissions ON role_permissions.permission_id = permissions.id").
-		Where("role_permissions.custom_role_id IN ?", roleIDs).
-		Where("permissions.deleted_at IS NULL").
-		Find(&results).Error
-	if err != nil {
-		return err
-	}
-
-	for _, r := range results {
-		if role, ok := roleMap[r.CustomRoleID]; ok {
-			role.Permissions = append(role.Permissions, r.Permission)
-		}
-	}
-	return nil
-}
-
 // splitPermissionKey splits "resource:action" into ["resource", "action"]
 func splitPermissionKey(key string) []string {
 	for i := range len(key) {
