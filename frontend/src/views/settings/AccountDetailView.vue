@@ -57,6 +57,7 @@ interface WhatsAppAccount {
   is_default_incoming: boolean
   is_default_outgoing: boolean
   auto_read_receipt: boolean
+  business_calling_enabled: boolean
   status: string
   has_access_token: boolean
   has_app_secret: boolean
@@ -163,7 +164,7 @@ function syncForm() {
     is_default_incoming: account.value.is_default_incoming,
     is_default_outgoing: account.value.is_default_outgoing,
     auto_read_receipt: account.value.auto_read_receipt,
-    business_calling_enabled: account.value.business_calling_enabled ?? false,
+    business_calling_enabled: account.value.business_calling_enabled,
   }
 }
 
