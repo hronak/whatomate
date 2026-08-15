@@ -10,6 +10,19 @@ environment = "development"  # development, staging, production
 debug = true
 encryption_key = ""  # AES-256 key for encrypting secrets at rest (32+ chars, required in production)
 
+# Route permissions.
+#
+# Every API route declares the resource:action it requires (see the table in
+# cmd/whatomate/routes.go). With this false — the default — a caller missing
+# that permission is *logged* and allowed through; with it true they get a 403.
+#
+# It ships false because most handlers historically checked no permission at
+# all, so enforcing everywhere at once would start rejecting callers who
+# succeed today. Roll it out by running with the default, watching for
+# "Route permission would be denied (shadow mode)" in the logs, fixing the role
+# assignments (or the route's entry) those reveal, then setting this true.
+enforce_route_permissions = false
+
 [server]
 host = "0.0.0.0"
 port = 8080

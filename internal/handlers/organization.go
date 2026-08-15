@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/shridarpatil/whatomate/internal/middleware"
 	"time"
 
 	"github.com/google/uuid"
@@ -338,7 +339,7 @@ type OrganizationResponse struct {
 
 // ListOrganizations returns all organizations (super admin or users with organizations:read)
 func (a *App) ListOrganizations(r *fastglue.Request) error {
-	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, ok := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}

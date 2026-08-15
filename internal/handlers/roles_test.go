@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"encoding/json"
+	"github.com/shridarpatil/whatomate/internal/middleware"
 	"testing"
 
 	"github.com/google/uuid"
@@ -26,8 +27,8 @@ func TestApp_ListRoles_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithEmail(testutil.UniqueEmail("list-roles")), testutil.WithRoleID(&adminRole.ID))
 
 	req := testutil.NewGETRequest(t)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	err := app.ListRoles(req)
 	require.NoError(t, err)
@@ -61,8 +62,8 @@ func TestApp_GetRole_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithEmail(testutil.UniqueEmail("get-role")), testutil.WithRoleID(&role.ID))
 
 	req := testutil.NewGETRequest(t)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", role.ID.String())
 
 	err := app.GetRole(req)
@@ -88,8 +89,8 @@ func TestApp_GetRole_NotFound(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithEmail(testutil.UniqueEmail("get-role-404")))
 
 	req := testutil.NewGETRequest(t)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", uuid.New().String())
 
 	err := app.GetRole(req)
@@ -111,8 +112,8 @@ func TestApp_CreateRole_Success(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	err := app.CreateRole(req)
 	require.NoError(t, err)
@@ -155,8 +156,8 @@ func TestApp_CreateRole_DuplicateName(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	err := app.CreateRole(req)
 	require.NoError(t, err)
@@ -175,8 +176,8 @@ func TestApp_CreateRole_MissingName(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	err := app.CreateRole(req)
 	require.NoError(t, err)
@@ -200,8 +201,8 @@ func TestApp_CreateRole_WithDefaultFlag(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	err := app.CreateRole(req)
 	require.NoError(t, err)
@@ -228,8 +229,8 @@ func TestApp_UpdateRole_Success(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", role.ID.String())
 
 	err := app.UpdateRole(req)
@@ -264,8 +265,8 @@ func TestApp_UpdateRole_SystemRoleOnlyDescription(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", systemRole.ID.String())
 
 	err := app.UpdateRole(req)
@@ -296,8 +297,8 @@ func TestApp_UpdateRole_NotFound(t *testing.T) {
 	}
 
 	req := testutil.NewJSONRequest(t, reqBody)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", uuid.New().String())
 
 	err := app.UpdateRole(req)
@@ -314,8 +315,8 @@ func TestApp_DeleteRole_Success(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	req.RequestCtx.Request.Header.SetMethod("DELETE")
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", role.ID.String())
 
 	err := app.DeleteRole(req)
@@ -337,8 +338,8 @@ func TestApp_DeleteRole_SystemRole(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	req.RequestCtx.Request.Header.SetMethod("DELETE")
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", systemRole.ID.String())
 
 	err := app.DeleteRole(req)
@@ -361,8 +362,8 @@ func TestApp_DeleteRole_WithAssignedUsers(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	req.RequestCtx.Request.Header.SetMethod("DELETE")
-	req.RequestCtx.SetUserValue("user_id", adminUser.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, adminUser.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 	req.RequestCtx.SetUserValue("id", role.ID.String())
 
 	err := app.DeleteRole(req)
@@ -377,8 +378,8 @@ func TestApp_ListPermissions_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithEmail(testutil.UniqueEmail("list-perms")))
 
 	req := testutil.NewGETRequest(t)
-	req.RequestCtx.SetUserValue("user_id", user.ID)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, user.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	err := app.ListPermissions(req)
 	require.NoError(t, err)

@@ -397,7 +397,7 @@ type SwitchOrgRequest struct {
 
 // SwitchOrg generates new tokens for a different organization the user belongs to
 func (a *App) SwitchOrg(r *fastglue.Request) error {
-	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, ok := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
@@ -540,11 +540,11 @@ func generateSlug(name string) string {
 // This is needed because httpOnly cookies cannot be read by JavaScript to pass
 // as a query parameter to the WebSocket connection URL.
 func (a *App) GetWSToken(r *fastglue.Request) error {
-	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, ok := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
-	orgID, ok := r.RequestCtx.UserValue("organization_id").(uuid.UUID)
+	orgID, ok := r.RequestCtx.UserValue(middleware.ContextKeyOrganizationID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}

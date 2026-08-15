@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/shridarpatil/whatomate/internal/middleware"
 	"slices"
 
 	"github.com/google/uuid"
@@ -236,7 +237,7 @@ func (a *App) UpdateRole(r *fastglue.Request) error {
 
 	if role.IsSystem {
 		// Check if user is super admin
-		isSuperAdmin, _ := r.RequestCtx.UserValue("is_super_admin").(bool)
+		isSuperAdmin, _ := r.RequestCtx.UserValue(middleware.ContextKeyIsSuperAdmin).(bool)
 
 		// Only allow description updates for non-super admins
 		if req.Description != "" {
