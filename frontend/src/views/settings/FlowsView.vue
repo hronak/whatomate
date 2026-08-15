@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PageHeader, ConfirmDialog, DataTable, SearchInput, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import FlowBuilder from '@/components/flow-builder/FlowBuilder.vue'
 import { flowsService, accountsService } from '@/services/api'
 import { toast } from 'vue-sonner'
@@ -47,10 +48,9 @@ const isSyncing = ref(false)
 const savingToMetaFlowId = ref<string | null>(null)
 const publishingFlowId = ref<string | null>(null)
 const duplicatingFlowId = ref<string | null>(null)
-const deleteDialogOpen = ref(false)
+const { deleteDialogOpen, itemToDelete: flowToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<WhatsAppFlow, Record<string, never>>({})
 const publishDialogOpen = ref(false)
 const saveToMetaDialogOpen = ref(false)
-const flowToDelete = ref<WhatsAppFlow | null>(null)
 const flowToPublish = ref<WhatsAppFlow | null>(null)
 const flowToSaveToMeta = ref<WhatsAppFlow | null>(null)
 const flowToEdit = ref<WhatsAppFlow | null>(null)
@@ -180,7 +180,7 @@ async function confirmPublishFlow() {
 
 async function confirmDeleteFlow() {
   if (!flowToDelete.value) return
-  try { await flowsService.delete(flowToDelete.value.id); toast.success(t('common.deletedSuccess', { resource: t('resources.Flow') })); deleteDialogOpen.value = false; flowToDelete.value = null; await fetchFlows() }
+  try { await flowsService.delete(flowToDelete.value.id); toast.success(t('common.deletedSuccess', { resource: t('resources.Flow') })); closeDeleteDialog(); await fetchFlows() }
   catch (e) { toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.flow') }))) }
 }
 
@@ -312,7 +312,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                       :label="$t('flows.deleteTooltip')"
                       class="size-8 text-destructive"
                       :disabled="flow.status?.toUpperCase() === 'PUBLISHED'"
-                      @click="flowToDelete = flow; deleteDialogOpen = true"
+                      @click="openDeleteDialog(flow)"
                     />
                   </div>
                 </template>

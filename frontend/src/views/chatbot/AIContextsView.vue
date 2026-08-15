@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { PageHeader, DataTable, ConfirmDialog, SearchInput, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { getErrorMessage } from '@/lib/api-utils'
 import { Plus, Pencil, Trash2, Sparkles } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -38,18 +39,7 @@ const isLoading = ref(true)
 const isDeleting = ref(false)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
-const deleteDialogOpen = ref(false)
-const contextToDelete = ref<AIContext | null>(null)
-
-function openDeleteDialog(context: AIContext) {
-  contextToDelete.value = context
-  deleteDialogOpen.value = true
-}
-
-function closeDeleteDialog() {
-  deleteDialogOpen.value = false
-  contextToDelete.value = null
-}
+const { deleteDialogOpen, itemToDelete: contextToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<AIContext, Record<string, never>>({})
 
 // Pagination state
 const currentPage = ref(1)

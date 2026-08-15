@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { PageHeader, SearchInput, DataTable, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { getErrorMessage } from '@/lib/api-utils'
 import { Plus, Pencil, Trash2, Key } from '@lucide/vue'
 import { useSearchPagination } from '@/composables/useSearchPagination'
@@ -30,18 +31,7 @@ const rules = ref<KeywordRule[]>([])
 const isLoading = ref(true)
 const isDeleting = ref(false)
 const error = ref<string | null>(null)
-const deleteDialogOpen = ref(false)
-const ruleToDelete = ref<KeywordRule | null>(null)
-
-function openDeleteDialog(rule: KeywordRule) {
-  ruleToDelete.value = rule
-  deleteDialogOpen.value = true
-}
-
-function closeDeleteDialog() {
-  deleteDialogOpen.value = false
-  ruleToDelete.value = null
-}
+const { deleteDialogOpen, itemToDelete: ruleToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<KeywordRule, Record<string, never>>({})
 
 const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } = useSearchPagination({
   fetchFn: () => fetchRules(),

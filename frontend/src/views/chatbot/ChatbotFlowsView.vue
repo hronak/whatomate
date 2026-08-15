@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { PageHeader, DataTable, ConfirmDialog, SearchInput, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { getErrorMessage } from '@/lib/api-utils'
 import { Plus, Pencil, Trash2, Workflow } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -31,9 +32,8 @@ const flows = ref<ChatbotFlow[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
-const deleteDialogOpen = ref(false)
 const isDeleting = ref(false)
-const flowToDelete = ref<ChatbotFlow | null>(null)
+const { deleteDialogOpen, itemToDelete: flowToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<ChatbotFlow, Record<string, never>>({})
 
 // Pagination state
 const currentPage = ref(1)
@@ -108,11 +108,6 @@ async function toggleFlow(flow: ChatbotFlow) {
   }
 }
 
-function openDeleteDialog(flow: ChatbotFlow) {
-  flowToDelete.value = flow
-  deleteDialogOpen.value = true
-}
-
 async function confirmDeleteFlow() {
   if (!flowToDelete.value) return
 
@@ -120,8 +115,7 @@ async function confirmDeleteFlow() {
   try {
     await chatbotService.deleteFlow(flowToDelete.value.id)
     toast.success(t('common.deletedSuccess', { resource: t('resources.Flow') }))
-    deleteDialogOpen.value = false
-    flowToDelete.value = null
+    closeDeleteDialog()
     await fetchFlows()
   } catch (error: any) {
     toast.error(getErrorMessage(error, t('common.failedDelete', { resource: t('resources.flow') })))
