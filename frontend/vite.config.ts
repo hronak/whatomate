@@ -66,7 +66,6 @@ export default defineConfig({
             'charts': ['chart.js', 'vue-chartjs'],
             'grid-layout': ['grid-layout-plus'],
             'emoji-picker': ['vue3-emoji-picker'],
-            'validation': ['vee-validate', '@vee-validate/zod', 'zod'],
             'utils': ['@vueuse/core', 'axios', 'clsx', 'tailwind-merge', 'class-variance-authority']
           }
           for (const [chunk, pkgs] of Object.entries(chunks)) {
