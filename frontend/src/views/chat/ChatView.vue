@@ -488,7 +488,7 @@ function onUserActive() {
   nextTick(() => {
     const el = document.getElementById(`message-${firstUnreadId.value}`)
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      el.scrollIntoView({ block: 'start' })
     }
   })
 }
@@ -803,7 +803,7 @@ function scrollToMessage(messageId: string | undefined) {
   if (!messageId) return
   const messageEl = document.getElementById(`message-${messageId}`)
   if (messageEl) {
-    messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    messageEl.scrollIntoView({ block: 'center' })
     messageEl.classList.add('highlight-message')
     setTimeout(() => messageEl.classList.remove('highlight-message'), 2000)
   }
@@ -1718,7 +1718,7 @@ async function sendMediaMessage() {
                   {{ $t('chat.noTagsAvailable') }} </div> <div v-else class="space-y-1 max-h-48 overflow-y-auto"> <button v-for="tag in tagsStore.tags" :key="tag.name" class="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors" :class="contactsStore.selectedTags.includes(tag.name) &&'bg-muted'"
                     @click="toggleTagFilter(tag.name)"
                   >
-                    <span :class="['size-2 rounded-full shrink-0', getTagColorClass(tag.color).split(' ')[0]]" />
+                    <span :class="['size-2 rounded-full shrink-0', getTagColorClass(tag.color).split('')[0]]" />
                     <span class="flex-1 text-left truncate">{{ tag.name }}</span>
                     <Check
                       v-if="contactsStore.selectedTags.includes(tag.name)"
@@ -1814,7 +1814,7 @@ async function sendMediaMessage() {
               :data-account="acct.name"
               :data-active="acct.name === selectedAccount"
               :class="[
-                'rounded-md px-3 py-1 font-medium whitespace-nowrap transition-all',
+                'rounded-md px-3 py-1 font-medium whitespace-nowrap transition-colors',
                 acct.name === selectedAccount
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-background text-foreground/70 hover:text-foreground hover:bg-accent'
@@ -1969,7 +1969,7 @@ async function sendMediaMessage() {
                       <p class="font-medium truncate">{{ contact.name }}</p>
                       <div v-if="contact.phones?.length" class="flex items-center gap-1 text-muted-foreground">
                         <Phone class="size-3" />
-                        <span class="truncate">{{ contact.phones.join(', ') }}</span>
+                        <span class="truncate">{{ contact.phones.join(',') }}</span>
                       </div>
                     </div>
                   </div>
@@ -2087,7 +2087,7 @@ async function sendMediaMessage() {
                 </span>
               </div>
               <!-- Action buttons for incoming messages -->
-              <div v-if="message.direction === 'incoming'" class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1">
+              <div v-if="message.direction === 'incoming'" class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 self-center ml-1">
                 <Popover :open="reactionPickerMessageId === message.id" @update:open="(open: boolean) => reactionPickerMessageId = open ? message.id : null">
                   <PopoverTrigger as-child>
                     <Button variant="ghost" size="icon" class="size-6">
@@ -2117,7 +2117,7 @@ async function sendMediaMessage() {
                 </Button>
               </div>
               <!-- Reply button for outgoing messages (shown on hover) -->
-              <div v-if="message.direction === 'outgoing'" class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1">
+              <div v-if="message.direction === 'outgoing'" class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 self-center ml-1">
                 <Popover :open="reactionPickerMessageId === message.id" @update:open="(open: boolean) => reactionPickerMessageId = open ? message.id : null">
                   <PopoverTrigger as-child>
                     <Button variant="ghost" size="icon" class="size-6">
@@ -2489,14 +2489,3 @@ async function sendMediaMessage() {
   </div>
 </template>
 
-<style scoped>
-.sticky-date-enter-active,
-.sticky-date-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.sticky-date-enter-from,
-.sticky-date-leave-to {
-  opacity: 0;
-}
-</style>

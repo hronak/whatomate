@@ -201,7 +201,7 @@ function formatNoteTime(dateStr: string) {
             v-for="note in notesStore.notes"
             :key="note.id"
             data-testid="note-card"
-            class="group relative rounded-xl p-3 backdrop-blur-sm border border-border bg-linear-to-br from-gray-50 to-white dark:from-white/4 dark:to-white/2 hover:from-gray-100 hover:to-gray-50 dark:hover:from-white/6 dark:hover:to-white/3 transition-all duration-200"
+            class="group relative rounded-xl p-3 backdrop-blur-sm border border-border bg-linear-to-br from-gray-50 to-white dark:from-white/4 dark:to-white/2 hover:from-gray-100 hover:to-gray-50 dark:hover:from-white/6 dark:hover:to-white/3 transition-colors duration-200"
           >
             <!-- Gradient accent line -->
             <div class="absolute top-0 left-3 right-3 h-[2px] rounded-full bg-linear-to-r from-amber-500/60 via-orange-500/40 to-transparent" />
@@ -247,7 +247,7 @@ function formatNoteTime(dateStr: string) {
                       <!-- Hover actions (own notes only) -->
                       <div
                         v-if="note.created_by_id === authStore.user?.id"
-                        class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5"
+                        class="opacity-0 group-hover:opacity-100 flex gap-0.5"
                       >
                         <button
                           data-testid="note-edit"

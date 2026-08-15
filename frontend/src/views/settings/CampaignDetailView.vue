@@ -268,7 +268,7 @@ const recipientPlaceholder = computed(() => {
     return `+1234567890, John Doe\n+0987654321, Jane Smith\n+1122334455`
   }
   const exampleValues = params.map(exampleValue)
-  return `+1234567890, John Doe, ${exampleValues.join(', ')}\n+0987654321, Jane Smith, ${exampleValues.join(', ')}`
+  return `+1234567890, John Doe, ${exampleValues.join(',')}\n+0987654321, Jane Smith, ${exampleValues.join(',')}`
 })
 
 const manualEntryFormat = computed(() => {
@@ -280,7 +280,7 @@ const manualEntryFormat = computed(() => {
     labels.push(/^\d+$/.test(p) ? `param${p}` : p)
   }
   if (labels.length === 0) return 'phone_number, name (optional)'
-  return `phone_number, name, ${labels.join(', ')}`
+  return `phone_number, name, ${labels.join(',')}`
 })
 
 // Status helpers
@@ -1169,15 +1169,15 @@ onUnmounted(() => {
           </div>
           <div class="h-2.5 w-full bg-muted rounded-full overflow-hidden flex">
             <div
-              class="bg-green-500 h-full transition-all duration-500"
+              class="bg-green-500 h-full "
               :style="{ width: `${(campaign.delivered_count / campaign.total_recipients) * 100}%` }"
             />
             <div
-              class="bg-blue-500 h-full transition-all duration-500"
+              class="bg-blue-500 h-full "
               :style="{ width: `${((campaign.sent_count - campaign.delivered_count) / campaign.total_recipients) * 100}%` }"
             />
             <div
-              class="bg-destructive h-full transition-all duration-500"
+              class="bg-destructive h-full "
               :style="{ width: `${(campaign.failed_count / campaign.total_recipients) * 100}%` }"
             />
           </div>
@@ -1195,7 +1195,7 @@ onUnmounted(() => {
       <Collapsible :default-open="recipients.length > 0 && recipients.length <= 20">
         <CardHeader class="pb-3 flex flex-row items-center justify-between">
           <CollapsibleTrigger class="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <ChevronDown class="size-4 text-muted-foreground transition-transform in-data-[state=closed]:-rotate-90" />
+            <ChevronDown class="size-4 text-muted-foreground in-data-[state=closed]:-rotate-90" />
             <CardTitle class="font-medium">
               {{ $t('campaigns.recipients', 'Recipients') }} ({{ recipients.length }})
             </CardTitle>

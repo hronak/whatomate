@@ -27,7 +27,7 @@ const headerGradient = computed(() => gradientMap[props.headerClass] || props.he
 </script>
 
 <template>
-  <div class="base-node relative bg-background border rounded-lg shadow-md hover:shadow-lg min-w-48 w-max max-w-sm overflow-visible transition-shadow duration-200">
+  <div class="base-node relative bg-background border rounded-lg shadow-md hover:shadow-lg min-w-48 w-max max-w-sm overflow-visible">
     <!-- Input handle (top) -->
     <Handle
       v-if="hasInput !== false"

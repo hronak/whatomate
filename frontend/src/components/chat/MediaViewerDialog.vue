@@ -97,7 +97,6 @@ function toggleZoom() { scale.value > 1 ? resetZoom() : (scale.value = 2) }
 const imageStyle = computed(() => ({
   transform: `translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`,
   cursor: scale.value > 1 ? (dragging.value ? 'grabbing' : 'grab') : 'zoom-in',
-  transition: dragging.value ? 'none' : 'transform 0.15s ease',
 }))
 
 // --- PDF blob (X-Frame-Options: DENY workaround) ------------------------

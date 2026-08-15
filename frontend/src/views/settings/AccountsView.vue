@@ -422,7 +422,7 @@ async function confirmDelete() {
           <!-- Coexistence Option Card -->
           <div
             @click="launchWhatsAppSignup(true)"
-            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-success/20 bg-gray-50/50 hover:bg-gray-100/70 hover:border-success/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.05)] dark:bg-[#141419] dark:hover:bg-[#181822] dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-all duration-300 overflow-hidden"
+            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-success/20 bg-gray-50/50 hover:bg-gray-100/70 hover:border-success/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.05)] dark:bg-[#141419] dark:hover:bg-[#181822] dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-colors duration-300 overflow-hidden"
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
@@ -431,7 +431,7 @@ async function confirmDelete() {
               </span>
             </div>
 
-            <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center mb-4">
               <Smartphone class="size-5 text-success" />
             </div>
 
@@ -444,14 +444,14 @@ async function confirmDelete() {
 
             <div class="mt-5 flex items-center justify-between font-medium text-success">
               <span>{{ $t('accounts.selectMode') }}</span>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">→</span>
+              <span>→</span>
             </div>
           </div>
 
           <!-- Classic Option Card -->
           <div
             @click="launchWhatsAppSignup(false)"
-            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100/70 hover:border-info/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.05)] dark:bg-[#141419] dark:border-[#222227] dark:hover:bg-[#181822] dark:hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300 overflow-hidden"
+            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100/70 hover:border-info/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.05)] dark:bg-[#141419] dark:border-[#222227] dark:hover:bg-[#181822] dark:hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-colors duration-300 overflow-hidden"
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
@@ -460,7 +460,7 @@ async function confirmDelete() {
               </span>
             </div>
 
-            <div class="size-10 rounded-lg bg-info/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div class="size-10 rounded-lg bg-info/10 flex items-center justify-center mb-4">
               <Network class="size-5 text-info" />
             </div>
 
@@ -473,7 +473,7 @@ async function confirmDelete() {
 
             <div class="mt-5 flex items-center justify-between font-medium text-info">
               <span>{{ $t('accounts.selectMode') }}</span>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">→</span>
+              <span>→</span>
             </div>
           </div>
         </div>

@@ -19,24 +19,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  ArrowLeft,
-  Save,
-  MessageSquare,
-  MousePointerClick,
-  Globe,
-  MessageCircle,
-  Users,
-  GitBranch,
-  Clock,
-  ExternalLink,
-  StopCircle,
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  Trash2,
-  Play,
-} from '@lucide/vue'
+import { ArrowLeft, Save, MessageSquare, MousePointerClick, Globe, MessageCircle, Users, GitBranch, Clock, ExternalLink, StopCircle, ChevronDown, ChevronRight, Plus, Trash2, Play } from '@lucide/vue'
 
 import AuditLogPanel from '@/components/shared/AuditLogPanel.vue'
 import MetadataPanel from '@/components/shared/MetadataPanel.vue'
@@ -149,7 +132,7 @@ const {
 } = useVueFlow({
   defaultEdgeOptions: {
     type: 'default',
-    animated: true,
+    animated: false,
     markerEnd: MarkerType.ArrowClosed,
   },
 })
@@ -263,7 +246,7 @@ function addNodeFromPalette(type: ChatNodeType) {
       target: id,
       sourceHandle: undefined,
       type: 'default',
-      animated: true,
+      animated: false,
       markerEnd: MarkerType.ArrowClosed,
       label: '',
     }])
@@ -297,7 +280,7 @@ onConnect((params) => {
     {
       ...params,
       type: 'default',
-      animated: true,
+      animated: false,
       markerEnd: MarkerType.ArrowClosed,
       label: params.sourceHandle || 'default',
     },
@@ -336,7 +319,7 @@ function onEdgeUpdate({ edge, connection }: { edge: Edge; connection: Connection
     {
       ...connection,
       type: 'default',
-      animated: true,
+      animated: false,
       markerEnd: MarkerType.ArrowClosed,
       label: connection.sourceHandle || 'default',
     },
@@ -499,7 +482,7 @@ function loadGraph(graph: ChatFlowGraph) {
       // undefined and Vue Flow routes to the node's only target.
       sourceHandle: condition !== 'default' ? condition : undefined,
       type: 'default' as const,
-      animated: true,
+      animated: false,
       markerEnd: MarkerType.ArrowClosed,
       label: condition !== 'default' ? condition : '',
     }
@@ -526,7 +509,7 @@ function loadGraph(graph: ChatFlowGraph) {
         target: originalEntry,
         sourceHandle: undefined,
         type: 'default' as const,
-        animated: true,
+        animated: false,
         markerEnd: MarkerType.ArrowClosed,
         label: '',
       })

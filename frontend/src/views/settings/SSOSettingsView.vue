@@ -268,7 +268,7 @@ onMounted(() => {
           <Card
             v-for="(config, key) in providerConfigs"
             :key="key"
-            :class="'relative overflow-hidden transition-all hover:shadow-md' + (getConfiguredProvider(key)?.is_enabled ? ' ring-2 ring-primary' : '')"
+            :class="'relative overflow-hidden hover:shadow-md' + (getConfiguredProvider(key)?.is_enabled ? ' ring-2 ring-primary' : '')"
           >
             <CardHeader class="pb-3">
               <div class="flex items-start justify-between">
