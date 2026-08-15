@@ -190,7 +190,7 @@ const handleLogout = () => {
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent side="top" align="start" class="w-52 p-1.5 bg-white dark:bg-[#141414] border-border">
+      <PopoverContent side="top" align="start" class="w-52 p-1.5">
         <div class="font-medium px-2 py-1 text-foreground/40">{{ $t('userMenu.myAccount') }}</div>
         <Separator class="my-1 bg-muted" />
         <!-- Availability Toggle -->

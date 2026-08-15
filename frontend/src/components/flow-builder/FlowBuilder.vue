@@ -351,7 +351,7 @@ defineExpose({
 <template>
   <div class="flex h-full gap-4">
     <!-- Screens Panel -->
-    <Card class="w-64 shrink-0 flex flex-col overflow-hidden">
+    <Card class="w-64 shrink-0 overflow-hidden">
       <CardHeader class="py-3 px-4">
         <div class="flex items-center justify-between">
           <CardTitle class="font-medium flex items-center gap-2">
@@ -398,7 +398,7 @@ defineExpose({
     </Card>
 
     <!-- Screen Editor -->
-    <Card class="flex-1 flex flex-col overflow-hidden">
+    <Card class="flex-1 overflow-hidden">
       <CardHeader class="py-3 px-4 shrink-0">
         <div class="flex items-center justify-between">
           <div v-if="selectedScreen" class="flex items-center gap-2">
@@ -590,7 +590,7 @@ defineExpose({
     </Card>
 
     <!-- Properties Panel -->
-    <Card class="w-72 shrink-0 flex flex-col overflow-hidden">
+    <Card class="w-72 shrink-0 overflow-hidden">
       <CardHeader class="py-3 px-4 shrink-0">
         <CardTitle class="font-medium flex items-center gap-2">
           <Settings2 class="size-4" />

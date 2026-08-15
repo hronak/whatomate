@@ -360,7 +360,7 @@ watch(phoneSearch, () => {
 
     <!-- Detail Dialog -->
     <Dialog v-model:open="showDetail">
-      <DialogContent class="max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{{ t('calling.callDetail') }}</DialogTitle>
           <DialogDescription>

@@ -241,7 +241,7 @@ function formatNoteTime(dateStr: string) {
             <!-- Display mode -->
             <template v-else>
               <div class="flex items-start gap-2.5 mt-1">
-                <Avatar class="size-6 shrink-0 ring-1 ring-border">
+                <Avatar class="size-6 ring-1 ring-border">
                   <AvatarFallback :class="'bg-linear-to-br text-white ' + getAvatarGradient(note.created_by_name)">
                     {{ getInitials(note.created_by_name) }}
                   </AvatarFallback>

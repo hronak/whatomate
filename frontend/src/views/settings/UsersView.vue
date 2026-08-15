@@ -236,7 +236,7 @@ async function copyInviteLink() {
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
                   <Select v-model="roleFilter">
-                    <SelectTrigger class="w-44 h-9">
+                    <SelectTrigger class="w-44">
                       <SelectValue :placeholder="$t('users.allRoles', 'All roles')" />
                     </SelectTrigger>
                     <SelectContent>

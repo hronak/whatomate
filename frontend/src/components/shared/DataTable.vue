@@ -191,7 +191,7 @@ function getRowKey(item: T, index: number): string {
           <TableCell v-for="col in columns" :key="`skeleton-${row}-${col.key}`">
             <Skeleton
               :class="[
-                'h-4 skeleton-block animate-pulse',
+                'h-4',
                 col.key === 'actions' ? 'w-16' : row % 3 === 0 ? 'w-3/4' : row % 3 === 1 ? 'w-1/2' : 'w-2/3',
               ]"
             />

@@ -66,7 +66,7 @@ defineEmits<{
       @edges-change="$emit('edges-change', $event)"
     >
       <Background
-        pattern-color="hsl(var(--muted-foreground) / 0.15)"
+        pattern-color="color-mix(in oklab, var(--muted-foreground) 15%, transparent)"
         :gap="20"
         :size="1"
         variant="dots"
@@ -96,16 +96,18 @@ defineEmits<{
   animation: none;
 }
 
+/* --background / --primary are oklch() colors, not HSL channel triplets —
+   use them bare or via color-mix(), never wrapped in hsl(). */
 .selected-node {
   outline: none;
   border-radius: 0.5rem;
   box-shadow:
-    0 0 0 2px hsl(var(--background)),
-    0 0 0 4px hsl(var(--primary)),
-    0 0 16px hsl(var(--primary) / 0.35);
+    0 0 0 2px var(--background),
+    0 0 0 4px var(--primary),
+    0 0 16px color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
 .selected-node .base-node {
-  border-color: hsl(var(--primary));
+  border-color: var(--primary);
 }
 </style>

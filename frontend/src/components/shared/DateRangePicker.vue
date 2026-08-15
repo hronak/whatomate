@@ -57,7 +57,7 @@ const { t } = useI18n()
         {{ formatDateRangeDisplay || t('common.select') }}
       </Button>
     </PopoverTrigger>
-    <PopoverContent class="w-auto p-4" align="end">
+    <PopoverContent class="w-auto" align="end">
       <div class="space-y-4">
         <RangeCalendar
           :model-value="customDateRange"

@@ -241,7 +241,7 @@ onMounted(() => fetchActions())
 
     <!-- Custom Dialog (complex action type configuration) -->
     <Dialog v-model:open="isDialogOpen">
-      <DialogContent class="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent class="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{{ editingItem ? $t('customActions.editTitle') : $t('customActions.createTitle') }}</DialogTitle>
           <DialogDescription>{{ $t('customActions.dialogDesc') }}</DialogDescription>
@@ -256,7 +256,7 @@ onMounted(() => fetchActions())
           </div>
           <div class="space-y-2">
             <Label>{{ $t('customActions.actionType') }}</Label>
-            <RadioGroup v-model="formData.action_type" class="flex flex-col gap-2">
+            <RadioGroup v-model="formData.action_type" class="flex flex-col">
               <div class="flex items-center space-x-2"><RadioGroupItem value="webhook" id="type-webhook" /><Label for="type-webhook" class="flex items-center gap-2 cursor-pointer font-normal"><Webhook class="size-4" />{{ $t('customActions.webhookType') }}</Label></div>
               <div class="flex items-center space-x-2"><RadioGroupItem value="url" id="type-url" /><Label for="type-url" class="flex items-center gap-2 cursor-pointer font-normal"><Globe class="size-4" />{{ $t('customActions.urlType') }}</Label></div>
               <div class="flex items-center space-x-2"><RadioGroupItem value="javascript" id="type-javascript" /><Label for="type-javascript" class="flex items-center gap-2 cursor-pointer font-normal"><Code class="size-4" />{{ $t('customActions.javascriptType') }}</Label></div>

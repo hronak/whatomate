@@ -402,7 +402,7 @@ async function confirmDelete() {
 
     <!-- Onboarding Method Selection Dialog -->
     <Dialog v-model:open="showOnboardingDialog">
-      <DialogContent class="sm:max-w-2xl bg-white border-gray-200 text-foreground dark:bg-[#0e0e11] dark:border-[#222227] p-6 shadow-2xl rounded-xl">
+      <DialogContent class="sm:max-w-2xl">
         <DialogHeader class="mb-4">
           <DialogTitle class="text-xl font-bold bg-linear-to-r from-success to-success bg-clip-text text-transparent flex items-center gap-2">
             {{ $t('accounts.connectTitle') }}

@@ -306,19 +306,12 @@
   background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
 }
 
-/* Static card with depth - use for non-clickable stat cards */
+/* Non-clickable stat cards. Every call site already carries its own
+   `rounded-xl border border-border bg-card`, so this adds no surface of its
+   own — only the positioning context for the hover accent line below.
+   Cards are flat by design; don't reintroduce a box-shadow here. */
 .card-depth {
   @apply relative overflow-hidden;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.08),
-    0 2px 4px -2px rgba(0, 0, 0, 0.05);
-}
-
-.dark .card-depth {
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -2px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Bottom accent line, shown on hover (no sweep — motion is removed app-wide) */
@@ -338,39 +331,24 @@
 }
 
 .card-depth:hover {
-  @apply bg-gray-50 border-gray-300;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  @apply border-gray-300;
 }
 
 .dark .card-depth:hover {
-  @apply bg-white/6 border-white/12;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.4),
-    0 4px 6px -4px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  @apply border-white/12;
 }
 
-/* Interactive card hover effect - use for clickable cards */
+/* Clickable cards — hover reads as a border emphasis only. */
 .card-interactive {
   @apply cursor-pointer;
 }
 
 .card-interactive:hover {
-  @apply border-gray-300 bg-gray-50 shadow-xl;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 0 30px -5px rgba(16, 185, 129, 0.1);
+  @apply border-gray-300;
 }
 
 .dark .card-interactive:hover {
-  @apply border-white/20 bg-white/6 shadow-2xl;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 0 30px -5px rgba(16, 185, 129, 0.15);
+  @apply border-white/20;
 }
 
 /* Chat background */
@@ -671,15 +649,3 @@
 .nav-active-indicator[data-active="true"]::before {
   opacity: 1;
 }
-
-/* Skeleton placeholder — a flat fill; the shimmer sweep was removed with the
-   rest of the app's motion. */
-.skeleton-block {
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 0.25rem;
-}
-
-.dark .skeleton-block {
-  background: rgba(255, 255, 255, 0.06);
-}
-

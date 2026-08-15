@@ -766,7 +766,7 @@ onMounted(async () => {
       </div>
 
       <!-- Right panel -->
-      <Card class="w-[420px] min-w-0 border-y-0 border-r-0 rounded-none shrink-0 flex flex-col">
+      <Card class="w-[420px] min-w-0 border-y-0 border-r-0 rounded-none shrink-0">
         <!-- Node properties when a node is selected -->
         <div v-if="selectedChatNode && selectedChatNode.type !== 'start'" class="flex-1 overflow-y-auto">
           <ChatNodeProperties

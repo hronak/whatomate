@@ -243,7 +243,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
 
 <template>
   <div class="flex flex-col h-full bg-background">
-    <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" :icon="Settings" icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20" /> <ScrollArea class="flex-1"> <div class="p-6 space-y-4 max-w-4xl mx-auto"> <Tabs default-value="general" class="w-full"> <TabsList class="grid w-full grid-cols-3 mb-6 bg-muted border border-border"> <TabsTrigger value="general" class="data-[state=active]:bg-card data-[state=active]:text-foreground text-foreground/50"> <Settings class="size-4 mr-2" /> {{ $t('settings.general') }} </TabsTrigger> <TabsTrigger value="notifications" class="data-[state=active]:bg-card data-[state=active]:text-foreground text-foreground/50"> <Bell class="size-4 mr-2" /> {{ $t('settings.notifications') }} </TabsTrigger> <TabsTrigger value="calling" class="data-[state=active]:bg-card data-[state=active]:text-foreground text-foreground/50"> <Phone class="size-4 mr-2" /> {{ $t('settings.calling') }} </TabsTrigger> </TabsList> <!-- General Settings Tab --> <TabsContent value="general"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.generalSettings') }}</h3>
+    <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" :icon="Settings" icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20" /> <ScrollArea class="flex-1"> <div class="p-6 space-y-4 max-w-4xl mx-auto"> <Tabs default-value="general" class="w-full"> <TabsList class="grid w-full grid-cols-3 mb-6 border border-border"> <TabsTrigger value="general" class="data-[state=active]:bg-card text-foreground/50"> <Settings class="size-4 mr-2" /> {{ $t('settings.general') }} </TabsTrigger> <TabsTrigger value="notifications" class="data-[state=active]:bg-card text-foreground/50"> <Bell class="size-4 mr-2" /> {{ $t('settings.notifications') }} </TabsTrigger> <TabsTrigger value="calling" class="data-[state=active]:bg-card text-foreground/50"> <Phone class="size-4 mr-2" /> {{ $t('settings.calling') }} </TabsTrigger> </TabsList> <!-- General Settings Tab --> <TabsContent value="general"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.generalSettings') }}</h3>
                 <p class="text-foreground/40">{{ $t('settings.generalSettingsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
@@ -257,24 +257,24 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-2">
-                    <Label for="timezone" class="text-foreground/70">{{ $t('settings.defaultTimezone') }}</Label> <Select v-model="generalSettings.default_timezone"> <SelectTrigger class="bg-card border-border text-foreground/70"> <SelectValue :placeholder="$t('settings.selectTimezone')" />
+                    <Label for="timezone" class="text-foreground/70">{{ $t('settings.defaultTimezone') }}</Label> <Select v-model="generalSettings.default_timezone"> <SelectTrigger> <SelectValue :placeholder="$t('settings.selectTimezone')" />
                       </SelectTrigger>
-                      <SelectContent class="bg-white border-border dark:bg-[#141414]">
-                        <SelectItem value="UTC" class="text-foreground/70 focus:bg-accent focus:text-foreground">UTC</SelectItem>
-                        <SelectItem value="America/New_York" class="text-foreground/70 focus:bg-accent focus:text-foreground">Eastern Time</SelectItem>
-                        <SelectItem value="America/Los_Angeles" class="text-foreground/70 focus:bg-accent focus:text-foreground">Pacific Time</SelectItem>
-                        <SelectItem value="Europe/London" class="text-foreground/70 focus:bg-accent focus:text-foreground">London</SelectItem>
-                        <SelectItem value="Asia/Tokyo" class="text-foreground/70 focus:bg-accent focus:text-foreground">Tokyo</SelectItem>
+                      <SelectContent>
+                        <SelectItem value="UTC">UTC</SelectItem>
+                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                        <SelectItem value="Europe/London">London</SelectItem>
+                        <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div class="space-y-2">
-                    <Label for="date_format" class="text-foreground/70">{{ $t('settings.dateFormat') }}</Label> <Select v-model="generalSettings.date_format"> <SelectTrigger class="bg-card border-border text-foreground/70"> <SelectValue :placeholder="$t('settings.selectFormat')" />
+                    <Label for="date_format" class="text-foreground/70">{{ $t('settings.dateFormat') }}</Label> <Select v-model="generalSettings.date_format"> <SelectTrigger> <SelectValue :placeholder="$t('settings.selectFormat')" />
                       </SelectTrigger>
-                      <SelectContent class="bg-white border-border dark:bg-[#141414]">
-                        <SelectItem value="YYYY-MM-DD" class="text-foreground/70 focus:bg-accent focus:text-foreground">YYYY-MM-DD</SelectItem>
-                        <SelectItem value="DD/MM/YYYY" class="text-foreground/70 focus:bg-accent focus:text-foreground">DD/MM/YYYY</SelectItem>
-                        <SelectItem value="MM/DD/YYYY" class="text-foreground/70 focus:bg-accent focus:text-foreground">MM/DD/YYYY</SelectItem>
+                      <SelectContent>
+                        <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                        <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                        <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

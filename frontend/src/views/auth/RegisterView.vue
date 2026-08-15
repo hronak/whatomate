@@ -89,7 +89,7 @@ const handleRegister = async () => {
             </p>
           </div>
         </CardContent>
-        <CardFooter class="flex flex-col space-y-4">
+        <CardFooter class="flex-col space-y-4">
           <RouterLink to="/login" class="w-full">
             <Button variant="outline" class="w-full">
               {{ $t('auth.signIn') }}
@@ -146,7 +146,7 @@ const handleRegister = async () => {
             />
           </div>
         </CardContent>
-        <CardFooter class="flex flex-col space-y-4">
+        <CardFooter class="flex-col space-y-4">
           <Button type="submit" class="w-full" :disabled="isLoading">
             <Spinner v-if="isLoading" class="mr-2 size-4" />
             {{ $t('auth.createAccountBtn') }}

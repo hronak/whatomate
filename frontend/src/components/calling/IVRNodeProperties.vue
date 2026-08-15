@@ -276,7 +276,7 @@ const greetingTab = computed(() =>
             <Type class="size-3 mr-1" /> TTS
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="audio" class="mt-2">
+        <TabsContent value="audio">
           <div class="flex items-center gap-2">
             <div v-if="config.audio_file" class="flex items-center gap-1 flex-1 min-w-0 px-2 py-1 border rounded-md bg-muted/50">
               <Button variant="ghost" size="icon" class="size-5 shrink-0" @click="togglePlayback">
@@ -296,7 +296,7 @@ const greetingTab = computed(() =>
             <input ref="audioFileInput" type="file" accept="audio/*" class="hidden" @change="handleFileSelect" />
           </div>
         </TabsContent>
-        <TabsContent value="text" class="mt-2">
+        <TabsContent value="text">
           <Textarea
             :model-value="config.greeting_text || ''"
             @update:model-value="(v: string | number) => updateConfigEntries(String(v) ? { greeting_text: String(v), audio_file: undefined } : { greeting_text: String(v) })"
@@ -427,7 +427,7 @@ const greetingTab = computed(() =>
 
       <!-- HTTP Callbacks per lifecycle event -->
       <div class="space-y-2 mt-3">
-        <Label class="font-medium">HTTP Callbacks</Label>
+        <Label>HTTP Callbacks</Label>
         <p class="text-muted-foreground">Configure API calls to your CRM at each transfer stage.</p>
 
         <div v-for="event in callbackEvents" :key="event" class="border rounded-md">

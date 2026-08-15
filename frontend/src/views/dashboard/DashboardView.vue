@@ -1080,7 +1080,7 @@ onMounted(() => {
 
     <!-- Widget Dialog -->
     <Dialog v-model:open="isWidgetDialogOpen">
-      <DialogContent class="sm:max-w-[500px] bg-white border-border text-foreground dark:bg-[#141414]">
+      <DialogContent class="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{{ isEditMode ? $t('dashboard.editWidget') : $t('dashboard.createWidget') }}</DialogTitle>
           <DialogDescription class="text-foreground/50">
@@ -1114,15 +1114,14 @@ onMounted(() => {
           <div v-if="widgetForm.display_type !== 'shortcuts'" class="space-y-2">
             <Label class="text-foreground/70">{{ $t('dashboard.dataSource') }} *</Label>
             <Select :model-value="widgetForm.data_source" @update:model-value="(val) => widgetForm.data_source = String(val)">
-              <SelectTrigger class="bg-card border-border text-foreground">
+              <SelectTrigger>
                 <SelectValue :placeholder="$t('dashboard.selectDataSource')" />
               </SelectTrigger>
-              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+              <SelectContent>
                 <SelectItem
                   v-for="source in dataSources"
                   :key="source.name"
                   :value="source.name"
-                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ source.label }}
                 </SelectItem>
@@ -1134,13 +1133,13 @@ onMounted(() => {
           <div v-if="widgetForm.display_type !== 'shortcuts' && widgetForm.display_type !== 'table'" class="space-y-2">
             <Label class="text-foreground/70">{{ $t('dashboard.metric') }}</Label>
             <Select :model-value="widgetForm.metric" @update:model-value="(val) => widgetForm.metric = String(val)">
-              <SelectTrigger class="bg-card border-border text-foreground">
+              <SelectTrigger>
                 <SelectValue :placeholder="$t('dashboard.selectMetric')" />
               </SelectTrigger>
-              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
-                <SelectItem value="count" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.metricCount') }}</SelectItem>
-                <SelectItem value="sum" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.metricSum') }}</SelectItem>
-                <SelectItem value="avg" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.metricAverage') }}</SelectItem>
+              <SelectContent>
+                <SelectItem value="count">{{ $t('dashboard.metricCount') }}</SelectItem>
+                <SelectItem value="sum">{{ $t('dashboard.metricSum') }}</SelectItem>
+                <SelectItem value="avg">{{ $t('dashboard.metricAverage') }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1149,14 +1148,14 @@ onMounted(() => {
           <div class="space-y-2">
             <Label class="text-foreground/70">{{ $t('dashboard.displayType') }}</Label>
             <Select :model-value="widgetForm.display_type" @update:model-value="(val) => widgetForm.display_type = String(val)">
-              <SelectTrigger class="bg-card border-border text-foreground">
+              <SelectTrigger>
                 <SelectValue :placeholder="$t('dashboard.selectDisplayType')" />
               </SelectTrigger>
-              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
-                <SelectItem value="number" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayNumber') }}</SelectItem>
-                <SelectItem value="chart" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayChart') }}</SelectItem>
-                <SelectItem value="table" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayTable') }}</SelectItem>
-                <SelectItem value="shortcuts" class="text-foreground/70 focus:bg-accent focus:text-foreground">{{ $t('dashboard.displayShortcuts') }}</SelectItem>
+              <SelectContent>
+                <SelectItem value="number">{{ $t('dashboard.displayNumber') }}</SelectItem>
+                <SelectItem value="chart">{{ $t('dashboard.displayChart') }}</SelectItem>
+                <SelectItem value="table">{{ $t('dashboard.displayTable') }}</SelectItem>
+                <SelectItem value="shortcuts">{{ $t('dashboard.displayShortcuts') }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1165,15 +1164,14 @@ onMounted(() => {
           <div v-if="widgetForm.display_type === 'chart'" class="space-y-2">
             <Label class="text-foreground/70">{{ $t('dashboard.chartType') }}</Label>
             <Select :model-value="widgetForm.chart_type" @update:model-value="(val) => widgetForm.chart_type = String(val)">
-              <SelectTrigger class="bg-card border-border text-foreground">
+              <SelectTrigger>
                 <SelectValue :placeholder="$t('dashboard.selectChartType')" />
               </SelectTrigger>
-              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+              <SelectContent>
                 <SelectItem
                   v-for="ct in chartTypeOptions"
                   :key="ct.value"
                   :value="ct.value"
-                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ ct.label }}
                 </SelectItem>
@@ -1185,13 +1183,12 @@ onMounted(() => {
           <div v-if="(widgetForm.display_type === 'chart' || widgetForm.display_type === 'table') && widgetForm.data_source" class="space-y-2">
             <Label class="text-foreground/70">{{ $t('dashboard.groupBy') }}</Label>
             <Select :model-value="widgetForm.group_by_field || 'none'" @update:model-value="(val) => widgetForm.group_by_field = val === 'none' ? '' : String(val)">
-              <SelectTrigger class="bg-card border-border text-foreground">
+              <SelectTrigger>
                 <SelectValue :placeholder="$t('dashboard.noneTimeSeries')" />
               </SelectTrigger>
-              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+              <SelectContent>
                 <SelectItem
                   value="none"
-                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ $t('dashboard.noneTimeSeries') }}
                 </SelectItem>
@@ -1199,7 +1196,6 @@ onMounted(() => {
                   v-for="field in availableFields"
                   :key="field"
                   :value="field"
-                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   {{ field }}
                 </SelectItem>
@@ -1247,15 +1243,14 @@ onMounted(() => {
             <div v-for="(filter, index) in widgetForm.filters" :key="index" class="flex items-center gap-2">
               <div class="flex-1">
                 <Select :model-value="filter.field" @update:model-value="(val) => filter.field = String(val)">
-                  <SelectTrigger class="w-full bg-card border-border text-foreground">
+                  <SelectTrigger>
                     <SelectValue :placeholder="$t('dashboard.field')" />
                   </SelectTrigger>
-                  <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+                  <SelectContent>
                     <SelectItem
                       v-for="field in availableFields"
                       :key="field"
                       :value="field"
-                      class="text-foreground/70 focus:bg-accent focus:text-foreground"
                     >
                       {{ field }}
                     </SelectItem>
@@ -1264,15 +1259,14 @@ onMounted(() => {
               </div>
               <div class="w-36">
                 <Select :model-value="filter.operator" @update:model-value="(val) => filter.operator = String(val)">
-                  <SelectTrigger class="w-full bg-card border-border text-foreground">
+                  <SelectTrigger>
                     <SelectValue :placeholder="$t('dashboard.operator')" />
                   </SelectTrigger>
-                  <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+                  <SelectContent>
                     <SelectItem
                       v-for="op in operators"
                       :key="op.value"
                       :value="op.value"
-                      class="text-foreground/70 focus:bg-accent focus:text-foreground"
                     >
                       {{ op.label }}
                     </SelectItem>
@@ -1294,15 +1288,14 @@ onMounted(() => {
           <div v-if="widgetForm.display_type !== 'shortcuts' && widgetForm.display_type !== 'table'" class="space-y-2">
             <Label class="text-foreground/70">{{ $t('dashboard.color') }}</Label>
             <Select :model-value="widgetForm.color" @update:model-value="(val) => widgetForm.color = String(val)">
-              <SelectTrigger class="bg-card border-border text-foreground">
+              <SelectTrigger>
                 <SelectValue :placeholder="$t('dashboard.selectColor')" />
               </SelectTrigger>
-              <SelectContent class="bg-white border-border dark:bg-[#1a1a1a]">
+              <SelectContent>
                 <SelectItem
                   v-for="color in colorOptions"
                   :key="color.value"
                   :value="color.value"
-                  class="text-foreground/70 focus:bg-accent focus:text-foreground"
                 >
                   <span class="flex items-center gap-2">
                     <span :class="['inline-block size-3 rounded-full', color.bg]"></span>

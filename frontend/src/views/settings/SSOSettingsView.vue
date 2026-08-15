@@ -335,7 +335,7 @@ onMounted(() => {
 
     <!-- Edit Dialog -->
     <Dialog v-model:open="isEditDialogOpen">
-      <DialogContent class="max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2">
             <svg v-if="currentProviderConfig" class="size-5" viewBox="0 0 24 24" fill="currentColor">
@@ -476,7 +476,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <DialogFooter class="flex gap-2">
+        <DialogFooter class="gap-2">
           <Button
             v-if="getConfiguredProvider(editingProvider)"
             variant="destructive"
