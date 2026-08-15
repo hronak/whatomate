@@ -13,9 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { PageHeader, AuditLogPanel } from '@/components/shared'
+import { PageHeader, AuditLogPanel, Spinner } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { Bot, Loader2, Brain, Plus, X, Clock, AlertTriangle, UserPlus, MessageSquare, Users } from '@lucide/vue'
+import { Bot, Brain, Plus, X, Clock, AlertTriangle, UserPlus, MessageSquare, Users } from '@lucide/vue'
 import { chatbotService } from '@/services/api'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
@@ -539,7 +539,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveMessagesSettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -597,7 +597,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-4">
                   <Button @click="saveAgentSettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -688,7 +688,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveBusinessHoursSettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -869,7 +869,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveSLASettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>
@@ -958,7 +958,7 @@ function removeEscalationUser(userId: string) {
 
                 <div class="flex justify-end pt-2">
                   <Button @click="saveAISettings" :disabled="isSubmitting">
-                    <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" />
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
                     {{ $t('chatbotSettings.saveChanges') }}
                   </Button>
                 </div>

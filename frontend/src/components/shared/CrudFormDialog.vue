@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Spinner from './Spinner.vue'
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from '@lucide/vue'
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -93,7 +93,7 @@ import { computed } from 'vue'
           {{ cancelLabel }}
         </Button>
         <Button size="sm" @click="handleSubmit" :disabled="isSubmitting">
-          <Loader2 v-if="isSubmitting" class="size-4 mr-2 animate-spin" />
+          <Spinner v-if="isSubmitting" class="size-4 mr-2" />
           {{ computedSubmitLabel }}
         </Button>
       </DialogFooter>

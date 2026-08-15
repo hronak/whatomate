@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { PageHeader, DataTable, DeleteConfirmDialog, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, DataTable, DeleteConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/services/api'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -20,7 +20,6 @@ import {
   Trash2,
   Phone,
   Check,
-  Loader2,
   Link2,
   Smartphone,
   Network
@@ -269,7 +268,7 @@ async function confirmDelete() {
             :disabled="isConnectingFB"
             class="bg-linear-to-br from-facebook to-facebook-dark hover:from-facebook-hover hover:to-facebook-hoverDark text-white border-none shadow-none"
           >
-            <Loader2 v-if="isConnectingFB" class="size-4 mr-2 animate-spin" />
+            <Spinner v-if="isConnectingFB" class="size-4 mr-2" />
             <Link2 v-else class="size-4 mr-2" />
             {{ $t('accounts.connectFacebook') }}
           </Button>
@@ -324,7 +323,7 @@ async function confirmDelete() {
                       class="bg-linear-to-br from-facebook to-facebook-dark hover:from-facebook-hover hover:to-facebook-hoverDark text-white border-none shadow-none"
                     >
                       <Link2 v-if="!isConnectingFB" class="mr-2 size-5" />
-                      <Loader2 v-else class="mr-2 size-5 animate-spin" />
+                      <Spinner v-else class="mr-2 size-5" />
                       {{ $t('accounts.connectFacebook') }}
                     </Button>
                     <RouterLink to="/settings/accounts/new">

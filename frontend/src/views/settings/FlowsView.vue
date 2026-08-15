@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, DeleteConfirmDialog, ConfirmDialog, DataTable, SearchInput, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, DeleteConfirmDialog, ConfirmDialog, DataTable, SearchInput, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
 import FlowBuilder from '@/components/flow-builder/FlowBuilder.vue'
 import { flowsService, accountsService } from '@/services/api'
 import { toast } from 'vue-sonner'
@@ -344,7 +344,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
           </div>
         </div>
         <div class="flex-1 overflow-hidden py-4"><FlowBuilder v-model="flowBuilderData" /></div>
-        <DialogFooter><Button variant="outline" size="sm" @click="showCreateDialog = false" :disabled="isCreating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="createFlow" :disabled="isCreating"><Loader2 v-if="isCreating" class="size-4 mr-2 animate-spin" />{{ $t('flows.createFlow') }}</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" size="sm" @click="showCreateDialog = false" :disabled="isCreating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="createFlow" :disabled="isCreating"><Spinner v-if="isCreating" class="size-4 mr-2" />{{ $t('flows.createFlow') }}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
 
@@ -362,7 +362,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
           <div v-if="flowToEdit?.meta_flow_id" class="flex items-center gap-2 ml-auto"><Badge variant="outline">Meta ID: {{ flowToEdit.meta_flow_id }}</Badge></div>
         </div>
         <div class="flex-1 overflow-hidden py-4"><FlowBuilder v-model="editFlowBuilderData" /></div>
-        <DialogFooter><Button variant="outline" size="sm" @click="showEditDialog = false" :disabled="isUpdating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="updateFlow" :disabled="isUpdating"><Loader2 v-if="isUpdating" class="size-4 mr-2 animate-spin" />{{ $t('flows.saveChanges') }}</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" size="sm" @click="showEditDialog = false" :disabled="isUpdating">{{ $t('common.cancel') }}</Button><Button size="sm" @click="updateFlow" :disabled="isUpdating"><Spinner v-if="isUpdating" class="size-4 mr-2" />{{ $t('flows.saveChanges') }}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
 

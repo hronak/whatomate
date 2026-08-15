@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCallingStore } from '@/stores/calling'
 import { teamsService, type Team, type TeamMember } from '@/services/api'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Users, Loader2 } from '@lucide/vue'
+import { ArrowLeft, Users } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
 const emit = defineEmits<{ close: [] }>()
@@ -78,7 +79,7 @@ async function doTransfer(agentId?: string) {
       <div v-if="step === 'teams'">
         <p class="text-muted-foreground mb-3">{{ t('callTransfers.selectTeam') }}</p>
         <div v-if="loading" class="flex justify-center py-8">
-          <Loader2 class="size-5 animate-spin text-muted-foreground" />
+          <Spinner class="size-5 text-muted-foreground" />
         </div>
         <div v-else-if="teams.length === 0" class="text-center py-8 text-muted-foreground">
           {{ t('callTransfers.noTeams') }}
@@ -116,14 +117,14 @@ async function doTransfer(agentId?: string) {
           :disabled="store.isTransferring"
           @click="doTransfer()"
         >
-          <Loader2 v-if="store.isTransferring" class="size-4 animate-spin mr-2" />
+          <Spinner v-if="store.isTransferring" class="size-4 mr-2" />
           {{ t('callTransfers.transferToTeam') }}
         </Button>
 
         <p class="text-muted-foreground mb-2">{{ t('callTransfers.selectAgent') }}</p>
 
         <div v-if="membersLoading" class="flex justify-center py-6">
-          <Loader2 class="size-5 animate-spin text-muted-foreground" />
+          <Spinner class="size-5 text-muted-foreground" />
         </div>
         <div v-else class="space-y-1 max-h-48 overflow-y-auto">
           <button

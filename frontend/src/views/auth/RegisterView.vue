@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'vue-sonner'
-import { MessageSquare, Loader2 } from '@lucide/vue'
+import { MessageSquare } from '@lucide/vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -147,7 +148,7 @@ const handleRegister = async () => {
         </CardContent>
         <CardFooter class="flex flex-col space-y-4">
           <Button type="submit" class="w-full" :disabled="isLoading">
-            <Loader2 v-if="isLoading" class="mr-2 size-4 animate-spin" />
+            <Spinner v-if="isLoading" class="mr-2 size-4" />
             {{ $t('auth.createAccountBtn') }}
           </Button>
           <p class="text-center text-muted-foreground">

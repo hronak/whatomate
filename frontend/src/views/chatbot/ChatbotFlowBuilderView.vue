@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, onMounted, markRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -734,7 +735,7 @@ onMounted(async () => {
       <!-- Canvas -->
       <div class="flex-1 relative">
         <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-          <div class="animate-spin rounded-full size-8 border-b-2 border-primary" />
+          <Spinner size="lg" class="text-primary" />
         </div>
         <ErrorState
           v-else-if="loadError"

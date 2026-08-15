@@ -13,9 +13,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, ConfirmDialog, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { Plus, Trash2, Pencil, Zap, Loader2, Globe, Webhook, Code, Ticket, User, BarChart, Link, Phone, Mail, FileText, ExternalLink } from '@lucide/vue'
+import { Plus, Trash2, Pencil, Zap, Globe, Webhook, Code, Ticket, User, BarChart, Link, Phone, Mail, FileText, ExternalLink } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useDebounceFn } from '@vueuse/core'
@@ -314,7 +314,7 @@ onMounted(() => fetchActions())
         </div>
         <DialogFooter>
           <Button variant="outline" @click="isDialogOpen = false">{{ $t('common.cancel') }}</Button>
-          <Button @click="saveAction" :disabled="isSaving"><Loader2 v-if="isSaving" class="size-4 mr-2 animate-spin" />{{ isEditing ? $t('common.update') : $t('common.create') }}</Button>
+          <Button @click="saveAction" :disabled="isSaving"><Spinner v-if="isSaving" class="size-4 mr-2" />{{ isEditing ? $t('common.update') : $t('common.create') }}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

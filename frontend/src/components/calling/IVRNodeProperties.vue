@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { computed, ref } from 'vue'
 import type { IVRNode, IVRNodeType } from '@/services/api'
 import { ivrFlowsService } from '@/services/api'
@@ -11,7 +12,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Trash2, Plus, Upload, Play, Pause, X, Loader2, Type } from '@lucide/vue'
+import { Trash2, Plus, Upload, Play, Pause, X, Type } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
 const props = defineProps<{
@@ -288,7 +289,7 @@ const greetingTab = computed(() =>
               </Button>
             </div>
             <Button v-else variant="outline" size="sm" class="h-7 w-full" @click="triggerFileUpload" :disabled="isUploading">
-              <Loader2 v-if="isUploading" class="size-3 mr-1 animate-spin" />
+              <Spinner v-if="isUploading" class="size-3 mr-1" />
               <Upload v-else class="size-3 mr-1" />
               Upload Audio
             </Button>

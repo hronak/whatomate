@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 // In-app media viewer (lightbox) for chat attachments: images, stickers, video
 // and PDF/documents. Replaces the old "open in a new browser tab" behaviour.
 //
@@ -21,8 +22,7 @@ import {
   ZoomOut,
   ChevronLeft,
   ChevronRight,
-  FileText,
-  Loader2,
+  FileText
 } from '@lucide/vue'
 import type { Message } from '@/stores/contacts'
 
@@ -268,7 +268,7 @@ function closeOnBackdrop() { open.value = false }
         <!-- PDF -->
         <template v-else-if="current && currentKind === 'pdf'">
           <div v-if="pdfLoading" class="flex flex-col items-center gap-2 text-white/80">
-            <Loader2 class="size-8 animate-spin" />
+            <Spinner class="size-8" />
           </div>
           <iframe
             v-else-if="pdfBlobUrl"

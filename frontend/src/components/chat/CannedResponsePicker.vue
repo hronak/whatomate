@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +10,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cannedResponsesService, type CannedResponse } from '@/services/api'
-import { MessageSquareText, Search, Loader2 } from '@lucide/vue'
+import { MessageSquareText, Search } from '@lucide/vue'
 
 const props = defineProps<{
   externalOpen?: boolean
@@ -131,7 +132,7 @@ function selectResponse(response: CannedResponse) {
 
       <ScrollArea class="h-[300px]">
         <div v-if="isLoading" class="flex items-center justify-center py-8">
-          <Loader2 class="size-6 animate-spin text-muted-foreground" />
+          <Spinner class="size-6 text-muted-foreground" />
         </div>
 
         <div v-else-if="filteredResponses.length === 0" class="py-8 text-center text-muted-foreground">

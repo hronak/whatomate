@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -15,7 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { organizationsService } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { Building2, Plus, Loader2 } from '@lucide/vue'
+import { Building2, Plus } from '@lucide/vue'
 
 const props = defineProps<{
   collapsed?: boolean
@@ -197,7 +198,7 @@ const refreshOrgs = async () => {
       <DialogFooter>
         <Button variant="outline" @click="isCreateDialogOpen = false">{{ t('common.cancel') }}</Button>
         <Button @click="submitCreateOrg" :disabled="isCreating || !newOrgName.trim()">
-          <Loader2 v-if="isCreating" class="size-4 mr-2 animate-spin" />
+          <Spinner v-if="isCreating" class="size-4 mr-2" />
           {{ t('common.create') }}
         </Button>
       </DialogFooter>

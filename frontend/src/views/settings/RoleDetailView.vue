@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -30,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Shield, Lock, Star, Save, Trash2, Loader2 } from '@lucide/vue'
+import { Shield, Lock, Star, Save, Trash2 } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -236,7 +237,7 @@ onMounted(async () => {
         <CardContent>
           <p class="text-muted-foreground mb-3">{{ $t('roles.selectPermissions') }}</p>
           <div v-if="rolesStore.permissions.length === 0" class="text-center py-8 text-muted-foreground border rounded-lg">
-            <Loader2 class="size-6 animate-spin mx-auto mb-2" />
+            <Spinner class="size-6 mx-auto mb-2" />
             <p>{{ $t('roles.loadingPermissions') }}...</p>
           </div>
           <PermissionMatrix

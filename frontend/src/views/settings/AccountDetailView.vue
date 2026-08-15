@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { IconButton } from '@/components/shared'
+import { IconButton, Spinner } from '@/components/shared'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,14 +37,13 @@ import {
   Trash2,
   Copy,
   RefreshCw,
-  Loader2,
   AlertCircle,
   CheckCircle2,
   Bell,
   Store,
   TestTube2,
   Check,
-  X,
+  X
 } from '@lucide/vue'
 
 interface WhatsAppAccount {
@@ -284,12 +283,12 @@ onMounted(async () => {
     <template #actions>
       <div class="flex items-center gap-2">
         <Button v-if="!isNew && account" variant="outline" size="sm" :disabled="testingConnection" @click="testConnection">
-          <Loader2 v-if="testingConnection" class="size-4 animate-spin mr-1" />
+          <Spinner v-if="testingConnection" class="size-4 mr-1" />
           <RefreshCw v-else class="size-4 mr-1" />
           {{ $t('accounts.test', 'Test') }}
         </Button>
         <Button v-if="!isNew && account" variant="outline" size="sm" :disabled="subscribing" @click="subscribeApp">
-          <Loader2 v-if="subscribing" class="size-4 animate-spin mr-1" />
+          <Spinner v-if="subscribing" class="size-4 mr-1" />
           <Bell v-else class="size-4 mr-1" />
           {{ $t('accounts.subscribe', 'Subscribe') }}
         </Button>

@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { PageHeader, IconButton, ErrorState, ConfirmDialog } from '@/components/shared'
+import { PageHeader, IconButton, ErrorState, ConfirmDialog, Spinner } from '@/components/shared'
 import { chatbotService, type Team } from '@/services/api'
 import { useTransfersStore, type AgentTransfer, getSLAStatus } from '@/stores/transfers'
 import { useAuthStore } from '@/stores/auth'
@@ -19,7 +19,7 @@ import { useUsersStore } from '@/stores/users'
 import { useTeamsStore } from '@/stores/teams'
 import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
-import { UserX, Play, MessageSquare, User, Clock, Loader2, Users, UserPlus, AlertTriangle, CheckCircle2, XCircle } from '@lucide/vue'
+import { UserX, Play, MessageSquare, User, Clock, Users, UserPlus, AlertTriangle, CheckCircle2, XCircle } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const { t } = useI18n()
@@ -333,7 +333,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                   @click="pickNextTransfer"
                   :disabled="!allowQueuePickup || isPicking || transfersStore.queueCount === 0"
                 >
-                  <Loader2 v-if="isPicking" class="mr-2 size-4 animate-spin" />
+                  <Spinner v-if="isPicking" class="mr-2 size-4" />
                   <Play v-else class="mr-2 size-4" />
                   {{ $t('agentTransfers.pickNext') }}
                 </Button>
@@ -686,7 +686,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                 <CardContent>
                   <!-- Loading state -->
                   <div v-if="isLoadingHistory && historyTransfers.length === 0" class="text-center py-8">
-                    <Loader2 class="size-8 mx-auto mb-4 animate-spin text-muted-foreground" />
+                    <Spinner class="size-8 mx-auto mb-4 text-muted-foreground" />
                     <p class="text-muted-foreground">{{ $t('agentTransfers.loadingHistory') }}...</p>
                   </div>
 
@@ -724,7 +724,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         @click="transfersStore.loadMoreHistory()"
                         :disabled="isLoadingHistory"
                       >
-                        <Loader2 v-if="isLoadingHistory" class="size-4 mr-2 animate-spin" />
+                        <Spinner v-if="isLoadingHistory" class="size-4 mr-2" />
                         {{ $t('agentTransfers.loadMore') }}
                       </Button>
                     </div>
@@ -789,7 +789,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
         <DialogFooter>
           <Button variant="outline" size="sm" @click="assignDialogOpen = false">{{ $t('common.cancel') }}</Button>
           <Button size="sm" @click="assignTransfer" :disabled="isAssigning">
-            <Loader2 v-if="isAssigning" class="mr-2 size-4 animate-spin" />
+            <Spinner v-if="isAssigning" class="mr-2 size-4" />
             {{ $t('agentTransfers.save') }}
           </Button>
         </DialogFooter>

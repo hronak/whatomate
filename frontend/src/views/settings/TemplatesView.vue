@@ -8,11 +8,11 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, SearchInput, DataTable, IconButton, DeleteConfirmDialog, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, SearchInput, DataTable, IconButton, DeleteConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
 import { api, templatesService } from '@/services/api'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { toast } from 'vue-sonner'
-import { Plus, RefreshCw, FileText, Pencil, Trash2, Loader2, MessageSquare, Image, FileIcon, Video } from '@lucide/vue'
+import { Plus, RefreshCw, FileText, Pencil, Trash2, MessageSquare, Image, FileIcon, Video } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { useSearchPagination } from '@/composables/useSearchPagination'
 import { getQualityBadgeClass, getQualityRatingLabel } from '@/lib/utils'
@@ -298,7 +298,7 @@ function getHeaderIcon(type: string) {
     <PageHeader :title="$t('templates.title')" :subtitle="$t('templates.subtitle')" :icon="FileText" icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20">
       <template #actions>
         <Button variant="outline" size="sm" @click="syncTemplates" :disabled="isSyncing || !selectedAccount || selectedAccount === 'all'">
-          <Loader2 v-if="isSyncing" class="size-4 mr-2 animate-spin" />
+          <Spinner v-if="isSyncing" class="size-4 mr-2" />
           <RefreshCw v-else class="size-4 mr-2" />
           {{ $t('templates.syncFromMeta') }}
         </Button>

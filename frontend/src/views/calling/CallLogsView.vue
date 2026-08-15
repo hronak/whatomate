@@ -12,7 +12,7 @@ import { Phone, PhoneIncoming, PhoneOutgoing, PhoneOff, PhoneMissed, Clock, Refr
 import DataTable from '@/components/shared/DataTable.vue'
 import type { Column } from '@/components/shared/types'
 import SearchInput from '@/components/shared/SearchInput.vue'
-import { ErrorState } from '@/components/shared'
+import { ErrorState, Spinner } from '@/components/shared'
 import IVRPathTree from '@/components/calling/IVRPathTree.vue'
 
 const { t } = useI18n()
@@ -462,7 +462,7 @@ watch(phoneSearch, () => {
           <div v-if="selectedLog.recording_s3_key" class="space-y-2">
             <p class="text-muted-foreground">{{ t('calling.recording') }}</p>
             <div v-if="recordingLoading" class="flex items-center gap-2 text-muted-foreground">
-              <div class="animate-spin rounded-full size-4 border-b-2 border-primary" />
+              <Spinner size="sm" class="text-primary" />
               {{ t('common.loading') }}
             </div>
             <audio

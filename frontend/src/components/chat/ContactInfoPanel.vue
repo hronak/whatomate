@@ -22,8 +22,8 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command'
-import { X, ChevronDown, Phone, User, Plus, Check, Tags, Loader2 } from '@lucide/vue'
-import { TagBadge } from '@/components/shared'
+import { X, ChevronDown, Phone, User, Plus, Check, Tags } from '@lucide/vue'
+import { TagBadge, Spinner } from '@/components/shared'
 import MetadataSection from '@/components/chat/MetadataSection.vue'
 import { getInitials, getAvatarGradient, formatLabel } from '@/lib/utils'
 import { getTagColorClass } from '@/lib/constants'
@@ -342,7 +342,7 @@ async function updateContactTags(tags: string[]) {
               </TagBadge>
             </template>
             <span v-else class="text-muted-foreground">No tags</span>
-            <Loader2 v-if="isUpdatingTags" class="size-4 animate-spin text-muted-foreground" />
+            <Spinner v-if="isUpdatingTags" class="size-4 text-muted-foreground" />
           </div>
         </div>
 

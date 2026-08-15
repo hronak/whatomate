@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Spinner from './Spinner.vue'
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
@@ -10,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { dataService, type ExportColumn, type ImportResult } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { Loader2, Upload, Download, FileSpreadsheet, Check, AlertCircle } from '@lucide/vue'
+import { Upload, Download, FileSpreadsheet, Check, AlertCircle } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const { t, te } = useI18n()
@@ -224,7 +225,7 @@ function downloadSampleCsv() {
         <!-- Export Tab -->
         <TabsContent v-if="canExport" value="export" class="space-y-4 mt-4">
           <div v-if="isLoadingExportConfig" class="flex items-center justify-center py-8">
-            <Loader2 class="size-6 animate-spin text-muted-foreground" />
+            <Spinner class="size-6 text-muted-foreground" />
           </div>
           <template v-else>
             <div class="space-y-2">
@@ -246,7 +247,7 @@ function downloadSampleCsv() {
             <div class="flex justify-end gap-2 pt-2">
               <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
               <Button @click="handleExport" :disabled="isExporting || selectedColumns.length === 0">
-                <Loader2 v-if="isExporting" class="size-4 mr-2 animate-spin" />
+                <Spinner v-if="isExporting" class="size-4 mr-2" />
                 <Download v-else class="size-4 mr-2" />
                 {{ $t('importExport.exportCsv') }}
               </Button>
@@ -257,7 +258,7 @@ function downloadSampleCsv() {
         <!-- Import Tab -->
         <TabsContent v-if="canImport" value="import" class="space-y-4 mt-4">
           <div v-if="isLoadingImportConfig" class="flex items-center justify-center py-8">
-            <Loader2 class="size-6 animate-spin text-muted-foreground" />
+            <Spinner class="size-6 text-muted-foreground" />
           </div>
           <template v-else>
             <!-- Column Info -->
@@ -323,7 +324,7 @@ function downloadSampleCsv() {
             <div class="flex justify-end gap-2 pt-2">
               <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
               <Button @click="handleImport" :disabled="isImporting || !importFile">
-                <Loader2 v-if="isImporting" class="size-4 mr-2 animate-spin" />
+                <Spinner v-if="isImporting" class="size-4 mr-2" />
                 <Upload v-else class="size-4 mr-2" />
                 {{ $t('importExport.importCsv') }}
               </Button>
