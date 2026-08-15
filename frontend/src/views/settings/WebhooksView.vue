@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader, DataTable, SearchInput, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { toast } from 'vue-sonner'
 import { Plus, Trash2, Pencil, Webhook as WebhookIcon, Play } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
@@ -31,8 +32,7 @@ const error = ref(false)
 const canWrite = computed(() => authStore.hasPermission('webhooks', 'write'))
 const canDelete = computed(() => authStore.hasPermission('webhooks', 'delete'))
 
-const isDeleteDialogOpen = ref(false)
-const webhookToDelete = ref<Webhook | null>(null)
+const { deleteDialogOpen: isDeleteDialogOpen, itemToDelete: webhookToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Webhook, Record<string, never>>({})
 
 const isDisableDialogOpen = ref(false)
 const webhookToToggle = ref<Webhook | null>(null)
@@ -120,7 +120,7 @@ async function testWebhook(webhook: Webhook) {
 async function deleteWebhook() {
   if (!webhookToDelete.value) return
   isDeleting.value = true
-  try { await webhooksService.delete(webhookToDelete.value.id); await fetchWebhooks(); toast.success(t('common.deletedSuccess', { resource: t('resources.Webhook') })); isDeleteDialogOpen.value = false; webhookToDelete.value = null }
+  try { await webhooksService.delete(webhookToDelete.value.id); await fetchWebhooks(); toast.success(t('common.deletedSuccess', { resource: t('resources.Webhook') })); closeDeleteDialog() }
   catch (e) { toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.webhook') }))) }
   finally { isDeleting.value = false }
 }
@@ -188,7 +188,7 @@ onMounted(() => fetchWebhooks())
                     <RouterLink :to="`/settings/webhooks/${webhook.id}`">
                       <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" />
                     </RouterLink>
-                    <IconButton v-if="canDelete" :icon="Trash2" :label="$t('common.delete')" class="size-8 text-destructive" @click="webhookToDelete = webhook; isDeleteDialogOpen = true" />
+                    <IconButton v-if="canDelete" :icon="Trash2" :label="$t('common.delete')" class="size-8 text-destructive" @click="openDeleteDialog(webhook)" />
                   </div>
                 </template>
                 <template #empty-action>

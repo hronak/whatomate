@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { PageHeader, SearchInput, DataTable, ConfirmDialog, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { useTeamsStore } from '@/stores/teams'
 import { useAuthStore } from '@/stores/auth'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -35,8 +36,7 @@ const totalItems = ref(0)
 const pageSize = 20
 
 // Delete
-const deleteDialogOpen = ref(false)
-const teamToDelete = ref<Team | null>(null)
+const { deleteDialogOpen, itemToDelete: teamToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Team, Record<string, never>>({})
 const isDeletingTeam = ref(false)
 
 // Sorting
@@ -71,11 +71,6 @@ function handlePageChange(page: number) {
   fetchTeams()
 }
 
-function openDeleteDialog(team: Team) {
-  teamToDelete.value = team
-  deleteDialogOpen.value = true
-}
-
 watch(() => organizationsStore.selectedOrgId, () => fetchTeams())
 onMounted(() => fetchTeams())
 
@@ -104,8 +99,7 @@ async function confirmDelete() {
   try {
     await teamsStore.deleteTeam(teamToDelete.value.id)
     toast.success(t('common.deletedSuccess', { resource: t('resources.Team') }))
-    deleteDialogOpen.value = false
-    teamToDelete.value = null
+    closeDeleteDialog()
     await fetchTeams()
   } catch (e) {
     toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.team') })))

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader, SearchInput, DataTable, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { useRolesStore } from '@/stores/roles'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { useAuthStore } from '@/stores/auth'
@@ -26,8 +27,7 @@ const roles = ref<Role[]>([])
 const isLoading = ref(true)
 const error = ref(false)
 
-const deleteDialogOpen = ref(false)
-const roleToDelete = ref<Role | null>(null)
+const { deleteDialogOpen, itemToDelete: roleToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Role, Record<string, never>>({})
 const isDeleting = ref(false)
 
 const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } = useSearchPagination({
@@ -49,11 +49,6 @@ const columns = computed<Column<Role>[]>(() => [
 
 const sortKey = ref('name')
 const sortDirection = ref<'asc' | 'desc'>('asc')
-
-function openDeleteDialog(role: Role) {
-  roleToDelete.value = role
-  deleteDialogOpen.value = true
-}
 
 watch(() => organizationsStore.selectedOrgId, () => fetchRoles())
 onMounted(() => fetchRoles())
@@ -83,8 +78,7 @@ async function confirmDelete() {
   try {
     await rolesStore.deleteRole(roleToDelete.value.id)
     toast.success(t('common.deletedSuccess', { resource: t('resources.Role') }))
-    deleteDialogOpen.value = false
-    roleToDelete.value = null
+    closeDeleteDialog()
     await fetchRoles()
   } catch (e) {
     toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.role') })))

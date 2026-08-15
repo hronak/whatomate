@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PageHeader, SearchInput, DataTable, IconButton, ConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { api, templatesService } from '@/services/api'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { toast } from 'vue-sonner'
@@ -55,8 +56,7 @@ const isSyncing = ref(false)
 const selectedAccount = ref<string>(localStorage.getItem('templates_selected_account') || 'all')
 
 // Delete dialog state
-const deleteDialogOpen = ref(false)
-const templateToDelete = ref<Template | null>(null)
+const { deleteDialogOpen, itemToDelete: templateToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Template, Record<string, never>>({})
 const isDeleting = ref(false)
 
 const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } = useSearchPagination({
@@ -229,11 +229,6 @@ async function syncTemplates() {
   }
 }
 
-function openDeleteDialog(template: Template) {
-  templateToDelete.value = template
-  deleteDialogOpen.value = true
-}
-
 async function confirmDeleteTemplate() {
   if (!templateToDelete.value) return
 
@@ -241,8 +236,7 @@ async function confirmDeleteTemplate() {
   try {
     await api.delete(`/templates/${templateToDelete.value.id}`)
     toast.success(t('common.deletedSuccess', { resource: t('resources.Template') }))
-    deleteDialogOpen.value = false
-    templateToDelete.value = null
+    closeDeleteDialog()
     await fetchTemplates()
   } catch (error) {
     toast.error(getErrorMessage(error, t('common.failedDelete', { resource: t('resources.template') })))

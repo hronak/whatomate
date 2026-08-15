@@ -19,27 +19,28 @@ import { Plus, Trash2, Pencil, Zap, Globe, Webhook, Code, Ticket, User, BarChart
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
 import { useDebounceFn } from '@vueuse/core'
+import { useCrudState } from '@/composables/useCrudState'
 
 const { t } = useI18n()
 
 const actions = ref<CustomAction[]>([])
 const isLoading = ref(false)
-const isSaving = ref(false)
 const isDeleting = ref(false)
 const error = ref(false)
 
-const isDialogOpen = ref(false)
-const isEditing = ref(false)
-const editingActionId = ref<string | null>(null)
-const formData = ref({
+const defaultFormData = {
   name: '', icon: 'zap', action_type: 'webhook' as 'webhook' | 'url' | 'javascript', is_active: true, display_order: 0,
   config: { url: '', method: 'POST', headers: {} as Record<string, string>, body: '', open_in_new_tab: true, code: '' }
-})
+}
+
+const {
+  isSubmitting, isDialogOpen, editingItem, formData,
+  openCreateDialog: baseOpenCreateDialog, openEditDialog: baseOpenEditDialog, closeDialog,
+  deleteDialogOpen, itemToDelete, openDeleteDialog, closeDeleteDialog,
+} = useCrudState<CustomAction, typeof defaultFormData>(defaultFormData)
 
 const newHeaderKey = ref('')
 const newHeaderValue = ref('')
-const isDeleteDialogOpen = ref(false)
-const actionToDelete = ref<CustomAction | null>(null)
 
 const isDisableDialogOpen = ref(false)
 const actionToToggle = ref<CustomAction | null>(null)
@@ -106,20 +107,15 @@ function handlePageChange(page: number) {
 }
 
 function openCreateDialog() {
-  isEditing.value = false
-  editingActionId.value = null
-  formData.value = { name: '', icon: 'zap', action_type: 'webhook', is_active: true, display_order: actions.value.length, config: { url: '', method: 'POST', headers: {}, body: '', open_in_new_tab: true, code: '' } }
-  isDialogOpen.value = true
+  baseOpenCreateDialog()
+  formData.value.display_order = actions.value.length
 }
 
 function openEditDialog(action: CustomAction) {
-  isEditing.value = true
-  editingActionId.value = action.id
-  formData.value = {
-    name: action.name, icon: action.icon || 'zap', action_type: action.action_type, is_active: action.is_active, display_order: action.display_order,
-    config: { url: action.config.url || '', method: action.config.method || 'POST', headers: { ...(action.config.headers || {}) }, body: action.config.body || '', open_in_new_tab: action.config.open_in_new_tab !== false, code: action.config.code || '' }
-  }
-  isDialogOpen.value = true
+  baseOpenEditDialog(action, (a) => ({
+    name: a.name, icon: a.icon || 'zap', action_type: a.action_type, is_active: a.is_active, display_order: a.display_order,
+    config: { url: a.config.url || '', method: a.config.method || 'POST', headers: { ...(a.config.headers || {}) }, body: a.config.body || '', open_in_new_tab: a.config.open_in_new_tab !== false, code: a.config.code || '' }
+  }))
 }
 
 async function saveAction() {
@@ -134,15 +130,15 @@ async function saveAction() {
     case 'javascript': config = { code: formData.value.config.code }; break
   }
 
-  isSaving.value = true
+  isSubmitting.value = true
   try {
     const payload = { name: formData.value.name.trim(), icon: formData.value.icon, action_type: formData.value.action_type, config, is_active: formData.value.is_active, display_order: formData.value.display_order }
-    if (isEditing.value && editingActionId.value) { await customActionsService.update(editingActionId.value, payload); toast.success(t('common.updatedSuccess', { resource: t('resources.CustomAction') })) }
+    if (editingItem.value) { await customActionsService.update(editingItem.value.id, payload); toast.success(t('common.updatedSuccess', { resource: t('resources.CustomAction') })) }
     else { await customActionsService.create(payload); toast.success(t('common.createdSuccess', { resource: t('resources.CustomAction') })) }
-    isDialogOpen.value = false
+    closeDialog()
     await fetchActions()
   } catch (e) { toast.error(getErrorMessage(e, t('common.failedSave', { resource: t('resources.customAction') }))) }
-  finally { isSaving.value = false }
+  finally { isSubmitting.value = false }
 }
 
 function handleToggleAction(action: CustomAction) {
@@ -171,9 +167,9 @@ function confirmDisableAction() {
 }
 
 async function deleteAction() {
-  if (!actionToDelete.value) return
+  if (!itemToDelete.value) return
   isDeleting.value = true
-  try { await customActionsService.delete(actionToDelete.value.id); await fetchActions(); toast.success(t('common.deletedSuccess', { resource: t('resources.CustomAction') })); isDeleteDialogOpen.value = false; actionToDelete.value = null }
+  try { await customActionsService.delete(itemToDelete.value.id); await fetchActions(); toast.success(t('common.deletedSuccess', { resource: t('resources.CustomAction') })); closeDeleteDialog() }
   catch (e) { toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.customAction') }))) }
   finally { isDeleting.value = false }
 }
@@ -230,7 +226,7 @@ onMounted(() => fetchActions())
                 <template #cell-actions="{ item: action }">
                   <div class="flex items-center justify-end gap-1">
                     <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" @click="openEditDialog(action)" />
-                    <IconButton :icon="Trash2" :label="$t('common.delete')" class="size-8 text-destructive" @click="actionToDelete = action; isDeleteDialogOpen = true" />
+                    <IconButton :icon="Trash2" :label="$t('common.delete')" class="size-8 text-destructive" @click="openDeleteDialog(action)" />
                   </div>
                 </template>
                 <template #empty-action>
@@ -247,7 +243,7 @@ onMounted(() => fetchActions())
     <Dialog v-model:open="isDialogOpen">
       <DialogContent class="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{{ isEditing ? $t('customActions.editTitle') : $t('customActions.createTitle') }}</DialogTitle>
+          <DialogTitle>{{ editingItem ? $t('customActions.editTitle') : $t('customActions.createTitle') }}</DialogTitle>
           <DialogDescription>{{ $t('customActions.dialogDesc') }}</DialogDescription>
         </DialogHeader>
         <div class="space-y-4 py-4">
@@ -313,8 +309,8 @@ onMounted(() => fetchActions())
           </template>
         </div>
         <DialogFooter>
-          <Button variant="outline" @click="isDialogOpen = false">{{ $t('common.cancel') }}</Button>
-          <Button @click="saveAction" :disabled="isSaving"><Spinner v-if="isSaving" class="size-4 mr-2" />{{ isEditing ? $t('common.update') : $t('common.create') }}</Button>
+          <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
+          <Button @click="saveAction" :disabled="isSubmitting"><Spinner v-if="isSubmitting" class="size-4 mr-2" />{{ editingItem ? $t('common.update') : $t('common.create') }}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -329,6 +325,6 @@ onMounted(() => fetchActions())
       @confirm="confirmDisableAction"
     />
 
-    <ConfirmDialog v-model:open="isDeleteDialogOpen" variant="destructive" :title="$t('customActions.deleteTitle')" :item-name="actionToDelete?.name" :is-submitting="isDeleting" @confirm="deleteAction" />
+    <ConfirmDialog v-model:open="deleteDialogOpen" variant="destructive" :title="$t('customActions.deleteTitle')" :item-name="itemToDelete?.name" :is-submitting="isDeleting" @confirm="deleteAction" />
   </div>
 </template>
