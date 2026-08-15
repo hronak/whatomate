@@ -58,18 +58,8 @@ func TestClient_ExchangeCodeForToken(t *testing.T) {
 			apiVersion: "v21.0",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Invalid authorization code",
 						Code:    100,
 					},
@@ -101,18 +91,8 @@ func TestClient_ExchangeCodeForToken(t *testing.T) {
 			apiVersion: "v21.0",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Code has expired",
 						Code:    100,
 					},
@@ -192,18 +172,8 @@ func TestClient_GetPhoneNumberInfo(t *testing.T) {
 			phoneID: "nonexistent",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Phone number not found",
 						Code:    100,
 					},
@@ -217,18 +187,8 @@ func TestClient_GetPhoneNumberInfo(t *testing.T) {
 			phoneID: "123456789",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusUnauthorized)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Invalid OAuth access token",
 						Code:    190,
 					},
@@ -305,18 +265,8 @@ func TestClient_RegisterPhoneNumber(t *testing.T) {
 			pin:     "654321",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Two-step verification is already enabled for this phone number",
 						Code:    33,
 					},
@@ -331,18 +281,8 @@ func TestClient_RegisterPhoneNumber(t *testing.T) {
 			pin:     "abc",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "PIN must be 6 digits",
 						Code:    100,
 					},
@@ -357,18 +297,8 @@ func TestClient_RegisterPhoneNumber(t *testing.T) {
 			pin:     "123456",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusForbidden)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Phone number must be verified before registration",
 						Code:    368,
 					},

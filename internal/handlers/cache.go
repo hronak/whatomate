@@ -47,7 +47,8 @@ type chatbotSettingsCache struct {
 
 // getChatbotSettingsCached retrieves chatbot settings from cache or database
 func (a *App) getChatbotSettingsCached(orgID uuid.UUID, whatsAppAccount string) (*models.ChatbotSettings, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := fmt.Sprintf("%s%s:%s", settingsCachePrefix, orgID.String(), whatsAppAccount)
 
 	// Try cache first
@@ -86,7 +87,8 @@ func (a *App) getChatbotSettingsCached(orgID uuid.UUID, whatsAppAccount string) 
 
 // getChatbotFlowsCached retrieves all enabled flows with steps from cache or database
 func (a *App) getChatbotFlowsCached(orgID uuid.UUID) ([]models.ChatbotFlow, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := flowsCachePrefix + orgID.String()
 
 	// Try cache first
@@ -131,7 +133,8 @@ func (a *App) getChatbotFlowByIDCached(orgID uuid.UUID, flowID uuid.UUID) (*mode
 
 // getKeywordRulesCached retrieves keyword rules from cache or database
 func (a *App) getKeywordRulesCached(orgID uuid.UUID, whatsAppAccount string) ([]models.KeywordRule, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := fmt.Sprintf("%s%s:%s", keywordRulesCachePrefix, orgID.String(), whatsAppAccount)
 
 	// Try cache first
@@ -177,9 +180,26 @@ func (a *App) getKeywordRulesCached(orgID uuid.UUID, whatsAppAccount string) ([]
 
 // InvalidateChatbotSettingsCache invalidates the settings cache for an organization
 func (a *App) InvalidateChatbotSettingsCache(orgID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	pattern := fmt.Sprintf("%s%s:*", settingsCachePrefix, orgID.String())
 	a.deleteKeysByPattern(ctx, pattern)
+}
+
+// cacheTimeout bounds a single Redis cache operation. The cache is an
+// optimisation: if Redis is slow the request should fall through to Postgres,
+// not wait on it. These calls previously used context.Background() and so had
+// no ceiling at all.
+const cacheTimeout = 3 * time.Second
+
+// cacheContext returns the context for one cache operation, plus its cancel.
+//
+// Not derived from a request context: these getters are called from inbound
+// webhook processing and background tasks as often as from handlers, and
+// Phase 5 threads a real caller context through per domain. Bounding them is
+// the part that matters now.
+func cacheContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), cacheTimeout)
 }
 
 // invalidate deletes a cache key and reports failure.
@@ -201,13 +221,15 @@ func (a *App) invalidate(ctx context.Context, what string, keys ...string) {
 
 // InvalidateChatbotFlowsCache invalidates the flows cache for an organization
 func (a *App) InvalidateChatbotFlowsCache(orgID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	a.invalidate(ctx, "chatbot_flows", flowsCachePrefix+orgID.String())
 }
 
 // InvalidateKeywordRulesCache invalidates the keyword rules cache for an organization
 func (a *App) InvalidateKeywordRulesCache(orgID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	pattern := fmt.Sprintf("%s%s:*", keywordRulesCachePrefix, orgID.String())
 	a.deleteKeysByPattern(ctx, pattern)
 }
@@ -234,7 +256,8 @@ type whatsAppAccountCache struct {
 
 // getWhatsAppAccountCached retrieves WhatsApp account by phone_id from cache or database
 func (a *App) getWhatsAppAccountCached(phoneID string) (*models.WhatsAppAccount, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := whatsappAccountCachePrefix + phoneID
 
 	// Try cache first
@@ -280,13 +303,15 @@ func (a *App) decryptAccountSecrets(account *models.WhatsAppAccount) {
 
 // InvalidateWhatsAppAccountCache invalidates the WhatsApp account cache
 func (a *App) InvalidateWhatsAppAccountCache(phoneID string) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	a.invalidate(ctx, "whatsapp_account", whatsappAccountCachePrefix+phoneID)
 }
 
 // getWebhooksCached retrieves active webhooks for an organization from cache or database
 func (a *App) getWebhooksCached(orgID uuid.UUID) ([]models.Webhook, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := webhooksCachePrefix + orgID.String()
 
 	// Try cache first
@@ -314,13 +339,15 @@ func (a *App) getWebhooksCached(orgID uuid.UUID) ([]models.Webhook, error) {
 
 // InvalidateWebhooksCache invalidates the webhooks cache for an organization
 func (a *App) InvalidateWebhooksCache(orgID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	a.invalidate(ctx, "webhooks", webhooksCachePrefix+orgID.String())
 }
 
 // getSLAEnabledSettingsCached retrieves all SLA-enabled chatbot settings from cache or database
 func (a *App) getSLAEnabledSettingsCached() ([]models.ChatbotSettings, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, slaSettingsCacheKey).Result()
@@ -347,13 +374,15 @@ func (a *App) getSLAEnabledSettingsCached() ([]models.ChatbotSettings, error) {
 
 // InvalidateSLASettingsCache invalidates the SLA settings cache
 func (a *App) InvalidateSLASettingsCache() {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	a.invalidate(ctx, "sla_settings", slaSettingsCacheKey)
 }
 
 // getAIContextsCached retrieves AI contexts from cache or database
 func (a *App) getAIContextsCached(orgID uuid.UUID, whatsAppAccount string) ([]models.AIContext, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := fmt.Sprintf("%s%s:%s", aiContextsCachePrefix, orgID.String(), whatsAppAccount)
 
 	// Try cache first
@@ -399,7 +428,8 @@ func (a *App) getAIContextsCached(orgID uuid.UUID, whatsAppAccount string) ([]mo
 
 // InvalidateAIContextsCache invalidates the AI contexts cache for an organization
 func (a *App) InvalidateAIContextsCache(orgID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	pattern := fmt.Sprintf("%s%s:*", aiContextsCachePrefix, orgID.String())
 	a.deleteKeysByPattern(ctx, pattern)
 }
@@ -417,7 +447,8 @@ type UserPermissions struct {
 // When orgID is provided, it looks up the user's role from user_organizations for that org.
 // When orgID is not provided, it falls back to the user's default RoleID.
 func (a *App) getUserPermissionsCached(userID uuid.UUID, orgIDs ...uuid.UUID) (*UserPermissions, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 
 	// Determine cache key based on whether orgID is provided
 	var cacheKey string
@@ -568,7 +599,8 @@ func (a *App) ScopeToOrg(query *gorm.DB, userID, orgID uuid.UUID) *gorm.DB {
 
 // GetRolePermissionsCached retrieves role permissions from cache or database
 func (a *App) GetRolePermissionsCached(roleID uuid.UUID) ([]string, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := rolePermissionsCachePrefix + roleID.String()
 
 	// Try cache first
@@ -605,7 +637,8 @@ func (a *App) GetRolePermissionsCached(roleID uuid.UUID) ([]string, error) {
 
 // InvalidateUserPermissionsCache invalidates the permissions cache for a user
 func (a *App) InvalidateUserPermissionsCache(userID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	// Delete the base key (no org suffix)
 	a.invalidate(ctx, "user_permissions", userPermissionsCachePrefix+userID.String())
 	// Delete all org-specific keys
@@ -618,7 +651,8 @@ func (a *App) InvalidateUserPermissionsCache(userID uuid.UUID) {
 
 // InvalidateRolePermissionsCache invalidates the permissions cache for a role and all users with that role
 func (a *App) InvalidateRolePermissionsCache(roleID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 
 	// Delete role cache
 	a.invalidate(ctx, "role_permissions", rolePermissionsCachePrefix+roleID.String())
@@ -688,7 +722,8 @@ func (a *App) notifyUserPermissionsChanged(userID uuid.UUID) {
 
 // getTagsCached retrieves tags for an organization from cache or database
 func (a *App) getTagsCached(orgID uuid.UUID) ([]models.Tag, error) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	cacheKey := tagsCachePrefix + orgID.String()
 
 	// Try cache first
@@ -716,6 +751,7 @@ func (a *App) getTagsCached(orgID uuid.UUID) ([]models.Tag, error) {
 
 // InvalidateTagsCache invalidates the tags cache for an organization
 func (a *App) InvalidateTagsCache(orgID uuid.UUID) {
-	ctx := context.Background()
+	ctx, cancel := cacheContext()
+	defer cancel()
 	a.invalidate(ctx, "tags", tagsCachePrefix+orgID.String())
 }

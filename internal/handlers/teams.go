@@ -57,7 +57,7 @@ type TeamMemberResponse struct {
 func (a *App) ListTeams(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -107,7 +107,7 @@ func (a *App) ListTeams(r *fastglue.Request) error {
 func (a *App) GetTeam(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	teamID, err := parsePathUUID(r, "id", "team")
@@ -120,7 +120,7 @@ func (a *App) GetTeam(r *fastglue.Request) error {
 		Preload("Members").Preload("Members.User").
 		Preload("CreatedBy").Preload("UpdatedBy").
 		First(&team).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Team not found", nil, "")
+		return a.sendError(r, notFound("Team"))
 	}
 
 	// Check access: users with teams:read permission can see all teams, otherwise must be a member
@@ -133,7 +133,7 @@ func (a *App) GetTeam(r *fastglue.Request) error {
 			}
 		}
 		if !hasAccess {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Access denied", nil, "")
+			return a.sendError(r, forbidden("Access denied"))
 		}
 	}
 
@@ -153,7 +153,7 @@ func (a *App) CreateTeam(r *fastglue.Request) error {
 	}
 
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Team name is required", nil, "")
+		return a.sendError(r, invalidRequest("Team name is required"))
 	}
 
 	// Validate assignment strategy
@@ -162,7 +162,7 @@ func (a *App) CreateTeam(r *fastglue.Request) error {
 		strategy = models.AssignmentStrategyRoundRobin
 	}
 	if strategy != models.AssignmentStrategyRoundRobin && strategy != models.AssignmentStrategyLoadBalanced && strategy != models.AssignmentStrategyManual {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid assignment strategy", nil, "")
+		return a.sendError(r, invalidRequest("Invalid assignment strategy"))
 	}
 
 	team := models.Team{
@@ -194,7 +194,7 @@ func (a *App) CreateTeam(r *fastglue.Request) error {
 func (a *App) UpdateTeam(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	teamID, err := parsePathUUID(r, "id", "team")
@@ -205,7 +205,7 @@ func (a *App) UpdateTeam(r *fastglue.Request) error {
 	var team models.Team
 	if err := a.DB.Where("id = ? AND organization_id = ?", teamID, orgID).
 		Preload("Members").First(&team).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Team not found", nil, "")
+		return a.sendError(r, notFound("Team"))
 	}
 
 	oldTeam := team // value copy for audit diff
@@ -220,7 +220,7 @@ func (a *App) UpdateTeam(r *fastglue.Request) error {
 			}
 		}
 		if !isManager {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+			return a.sendError(r, forbidden("Insufficient permissions"))
 		}
 	}
 
@@ -238,7 +238,7 @@ func (a *App) UpdateTeam(r *fastglue.Request) error {
 
 	if req.AssignmentStrategy != "" {
 		if req.AssignmentStrategy != models.AssignmentStrategyRoundRobin && req.AssignmentStrategy != models.AssignmentStrategyLoadBalanced && req.AssignmentStrategy != models.AssignmentStrategyManual {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid assignment strategy", nil, "")
+			return a.sendError(r, invalidRequest("Invalid assignment strategy"))
 		}
 		team.AssignmentStrategy = req.AssignmentStrategy
 	}
@@ -293,7 +293,7 @@ func (a *App) DeleteTeam(r *fastglue.Request) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Team not found", nil, "")
+		return a.sendError(r, notFound("Team"))
 	}
 
 	if a.Assigner != nil {
@@ -310,7 +310,7 @@ func (a *App) DeleteTeam(r *fastglue.Request) error {
 func (a *App) ListTeamMembers(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	teamID, err := parsePathUUID(r, "id", "team")
@@ -323,7 +323,7 @@ func (a *App) ListTeamMembers(r *fastglue.Request) error {
 	if err := a.DB.Where("id = ? AND organization_id = ?", teamID, orgID).
 		Preload("Members").Preload("Members.User").
 		First(&team).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Team not found", nil, "")
+		return a.sendError(r, notFound("Team"))
 	}
 
 	// Check access: users with teams:read permission can see all, otherwise must be a member
@@ -336,7 +336,7 @@ func (a *App) ListTeamMembers(r *fastglue.Request) error {
 			}
 		}
 		if !hasAccess {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Access denied", nil, "")
+			return a.sendError(r, forbidden("Access denied"))
 		}
 	}
 
@@ -360,7 +360,7 @@ func (a *App) ListTeamMembers(r *fastglue.Request) error {
 func (a *App) AddTeamMember(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	teamID, err := parsePathUUID(r, "id", "team")
@@ -372,7 +372,7 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 	var team models.Team
 	if err := a.DB.Where("id = ? AND organization_id = ?", teamID, orgID).
 		Preload("Members").First(&team).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Team not found", nil, "")
+		return a.sendError(r, notFound("Team"))
 	}
 
 	hasWritePermission := a.HasPermission(userID, models.ResourceTeams, models.ActionWrite, orgID)
@@ -387,7 +387,7 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 			}
 		}
 		if !isManager {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+			return a.sendError(r, forbidden("Insufficient permissions"))
 		}
 	}
 
@@ -398,11 +398,11 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 
 	memberUserID, err := uuid.Parse(req.UserID)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid user ID", nil, "")
+		return a.sendError(r, invalidRequest("Invalid user ID"))
 	}
 
 	// Verify user exists in org
-	user, err := findByIDAndOrg[models.User](a.DB, r, memberUserID, orgID, "User")
+	user, err := findByIDAndOrg[models.User](a, r, memberUserID, orgID, "User")
 	if err != nil {
 		return nil
 	}
@@ -410,7 +410,7 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 	// Check if already a member
 	var existingMember models.TeamMember
 	if err := a.DB.Where("team_id = ? AND user_id = ?", teamID, memberUserID).First(&existingMember).Error; err == nil {
-		return r.SendErrorEnvelope(fasthttp.StatusConflict, "User is already a member of this team", nil, "")
+		return a.sendError(r, conflict("User is already a member of this team"))
 	}
 
 	// Validate role
@@ -419,12 +419,12 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 		role = models.TeamRoleAgent
 	}
 	if role != models.TeamRoleManager && role != models.TeamRoleAgent {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid role. Must be 'manager' or 'agent'", nil, "")
+		return a.sendError(r, invalidRequest("Invalid role. Must be 'manager' or 'agent'"))
 	}
 
 	// Only users with teams:write permission can add managers
 	if !hasWritePermission && role == models.TeamRoleManager {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions to add managers", nil, "")
+		return a.sendError(r, forbidden("Insufficient permissions to add managers"))
 	}
 
 	member := models.TeamMember{
@@ -456,7 +456,7 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 func (a *App) RemoveTeamMember(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	teamID, err := parsePathUUID(r, "id", "team")
@@ -473,7 +473,7 @@ func (a *App) RemoveTeamMember(r *fastglue.Request) error {
 	var team models.Team
 	if err := a.DB.Where("id = ? AND organization_id = ?", teamID, orgID).
 		Preload("Members").First(&team).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Team not found", nil, "")
+		return a.sendError(r, notFound("Team"))
 	}
 
 	hasWritePermission := a.HasPermission(userID, models.ResourceTeams, models.ActionWrite, orgID)
@@ -488,13 +488,13 @@ func (a *App) RemoveTeamMember(r *fastglue.Request) error {
 			}
 		}
 		if !isManager {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+			return a.sendError(r, forbidden("Insufficient permissions"))
 		}
 
 		// Team managers cannot remove other managers
 		for _, m := range team.Members {
 			if m.UserID == memberUserID && m.Role == models.TeamRoleManager {
-				return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions to remove managers", nil, "")
+				return a.sendError(r, forbidden("Insufficient permissions to remove managers"))
 			}
 		}
 	}
@@ -506,7 +506,7 @@ func (a *App) RemoveTeamMember(r *fastglue.Request) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Member not found in team", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "Member not found in team", kind: errNotFound})
 	}
 
 	if a.Assigner != nil {

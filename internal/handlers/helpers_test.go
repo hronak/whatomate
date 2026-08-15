@@ -201,7 +201,8 @@ func TestFindByIDAndOrg_Found(t *testing.T) {
 	require.NoError(t, db.Create(account).Error)
 
 	req := testutil.NewGETRequest(t)
-	result, err := findByIDAndOrg[models.WhatsAppAccount](db, req, account.ID, org.ID, "Account")
+	app := &App{DB: db, Log: testutil.NopLogger()}
+	result, err := findByIDAndOrg[models.WhatsAppAccount](app, req, account.ID, org.ID, "Account")
 	require.NoError(t, err)
 	assert.Equal(t, account.ID, result.ID)
 }
@@ -211,7 +212,8 @@ func TestFindByIDAndOrg_NotFound(t *testing.T) {
 	db := testutil.SetupTestDB(t)
 
 	req := testutil.NewGETRequest(t)
-	_, err := findByIDAndOrg[models.WhatsAppAccount](db, req, uuid.New(), uuid.New(), "Account")
+	app := &App{DB: db, Log: testutil.NopLogger()}
+	_, err := findByIDAndOrg[models.WhatsAppAccount](app, req, uuid.New(), uuid.New(), "Account")
 	assert.ErrorIs(t, err, errEnvelopeSent)
 	assert.Equal(t, fasthttp.StatusNotFound, testutil.GetResponseStatusCode(req))
 }
@@ -245,7 +247,8 @@ func TestFindByIDAndOrg_CrossOrgIsolation(t *testing.T) {
 
 	// Try to access org1's account with org2's ID
 	req := testutil.NewGETRequest(t)
-	_, err := findByIDAndOrg[models.WhatsAppAccount](db, req, account.ID, org2.ID, "Account")
+	app := &App{DB: db, Log: testutil.NopLogger()}
+	_, err := findByIDAndOrg[models.WhatsAppAccount](app, req, account.ID, org2.ID, "Account")
 	assert.ErrorIs(t, err, errEnvelopeSent)
 	assert.Equal(t, fasthttp.StatusNotFound, testutil.GetResponseStatusCode(req))
 }

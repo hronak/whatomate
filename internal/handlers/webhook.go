@@ -26,7 +26,7 @@ func (a *App) WebhookVerify(r *fastglue.Request) error {
 
 	if mode != "subscribe" {
 		a.Log.Warn("Webhook verification failed - invalid mode", "mode", mode)
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Verification failed", nil, "")
+		return a.sendError(r, forbidden("Verification failed"))
 	}
 
 	// First check against global config token
@@ -48,7 +48,7 @@ func (a *App) WebhookVerify(r *fastglue.Request) error {
 	}
 
 	a.Log.Warn("Webhook verification failed - token not found", "token", token)
-	return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Verification failed", nil, "")
+	return a.sendError(r, forbidden("Verification failed"))
 }
 
 // WebhookStatusError represents an error in a status update
@@ -167,7 +167,7 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 	var payload WebhookPayload
 	if err := json.Unmarshal(body, &payload); err != nil {
 		a.Log.Error("Failed to parse webhook payload", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid payload", nil, "")
+		return a.sendError(r, invalidRequest("Invalid payload"))
 	}
 
 	// Verify webhook signature before processing any fields.
@@ -185,7 +185,7 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 				}
 				if !verifyWebhookSignature(body, signature, []byte(account.AppSecret)) {
 					a.Log.Warn("Invalid webhook signature", "phone_id", phoneNumberID)
-					return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Invalid signature", nil, "")
+					return a.sendError(r, forbidden("Invalid signature"))
 				}
 				a.Log.Debug("Webhook signature verified successfully")
 				break

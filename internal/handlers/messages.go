@@ -652,10 +652,20 @@ type SendTemplateMessageRequest struct {
 
 // SendTemplateMessage sends a template message to a contact or phone number.
 // Accepts either JSON body or multipart/form-data (when a header media file is included).
+// Limits for fetching a template header image from a caller-supplied URL.
+const (
+	// headerMediaFetchTimeout bounds the download.
+	headerMediaFetchTimeout = 30 * time.Second
+
+	// maxHeaderMediaBytes caps how much we will read, matching the server's
+	// own 15MB request body limit.
+	maxHeaderMediaBytes = 15 << 20
+)
+
 func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req SendTemplateMessageRequest
@@ -668,7 +678,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		// Parse multipart form — used when template has a media header
 		form, err := r.RequestCtx.MultipartForm()
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid multipart form", nil, "")
+			return a.sendError(r, invalidRequest("Invalid multipart form"))
 		}
 		if v := form.Value["contact_id"]; len(v) > 0 {
 			req.ContactID = v[0]
@@ -688,19 +698,19 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		// Parse template_params from JSON string
 		if v := form.Value["template_params"]; len(v) > 0 && v[0] != "" {
 			if err := json.Unmarshal([]byte(v[0]), &req.TemplateParams); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid template_params JSON", nil, "")
+				return a.sendError(r, invalidRequest("Invalid template_params JSON"))
 			}
 		}
 		// Parse button_params from JSON string
 		if v := form.Value["button_params"]; len(v) > 0 && v[0] != "" {
 			if err := json.Unmarshal([]byte(v[0]), &req.ButtonParams); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid button_params JSON", nil, "")
+				return a.sendError(r, invalidRequest("Invalid button_params JSON"))
 			}
 		}
 		// Parse header_params from JSON string
 		if v := form.Value["header_params"]; len(v) > 0 && v[0] != "" {
 			if err := json.Unmarshal([]byte(v[0]), &req.HeaderParams); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid header_params JSON", nil, "")
+				return a.sendError(r, invalidRequest("Invalid header_params JSON"))
 			}
 		}
 		// Read header media file
@@ -708,7 +718,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 			fh := files[0]
 			f, err := fh.Open()
 			if err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Failed to read header file", nil, "")
+				return a.sendError(r, invalidRequest("Failed to read header file"))
 			}
 			defer f.Close() //nolint:errcheck
 			headerFileData, err = io.ReadAll(f)
@@ -733,12 +743,12 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 
 	// Must have either contact_id or phone_number
 	if req.ContactID == "" && req.PhoneNumber == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Either contact_id or phone_number is required", nil, "")
+		return a.sendError(r, invalidRequest("Either contact_id or phone_number is required"))
 	}
 
 	// Must have either template_name or template_id
 	if req.TemplateName == "" && req.TemplateID == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Either template_name or template_id is required", nil, "")
+		return a.sendError(r, invalidRequest("Either template_name or template_id is required"))
 	}
 
 	// Get template
@@ -746,22 +756,22 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	if req.TemplateID != "" {
 		templateID, err := uuid.Parse(req.TemplateID)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid template_id", nil, "")
+			return a.sendError(r, invalidRequest("Invalid template_id"))
 		}
-		t, err := findByIDAndOrg[models.Template](a.DB, r, templateID, orgID, "Template")
+		t, err := findByIDAndOrg[models.Template](a, r, templateID, orgID, "Template")
 		if err != nil {
 			return nil
 		}
 		template = *t
 	} else {
 		if err := a.DB.Where("name = ? AND organization_id = ?", req.TemplateName, orgID).First(&template).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Template not found", nil, "")
+			return a.sendError(r, notFound("Template"))
 		}
 	}
 
 	// Check template is approved
 	if template.Status != "APPROVED" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, fmt.Sprintf("Template is not approved (status: %s)", template.Status), nil, "")
+		return a.sendError(r, invalidRequest(fmt.Sprintf("Template is not approved (status: %s)", template.Status)))
 	}
 
 	// Get contact or use phone number directly
@@ -770,9 +780,9 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	if req.ContactID != "" {
 		cID, err := uuid.Parse(req.ContactID)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid contact_id", nil, "")
+			return a.sendError(r, invalidRequest("Invalid contact_id"))
 		}
-		c, err := findByIDAndOrg[models.Contact](a.DB, r, cID, orgID, "Contact")
+		c, err := findByIDAndOrg[models.Contact](a, r, cID, orgID, "Contact")
 		if err != nil {
 			return nil
 		}
@@ -809,7 +819,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 
 	account, err := a.resolveWhatsAppAccount(orgID, accountName)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+		return a.sendError(r, invalidRequest(err.Error()))
 	}
 
 	// Extract parameter names and resolve values
@@ -860,19 +870,33 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 			// Option 1: Pre-uploaded WhatsApp media ID — use directly (no local preview)
 			headerMediaID = req.HeaderMediaID
 		} else if req.HeaderMediaURL != "" {
-			// Option 2: Download from URL, then upload to WhatsApp
-			resp, err := http.Get(req.HeaderMediaURL)
+			// Option 2: Download from URL, then upload to WhatsApp.
+			//
+			// Through a.HTTPClient, not http.Get: the URL comes from the
+			// request body, and the default client has no timeout and no SSRF
+			// protection, so it would happily fetch link-local metadata
+			// endpoints and hang forever doing it. a.HTTPClient carries both
+			// the timeout and SSRFSafeDialer.
+			ctx, cancel := context.WithTimeout(context.Background(), headerMediaFetchTimeout)
+			defer cancel()
+
+			httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, req.HeaderMediaURL, nil)
 			if err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Failed to download header media from URL", nil, "")
+				return a.sendError(r, invalidRequest("Invalid header media URL"))
+			}
+			resp, err := a.HTTPClient.Do(httpReq)
+			if err != nil {
+				return a.sendError(r, invalidRequest("Failed to download header media from URL"))
 			}
 			defer resp.Body.Close() //nolint:errcheck
 			if resp.StatusCode != http.StatusOK {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, fmt.Sprintf("Header media URL returned status %d", resp.StatusCode), nil, "")
+				return a.sendError(r, invalidRequestf("Header media URL returned status %d", resp.StatusCode))
 			}
-			headerMediaData, err = io.ReadAll(resp.Body)
+			// Bounded read: an attacker-supplied URL must not be able to make
+			// us allocate without limit.
+			headerMediaData, err = io.ReadAll(io.LimitReader(resp.Body, maxHeaderMediaBytes))
 			if err != nil {
-				a.Log.Error("Failed to read header media from URL", "error", err)
-				return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read header media from URL", nil, "")
+				return a.sendError(r, internalError("Failed to read header media from URL", err))
 			}
 			headerMimeType = resp.Header.Get("Content-Type")
 			if headerMimeType == "" {
@@ -910,7 +934,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 
 	// Check marketing opt-out
 	if contact.MarketingOptOut && strings.EqualFold(template.Category, "MARKETING") {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Contact has opted out of marketing messages", nil, "")
+		return a.sendError(r, invalidRequest("Contact has opted out of marketing messages"))
 	}
 
 	// For authentication templates with OTP COPY_CODE buttons, Meta expects

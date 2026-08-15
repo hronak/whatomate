@@ -192,7 +192,7 @@ func (a *App) ListUsers(r *fastglue.Request) error {
 func (a *App) GetUser(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "user")
@@ -208,7 +208,7 @@ func (a *App) GetUser(r *fastglue.Request) error {
 		Joins("JOIN user_organizations ON user_organizations.user_id = users.id AND user_organizations.organization_id = ? AND user_organizations.deleted_at IS NULL", orgID).
 		Where("users.id = ? AND users.deleted_at IS NULL", id).
 		First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	// Load org-specific role from user_organizations
@@ -239,12 +239,12 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Email == "" || req.Password == "" || req.FullName == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Email, password, and full_name are required", nil, "")
+		return a.sendError(r, invalidRequest("Email, password, and full_name are required"))
 	}
 
 	// Validate email format
 	if _, err := mail.ParseAddress(req.Email); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid email format", nil, "")
+		return a.sendError(r, invalidRequest("Invalid email format"))
 	}
 
 	// Determine role
@@ -253,7 +253,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 		// Validate role exists and belongs to org
 		var role models.CustomRole
 		if err := a.DB.Where("id = ? AND organization_id = ?", req.RoleID, orgID).First(&role).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid role", nil, "")
+			return a.sendError(r, invalidRequest("Invalid role"))
 		}
 		roleID = req.RoleID
 	} else {
@@ -267,7 +267,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 	// Check if email already exists (including soft-deleted users)
 	var existingUser models.User
 	if err := a.DB.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
-		return r.SendErrorEnvelope(fasthttp.StatusConflict, "Email already exists", nil, "")
+		return a.sendError(r, conflict("Email already exists"))
 	}
 
 	// Hash password
@@ -280,7 +280,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 	isSuperAdmin := false
 	if saField := parseSuperAdminField(r); saField != nil && *saField {
 		if !a.IsSuperAdmin(userID) {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Only super admins can create super admins", nil, "")
+			return a.sendError(r, forbidden("Only super admins can create super admins"))
 		}
 		isSuperAdmin = true
 	}
@@ -379,7 +379,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 func (a *App) UpdateUser(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	currentUserID, _ := r.RequestCtx.UserValue("user_id").(uuid.UUID)
@@ -391,7 +391,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 
 	// Users can update themselves, others need users:write permission
 	if currentUserID != id && !a.HasPermission(currentUserID, models.ResourceUsers, models.ActionWrite, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+		return a.sendError(r, forbidden("Insufficient permissions"))
 	}
 
 	// Find user via user_organizations (supports cross-org members).
@@ -403,7 +403,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 		Where("users.id = ? AND users.deleted_at IS NULL", id).
 		Preload("Role").
 		First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	isMember := user.OrganizationID != orgID
@@ -423,23 +423,23 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 	var req UserRequest
 	if err := r.Decode(&req, "json"); err != nil {
 		a.Log.Error("UpdateUser: Failed to decode request", "error", err, "body", string(r.RequestCtx.PostBody()))
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid request body", nil, "")
+		return a.sendError(r, invalidRequest("Invalid request body"))
 	}
 
 	// Only users with users:write permission can change roles
 	if req.RoleID != nil && !a.HasPermission(currentUserID, models.ResourceUsers, models.ActionWrite, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions to change roles", nil, "")
+		return a.sendError(r, forbidden("Insufficient permissions to change roles"))
 	}
 
 	// For cross-org members, only allow role updates
 	if isMember {
 		if req.RoleID == nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Only role can be updated for organization members", nil, "")
+			return a.sendError(r, invalidRequest("Only role can be updated for organization members"))
 		}
 		// Validate role exists and belongs to org
 		var newRole models.CustomRole
 		if err := a.DB.Where("id = ? AND organization_id = ?", req.RoleID, orgID).First(&newRole).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid role", nil, "")
+			return a.sendError(r, invalidRequest("Invalid role"))
 		}
 		// Update role in user_organizations only
 		if err := a.DB.Model(&models.UserOrganization{}).
@@ -465,11 +465,11 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 	// Native user: full update
 	if req.Email != "" {
 		if _, err := mail.ParseAddress(req.Email); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid email format", nil, "")
+			return a.sendError(r, invalidRequest("Invalid email format"))
 		}
 		var existingUser models.User
 		if err := a.DB.Where("email = ? AND id != ?", req.Email, id).First(&existingUser).Error; err == nil {
-			return r.SendErrorEnvelope(fasthttp.StatusConflict, "Email already exists", nil, "")
+			return a.sendError(r, conflict("Email already exists"))
 		}
 		user.Email = req.Email
 	}
@@ -491,11 +491,11 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 		// Validate role exists and belongs to org
 		var newRole models.CustomRole
 		if err := a.DB.Where("id = ? AND organization_id = ?", req.RoleID, orgID).First(&newRole).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid role", nil, "")
+			return a.sendError(r, invalidRequest("Invalid role"))
 		}
 		// Prevent self-demotion from admin
 		if currentUserID == id && user.Role != nil && user.Role.Name == "admin" && newRole.Name != "admin" {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot demote yourself", nil, "")
+			return a.sendError(r, invalidRequest("Cannot demote yourself"))
 		}
 		if user.RoleID == nil || *user.RoleID != *req.RoleID {
 			roleChanged = true
@@ -507,7 +507,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 	if req.IsActive != nil {
 		// Prevent user from deactivating themselves
 		if currentUserID == id && !*req.IsActive {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot deactivate yourself", nil, "")
+			return a.sendError(r, invalidRequest("Cannot deactivate yourself"))
 		}
 		user.IsActive = *req.IsActive
 	}
@@ -515,11 +515,11 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 	// Handle super admin update - only superadmins can change this
 	if saField := parseSuperAdminField(r); saField != nil {
 		if !a.IsSuperAdmin(currentUserID) {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Only super admins can modify super admin status", nil, "")
+			return a.sendError(r, forbidden("Only super admins can modify super admin status"))
 		}
 		// Prevent removing own super admin status
 		if currentUserID == id && !*saField && user.IsSuperAdmin {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot remove your own super admin status", nil, "")
+			return a.sendError(r, invalidRequest("Cannot remove your own super admin status"))
 		}
 		user.IsSuperAdmin = *saField
 	}
@@ -551,12 +551,12 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 func (a *App) DeleteUser(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	currentUserID, _ := r.RequestCtx.UserValue("user_id").(uuid.UUID)
 	if !a.HasPermission(currentUserID, models.ResourceUsers, models.ActionDelete, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+		return a.sendError(r, forbidden("Insufficient permissions"))
 	}
 
 	id, err := parsePathUUID(r, "id", "user")
@@ -566,7 +566,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 
 	// Prevent user from deleting/removing themselves
 	if currentUserID == id {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot delete yourself", nil, "")
+		return a.sendError(r, invalidRequest("Cannot delete yourself"))
 	}
 
 	// Find user via user_organizations (supports cross-org members).
@@ -578,7 +578,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 		Where("users.id = ? AND users.deleted_at IS NULL", id).
 		Preload("Role").
 		First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	isMember := user.OrganizationID != orgID
@@ -610,7 +610,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 				Where("organization_id = ? AND role_id = ? AND deleted_at IS NULL", orgID, adminRole.ID).
 				Count(&adminCount)
 			if adminCount <= 1 {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot delete the last admin", nil, "")
+				return a.sendError(r, invalidRequest("Cannot delete the last admin"))
 			}
 		}
 	}
@@ -621,7 +621,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete user", nil, "")
 	}
 	if result.RowsAffected == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	// Delete all UserOrganization entries for this user
@@ -637,14 +637,14 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 func (a *App) GetCurrentUser(r *fastglue.Request) error {
 	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var user models.User
 	if err := a.DB.Where("id = ?", userID).
 		Preload("Role").
 		First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	// Use org from JWT context (may differ from DB after org switch)
@@ -699,12 +699,12 @@ func splitPermission(p string) []string {
 func (a *App) UpdateCurrentUserSettings(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var user models.User
 	if err := a.DB.Where("id = ?", userID).First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	var req UserSettingsRequest
@@ -753,12 +753,12 @@ func notificationSettingsSnapshot(settings models.JSONB) map[string]any {
 func (a *App) ChangePassword(r *fastglue.Request) error {
 	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var user models.User
 	if err := a.DB.Where("id = ?", userID).First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	var req ChangePasswordRequest
@@ -768,17 +768,17 @@ func (a *App) ChangePassword(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.CurrentPassword == "" || req.NewPassword == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Current password and new password are required", nil, "")
+		return a.sendError(r, invalidRequest("Current password and new password are required"))
 	}
 
 	// Validate new password length
 	if len(req.NewPassword) < 6 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "New password must be at least 6 characters", nil, "")
+		return a.sendError(r, invalidRequest("New password must be at least 6 characters"))
 	}
 
 	// Verify current password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.CurrentPassword)); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Current password is incorrect", nil, "")
+		return a.sendError(r, invalidRequest("Current password is incorrect"))
 	}
 
 	// Hash new password
@@ -874,7 +874,7 @@ type MyOrganizationResponse struct {
 func (a *App) ListMyOrganizations(r *fastglue.Request) error {
 	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var userOrgs []models.UserOrganization
@@ -917,12 +917,12 @@ type AvailabilityRequest struct {
 func (a *App) UpdateAvailability(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var user models.User
 	if err := a.DB.Where("id = ?", userID).First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	var req AvailabilityRequest

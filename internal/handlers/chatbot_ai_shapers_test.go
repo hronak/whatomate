@@ -78,7 +78,7 @@ func TestGenerateOpenAIResponse_PayloadShaping(t *testing.T) {
 				},
 			}
 
-			_, err := app.generateOpenAIResponse(settings, nil, "hello", "")
+			_, err := app.generateOpenAIResponse(t.Context(), settings, nil, "hello", "")
 			require.NoError(t, err)
 
 			var payload map[string]any
@@ -141,7 +141,7 @@ func TestGenerateAnthropicResponse_PayloadShaping(t *testing.T) {
 				},
 			}
 
-			_, err := app.generateAnthropicResponse(settings, nil, "hello", "")
+			_, err := app.generateAnthropicResponse(t.Context(), settings, nil, "hello", "")
 			require.NoError(t, err)
 
 			var payload map[string]any

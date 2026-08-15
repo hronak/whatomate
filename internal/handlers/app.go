@@ -234,7 +234,7 @@ func (a *App) ReadyCheck(r *fastglue.Request) error {
 func (a *App) GetEmbeddedSignupConfig(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	appID, _, configID, err := a.resolveMetaAppCreds(orgID)
@@ -351,11 +351,11 @@ func (a *App) requirePermission(r *fastglue.Request, userID uuid.UUID, resource,
 	orgID, err := a.getOrgID(r)
 	if err != nil {
 		a.Log.Error("Failed to get organization ID for permission check", "error", err, "user_id", userID)
-		_ = r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+		_ = a.sendError(r, forbidden("Insufficient permissions"))
 		return errEnvelopeSent
 	}
 	if !a.HasPermission(userID, resource, action, orgID) {
-		_ = r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+		_ = a.sendError(r, forbidden("Insufficient permissions"))
 		return errEnvelopeSent
 	}
 	return nil
@@ -368,11 +368,11 @@ func (a *App) requirePermission(r *fastglue.Request, userID uuid.UUID, resource,
 func (a *App) requireAuth(r *fastglue.Request, resource, action string) (orgID, userID uuid.UUID, err error) {
 	orgID, userID, err = a.getOrgAndUserID(r)
 	if err != nil {
-		_ = r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		_ = a.sendError(r, unauthorized("Unauthorized"))
 		return uuid.Nil, uuid.Nil, errEnvelopeSent
 	}
 	if !a.HasPermission(userID, resource, action, orgID) {
-		_ = r.SendErrorEnvelope(fasthttp.StatusForbidden, "Insufficient permissions", nil, "")
+		_ = a.sendError(r, forbidden("Insufficient permissions"))
 		return uuid.Nil, uuid.Nil, errEnvelopeSent
 	}
 	return orgID, userID, nil
@@ -382,7 +382,7 @@ func (a *App) requireAuth(r *fastglue.Request, resource, action string) (orgID, 
 // Returns nil on success, otherwise sends a 400 error envelope and returns errEnvelopeSent.
 func (a *App) decodeRequest(r *fastglue.Request, v any) error {
 	if err := r.Decode(v, "json"); err != nil {
-		_ = r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid request body", nil, "")
+		_ = a.sendError(r, invalidRequest("Invalid request body"))
 		return errEnvelopeSent
 	}
 	return nil

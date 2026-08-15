@@ -28,7 +28,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 	}
 
 	if req.ContactID == "" || req.WhatsAppAccount == "" || req.SDPOffer == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "contact_id, whatsapp_account, and sdp_offer are required", nil, "")
+		return a.sendError(r, invalidRequest("contact_id, whatsapp_account, and sdp_offer are required"))
 	}
 
 	if err := a.requireCallingEnabled(r, orgID); err != nil {
@@ -39,19 +39,19 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 	var account models.WhatsAppAccount
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccount).
 		First(&account).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "WhatsApp account not found", nil, "")
+		return a.sendError(r, notFound("WhatsApp account"))
 	}
 
 	// Look up contact by ID
 	contactID, parseErr := uuid.Parse(req.ContactID)
 	if parseErr != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid contact_id", nil, "")
+		return a.sendError(r, invalidRequest("Invalid contact_id"))
 	}
 
 	var contact models.Contact
 	if err := a.DB.Where("id = ? AND organization_id = ?", contactID, orgID).
 		First(&contact).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Contact not found", nil, "")
+		return a.sendError(r, notFound("Contact"))
 	}
 
 	waAccount := account.ToWAAccount()
@@ -62,8 +62,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 		waAccount, req.SDPOffer,
 	)
 	if err != nil {
-		a.Log.Error("Failed to initiate outgoing call", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to initiate call: "+err.Error(), nil, "")
+		return a.sendError(r, internalError("Failed to initiate call", err))
 	}
 
 	return r.SendEnvelope(map[string]string{
@@ -89,7 +88,7 @@ func (a *App) HangupOutgoingCall(r *fastglue.Request) error {
 	}
 
 	if err := a.CallManager.HangupOutgoingCall(callLogID, userID); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+		return a.sendError(r, invalidRequest(err.Error()))
 	}
 
 	// Mark the call as disconnected by agent
@@ -116,7 +115,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 	}
 
 	if req.ContactID == "" || req.WhatsAppAccount == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "contact_id and whatsapp_account are required", nil, "")
+		return a.sendError(r, invalidRequest("contact_id and whatsapp_account are required"))
 	}
 
 	if err := a.requireCallingEnabled(r, orgID); err != nil {
@@ -125,20 +124,20 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 
 	contactID, parseErr := uuid.Parse(req.ContactID)
 	if parseErr != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid contact_id", nil, "")
+		return a.sendError(r, invalidRequest("Invalid contact_id"))
 	}
 
 	// Verify contact exists
 	var contact models.Contact
 	if err := a.DB.Where("id = ? AND organization_id = ?", contactID, orgID).First(&contact).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Contact not found", nil, "")
+		return a.sendError(r, notFound("Contact"))
 	}
 
 	// Look up account
 	var account models.WhatsAppAccount
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccount).
 		First(&account).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "WhatsApp account not found", nil, "")
+		return a.sendError(r, notFound("WhatsApp account"))
 	}
 
 	waAccount := account.ToWAAccount()
@@ -177,7 +176,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 func (a *App) GetICEServers(r *fastglue.Request) error {
 	_, _, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	type iceServer struct {
@@ -217,19 +216,19 @@ func (a *App) GetCallPermission(r *fastglue.Request) error {
 
 	accountName := string(r.RequestCtx.QueryArgs().Peek("whatsapp_account"))
 	if accountName == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "whatsapp_account query param is required", nil, "")
+		return a.sendError(r, invalidRequest("whatsapp_account query param is required"))
 	}
 
 	// Look up contact
 	var contact models.Contact
 	if err := a.DB.Where("id = ? AND organization_id = ?", contactID, orgID).First(&contact).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Contact not found", nil, "")
+		return a.sendError(r, notFound("Contact"))
 	}
 
 	// Look up WhatsApp account
 	var account models.WhatsAppAccount
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, accountName).First(&account).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "WhatsApp account not found", nil, "")
+		return a.sendError(r, notFound("WhatsApp account"))
 	}
 
 	waAccount := account.ToWAAccount()

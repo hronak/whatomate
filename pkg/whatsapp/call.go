@@ -27,14 +27,14 @@ func (c *Client) PreAcceptCall(ctx context.Context, account *Account, callID, sd
 	}
 
 	url := c.buildCallsURL(account)
-	c.Log.Info("Pre-accepting call", "call_id", callID)
+	c.Log.Debug("Pre-accepting call", "call_id", callID)
 
 	_, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return fmt.Errorf("failed to pre-accept call: %w", err)
 	}
 
-	c.Log.Info("Call pre-accepted", "call_id", callID)
+	c.Log.Debug("Call pre-accepted", "call_id", callID)
 	return nil
 }
 
@@ -53,14 +53,14 @@ func (c *Client) AcceptCall(ctx context.Context, account *Account, callID, sdpAn
 	}
 
 	url := c.buildCallsURL(account)
-	c.Log.Info("Accepting call", "call_id", callID)
+	c.Log.Debug("Accepting call", "call_id", callID)
 
 	_, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return fmt.Errorf("failed to accept call: %w", err)
 	}
 
-	c.Log.Info("Call accepted", "call_id", callID)
+	c.Log.Debug("Call accepted", "call_id", callID)
 	return nil
 }
 
@@ -73,14 +73,14 @@ func (c *Client) RejectCall(ctx context.Context, account *Account, callID string
 	}
 
 	url := c.buildCallsURL(account)
-	c.Log.Info("Rejecting call", "call_id", callID)
+	c.Log.Debug("Rejecting call", "call_id", callID)
 
 	_, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return fmt.Errorf("failed to reject call: %w", err)
 	}
 
-	c.Log.Info("Call rejected", "call_id", callID)
+	c.Log.Debug("Call rejected", "call_id", callID)
 	return nil
 }
 
@@ -109,7 +109,7 @@ func (c *Client) SendCallPermissionRequest(ctx context.Context, account *Account
 	rcpt.SetOnPayload(payload)
 
 	url := c.buildMessagesURL(account)
-	c.Log.Info("Sending call permission request", "phone", rcpt.Phone)
+	c.Log.Debug("Sending call permission request", "phone", rcpt.Phone)
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
@@ -123,7 +123,7 @@ func (c *Client) SendCallPermissionRequest(ctx context.Context, account *Account
 		} `json:"messages"`
 	}
 	if parseErr := json.Unmarshal(respBody, &resp); parseErr == nil && len(resp.Messages) > 0 {
-		c.Log.Info("Call permission request sent", "phone", rcpt.Phone, "message_id", resp.Messages[0].ID)
+		c.Log.Debug("Call permission request sent", "phone", rcpt.Phone, "message_id", resp.Messages[0].ID)
 		return resp.Messages[0].ID, nil
 	}
 
@@ -167,7 +167,7 @@ func (c *Client) InitiateCall(ctx context.Context, account *Account, rcpt Recipi
 	rcpt.SetOnPayload(payload)
 
 	url := c.buildCallsURL(account)
-	c.Log.Info("Initiating outgoing call", "phone", rcpt.Phone)
+	c.Log.Debug("Initiating outgoing call", "phone", rcpt.Phone)
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
@@ -184,7 +184,7 @@ func (c *Client) InitiateCall(ctx context.Context, account *Account, rcpt Recipi
 		return "", fmt.Errorf("failed to parse call_id from response: %s", string(respBody))
 	}
 
-	c.Log.Info("Outgoing call initiated", "phone", rcpt.Phone, "call_id", resp.Calls[0].ID)
+	c.Log.Debug("Outgoing call initiated", "phone", rcpt.Phone, "call_id", resp.Calls[0].ID)
 	return resp.Calls[0].ID, nil
 }
 
@@ -197,13 +197,13 @@ func (c *Client) TerminateCall(ctx context.Context, account *Account, callID str
 	}
 
 	url := c.buildCallsURL(account)
-	c.Log.Info("Terminating call", "call_id", callID)
+	c.Log.Debug("Terminating call", "call_id", callID)
 
 	_, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
 		return fmt.Errorf("failed to terminate call: %w", err)
 	}
 
-	c.Log.Info("Call terminated", "call_id", callID)
+	c.Log.Debug("Call terminated", "call_id", callID)
 	return nil
 }

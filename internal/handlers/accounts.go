@@ -9,6 +9,7 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/crypto"
@@ -17,6 +18,9 @@ import (
 	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
+
+// metaRequestTimeout bounds a direct Graph API call made outside pkg/whatsapp.
+const metaRequestTimeout = 30 * time.Second
 
 // AccountRequest represents the request body for creating/updating an account
 type AccountRequest struct {
@@ -98,7 +102,7 @@ func (a *App) CreateAccount(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Name == "" || req.PhoneID == "" || req.BusinessID == "" || req.AccessToken == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name, phone_id, business_id, and access_token are required", nil, "")
+		return a.sendError(r, invalidRequest("Name, phone_id, business_id, and access_token are required"))
 	}
 
 	// Generate webhook verify token if not provided
@@ -173,8 +177,8 @@ func (a *App) GetAccount(r *fastglue.Request) error {
 		return nil
 	}
 
-	account, err := findByIDAndOrg[models.WhatsAppAccount](
-		a.DB.Preload("CreatedBy").Preload("UpdatedBy"), r, id, orgID, "Account")
+	account, err := findByIDAndOrgWith[models.WhatsAppAccount](
+		a, r, a.DB.Preload("CreatedBy").Preload("UpdatedBy"), id, orgID, "Account")
 	if err != nil {
 		return nil
 	}
@@ -303,7 +307,7 @@ func (a *App) DeleteAccount(r *fastglue.Request) error {
 	}
 
 	// Get account first for cache invalidation and audit
-	account, err := findByIDAndOrg[models.WhatsAppAccount](a.DB, r, id, orgID, "Account")
+	account, err := findByIDAndOrg[models.WhatsAppAccount](a, r, id, orgID, "Account")
 	if err != nil {
 		return nil
 	}
@@ -327,7 +331,7 @@ func (a *App) DeleteAccount(r *fastglue.Request) error {
 func (a *App) TestAccountConnection(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "account")
@@ -424,7 +428,10 @@ func (a *App) TestAccountConnection(r *fastglue.Request) error {
 // regardless of HTTP status, so callers can surface error envelopes from Meta.
 // Returns (nil, 0, err) only when the request itself fails (network/decode).
 func (a *App) fetchMetaJSON(url, accessToken string) (map[string]any, int, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), metaRequestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -504,7 +511,7 @@ func (a *App) validateAccountCredentials(phoneID, businessID, accessToken, apiVe
 func (a *App) SubscribeApp(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "account")
@@ -590,7 +597,7 @@ func (a *App) ExchangeToken(r *fastglue.Request) error {
 		"organization_id", orgID)
 
 	if req.Code == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Code is required", nil, "")
+		return a.sendError(r, invalidRequest("Code is required"))
 	}
 
 	// 1. Resolve Meta credentials for this org
@@ -607,19 +614,20 @@ func (a *App) ExchangeToken(r *fastglue.Request) error {
 		appID, appSecret, a.Config.WhatsApp.APIVersion)
 	if err != nil {
 		a.Log.Error("Failed to exchange token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+		return a.sendError(r, fromMetaError("Failed to exchange authorization code with Meta", err))
 	}
 
 	// DISCOVERY: If IDs are missing, try to find them using the token
 	phoneID, wabaID, name, err := a.discoverWABAAndPhone(ctx, orgID, accessToken, req.PhoneID, req.WABAID, req.Name)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+		a.Log.Error("Failed to discover WABA and phone", "error", err)
+		return a.sendError(r, fromMetaError("Could not determine the WhatsApp Business Account for this token", err))
 	}
 
 	// 3. We can now create/update the account
 	account, phoneInfo, existingAccount, oldAccount, err := a.createOrUpdateAccount(ctx, orgID, phoneID, wabaID, name, req.WebhookVerifyToken, accessToken, appSecret)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, err.Error(), nil, "")
+		return a.sendError(r, internalError("Failed to save the WhatsApp account", err))
 	}
 
 	// 4. Attempt Auto-Registration
@@ -637,8 +645,7 @@ func (a *App) ExchangeToken(r *fastglue.Request) error {
 	// 6. Encrypt credentials at rest
 	plaintextPin := account.Pin
 	if err := a.encryptAccountSecrets(account); err != nil {
-		a.Log.Error("Failed to encrypt account secrets", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, err.Error(), nil, "")
+		return a.sendError(r, internalError("Failed to secure account credentials", err))
 	}
 
 	if err := a.DB.Save(account).Error; err != nil {
@@ -911,7 +918,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 		// Call Meta Register endpoint using WhatsApp service
 		if err := a.WhatsApp.RegisterPhoneNumber(ctx, account.PhoneID, pin, account.AccessToken, account.APIVersion); err != nil {
 			a.Log.Error("Manual registration failed", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+			return a.sendError(r, fromMetaError("Phone number registration was rejected by Meta", err))
 		}
 	}
 
@@ -921,8 +928,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 
 	// Encrypt secrets before saving
 	if err := a.encryptAccountSecrets(account); err != nil {
-		a.Log.Error("Failed to encrypt account secrets", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, err.Error(), nil, "")
+		return a.sendError(r, internalError("Failed to secure account credentials", err))
 	}
 
 	if err := a.DB.Save(account).Error; err != nil {

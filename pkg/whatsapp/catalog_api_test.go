@@ -43,18 +43,8 @@ func TestClient_CreateCatalog_APIError(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-			Error: struct {
-				Message      string `json:"message"`
-				Type         string `json:"type"`
-				Code         int    `json:"code"`
-				ErrorSubcode int    `json:"error_subcode"`
-				ErrorUserMsg string `json:"error_user_msg"`
-				ErrorData    struct {
-					Details string `json:"details"`
-				} `json:"error_data"`
-				FBTraceID string `json:"fbtrace_id"`
-			}{
+		_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+			Error: whatsapp.MetaErrorDetail{
 				Message: "Catalog limit reached",
 				Code:    100,
 			},
@@ -269,18 +259,8 @@ func TestClient_DeleteProduct_APIError(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-			Error: struct {
-				Message      string `json:"message"`
-				Type         string `json:"type"`
-				Code         int    `json:"code"`
-				ErrorSubcode int    `json:"error_subcode"`
-				ErrorUserMsg string `json:"error_user_msg"`
-				ErrorData    struct {
-					Details string `json:"details"`
-				} `json:"error_data"`
-				FBTraceID string `json:"fbtrace_id"`
-			}{
+		_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+			Error: whatsapp.MetaErrorDetail{
 				Message: "Product not found",
 				Code:    100,
 			},

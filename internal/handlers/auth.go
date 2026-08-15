@@ -53,7 +53,7 @@ func (a *App) Login(r *fastglue.Request) error {
 	if err := a.DB.Preload("Role").Where("email = ?", req.Email).First(&user).Error; err != nil {
 		// Run dummy bcrypt to prevent timing-based account enumeration
 		_ = bcrypt.CompareHashAndPassword([]byte("$2a$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"), []byte(req.Password))
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Invalid credentials", nil, "")
+		return a.sendError(r, unauthorized("Invalid credentials"))
 	}
 
 	// Load permissions from cache
@@ -78,12 +78,12 @@ func (a *App) Login(r *fastglue.Request) error {
 
 	// Check if user is active
 	if !user.IsActive {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Account is disabled", nil, "")
+		return a.sendError(r, unauthorized("Account is disabled"))
 	}
 
 	// Verify password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Invalid credentials", nil, "")
+		return a.sendError(r, unauthorized("Invalid credentials"))
 	}
 
 	// Generate tokens
@@ -115,13 +115,13 @@ func (a *App) Register(r *fastglue.Request) error {
 	}
 
 	if req.OrganizationID == uuid.Nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "organization_id is required", nil, "")
+		return a.sendError(r, invalidRequest("organization_id is required"))
 	}
 
 	// Validate the organization exists
 	var org models.Organization
 	if err := a.DB.Where("id = ?", req.OrganizationID).First(&org).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Organization not found", nil, "")
+		return a.sendError(r, notFound("Organization"))
 	}
 
 	// Get the org's default role
@@ -138,12 +138,12 @@ func (a *App) Register(r *fastglue.Request) error {
 	if err := a.DB.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
 		// User exists — verify password and add to this org
 		if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(req.Password)); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusConflict, "An account with this email already exists. Please sign in and ask your organization admin to add you.", nil, "")
+			return a.sendError(r, conflict("An account with this email already exists. Please sign in and ask your organization admin to add you."))
 		}
 
 		// Check if user account is disabled
 		if !existingUser.IsActive {
-			return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Account is disabled", nil, "")
+			return a.sendError(r, unauthorized("Account is disabled"))
 		}
 
 		// Check if already a member of this org
@@ -152,7 +152,7 @@ func (a *App) Register(r *fastglue.Request) error {
 			Where("user_id = ? AND organization_id = ?", existingUser.ID, req.OrganizationID).
 			Count(&count)
 		if count > 0 {
-			return r.SendErrorEnvelope(fasthttp.StatusConflict, "You are already a member of this organization", nil, "")
+			return a.sendError(r, conflict("You are already a member of this organization"))
 		}
 
 		// Add as member with default role
@@ -275,7 +275,7 @@ func (a *App) RefreshToken(r *fastglue.Request) error {
 		refreshTokenStr = req.RefreshToken
 	}
 	if refreshTokenStr == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Missing refresh token", nil, "")
+		return a.sendError(r, unauthorized("Missing refresh token"))
 	}
 
 	// Parse and validate refresh token
@@ -284,12 +284,12 @@ func (a *App) RefreshToken(r *fastglue.Request) error {
 	})
 
 	if err != nil || !token.Valid {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Invalid refresh token", nil, "")
+		return a.sendError(r, unauthorized("Invalid refresh token"))
 	}
 
 	claims, ok := token.Claims.(*middleware.JWTClaims)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Invalid token claims", nil, "")
+		return a.sendError(r, unauthorized("Invalid token claims"))
 	}
 
 	// Validate JTI in Redis (single-use: delete on consumption)
@@ -299,18 +299,18 @@ func (a *App) RefreshToken(r *fastglue.Request) error {
 		deleted, err := a.Redis.Del(ctx, refreshTokenKey(claims.ID)).Result()
 		if err != nil || deleted == 0 {
 			// Token was already used or revoked
-			return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Refresh token has been revoked", nil, "")
+			return a.sendError(r, unauthorized("Refresh token has been revoked"))
 		}
 	}
 
 	// Get user
 	var user models.User
 	if err := a.DB.Where("id = ?", claims.UserID).First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "User not found", nil, "")
+		return a.sendError(r, unauthorized("User not found"))
 	}
 
 	if !user.IsActive {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Account is disabled", nil, "")
+		return a.sendError(r, unauthorized("Account is disabled"))
 	}
 
 	// Generate new tokens (rotation: new refresh token with new JTI)
@@ -399,7 +399,7 @@ type SwitchOrgRequest struct {
 func (a *App) SwitchOrg(r *fastglue.Request) error {
 	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req SwitchOrgRequest
@@ -408,26 +408,26 @@ func (a *App) SwitchOrg(r *fastglue.Request) error {
 	}
 
 	if req.OrganizationID == uuid.Nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "organization_id is required", nil, "")
+		return a.sendError(r, invalidRequest("organization_id is required"))
 	}
 
 	// Verify the organization exists
 	var org models.Organization
 	if err := a.DB.Where("id = ?", req.OrganizationID).First(&org).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Organization not found", nil, "")
+		return a.sendError(r, notFound("Organization"))
 	}
 
 	// Get the user
 	var user models.User
 	if err := a.DB.Where("id = ?", userID).First(&user).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "User not found", nil, "")
+		return a.sendError(r, notFound("User"))
 	}
 
 	// Super admins can switch to any org; others need membership
 	if !user.IsSuperAdmin {
 		var userOrg models.UserOrganization
 		if err := a.DB.Where("user_id = ? AND organization_id = ?", userID, req.OrganizationID).First(&userOrg).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You are not a member of this organization", nil, "")
+			return a.sendError(r, forbidden("You are not a member of this organization"))
 		}
 		// Use the role from the user_organizations table for the target org
 		if userOrg.RoleID != nil {
@@ -542,11 +542,11 @@ func generateSlug(name string) string {
 func (a *App) GetWSToken(r *fastglue.Request) error {
 	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 	orgID, ok := r.RequestCtx.UserValue("organization_id").(uuid.UUID)
 	if !ok {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	claims := middleware.JWTClaims{

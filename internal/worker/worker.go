@@ -186,15 +186,11 @@ func (w *Worker) HandleRecipientJob(ctx context.Context, job *queue.RecipientJob
 
 // isRetryableSendError reports whether a failed send is worth another attempt.
 //
-// Anything that never reached Meta — DNS, dial, TLS, timeouts, connection
-// resets — is transient by definition. A response from Meta, on the other hand,
-// is a considered verdict: an invalid number or a rejected template will fail
-// identically every time, and retrying only burns quota.
-//
-// The check is by message prefix because pkg/whatsapp currently flattens Meta's
-// structured error into a string. Phase 2 of the refactor gives it a real
-// *MetaAPIError with sentinels, at which point this becomes errors.As on the
-// code and the rate-limit codes can be retried too.
+// A response from Meta is a considered verdict: an invalid number, an
+// unapproved template or a closed 24-hour window will fail identically every
+// time, and retrying only burns quota. Throttling and 5xx are the exceptions.
+// Anything that never reached Meta at all — DNS, dial, TLS, timeouts,
+// connection resets — is transient by definition.
 func isRetryableSendError(err error) bool {
 	if err == nil {
 		return false
@@ -204,8 +200,13 @@ func isRetryableSendError(err error) bool {
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		return true
 	}
-	msg := err.Error()
-	return !strings.Contains(msg, "API error ") && !strings.Contains(msg, "API returned status ")
+
+	var apiErr *whatsapp.MetaAPIError
+	if errors.As(err, &apiErr) {
+		return apiErr.Retryable()
+	}
+	// No response from Meta: transport failure.
+	return true
 }
 
 // updateRecipientStatus updates the recipient's status in the database

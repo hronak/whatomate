@@ -82,17 +82,16 @@ func (c *Client) SubmitTemplate(ctx context.Context, account *Account, template 
 		action = "Updating"
 	}
 	payloadJSON, _ := json.MarshalIndent(payload, "", "  ")
-	c.Log.Info(action+" template to Meta", "url", url, "name", template.Name, "payload", string(payloadJSON))
+	c.Log.Debug(action+" template to Meta", "url", url, "name", template.Name, "payload", string(payloadJSON))
 
 	respBody, err := c.doRequest(ctx, http.MethodPost, url, payload, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to "+action+" template", "error", err, "name", template.Name)
 		return "", err
 	}
 
 	// For updates, return existing ID; for creates, parse response for new ID
 	if isUpdate {
-		c.Log.Info("Template updated", "template_id", template.MetaTemplateID, "name", template.Name)
+		c.Log.Debug("Template updated", "template_id", template.MetaTemplateID, "name", template.Name)
 		return template.MetaTemplateID, nil
 	}
 
@@ -101,7 +100,7 @@ func (c *Client) SubmitTemplate(ctx context.Context, account *Account, template 
 		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	c.Log.Info("Template submitted", "template_id", result.ID, "name", template.Name)
+	c.Log.Debug("Template submitted", "template_id", result.ID, "name", template.Name)
 	return result.ID, nil
 }
 
@@ -392,7 +391,6 @@ func (c *Client) FetchTemplates(ctx context.Context, account *Account) ([]MetaTe
 
 	respBody, err := c.doRequest(ctx, http.MethodGet, url, nil, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to fetch templates", "error", err)
 		return nil, err
 	}
 
@@ -401,7 +399,7 @@ func (c *Client) FetchTemplates(ctx context.Context, account *Account) ([]MetaTe
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	c.Log.Info("Fetched templates from Meta", "count", len(result.Data))
+	c.Log.Debug("Fetched templates from Meta", "count", len(result.Data))
 	return result.Data, nil
 }
 
@@ -411,11 +409,10 @@ func (c *Client) DeleteTemplate(ctx context.Context, account *Account, templateN
 
 	_, err := c.doRequest(ctx, http.MethodDelete, url, nil, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to delete template", "error", err, "template", templateName)
 		return err
 	}
 
-	c.Log.Info("Template deleted from Meta", "template", templateName)
+	c.Log.Debug("Template deleted from Meta", "template", templateName)
 	return nil
 }
 

@@ -142,12 +142,12 @@ var staticDisplayTypes = map[string]bool{
 func (a *App) ListWidgets(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check analytics read permission
 	if !a.HasPermission(userID, models.ResourceAnalytics, models.ActionRead, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to view analytics", nil, "")
+		return a.sendError(r, forbidden("You don't have permission to view analytics"))
 	}
 
 	// Get user's own widgets + shared widgets from org
@@ -175,12 +175,12 @@ func (a *App) ListWidgets(r *fastglue.Request) error {
 func (a *App) GetWidget(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check analytics read permission
 	if !a.HasPermission(userID, models.ResourceAnalytics, models.ActionRead, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to view analytics", nil, "")
+		return a.sendError(r, forbidden("You don't have permission to view analytics"))
 	}
 
 	id, err := parsePathUUID(r, "id", "widget")
@@ -193,7 +193,7 @@ func (a *App) GetWidget(r *fastglue.Request) error {
 		"id = ? AND organization_id = ? AND (user_id = ? OR is_shared = true)",
 		id, orgID, userID,
 	).First(&widget).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Widget not found", nil, "")
+		return a.sendError(r, notFound("Widget"))
 	}
 
 	return r.SendEnvelope(widgetToResponse(widget, userID))
@@ -203,12 +203,12 @@ func (a *App) GetWidget(r *fastglue.Request) error {
 func (a *App) CreateWidget(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check analytics write permission
 	if !a.HasPermission(userID, models.ResourceAnalytics, models.ActionWrite, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to create widgets", nil, "")
+		return a.sendError(r, forbidden("You don't have permission to create widgets"))
 	}
 
 	var req WidgetRequest
@@ -218,7 +218,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name is required", nil, "")
+		return a.sendError(r, invalidRequest("Name is required"))
 	}
 
 	// Validate display type
@@ -227,7 +227,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 		displayType = "number"
 	}
 	if !slices.Contains(widgetDisplayTypes, displayType) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid display type", nil, "")
+		return a.sendError(r, invalidRequest("Invalid display type"))
 	}
 
 	// For static display types (e.g. shortcuts), auto-set data_source and metric
@@ -236,20 +236,20 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 		req.Metric = "count"
 	} else {
 		if req.DataSource == "" {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Data source is required", nil, "")
+			return a.sendError(r, invalidRequest("Data source is required"))
 		}
 		if req.Metric == "" {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Metric is required", nil, "")
+			return a.sendError(r, invalidRequest("Metric is required"))
 		}
 
 		// Validate data source
 		if _, ok := widgetDataSources[req.DataSource]; !ok {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid data source", nil, "")
+			return a.sendError(r, invalidRequest("Invalid data source"))
 		}
 
 		// Validate metric
 		if !slices.Contains(widgetMetrics, req.Metric) {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid metric", nil, "")
+			return a.sendError(r, invalidRequest("Invalid metric"))
 		}
 	}
 
@@ -289,7 +289,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 	if req.GroupByField != "" && !staticDisplayTypes[displayType] {
 		fields := widgetDataSources[req.DataSource]
 		if !slices.Contains(fields, req.GroupByField) {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid group by field for this data source", nil, "")
+			return a.sendError(r, invalidRequest("Invalid group by field for this data source"))
 		}
 	}
 
@@ -361,12 +361,12 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 func (a *App) UpdateWidget(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check analytics write permission
 	if !a.HasPermission(userID, models.ResourceAnalytics, models.ActionWrite, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to edit widgets", nil, "")
+		return a.sendError(r, forbidden("You don't have permission to edit widgets"))
 	}
 
 	id, err := parsePathUUID(r, "id", "widget")
@@ -375,14 +375,14 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 	}
 
 	// Find the widget - must belong to same organization
-	widget, err := findByIDAndOrg[models.Widget](a.DB, r, id, orgID, "Widget")
+	widget, err := findByIDAndOrg[models.Widget](a, r, id, orgID, "Widget")
 	if err != nil {
 		return nil
 	}
 
 	// Only the owner can edit the widget
 	if widget.UserID == nil || *widget.UserID != userID {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Only the widget owner can edit this widget", nil, "")
+		return a.sendError(r, forbidden("Only the widget owner can edit this widget"))
 	}
 
 	var req WidgetRequest
@@ -399,13 +399,13 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 	}
 	if req.DataSource != "" {
 		if _, ok := widgetDataSources[req.DataSource]; !ok {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid data source", nil, "")
+			return a.sendError(r, invalidRequest("Invalid data source"))
 		}
 		widget.DataSource = req.DataSource
 	}
 	if req.Metric != "" {
 		if !slices.Contains(widgetMetrics, req.Metric) {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid metric", nil, "")
+			return a.sendError(r, invalidRequest("Invalid metric"))
 		}
 		widget.Metric = req.Metric
 	}
@@ -425,7 +425,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 	}
 	if req.DisplayType != "" {
 		if !slices.Contains(widgetDisplayTypes, req.DisplayType) {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid display type", nil, "")
+			return a.sendError(r, invalidRequest("Invalid display type"))
 		}
 		widget.DisplayType = req.DisplayType
 	}
@@ -440,7 +440,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 		}
 		fields := widgetDataSources[ds]
 		if !slices.Contains(fields, req.GroupByField) {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid group by field for this data source", nil, "")
+			return a.sendError(r, invalidRequest("Invalid group by field for this data source"))
 		}
 	}
 	widget.GroupByField = req.GroupByField
@@ -484,12 +484,12 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 func (a *App) DeleteWidget(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check analytics delete permission
 	if !a.HasPermission(userID, models.ResourceAnalytics, models.ActionDelete, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to delete widgets", nil, "")
+		return a.sendError(r, forbidden("You don't have permission to delete widgets"))
 	}
 
 	id, err := parsePathUUID(r, "id", "widget")
@@ -498,14 +498,14 @@ func (a *App) DeleteWidget(r *fastglue.Request) error {
 	}
 
 	// Find the widget - must belong to same organization
-	widget, err := findByIDAndOrg[models.Widget](a.DB, r, id, orgID, "Widget")
+	widget, err := findByIDAndOrg[models.Widget](a, r, id, orgID, "Widget")
 	if err != nil {
 		return nil
 	}
 
 	// Only the owner can delete the widget
 	if widget.UserID == nil || *widget.UserID != userID {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Only the widget owner can delete this widget", nil, "")
+		return a.sendError(r, forbidden("Only the widget owner can delete this widget"))
 	}
 
 	if err := a.DB.Delete(widget).Error; err != nil {
@@ -520,7 +520,7 @@ func (a *App) DeleteWidget(r *fastglue.Request) error {
 func (a *App) SaveWidgetLayout(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req struct {
@@ -537,7 +537,7 @@ func (a *App) SaveWidgetLayout(r *fastglue.Request) error {
 	}
 
 	if len(req.Layout) == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Layout is required", nil, "")
+		return a.sendError(r, invalidRequest("Layout is required"))
 	}
 
 	// Update all widgets in a transaction
@@ -663,7 +663,7 @@ func formatLabel(s string) string {
 func (a *App) GetWidgetData(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "widget")
@@ -681,7 +681,7 @@ func (a *App) GetWidgetData(r *fastglue.Request) error {
 		"id = ? AND organization_id = ? AND (user_id = ? OR is_shared = true)",
 		id, orgID, userID,
 	).First(&widget).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Widget not found", nil, "")
+		return a.sendError(r, notFound("Widget"))
 	}
 
 	// Execute the query
@@ -699,7 +699,7 @@ func (a *App) GetWidgetData(r *fastglue.Request) error {
 func (a *App) GetAllWidgetsData(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Parse date range from query params

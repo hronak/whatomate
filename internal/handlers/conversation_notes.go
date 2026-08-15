@@ -105,7 +105,7 @@ func (a *App) CreateConversationNote(r *fastglue.Request) error {
 	}
 
 	if req.Content == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "content is required", nil, "")
+		return a.sendError(r, invalidRequest("content is required"))
 	}
 
 	note := models.ConversationNote{
@@ -156,14 +156,14 @@ func (a *App) UpdateConversationNote(r *fastglue.Request) error {
 		return nil
 	}
 
-	note, err := findByIDAndOrg[models.ConversationNote](a.DB, r, noteID, orgID, "Note")
+	note, err := findByIDAndOrg[models.ConversationNote](a, r, noteID, orgID, "Note")
 	if err != nil {
 		return nil
 	}
 
 	// Only the creator can update their own notes
 	if note.CreatedByID != userID {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You can only edit your own notes", nil, "")
+		return a.sendError(r, forbidden("You can only edit your own notes"))
 	}
 
 	var req ConversationNoteRequest
@@ -172,7 +172,7 @@ func (a *App) UpdateConversationNote(r *fastglue.Request) error {
 	}
 
 	if req.Content == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "content is required", nil, "")
+		return a.sendError(r, invalidRequest("content is required"))
 	}
 
 	note.Content = req.Content
@@ -217,14 +217,14 @@ func (a *App) DeleteConversationNote(r *fastglue.Request) error {
 		return nil
 	}
 
-	note, err := findByIDAndOrg[models.ConversationNote](a.DB, r, noteID, orgID, "Note")
+	note, err := findByIDAndOrg[models.ConversationNote](a, r, noteID, orgID, "Note")
 	if err != nil {
 		return nil
 	}
 
 	// Only the creator can delete their own notes
 	if note.CreatedByID != userID {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You can only delete your own notes", nil, "")
+		return a.sendError(r, forbidden("You can only delete your own notes"))
 	}
 
 	contactID := note.ContactID

@@ -450,13 +450,13 @@ func (c *Client) parseTemplateAnalyticsResponse(ctx context.Context, account *Ac
 
 		pageRespBody, err := c.doRequest(ctx, http.MethodGet, nextURL, nil, account.AccessToken)
 		if err != nil {
-			c.Log.Error("Failed to fetch template analytics page", "error", err, "page", pageCount+1)
+			c.Log.Warn("Failed to fetch template analytics page, returning partial results", "error", err, "page", pageCount+1)
 			break
 		}
 
 		var pageResp templateAnalyticsWithPaging
 		if err := json.Unmarshal(pageRespBody, &pageResp); err != nil {
-			c.Log.Error("Failed to parse template analytics page", "error", err, "page", pageCount+1)
+			c.Log.Warn("Failed to parse template analytics page, returning partial results", "error", err, "page", pageCount+1)
 			break
 		}
 

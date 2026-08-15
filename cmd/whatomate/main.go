@@ -156,7 +156,7 @@ func runServer(args []string) {
 
 	// Run migrations if requested
 	if *migrate {
-		if err := database.RunMigrationWithProgress(db, &cfg.DefaultAdmin); err != nil {
+		if err := database.RunMigrationWithProgress(db, &cfg.DefaultAdmin, lo, os.Stdout); err != nil {
 			lo.Fatal("Migration failed", "error", err)
 		}
 		// Backfill v2 graph for any legacy chatbot flow still on Steps[].

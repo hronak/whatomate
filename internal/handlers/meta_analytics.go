@@ -44,12 +44,12 @@ type MetaAnalyticsResponse struct {
 func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check permission
 	if !a.HasPermission(userID, "analytics", "read", orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Permission denied", nil, "")
+		return a.sendError(r, forbidden("Permission denied"))
 	}
 
 	// Parse request parameters
@@ -61,24 +61,24 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 
 	// Validate required parameters
 	if analyticsType == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "analytics_type is required", nil, "")
+		return a.sendError(r, invalidRequest("analytics_type is required"))
 	}
 	if !whatsapp.ValidateAnalyticsType(analyticsType) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid analytics_type. Must be one of: analytics, pricing_analytics, template_analytics, call_analytics", nil, "")
+		return a.sendError(r, invalidRequest("Invalid analytics_type. Must be one of: analytics, pricing_analytics, template_analytics, call_analytics"))
 	}
 	if startStr == "" || endStr == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "start and end dates are required (YYYY-MM-DD format)", nil, "")
+		return a.sendError(r, invalidRequest("start and end dates are required (YYYY-MM-DD format)"))
 	}
 
 	// Parse dates
 	startDate, endDate, errMsg := parseDateRange(startStr, endStr)
 	if errMsg != "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, errMsg, nil, "")
+		return a.sendError(r, invalidRequest(errMsg))
 	}
 
 	// Validate date range
 	if endDate.Before(startDate) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "End date must be after start date", nil, "")
+		return a.sendError(r, invalidRequest("End date must be after start date"))
 	}
 
 	// Set default granularity (use DAY as standard input, will be normalized per endpoint)
@@ -86,7 +86,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 		granularity = "DAY"
 	}
 	if !whatsapp.ValidateGranularity(granularity) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid granularity. Must be one of: HALF_HOUR, DAY, MONTH", nil, "")
+		return a.sendError(r, invalidRequest("Invalid granularity. Must be one of: HALF_HOUR, DAY, MONTH"))
 	}
 
 	// Auto-adjust granularity based on date range to avoid Meta API errors
@@ -115,7 +115,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 	if analyticsType == string(whatsapp.AnalyticsTypeTemplate) {
 		ninetyDaysAgo := time.Now().AddDate(0, 0, -90)
 		if startDate.Before(ninetyDaysAgo) {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Template analytics have a 90-day lookback limit", nil, "")
+			return a.sendError(r, invalidRequest("Template analytics have a 90-day lookback limit"))
 		}
 	}
 
@@ -129,7 +129,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 		// Specific account
 		var account models.WhatsAppAccount
 		if err := a.DB.Where("id = ? AND organization_id = ?", accountID, orgID).First(&account).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Account not found", nil, "")
+			return a.sendError(r, notFound("Account"))
 		}
 		accounts = append(accounts, account)
 	} else {
@@ -344,12 +344,12 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 func (a *App) ListMetaAccountsForAnalytics(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check permission
 	if !a.HasPermission(userID, "analytics", "read", orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Permission denied", nil, "")
+		return a.sendError(r, forbidden("Permission denied"))
 	}
 
 	type AccountInfo struct {
@@ -382,12 +382,12 @@ func (a *App) ListMetaAccountsForAnalytics(r *fastglue.Request) error {
 func (a *App) RefreshMetaAnalyticsCache(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check permission
 	if !a.HasPermission(userID, "analytics", "write", orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Permission denied", nil, "")
+		return a.sendError(r, forbidden("Permission denied"))
 	}
 
 	// Delete all cached analytics for this organization

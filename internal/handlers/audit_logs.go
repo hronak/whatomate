@@ -115,7 +115,7 @@ func (a *App) GetAuditLog(r *fastglue.Request) error {
 
 	var log models.AuditLog
 	if err := a.DB.Where("id = ? AND organization_id = ?", logID, orgID).First(&log).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Audit log not found", nil, "")
+		return a.sendError(r, notFound("Audit log"))
 	}
 
 	return r.SendEnvelope(AuditLogResponse{

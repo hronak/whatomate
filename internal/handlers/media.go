@@ -136,18 +136,18 @@ func (a *App) ServeMedia(r *fastglue.Request) error {
 	// Get auth context
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Get the message ID from URL parameter
 	messageIDStr := r.RequestCtx.UserValue("message_id").(string)
 	messageID, err := uuid.Parse(messageIDStr)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid message ID", nil, "")
+		return a.sendError(r, invalidRequest("Invalid message ID"))
 	}
 
 	// Find the message and verify access
-	message, err := findByIDAndOrg[models.Message](a.DB, r, messageID, orgID, "Message")
+	message, err := findByIDAndOrg[models.Message](a, r, messageID, orgID, "Message")
 	if err != nil {
 		return nil
 	}
@@ -164,19 +164,19 @@ func (a *App) ServeMedia(r *fastglue.Request) error {
 			var transfer models.AgentTransfer
 			if err := a.DB.Where("contact_id = ? AND organization_id = ? AND status = ? AND team_id IS NOT NULL",
 				message.ContactID, orgID, models.TransferStatusActive).First(&transfer).Error; err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Access denied", nil, "")
+				return a.sendError(r, forbidden("Access denied"))
 			}
 			var count int64
 			a.DB.Model(&models.TeamMember{}).Where("team_id = ? AND user_id = ?", transfer.TeamID, userID).Count(&count)
 			if count == 0 {
-				return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Access denied", nil, "")
+				return a.sendError(r, forbidden("Access denied"))
 			}
 		}
 	}
 
 	// Check if message has media
 	if message.MediaURL == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "No media found", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "No media found", kind: errNotFound})
 	}
 
 	// Security: prevent directory traversal and symlink attacks
@@ -188,16 +188,16 @@ func (a *App) ServeMedia(r *fastglue.Request) error {
 	}
 	fullPath, err := filepath.Abs(filepath.Join(baseDir, filePath))
 	if err != nil || !strings.HasPrefix(fullPath, baseDir+string(os.PathSeparator)) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid file path", nil, "")
+		return a.sendError(r, invalidRequest("Invalid file path"))
 	}
 
 	// Reject symlinks
 	info, err := os.Lstat(fullPath)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "File not found", nil, "")
+		return a.sendError(r, notFound("File"))
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid file path", nil, "")
+		return a.sendError(r, invalidRequest("Invalid file path"))
 	}
 
 	// Read file
