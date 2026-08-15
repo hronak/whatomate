@@ -1360,56 +1360,59 @@ onMounted(() => {
 </template>
 
 <style>
-/* Grid layout placeholder styling */
-.vue-grid-item.vue-grid-placeholder {
-  background: transparent !important;
-  border: 2px dashed rgba(16, 185, 129, 0.4) !important;
+/* The grid is grid-layout-plus, which renders `vgl-*` class names. These rules
+   were originally written against vue-grid-layout's `.vue-grid-item` /
+   `.vue-resizable-handle`, which this library never emits — so none of the
+   intended styling below had been applying.
+   Rules are scoped under .vgl-layout so they out-specify the library's own
+   stylesheet regardless of injection order. */
+
+/* Drop placeholder. The library's defaults are a red fill at 20% opacity;
+   these vars are its supported styling hook. Opacity must go back to 100%
+   or it washes out the dashed border too. */
+.vgl-layout {
+  --vgl-placeholder-bg: transparent;
+  --vgl-placeholder-opacity: 100%;
+}
+
+.vgl-layout .vgl-item--placeholder {
+  border: 2px dashed rgba(16, 185, 129, 0.4);
   border-radius: 0.75rem;
 }
 
-/* Grid resize handle styling */
-.vue-grid-item > .vue-resizable-handle {
-  width: 20px;
-  height: 20px;
-  bottom: 4px;
+/* Resize handle: 20px hit area, 2px corner chevron. */
+.vgl-layout .vgl-item__resizer {
+  --vgl-resizer-size: 20px;
+  --vgl-resizer-border-color: rgba(0, 0, 0, 0.2);
+  --vgl-resizer-border-width: 2px;
   right: 4px;
-  background: none;
-  cursor: se-resize;
+  bottom: 4px;
 }
 
-.vue-grid-item > .vue-resizable-handle::after {
-  content: '';
-  position: absolute;
+.dark .vgl-layout .vgl-item__resizer {
+  --vgl-resizer-border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* The library draws the chevron across the full resizer box; shrink it to the
+   8px corner mark this dashboard was designed with. */
+.vgl-layout .vgl-item__resizer::before {
+  top: auto;
+  left: auto;
   right: 4px;
   bottom: 4px;
   width: 8px;
   height: 8px;
-  border-right: 2px solid rgba(0, 0, 0, 0.2);
-  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
   border-radius: 0 0 2px 0;
 }
 
-.dark .vue-grid-item > .vue-resizable-handle::after {
-  border-right-color: rgba(255, 255, 255, 0.2);
-  border-bottom-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Ensure grid items don't overflow */
-.vue-grid-item {
-  transition: all 200ms ease;
-}
-
-/* Animated counter transition */
-.counter-fade-enter-active,
-.counter-fade-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-.counter-fade-enter-from {
-  opacity: 0;
-  transform: translateY(4px);
-}
-.counter-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
+/* Motion is removed app-wide. grid-layout-plus animates widget position via
+   `transition-property: transform` on .vgl-item, the container height on
+   .vgl-layout, and .1s on the placeholder — so widgets glide to their new slot
+   after a drag. Kill all three; dragging still tracks the cursor (that is a
+   live transform, not an interpolated one), the widget just snaps on drop. */
+.vgl-item,
+.vgl-item--placeholder,
+.vgl-layout {
+  transition: none !important;
 }
 </style>
