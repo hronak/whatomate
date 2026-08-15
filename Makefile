@@ -59,7 +59,26 @@ run-migrate:
 # failure summary at the end. Falls back to the built-in `go test -v` so
 # nothing breaks for devs who haven't installed it.
 # Install:  go install gotest.tools/gotestsum@latest
-test:
+# check-test-infra warns when the databases the suite needs are absent. Without
+# them nearly every test skips and `go test` still prints ok, so a green run
+# means nothing. Warns rather than fails: running the handful of pure-unit
+# tests is still legitimate.
+.PHONY: check-test-infra
+check-test-infra:
+	@if [ -z "$$TEST_DATABASE_URL" ] || [ -z "$$TEST_REDIS_URL" ]; then \
+		echo ""; \
+		echo "  ####################################################################"; \
+		echo "  #  WARNING: TEST_DATABASE_URL / TEST_REDIS_URL are not both set.    #"; \
+		echo "  #  Infrastructure-backed tests will SKIP, and a PASS proves little. #"; \
+		echo "  ####################################################################"; \
+		echo ""; \
+		echo "  TEST_DATABASE_URL=\"host=localhost port=5432 user=whatomate \\"; \
+		echo "    password=whatomate dbname=whatomate_test sslmode=disable\" \\"; \
+		echo "  TEST_REDIS_URL=\"redis://localhost:6379/1\" make test"; \
+		echo ""; \
+	fi
+
+test: check-test-infra
 	@if command -v gotestsum >/dev/null 2>&1; then \
 		gotestsum --format testname --hide-summary=skipped -- ./...; \
 	else \
@@ -68,7 +87,7 @@ test:
 	fi
 
 # Run tests with coverage. Same gotestsum fallback as `make test`.
-test-coverage:
+test-coverage: check-test-infra
 	@if command -v gotestsum >/dev/null 2>&1; then \
 		gotestsum --format testname --hide-summary=skipped -- -coverprofile=coverage.out ./...; \
 	else \

@@ -92,7 +92,7 @@ func TestEnqueueRecipient_Single(t *testing.T) {
 	client := skipIfNoRedis(t)
 	cleanStream(t, client)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	q := queue.NewRedisQueue(client, log)
 	job := makeRecipientJob()
@@ -119,7 +119,7 @@ func TestEnqueueRecipient_SetsEnqueuedAt(t *testing.T) {
 	client := skipIfNoRedis(t)
 	cleanStream(t, client)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	q := queue.NewRedisQueue(client, log)
 	job := makeRecipientJob()
@@ -137,7 +137,7 @@ func TestEnqueueRecipient_PreservesExistingEnqueuedAt(t *testing.T) {
 	client := skipIfNoRedis(t)
 	cleanStream(t, client)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	q := queue.NewRedisQueue(client, log)
 	job := makeRecipientJob()
@@ -167,7 +167,7 @@ func TestEnqueueRecipients_Batch(t *testing.T) {
 	client := skipIfNoRedis(t)
 	cleanStream(t, client)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	q := queue.NewRedisQueue(client, log)
 
@@ -194,7 +194,7 @@ func TestEnqueueRecipients_Empty(t *testing.T) {
 	client := skipIfNoRedis(t)
 	cleanStream(t, client)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	q := queue.NewRedisQueue(client, log)
 
@@ -211,7 +211,7 @@ func TestEnqueueRecipients_SetsEnqueuedAt(t *testing.T) {
 	client := skipIfNoRedis(t)
 	cleanStream(t, client)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	q := queue.NewRedisQueue(client, log)
 
@@ -365,7 +365,7 @@ func TestPublishCampaignStats(t *testing.T) {
 	t.Parallel()
 	client := skipIfNoRedis(t)
 	log := testutil.NopLogger()
-	ctx := testutil.TestContext(t)
+	ctx := t.Context()
 
 	pub := queue.NewPublisher(client, log)
 
@@ -413,8 +413,8 @@ func TestSubscribeCampaignStats_ReceivesUpdate(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// Give the subscriber a moment to fully establish.
-	time.Sleep(100 * time.Millisecond)
+	// No sleep needed: SubscribeCampaignStats waits for Redis to confirm the
+	// subscription before returning, so the channel is live once it does.
 
 	update := &queue.CampaignStatsUpdate{
 		CampaignID:     targetCampaignID,

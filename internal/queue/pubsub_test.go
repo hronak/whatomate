@@ -169,14 +169,32 @@ func TestSubscriber_ContextCancelStopsHandler(t *testing.T) {
 	cancel()
 	require.NoError(t, sub.Close())
 
-	// Give the goroutine a moment to wind down before publishing again.
-	time.Sleep(100 * time.Millisecond)
+	// A second, live subscriber acts as a fence. Publishing and waiting for
+	// *it* proves the message was actually dispatched by Redis — so the closed
+	// subscriber not having received it is a real result, not just "not yet".
+	// Sleeping and asserting zero could only ever prove the latter.
+	fence := queue.NewSubscriber(rdb, testutil.NopLogger())
+	t.Cleanup(func() { _ = fence.Close() })
+
+	var (
+		fenceMu  sync.Mutex
+		fenceGot int
+	)
+	require.NoError(t, fence.SubscribeCampaignStats(context.Background(), func(u *queue.CampaignStatsUpdate) {
+		fenceMu.Lock()
+		fenceGot++
+		fenceMu.Unlock()
+	}))
+
 	require.NoError(t, pub.PublishCampaignStats(context.Background(), &queue.CampaignStatsUpdate{
 		CampaignID: "c2", OrganizationID: uuid.New(), Status: models.CampaignStatusProcessing,
 	}))
+	testutil.AssertEventually(t, func() bool {
+		fenceMu.Lock()
+		defer fenceMu.Unlock()
+		return fenceGot == 1
+	}, 2*time.Second, "the fence subscriber should have received the second message")
 
-	// Wait briefly to ensure no further deliveries.
-	time.Sleep(200 * time.Millisecond)
 	mu.Lock()
 	defer mu.Unlock()
 	assert.Equal(t, 1, received, "no messages must be delivered after Close")

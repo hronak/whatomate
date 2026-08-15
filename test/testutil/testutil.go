@@ -20,16 +20,12 @@ var (
 	testRedisInitErr error
 )
 
-// TestContext returns a context with a timeout suitable for tests.
-// The context is automatically cancelled when the test completes.
-func TestContext(t *testing.T) context.Context {
-	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	t.Cleanup(cancel)
-	return ctx
-}
-
-// TestContextWithTimeout returns a context with a custom timeout.
+// TestContextWithTimeout returns a context with a custom timeout, cancelled
+// when the test ends.
+//
+// Prefer t.Context() where no deadline is needed — it is the standard-library
+// equivalent and this package's plain TestContext was deleted in its favour.
+// This variant remains because t.Context() carries no timeout.
 func TestContextWithTimeout(t *testing.T, timeout time.Duration) context.Context {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -123,9 +119,25 @@ func AssertEventually(t *testing.T, condition func() bool, timeout time.Duration
 	t.Fatalf("condition not met within %v: %s", timeout, msg)
 }
 
+// RequireTestRedis returns a test Redis client, skipping the test when Redis
+// is unavailable.
+//
+// Prefer this to SetupTestRedis. SetupTestRedis returns nil so a caller can
+// treat Redis as optional, which means a test that genuinely needs it either
+// panics on the nil or — worse — quietly asserts nothing.
+func RequireTestRedis(t *testing.T) *redis.Client {
+	t.Helper()
+	rdb := SetupTestRedis(t)
+	if rdb == nil {
+		t.Skip("TEST_REDIS_URL not set, skipping Redis test")
+	}
+	return rdb
+}
+
 // SetupTestRedis creates a connection to a test Redis instance.
 // Requires TEST_REDIS_URL environment variable to be set.
-// If not set, returns nil (tests should handle this gracefully).
+// Returns nil when unavailable; use RequireTestRedis unless the test really
+// can run without Redis.
 func SetupTestRedis(t *testing.T) *redis.Client {
 	t.Helper()
 
