@@ -20,7 +20,7 @@ function onScroll() {
 }
 
 function scrollToTop() {
-  scrollEl?.scrollTo({ top: 0, behavior: 'smooth' })
+  scrollEl?.scrollTo({ top: 0 })
 }
 
 onMounted(() => {
@@ -36,16 +36,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Transition name="page">
-    <Button
-      v-show="isVisible"
-      variant="secondary"
-      size="icon"
-      class="fixed bottom-6 right-6 z-40 size-10 rounded-full shadow-lg shadow-gray-300/30 ring-1 ring-border dark:shadow-black/20"
-      aria-label="Scroll to top"
-      @click="scrollToTop"
-    >
-      <ArrowUp class="size-4" />
-    </Button>
-  </Transition>
+  <Button
+    v-show="isVisible"
+    variant="secondary"
+    size="icon"
+    class="fixed bottom-6 right-6 z-40 size-10 rounded-full shadow-lg shadow-gray-300/30 ring-1 ring-border dark:shadow-black/20"
+    aria-label="Scroll to top"
+    @click="scrollToTop"
+  >
+    <ArrowUp class="size-4" />
+  </Button>
 </template>

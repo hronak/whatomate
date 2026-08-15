@@ -52,7 +52,7 @@ defineEmits<{
       :min-zoom="0.2"
       :max-zoom="2"
       :delete-key-code="['Backspace', 'Delete']"
-      :default-edge-options="{ type: edgeType, animated: true, markerEnd: MarkerType.ArrowClosed }"
+      :default-edge-options="{ type: edgeType, animated: false, markerEnd: MarkerType.ArrowClosed }"
       :fit-view-on-init="fitViewOnInit"
       class="h-full"
       @update:nodes="$emit('update:nodes', $event)"
@@ -86,6 +86,14 @@ defineEmits<{
 
 .vue-flow__edge-textbg {
   fill: transparent;
+}
+
+/* Motion is removed app-wide. New edges are created with `animated: false`,
+   but flows saved before that still carry `animated: true` in their stored
+   graph JSON, so kill vue-flow's marching-ants dash here too. */
+.vue-flow__edge.animated path,
+.vue-flow__edge-path {
+  animation: none;
 }
 
 .selected-node {

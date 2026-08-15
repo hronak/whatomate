@@ -176,7 +176,7 @@ function closeDialog() {
                       @select.prevent="toggleTag(tag.name)"
                     >
                       <div class="flex items-center gap-2 flex-1">
-                        <span :class="['size-2 rounded-full', getTagColorClass(tag.color).split(' ')[0]]"></span>
+                        <span :class="['size-2 rounded-full', getTagColorClass(tag.color).split('')[0]]"></span>
                         <span>{{ tag.name }}</span>
                       </div>
                       <Check v-if="isTagSelected(tag.name)" class="size-4 text-primary" />

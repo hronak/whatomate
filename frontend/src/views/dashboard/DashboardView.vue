@@ -243,8 +243,8 @@ const getChartComponentData = (widget: DashboardWidget) => {
       data: chartData.map((d: { value: number }) => d.value),
       borderColor,
       backgroundColor: widget.chart_type === 'bar'
-        ? borderColor.replace('rgb', 'rgba').replace(')', ', 0.8)')
-        : borderColor.replace('rgb', 'rgba').replace(')', ', 0.1)'),
+        ? borderColor.replace('rgb', 'rgba').replace(')',', 0.8)')
+        : borderColor.replace('rgb', 'rgba').replace(')',', 0.1)'),
       fill: widget.chart_type === 'line',
       tension: 0.3
     }]
@@ -806,7 +806,7 @@ onMounted(() => {
                 </div>
                 <div class="flex items-center gap-2">
                   <!-- Actions - hidden in drag mode -->
-                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <Button
                       v-if="canEditWidget"
                       variant="ghost"
@@ -841,9 +841,7 @@ onMounted(() => {
                     <Skeleton class="h-8 w-20 bg-muted" />
                   </template>
                   <template v-else>
-                    <Transition name="counter-fade" mode="out-in">
-                      <span :key="widgetData[item.i]?.value">{{ formatNumber(widgetData[item.i]?.value || 0) }}</span>
-                    </Transition>
+                    <span>{{ formatNumber(widgetData[item.i]?.value || 0) }}</span>
                   </template>
                 </div>
                 <div v-if="getWidgetById(item.i)!.show_change && widgetData[item.i]" class="flex items-center text-foreground/40 mt-1">
@@ -878,7 +876,7 @@ onMounted(() => {
                   <p v-if="getWidgetById(item.i)!.description" class="text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <Button
                       v-if="canEditWidget"
                       variant="ghost"
@@ -938,7 +936,7 @@ onMounted(() => {
                   <p v-if="getWidgetById(item.i)!.description" class="text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <Button v-if="canEditWidget" variant="ghost" size="icon" class="size-6 text-foreground/20 hover:text-foreground hover:bg-accent" @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)" :title="$t('dashboard.editWidgetTooltip')">
                       <Pencil class="size-3" />
                     </Button>
@@ -984,7 +982,7 @@ onMounted(() => {
                           row.direction === 'incoming' ? 'bg-linear-to-br from-emerald-500 to-green-600 text-white' : 'bg-linear-to-br from-blue-500 to-cyan-600 text-white'
                         ]"
                       >
-                        {{ row.label.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() }}
+                        {{ row.label.split('').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() }}
                       </div>
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
@@ -1046,7 +1044,7 @@ onMounted(() => {
                   <p v-if="getWidgetById(item.i)!.description" class="text-foreground/30 mt-0.5">{{ getWidgetById(item.i)!.description }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div v-if="!isDragMode && (canEditWidget || canDeleteWidget)" class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <Button v-if="canEditWidget" variant="ghost" size="icon" class="size-6 text-foreground/20 hover:text-foreground hover:bg-accent" @click.stop="openEditWidgetDialog(getWidgetById(item.i)!)" :title="$t('dashboard.editWidgetTooltip')">
                       <Pencil class="size-3" />
                     </Button>

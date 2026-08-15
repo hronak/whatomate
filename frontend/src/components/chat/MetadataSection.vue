@@ -54,7 +54,7 @@ function getTableColumns(arr: Record<string, any>[]): string[] {
       </span>
       <ChevronDown
         :class="[
-          'size-4 text-muted-foreground transition-transform',
+          'size-4 text-muted-foreground',
           isOpen ? '' : '-rotate-90'
         ]"
       />

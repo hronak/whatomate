@@ -704,7 +704,7 @@ onMounted(async () => {
               {{ getQualityRatingLabel(template.quality_rating, t) }}
             </Badge>
           </div>
-          <ChevronDown class="size-4 text-muted-foreground transition-transform" :class="isDetailsOpen && 'rotate-180'" />
+          <ChevronDown class="size-4 text-muted-foreground " :class="isDetailsOpen && 'rotate-180'" />
         </div>
       </CardHeader>
       <CardContent v-show="isDetailsOpen" class="space-y-4">

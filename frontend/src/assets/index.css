@@ -308,7 +308,7 @@
 
 /* Static card with depth - use for non-clickable stat cards */
 .card-depth {
-  @apply transition-all duration-300 relative overflow-hidden;
+  @apply relative overflow-hidden;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.08),
     0 2px 4px -2px rgba(0, 0, 0, 0.05);
@@ -321,7 +321,7 @@
     inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Bottom line animation */
+/* Bottom accent line, shown on hover (no sweep — motion is removed app-wide) */
 .card-depth::after {
   content: '';
   position: absolute;
@@ -330,13 +330,11 @@
   width: 100%;
   height: 2px;
   background: linear-gradient(90deg, #22c55e, #10b981, #059669);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
+  opacity: 0;
 }
 
 .card-depth:hover::after {
-  transform: scaleX(1);
+  opacity: 1;
 }
 
 .card-depth:hover {
@@ -356,7 +354,7 @@
 
 /* Interactive card hover effect - use for clickable cards */
 .card-interactive {
-  @apply transition-all duration-300 cursor-pointer;
+  @apply cursor-pointer;
 }
 
 .card-interactive:hover {
@@ -365,7 +363,6 @@
     0 25px 50px -12px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(0, 0, 0, 0.05),
     0 0 30px -5px rgba(16, 185, 129, 0.1);
-  transform: translateY(-2px);
 }
 
 .dark .card-interactive:hover {
@@ -612,14 +609,11 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Message highlight animation for scroll-to */
-@keyframes highlight-pulse {
-  0%, 100% { background-color: transparent; }
-  50% { background-color: hsl(var(--primary) / 0.15); }
-}
-
+/* Message highlight for scroll-to. ChatView adds this class and strips it
+   after 2s, so a flat tint is the whole effect — no pulse.
+   --primary is an oklch() value, not HSL channels; use color-mix, not hsl(). */
 .highlight-message {
-  animation: highlight-pulse 0.5s ease-in-out 2;
+  background-color: color-mix(in oklab, var(--primary) 15%, transparent);
   border-radius: 0.5rem;
 }
 
@@ -653,28 +647,7 @@
   --v3-picker-emoji-hover: hsl(0 0% 12%);
 }
 
-/* ─── Page transitions ─── */
-.page-enter-active,
-.page-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
-}
-
 /* ─── Micro-interactions ─── */
-
-/* Button press effect */
-.btn-press:active {
-  transform: scale(0.97);
-}
 
 /* Sidebar active indicator bar */
 .nav-active-indicator {

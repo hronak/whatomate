@@ -49,7 +49,7 @@ function handleSelect(button: ButtonConfig) {
         />
 
         <!-- Panel -->
-        <div class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden animate-slide-up">
+        <div class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden">
           <!-- Header -->
           <div class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between">
             <button
@@ -94,17 +94,3 @@ function handleSelect(button: ButtonConfig) {
   </div>
 </template>
 
-<style scoped>
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.2s ease-out;
-}
-</style>

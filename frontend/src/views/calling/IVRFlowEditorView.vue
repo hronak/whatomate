@@ -79,7 +79,7 @@ const palette: { type: IVRNodeType; label: string; icon: any; color: string }[] 
 const { nodes, edges, addNodes, addEdges, removeNodes, removeEdges, onConnect, project, fitView } = useVueFlow({
   defaultEdgeOptions: {
     type: 'default',
-    animated: true,
+    animated: false,
     markerEnd: MarkerType.ArrowClosed,
   },
 })
@@ -155,7 +155,7 @@ onConnect((params) => {
   addEdges([{
     ...params,
     type: 'default',
-    animated: true,
+    animated: false,
     markerEnd: MarkerType.ArrowClosed,
     label: params.sourceHandle || 'default',
   }])
@@ -196,7 +196,7 @@ function onEdgeUpdate({ edge, connection }: { edge: Edge; connection: Connection
   addEdges([{
     ...connection,
     type: 'default',
-    animated: true,
+    animated: false,
     markerEnd: MarkerType.ArrowClosed,
     label: connection.sourceHandle || 'default',
   }])
@@ -293,7 +293,7 @@ function loadFlowData(data: IVRFlowData) {
     target: e.to,
     sourceHandle: e.condition,
     type: 'default' as const,
-    animated: true,
+    animated: false,
     markerEnd: MarkerType.ArrowClosed,
     label: e.condition !== 'default' ? e.condition : '',
   }))

@@ -93,7 +93,7 @@ const localListPickerOpen = computed({
         <Button
           variant="ghost"
           size="sm"
-          class="h-7 px-3 rounded-md transition-all"
+          class="h-7 px-3 rounded-md transition-colors"
           :class="{
             'bg-white dark:bg-gray-700 shadow-xs': mode === 'edit',
             'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'edit'
@@ -106,7 +106,7 @@ const localListPickerOpen = computed({
         <Button
           variant="ghost"
           size="sm"
-          class="h-7 px-3 rounded-md transition-all"
+          class="h-7 px-3 rounded-md transition-colors"
           :class="{
             'bg-white dark:bg-gray-700 shadow-xs': mode === 'preview',
             'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'preview'
