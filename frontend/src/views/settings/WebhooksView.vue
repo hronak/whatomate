@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, DataTable, SearchInput, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { toast } from 'vue-sonner'
 import { Plus, Trash2, Pencil, Webhook as WebhookIcon, Play } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
@@ -213,6 +213,6 @@ onMounted(() => fetchWebhooks())
       @confirm="confirmDisableWebhook"
     />
 
-    <DeleteConfirmDialog v-model:open="isDeleteDialogOpen" :title="$t('webhooks.deleteWebhook')" :item-name="webhookToDelete?.name" :is-submitting="isDeleting" @confirm="deleteWebhook" />
+    <ConfirmDialog v-model:open="isDeleteDialogOpen" variant="destructive" :title="$t('webhooks.deleteWebhook')" :item-name="webhookToDelete?.name" :is-submitting="isDeleting" @confirm="deleteWebhook" />
   </div>
 </template>

@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { PageHeader, DataTable, DeleteConfirmDialog, SearchInput, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, DataTable, ConfirmDialog, SearchInput, IconButton, ErrorState, type Column } from '@/components/shared'
 import { getErrorMessage } from '@/lib/api-utils'
 import { Plus, Pencil, Trash2, Sparkles } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -248,8 +248,9 @@ async function toggleContext(context: AIContext) {
       </div>
     </ScrollArea>
 
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
+      variant="destructive"
       :title="$t('aiContexts.deleteContext')"
       :item-name="contextToDelete?.name"
       :is-submitting="isDeleting"

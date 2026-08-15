@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { PageHeader, DataTable, DeleteConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
+import { PageHeader, DataTable, ConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/services/api'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -397,8 +397,9 @@ async function confirmDelete() {
       </div>
     </ScrollArea>
 
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
+      variant="destructive"
       :title="$t('accounts.deleteAccount')"
       :item-name="accountToDelete?.name"
       :is-submitting="isDeleting"

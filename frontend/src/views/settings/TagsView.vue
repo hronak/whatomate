@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TagBadge, PageHeader, SearchInput, DataTable, CrudFormDialog, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { TagBadge, PageHeader, SearchInput, DataTable, CrudFormDialog, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import type { Tag } from '@/services/api'
 import { useTagsStore } from '@/stores/tags'
 import { useCrudState } from '@/composables/useCrudState'
@@ -242,8 +242,8 @@ function getColorLabel(color: string): string {
       </div>
     </CrudFormDialog>
 
-    <DeleteConfirmDialog v-model:open="deleteDialogOpen" :title="$t('tags.deleteTag')" :item-name="tagToDelete?.name" :is-submitting="isDeleting" @confirm="confirmDelete">
+    <ConfirmDialog v-model:open="deleteDialogOpen" variant="destructive" :title="$t('tags.deleteTag')" :item-name="tagToDelete?.name" :is-submitting="isDeleting" @confirm="confirmDelete">
       <p class="text-muted-foreground">{{ $t('tags.deleteWarning') }}</p>
-    </DeleteConfirmDialog>
+    </ConfirmDialog>
   </div>
 </template>

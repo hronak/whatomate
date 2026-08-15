@@ -1,5 +1,4 @@
 export { default as SearchInput } from './SearchInput.vue'
-export { default as DeleteConfirmDialog } from './DeleteConfirmDialog.vue'
 export { default as ConfirmDialog } from './ConfirmDialog.vue'
 export { default as PageHeader } from './PageHeader.vue'
 export { default as PaginationControls } from './PaginationControls.vue'

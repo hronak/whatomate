@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TagBadge, PageHeader, SearchInput, DataTable, DeleteConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { TagBadge, PageHeader, SearchInput, DataTable, ConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { contactsService, accountsService, type ImportResult } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { Plus, Users, Pencil, Trash2, MessageSquare, Download } from '@lucide/vue'
@@ -251,8 +251,9 @@ function getDisplayName(contact: Contact): string {
     <!-- Create Contact Dialog (shared component) -->
     <CreateContactDialog v-model:open="isCreateDialogOpen" @created="onContactCreated" />
 
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
+      variant="destructive"
       :title="$t('contacts.deleteContact')"
       :item-name="contactToDelete ? getDisplayName(contactToDelete) : ''"
       :description="$t('contacts.deleteWarning')"

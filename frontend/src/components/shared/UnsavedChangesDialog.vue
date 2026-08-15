@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import ConfirmDialog from './ConfirmDialog.vue'
 
-defineProps<{
+const { t } = useI18n()
+
+const props = defineProps<{
   open: boolean
 }>()
 
@@ -18,21 +13,23 @@ const emit = defineEmits<{
   stay: []
   leave: []
 }>()
+
+const isOpen = computed({
+  get: () => props.open,
+  set: (value: boolean) => {
+    if (!value) emit('stay')
+  },
+})
 </script>
 
 <template>
-  <AlertDialog :open="open">
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>{{ $t('common.unsavedChangesTitle', 'Unsaved Changes') }}</AlertDialogTitle>
-        <AlertDialogDescription>
-          {{ $t('common.unsavedChangesDesc', 'You have unsaved changes. Are you sure you want to leave? Your changes will be lost.') }}
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel @click="emit('stay')">{{ $t('common.stay', 'Stay') }}</AlertDialogCancel>
-        <AlertDialogAction @click="emit('leave')">{{ $t('common.leave', 'Leave') }}</AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
+  <ConfirmDialog
+    v-model:open="isOpen"
+    :title="t('common.unsavedChangesTitle')"
+    :description="t('common.unsavedChangesDesc')"
+    :confirm-label="t('common.leave')"
+    :cancel-label="t('common.stay')"
+    variant="destructive"
+    @confirm="emit('leave')"
+  />
 </template>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, SearchInput, DeleteConfirmDialog, DataTable, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, SearchInput, ConfirmDialog, DataTable, IconButton, ErrorState, type Column } from '@/components/shared'
 import { cannedResponsesService, type CannedResponse } from '@/services/api'
 import { useCrudState } from '@/composables/useCrudState'
 import { toast } from 'vue-sonner'
@@ -209,6 +209,6 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
       </div>
     </ScrollArea>
 
-    <DeleteConfirmDialog v-model:open="deleteDialogOpen" :title="$t('cannedResponses.deleteTitle')" :item-name="responseToDelete?.name" :is-submitting="isDeleting" @confirm="confirmDelete" />
+    <ConfirmDialog v-model:open="deleteDialogOpen" variant="destructive" :title="$t('cannedResponses.deleteTitle')" :item-name="responseToDelete?.name" :is-submitting="isDeleting" @confirm="confirmDelete" />
   </div>
 </template>

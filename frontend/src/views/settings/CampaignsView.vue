@@ -16,7 +16,7 @@ import {
 import { campaignsService } from '@/services/api'
 import { wsService } from '@/services/websocket'
 import { toast } from 'vue-sonner'
-import { PageHeader, DataTable, DeleteConfirmDialog, SearchInput, IconButton, ErrorState, DateRangePicker, type Column } from '@/components/shared'
+import { PageHeader, DataTable, ConfirmDialog, SearchInput, IconButton, ErrorState, DateRangePicker, type Column } from '@/components/shared'
 import { getErrorMessage } from '@/lib/api-utils'
 import {
   Plus,
@@ -373,8 +373,9 @@ function getProgressPercentage(campaign: Campaign): number {
       </div>
     </ScrollArea>
 
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
+      variant="destructive"
       :title="$t('campaigns.deleteCampaign')"
       :item-name="campaignToDelete?.name"
       :is-submitting="isDeletingCampaign"

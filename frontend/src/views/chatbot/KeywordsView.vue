@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { chatbotService } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { PageHeader, SearchInput, DataTable, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, SearchInput, DataTable, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
 import { getErrorMessage } from '@/lib/api-utils'
 import { Plus, Pencil, Trash2, Key } from '@lucide/vue'
 import { useSearchPagination } from '@/composables/useSearchPagination'
@@ -226,8 +226,9 @@ const emptyDescription = computed(() => {
       </div>
     </ScrollArea>
 
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
+      variant="destructive"
       :title="$t('keywords.deleteRule')"
       :description="$t('keywords.deleteRuleDesc')"
       :is-submitting="isDeleting"

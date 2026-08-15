@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, DeleteConfirmDialog, ConfirmDialog, DataTable, SearchInput, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
+import { PageHeader, ConfirmDialog, DataTable, SearchInput, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
 import FlowBuilder from '@/components/flow-builder/FlowBuilder.vue'
 import { flowsService, accountsService } from '@/services/api'
 import { toast } from 'vue-sonner'
@@ -366,7 +366,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
       </DialogContent>
     </Dialog>
 
-    <DeleteConfirmDialog v-model:open="deleteDialogOpen" :title="$t('flows.deleteFlow')" :item-name="flowToDelete?.name" @confirm="confirmDeleteFlow" />
+    <ConfirmDialog v-model:open="deleteDialogOpen" variant="destructive" :title="$t('flows.deleteFlow')" :item-name="flowToDelete?.name" @confirm="confirmDeleteFlow" />
 
     <ConfirmDialog
       v-model:open="publishDialogOpen"

@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { PageHeader, SearchInput, DataTable, DeleteConfirmDialog, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, SearchInput, DataTable, ConfirmDialog, ErrorState, type Column } from '@/components/shared'
 import { useTeamsStore } from '@/stores/teams'
 import { useAuthStore } from '@/stores/auth'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -184,6 +184,6 @@ async function confirmDelete() {
       </div>
     </ScrollArea>
 
-    <DeleteConfirmDialog v-model:open="deleteDialogOpen" :title="$t('teams.deleteTeam')" :item-name="teamToDelete?.name" :description="$t('teams.deleteTeamWarning')" :is-submitting="isDeletingTeam" @confirm="confirmDelete" />
+    <ConfirmDialog v-model:open="deleteDialogOpen" variant="destructive" :title="$t('teams.deleteTeam')" :item-name="teamToDelete?.name" :description="$t('teams.deleteTeamWarning')" :is-submitting="isDeletingTeam" @confirm="confirmDelete" />
   </div>
 </template>

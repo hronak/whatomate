@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { PageHeader, DataTable, SearchInput, DeleteConfirmDialog, ConfirmDialog, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
+import { PageHeader, DataTable, SearchInput, ConfirmDialog, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
 import { toast } from 'vue-sonner'
 import { Plus, Trash2, Pencil, Zap, Globe, Webhook, Code, Ticket, User, BarChart, Link, Phone, Mail, FileText, ExternalLink } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
@@ -329,6 +329,6 @@ onMounted(() => fetchActions())
       @confirm="confirmDisableAction"
     />
 
-    <DeleteConfirmDialog v-model:open="isDeleteDialogOpen" :title="$t('customActions.deleteTitle')" :item-name="actionToDelete?.name" :is-submitting="isDeleting" @confirm="deleteAction" />
+    <ConfirmDialog v-model:open="isDeleteDialogOpen" variant="destructive" :title="$t('customActions.deleteTitle')" :item-name="actionToDelete?.name" :is-submitting="isDeleting" @confirm="deleteAction" />
   </div>
 </template>

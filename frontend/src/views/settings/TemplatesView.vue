@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, SearchInput, DataTable, IconButton, DeleteConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
+import { PageHeader, SearchInput, DataTable, IconButton, ConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
 import { api, templatesService } from '@/services/api'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { toast } from 'vue-sonner'
@@ -434,8 +434,9 @@ function getHeaderIcon(type: string) {
     </ScrollArea>
 
     <!-- Delete Confirmation Dialog -->
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
+      variant="destructive"
       :title="$t('templates.deleteTemplate')"
       :item-name="templateToDelete?.display_name || templateToDelete?.name"
       :is-submitting="isDeleting"

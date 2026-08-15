@@ -112,6 +112,8 @@
     "retryLoad": "Retry",
     "adding": "Adding...",
     "importing": "Importing...",
+    "deleteItemWarning": "Are you sure you want to delete \"{item}\"? This action cannot be undone.",
+    "deleteItemWarningGeneric": "Are you sure you want to delete this item? This action cannot be undone.",
     "leave": "Leave",
     "loadMore": "Load more",
     "stay": "Stay",

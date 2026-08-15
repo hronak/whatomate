@@ -17,7 +17,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Plus, Pencil, Trash2, Phone, RefreshCw } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import ConfirmDialog from '@/components/shared/ConfirmDialog.vue'
-import DeleteConfirmDialog from '@/components/shared/DeleteConfirmDialog.vue'
 import IconButton from '@/components/shared/IconButton.vue'
 import ErrorState from '@/components/shared/ErrorState.vue'
 
@@ -355,8 +354,9 @@ onMounted(async () => {
     </Dialog>
 
     <!-- Delete Confirmation -->
-    <DeleteConfirmDialog
+    <ConfirmDialog
       v-model:open="showDeleteConfirm"
+      variant="destructive"
       :title="t('calling.deleteFlow')"
       :item-name="deletingFlow?.name"
       :description="t('calling.deleteFlowConfirm', { name: deletingFlow?.name })"
