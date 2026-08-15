@@ -666,43 +666,20 @@
      produced an invalid color and the indicator never painted. */
   background: var(--primary);
   opacity: 0;
-  transform: scaleY(0);
-  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .nav-active-indicator[data-active="true"]::before {
   opacity: 1;
-  transform: scaleY(1);
 }
 
-/* Skeleton shimmer (replaces plain pulse) */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+/* Skeleton placeholder — a flat fill; the shimmer sweep was removed with the
+   rest of the app's motion. */
+.skeleton-block {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 0.25rem;
 }
 
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.04) 25%,
-    rgba(0, 0, 0, 0.08) 50%,
-    rgba(0, 0, 0, 0.04) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-
-.dark .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 75%
-  );
-  background-size: 200% 100%;
+.dark .skeleton-block {
+  background: rgba(255, 255, 255, 0.06);
 }
 

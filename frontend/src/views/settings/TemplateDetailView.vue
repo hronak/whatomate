@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -38,14 +39,13 @@ import {
   Trash2,
   Save,
   Upload,
-  Loader2,
   Check,
   Eye,
   Send,
   Plus,
   X,
   ChevronDown,
-  Info,
+  Info
 } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { getQualityBadgeClass, getQualityRatingLabel } from '@/lib/utils'
@@ -678,7 +678,7 @@ onMounted(async () => {
           <Eye class="size-4 mr-1" /> {{ $t('templates.preview', 'Preview') }}
         </Button>
         <Button v-if="canPublish" variant="outline" size="sm" @click="publishDialogOpen = true" :disabled="isPublishing">
-          <Loader2 v-if="isPublishing" class="size-4 mr-1 animate-spin" />
+          <Spinner v-if="isPublishing" class="size-4 mr-1" />
           <Send v-else class="size-4 mr-1" />
           {{ template?.meta_template_id ? $t('templates.republish', 'Republish') : $t('templates.publish', 'Publish') }}
         </Button>
@@ -799,7 +799,7 @@ onMounted(async () => {
               @click="uploadHeaderMedia"
               :disabled="!headerMediaFile || headerMediaUploading"
             >
-              <Loader2 v-if="headerMediaUploading" class="size-3.5 mr-1 animate-spin" />
+              <Spinner v-if="headerMediaUploading" class="size-3.5 mr-1" />
               <Upload v-else class="size-3.5 mr-1" />
               {{ $t('templates.uploadMedia', 'Upload') }}
             </Button>

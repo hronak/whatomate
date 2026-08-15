@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
@@ -10,7 +11,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { templatesService } from '@/services/api'
-import { LayoutTemplate, Search, Loader2 } from '@lucide/vue'
+import { LayoutTemplate, Search } from '@lucide/vue'
 
 const props = defineProps<{
   selectedAccount?: string | null
@@ -131,7 +132,7 @@ function selectTemplate(tpl: any) {
 
       <ScrollArea class="h-[300px]">
         <div v-if="isLoading" class="flex items-center justify-center py-8">
-          <Loader2 class="size-6 animate-spin text-muted-foreground" />
+          <Spinner class="size-6 text-muted-foreground" />
         </div>
 
         <div v-else-if="filteredTemplates.length === 0" class="py-8 text-center text-muted-foreground">

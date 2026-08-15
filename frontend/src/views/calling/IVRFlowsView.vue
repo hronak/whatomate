@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -304,7 +305,7 @@ onMounted(async () => {
         </Table>
 
         <div v-if="store.ivrFlowsLoading" class="flex justify-center py-8">
-          <div class="animate-spin rounded-full size-6 border-b-2 border-primary" />
+          <Spinner size="md" class="text-primary" />
         </div>
       </CardContent>
     </Card>
@@ -346,7 +347,7 @@ onMounted(async () => {
         <DialogFooter>
           <Button variant="outline" @click="showCreateDialog = false">{{ t('common.cancel') }}</Button>
           <Button :disabled="saving" @click="createFlow">
-            <span v-if="saving" class="animate-spin rounded-full size-4 border-b-2 border-white mr-2" />
+            <Spinner v-if="saving" size="sm" class="mr-2 text-white" />
             {{ t('common.create') }}
           </Button>
         </DialogFooter>

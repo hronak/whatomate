@@ -3,14 +3,13 @@ import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api } from '@/services/api'
 import { toast } from 'vue-sonner'
-import { CrudFormDialog } from '@/components/shared'
+import { CrudFormDialog, Spinner } from '@/components/shared'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
-  Loader2,
   Globe,
   Mail,
   MapPin,
@@ -219,7 +218,7 @@ async function handleFileChange(event: Event) {
     @submit="saveProfile"
   >
     <div v-if="isLoading" class="py-12 flex justify-center">
-      <Loader2 class="size-8 animate-spin text-muted-foreground" />
+      <Spinner class="size-8 text-muted-foreground" />
     </div>
 
     <div v-else class="space-y-6">
@@ -235,16 +234,16 @@ async function handleFileChange(event: Event) {
         <!-- Profile Picture Preview -->
         <div class="md:col-span-2 flex items-center gap-4">
           <div
-            class="group relative size-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border cursor-pointer transition-all hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 hover:ring-offset-background"
+            class="group relative size-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border cursor-pointer hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 hover:ring-offset-background"
             @click="triggerFileInput"
           >
             <!-- Loading Overlay -->
             <div v-if="isUploading" class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-              <Loader2 class="size-6 text-white animate-spin" />
+              <Spinner class="size-6 text-white" />
             </div>
 
             <!-- Hover Overlay -->
-            <div v-if="!isUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div v-if="!isUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
               <Pencil class="size-6 text-white" />
             </div>
 

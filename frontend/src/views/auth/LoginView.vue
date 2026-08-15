@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'vue-sonner'
-import { MessageSquare, Loader2 } from '@lucide/vue'
+import { MessageSquare } from '@lucide/vue'
 
 const { t } = useI18n()
 
@@ -130,7 +131,7 @@ const initiateSSO = (provider: string) => {
             />
           </div>
           <Button type="submit" class="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20" :disabled="isLoading">
-            <Loader2 v-if="isLoading" class="mr-2 size-4 animate-spin" />
+            <Spinner v-if="isLoading" class="mr-2 size-4" />
             {{ $t('auth.signIn') }}
           </Button>
         </div>

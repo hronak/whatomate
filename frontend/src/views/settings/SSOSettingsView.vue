@@ -11,9 +11,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, ConfirmDialog, ErrorState } from '@/components/shared'
+import { PageHeader, ConfirmDialog, ErrorState, Spinner } from '@/components/shared'
 import { toast } from 'vue-sonner'
-import { ShieldCheck, Settings2, ExternalLink, Info, Copy, Check, Loader2 } from '@lucide/vue'
+import { ShieldCheck, Settings2, ExternalLink, Info, Copy, Check } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const { t } = useI18n()
@@ -490,7 +490,7 @@ onMounted(() => {
             {{ $t('common.cancel') }}
           </Button>
           <Button size="sm" @click="saveProvider" :disabled="isSaving">
-            <Loader2 v-if="isSaving" class="size-4 mr-2 animate-spin" />{{ $t('common.save') }}
+            <Spinner v-if="isSaving" class="size-4 mr-2" />{{ $t('common.save') }}
           </Button>
         </DialogFooter>
       </DialogContent>

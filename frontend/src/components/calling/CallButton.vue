@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCallingStore } from '@/stores/calling'
 import { outgoingCallsService } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Phone, Loader2, Clock, X } from '@lucide/vue'
+import { Phone, Clock, X } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
 const props = defineProps<{
@@ -111,7 +112,7 @@ async function handleCall() {
         :disabled="store.isOnCall || isInitiating"
         @click="handleCall"
       >
-        <Loader2 v-if="isInitiating" class="size-4 animate-spin" />
+        <Spinner v-if="isInitiating" class="size-4" />
         <Phone v-else class="size-4" />
         <!-- Permission status badge (pending/declined only) -->
         <span

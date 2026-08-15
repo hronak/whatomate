@@ -9,10 +9,10 @@ import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, AuditLogPanel } from '@/components/shared'
+import { PageHeader, AuditLogPanel, Spinner } from '@/components/shared'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { toast } from 'vue-sonner'
-import { Settings, Bell, Loader2, Globe, Phone, Upload, Play, Pause, Music } from '@lucide/vue'
+import { Settings, Bell, Globe, Phone, Upload, Play, Pause, Music } from '@lucide/vue'
 import { usersService, organizationService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
@@ -291,7 +291,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.maskPhoneNumbers') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.maskPhoneNumbersDesc') }}</p> </div> <Switch :checked="generalSettings.mask_phone_numbers" @update:checked="generalSettings.mask_phone_numbers = $event" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <!-- Meta App Credentials Card (Gated on canWriteAccounts) --> <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.metaAppCredentials') }}</h3>
+                    <p class="text-foreground/40">{{ $t('settings.maskPhoneNumbersDesc') }}</p> </div> <Switch :checked="generalSettings.mask_phone_numbers" @update:checked="generalSettings.mask_phone_numbers = $event" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <!-- Meta App Credentials Card (Gated on canWriteAccounts) --> <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.metaAppCredentials') }}</h3>
                 <p class="text-foreground/40">{{ $t('settings.metaAppCredentialsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
@@ -319,7 +319,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     id="meta_app_secret"
                     type="password"
                     v-model="generalSettings.meta_app_secret"
-                    :placeholder="generalSettings.has_meta_app_secret ? '••••••••••••' : 'Enter Meta App Secret'" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="orgID" class="mt-4"> <AuditLogPanel :key="generalLogKey" resource-type="settings.general" :resource-id="orgID" /> </div> </TabsContent> <!-- Notification Settings Tab --> <TabsContent value="notifications"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.notifications') }}</h3>
+                    :placeholder="generalSettings.has_meta_app_secret ? '••••••••••••' : 'Enter Meta App Secret'" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="orgID" class="mt-4"> <AuditLogPanel :key="generalLogKey" resource-type="settings.general" :resource-id="orgID" /> </div> </TabsContent> <!-- Notification Settings Tab --> <TabsContent value="notifications"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.notifications') }}</h3>
                 <p class="text-foreground/40">{{ $t('settings.notificationsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
@@ -348,7 +348,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">{{ $t('settings.campaignUpdates') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.campaignUpdatesDesc') }}</p> </div> <Switch :checked="notificationSettings.campaign_updates" @update:checked="notificationSettings.campaign_updates = $event" /> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveNotificationSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="userID" class="mt-4"> <AuditLogPanel :key="notificationLogKey" resource-type="settings.notification" :resource-id="userID" /> </div> </TabsContent> <!-- Calling Settings Tab --> <TabsContent value="calling"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.callingSettings') }}</h3>
+                    <p class="text-foreground/40">{{ $t('settings.campaignUpdatesDesc') }}</p> </div> <Switch :checked="notificationSettings.campaign_updates" @update:checked="notificationSettings.campaign_updates = $event" /> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveNotificationSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="userID" class="mt-4"> <AuditLogPanel :key="notificationLogKey" resource-type="settings.notification" :resource-id="userID" /> </div> </TabsContent> <!-- Calling Settings Tab --> <TabsContent value="calling"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.callingSettings') }}</h3>
                 <p class="text-foreground/40">{{ $t('settings.callingSettingsDesc') }}</p>
               </div>
               <div class="p-6 pt-3 space-y-4">
@@ -404,7 +404,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     </Button>
                   </div>
                   <div class="flex items-center gap-2">
-                    <input ref="holdMusicInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('hold_music', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="holdMusicInput?.click()" :disabled="isUploadingHoldMusic"> <Loader2 v-if="isUploadingHoldMusic" class="mr-2 size-4 animate-spin" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }}
+                    <input ref="holdMusicInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('hold_music', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="holdMusicInput?.click()" :disabled="isUploadingHoldMusic"> <Spinner v-if="isUploadingHoldMusic" class="mr-2 size-4" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }}
                     </Button>
                     <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span>
                   </div>
@@ -425,7 +425,7 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     </Button>
                   </div>
                   <div class="flex items-center gap-2">
-                    <input ref="ringbackInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('ringback', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="ringbackInput?.click()" :disabled="isUploadingRingback"> <Loader2 v-if="isUploadingRingback" class="mr-2 size-4 animate-spin" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }} </Button> <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span> </div> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveCallingSettings" :disabled="isSubmitting"> <Loader2 v-if="isSubmitting" class="mr-2 size-4 animate-spin" /> {{ $t('settings.save') }}
+                    <input ref="ringbackInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('ringback', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="ringbackInput?.click()" :disabled="isUploadingRingback"> <Spinner v-if="isUploadingRingback" class="mr-2 size-4" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }} </Button> <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span> </div> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveCallingSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }}
                   </Button>
                 </div>
               </div>

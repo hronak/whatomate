@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { TagBadge } from '@/components/shared'
+import TagBadge from './TagBadge.vue'
+import Spinner from './Spinner.vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { contactsService, accountsService, type Tag } from '@/services/api'
 import { useTagsStore } from '@/stores/tags'
 import { toast } from 'vue-sonner'
-import { Loader2, Check, ChevronsUpDown, X } from '@lucide/vue'
+import { Check, ChevronsUpDown, X } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
 import { getTagColorClass } from '@/lib/constants'
 
@@ -207,7 +208,7 @@ function closeDialog() {
       <div class="flex justify-end gap-2">
         <Button variant="outline" @click="closeDialog">{{ $t('common.cancel') }}</Button>
         <Button @click="saveContact" :disabled="isSubmitting">
-          <Loader2 v-if="isSubmitting" class="size-4 mr-2 animate-spin" />
+          <Spinner v-if="isSubmitting" class="size-4 mr-2" />
           {{ $t('common.create') }}
         </Button>
       </div>

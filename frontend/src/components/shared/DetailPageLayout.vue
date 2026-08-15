@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import Spinner from './Spinner.vue'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import PageHeader from './PageHeader.vue'
 import ErrorState from './ErrorState.vue'
-import { Loader2 } from '@lucide/vue'
+
 import type { Component } from 'vue'
 
 defineProps<{
@@ -36,7 +37,7 @@ defineProps<{
 
     <!-- Loading -->
     <div v-if="isLoading" class="flex-1 flex items-center justify-center">
-      <Loader2 class="size-8 animate-spin text-muted-foreground" />
+      <Spinner class="size-8 text-muted-foreground" />
     </div>
 
     <!-- Not found -->

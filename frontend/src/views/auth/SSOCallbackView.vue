@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/services/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, AlertCircle, CheckCircle } from '@lucide/vue'
+import { AlertCircle, CheckCircle } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 
 const { t } = useI18n()
@@ -48,7 +49,7 @@ onMounted(async () => {
       <CardHeader class="text-center">
         <div class="flex justify-center mb-4">
           <div v-if="status === 'loading'" class="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Loader2 class="size-7 text-primary animate-spin" />
+            <Spinner class="size-7 text-primary" />
           </div>
           <div v-else-if="status === 'success'" class="size-12 rounded-xl bg-success/30 flex items-center justify-center">
             <CheckCircle class="size-7 text-success" />

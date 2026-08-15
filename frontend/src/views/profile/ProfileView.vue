@@ -7,10 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'vue-sonner'
-import { User, Eye, EyeOff, Loader2 } from '@lucide/vue'
+import { User, Eye, EyeOff } from '@lucide/vue'
 import { usersService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
-import { PageHeader } from '@/components/shared'
+import { PageHeader, Spinner } from '@/components/shared'
 import { getErrorMessage } from '@/lib/api-utils'
 
 const { t } = useI18n()
@@ -163,7 +163,7 @@ async function changePassword() {
             </div>
             <div class="flex justify-end">
               <Button variant="outline" size="sm" @click="changePassword" :disabled="isChangingPassword">
-                <Loader2 v-if="isChangingPassword" class="mr-2 size-4 animate-spin" />
+                <Spinner v-if="isChangingPassword" class="mr-2 size-4" />
                 {{ $t('profile.changePassword') }}
               </Button>
             </div>

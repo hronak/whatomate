@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from '@/components/shared'
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotesStore } from '@/stores/notes'
@@ -12,7 +13,12 @@ import { toast } from 'vue-sonner'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import { getInitials, getAvatarGradient } from '@/lib/utils'
 import {
-  StickyNote, Pencil, Trash2, X, Check, Loader2, Send
+  StickyNote,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+  Send
 } from '@lucide/vue'
 
 const props = defineProps<{
@@ -187,12 +193,12 @@ function formatNoteTime(dateStr: string) {
       <div class="space-y-3">
         <!-- Loading older notes -->
         <div v-if="notesStore.isLoadingOlder" class="flex justify-center py-2">
-          <Loader2 class="size-4 animate-spin text-foreground/30" />
+          <Spinner class="size-4 text-foreground/30" />
         </div>
 
         <!-- Initial loading state -->
         <div v-if="notesStore.isLoading" class="flex justify-center py-8">
-          <Loader2 class="size-5 animate-spin text-foreground/30" />
+          <Spinner class="size-5 text-foreground/30" />
         </div>
 
         <!-- Notes (chronological: oldest first, latest last) -->
@@ -225,7 +231,7 @@ function formatNoteTime(dateStr: string) {
                   :disabled="!editingContent.trim() || isSaving"
                   @click="saveEdit(note.id)"
                 >
-                  <Loader2 v-if="isSaving" class="size-3 mr-1 animate-spin" />
+                  <Spinner v-if="isSaving" class="size-3 mr-1" />
                   <Check v-else class="size-3 mr-1" />
                   {{ t('common.save') }}
                 </Button>
@@ -303,7 +309,7 @@ function formatNoteTime(dateStr: string) {
           :disabled="!newNoteContent.trim() || isSaving"
           @click="addNote"
         >
-          <Loader2 v-if="isSaving" class="size-4 animate-spin text-white" />
+          <Spinner v-if="isSaving" class="size-4 text-white" />
           <Send v-else class="size-4 text-white" />
         </button>
       </div>

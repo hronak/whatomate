@@ -9,14 +9,14 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, SearchInput, DataTable, CrudFormDialog, DeleteConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { PageHeader, SearchInput, DataTable, CrudFormDialog, DeleteConfirmDialog, IconButton, ErrorState, type Column, Spinner } from '@/components/shared'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useUsersStore, type User } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
 import { useRolesStore } from '@/stores/roles'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { toast } from 'vue-sonner'
-import { Plus, Pencil, Trash2, UserMinus, User as UserIcon, Shield, ShieldCheck, UserCog, Users, Link, UserPlus, Loader2 } from '@lucide/vue'
+import { Plus, Pencil, Trash2, UserMinus, User as UserIcon, Shield, ShieldCheck, UserCog, Users, Link, UserPlus } from '@lucide/vue'
 import { useCrudState } from '@/composables/useCrudState'
 import { getErrorMessage } from '@/lib/api-utils'
 import { formatDate } from '@/lib/utils'
@@ -371,7 +371,7 @@ async function copyInviteLink() {
         <DialogFooter>
           <Button variant="outline" @click="isAddExistingOpen = false">{{ $t('common.cancel') }}</Button>
           <Button @click="submitAddExisting" :disabled="isAddExistingSubmitting || !addExistingEmail.trim()">
-            <Loader2 v-if="isAddExistingSubmitting" class="size-4 mr-2 animate-spin" />
+            <Spinner v-if="isAddExistingSubmitting" class="size-4 mr-2" />
             {{ $t('users.addExistingUser') }}
           </Button>
         </DialogFooter>

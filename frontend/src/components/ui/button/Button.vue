@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import Spinner from '@/components/shared/Spinner.vue'
 import type { PrimitiveProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import type { ButtonVariants } from "."
 import { Primitive } from "reka-ui"
-import { Loader2 } from "@lucide/vue"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "."
 
@@ -34,7 +34,7 @@ const props = withDefaults(defineProps<Props>(), {
     :aria-busy="props.loading"
     :class="cn(buttonVariants({ variant, size }), props.class)"
   >
-    <Loader2 v-if="props.loading" class="size-4 animate-spin" />
+    <Spinner v-if="props.loading" class="size-4" />
     <slot v-if="!props.loading" />
     <span v-else class="opacity-0"><slot /></span>
   </Primitive>

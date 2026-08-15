@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import Spinner from './Spinner.vue'
 import { ref, onMounted } from 'vue'
 import { auditLogsService, type AuditLogEntry } from '@/services/api'
 import { formatDateTime, formatLabel } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { History, Plus, Pencil, Trash2, Loader2, ChevronDown } from '@lucide/vue'
+import { History, Plus, Pencil, Trash2, ChevronDown } from '@lucide/vue'
 
 const props = defineProps<{
   resourceType: string
@@ -87,7 +88,7 @@ onMounted(() => loadLogs())
     <CardContent>
       <!-- Loading state -->
       <div v-if="isLoading && logs.length === 0" class="flex items-center justify-center py-8">
-        <Loader2 class="size-5 animate-spin text-muted-foreground" />
+        <Spinner class="size-5 text-muted-foreground" />
       </div>
 
       <!-- Empty state -->
