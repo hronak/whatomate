@@ -97,7 +97,9 @@ test.describe('API Keys Management', () => {
     await page.waitForURL(/\/settings\/api-keys\/[a-f0-9-]+$/)
     await page.waitForLoadState('networkidle')
 
-    await expect(page.getByText(keyName)).toBeVisible()
+    // The detail page prints the name in three places — heading, breadcrumb and
+    // the Details card — so a bare getByText is a strict-mode violation.
+    await expect(page.getByRole('heading', { name: keyName })).toBeVisible()
     await expect(page.locator('code').filter({ hasText: 'whm_' }).first()).toBeVisible()
   })
 
