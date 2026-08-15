@@ -108,6 +108,21 @@ func drainCount(c *websocket.Client) int {
 	}
 }
 
+// awaitMessage blocks until one message reaches the client, failing the test if
+// none arrives. Waiting for the delivery we expect is what makes the *negative*
+// assertions in these tests meaningful: the hub dispatches a broadcast in a
+// single pass, so once the intended recipients have their message, a client
+// that has not received one never will. Sleeping instead only ever proved that
+// the message had not arrived *yet*.
+func awaitMessage(t *testing.T, c *websocket.Client) {
+	t.Helper()
+	select {
+	case <-c.SendChan():
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for a broadcast to reach the client")
+	}
+}
+
 func TestHub_BroadcastToUsers_DeliversToEachListedUser(t *testing.T) {
 	hub := newTestHub(t)
 	orgID := uuid.New()
@@ -125,11 +140,14 @@ func TestHub_BroadcastToUsers_DeliversToEachListedUser(t *testing.T) {
 
 	hub.BroadcastToUsers(orgID, []uuid.UUID{user1, user2}, websocket.WSMessage{Type: "x"})
 
-	// Give the hub goroutine a moment to dispatch.
-	time.Sleep(50 * time.Millisecond)
+	// Wait for the two intended recipients rather than sleeping. The dispatch
+	// is one pass over the org's clients, so by the time both have their
+	// message the third has been passed over for good.
+	awaitMessage(t, c1)
+	awaitMessage(t, c2)
 
-	assert.Equal(t, 1, drainCount(c1))
-	assert.Equal(t, 1, drainCount(c2))
+	assert.Equal(t, 0, drainCount(c1))
+	assert.Equal(t, 0, drainCount(c2))
 	assert.Equal(t, 0, drainCount(c3), "user not in the list must not receive the message")
 }
 
@@ -141,7 +159,13 @@ func TestHub_BroadcastToUsers_NilListIsNoop(t *testing.T) {
 	waitForClientCount(t, hub, 1)
 
 	hub.BroadcastToUsers(orgID, nil, websocket.WSMessage{Type: "noop"})
-	time.Sleep(50 * time.Millisecond)
 
-	assert.Equal(t, 0, drainCount(c))
+	// Fence: send a broadcast that *must* arrive, and wait for it. The hub
+	// processes its queue in order, so once the fence has been delivered the
+	// nil-list broadcast has definitively been handled — and delivered nothing.
+	// A sleep here could only ever say "nothing yet".
+	hub.BroadcastToOrg(orgID, websocket.WSMessage{Type: "fence"})
+	awaitMessage(t, c)
+
+	assert.Equal(t, 0, drainCount(c), "a nil user list must deliver to nobody")
 }

@@ -426,8 +426,10 @@ func TestApp_RegisterPhoneNumber_Success_WithPIN(t *testing.T) {
 	updated.DecryptSecrets(app.Config.App.EncryptionKey)
 	assert.Equal(t, "654321", updated.Pin)
 
-	// Verify audit log exists
-	time.Sleep(50 * time.Millisecond)
+	// Verify audit log exists. WaitForBackgroundTasks exists for exactly this:
+	// the audit write runs on a tracked background goroutine, so waiting for it
+	// is deterministic where a 50ms sleep was a guess that fails under load.
+	app.WaitForBackgroundTasks()
 	var auditCount int64
 	require.NoError(t, app.DB.Model(&models.AuditLog{}).Where("organization_id = ? AND resource_type = ? AND action = ?", org.ID, "account", models.AuditActionUpdated).Count(&auditCount).Error)
 	assert.Greater(t, auditCount, int64(0))
@@ -499,8 +501,10 @@ func TestApp_RegisterPhoneNumber_Success_GeneratedPIN(t *testing.T) {
 	updated.DecryptSecrets(app.Config.App.EncryptionKey)
 	assert.Len(t, updated.Pin, 6)
 
-	// Verify audit log exists
-	time.Sleep(50 * time.Millisecond)
+	// Verify audit log exists. WaitForBackgroundTasks exists for exactly this:
+	// the audit write runs on a tracked background goroutine, so waiting for it
+	// is deterministic where a 50ms sleep was a guess that fails under load.
+	app.WaitForBackgroundTasks()
 	var auditCount int64
 	require.NoError(t, app.DB.Model(&models.AuditLog{}).Where("organization_id = ? AND resource_type = ? AND action = ?", org.ID, "account", models.AuditActionUpdated).Count(&auditCount).Error)
 	assert.Greater(t, auditCount, int64(0))
