@@ -79,7 +79,6 @@ func TestRouteTable_PublicRoutesAreExpected(t *testing.T) {
 	want := map[string]bool{
 		"/health":                           true,
 		"/ready":                            true,
-		"/api/embedded-signup/config":       true,
 		"/api/auth/login":                   true,
 		"/api/auth/register":                true,
 		"/api/auth/refresh":                 true,

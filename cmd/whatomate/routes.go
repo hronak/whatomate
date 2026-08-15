@@ -52,7 +52,6 @@ func appRoutes(app *handlers.App) []route {
 		// Health check
 		{"GET", "/health", app.HealthCheck, authenticatedOnly, true, ""},
 		{"GET", "/ready", app.ReadyCheck, authenticatedOnly, true, ""},
-		{"GET", "/api/embedded-signup/config", app.GetEmbeddedSignupConfig, authenticatedOnly, true, ""},
 		// Auth routes (public, optionally rate-limited)
 		{"POST", "/api/auth/login", app.Login, authenticatedOnly, true, "login"},
 		{"POST", "/api/auth/register", app.Register, authenticatedOnly, true, "register"},
@@ -95,6 +94,11 @@ func appRoutes(app *handlers.App) []route {
 		{"PUT", "/api/api-keys/{id}", app.UpdateAPIKey, [2]string{models.ResourceAPIKeys, models.ActionWrite}, false, ""},
 		{"DELETE", "/api/api-keys/{id}", app.DeleteAPIKey, [2]string{models.ResourceAPIKeys, models.ActionDelete}, false, ""},
 		// Accounts
+		// The embedded-signup config resolves the caller's org credentials, so
+		// it needs the auth middleware to have run: marked public it answers
+		// every caller with a 401 from getOrgID, which the SPA reads as a dead
+		// session and logs the user out.
+		{"GET", "/api/embedded-signup/config", app.GetEmbeddedSignupConfig, [2]string{models.ResourceAccounts, models.ActionRead}, false, ""},
 		{"GET", "/api/accounts", app.ListAccounts, [2]string{models.ResourceAccounts, models.ActionRead}, false, ""},
 		{"POST", "/api/accounts", app.CreateAccount, [2]string{models.ResourceAccounts, models.ActionWrite}, false, ""},
 		{"POST", "/api/accounts/exchange-token", app.ExchangeToken, [2]string{models.ResourceAccounts, models.ActionWrite}, false, ""},
