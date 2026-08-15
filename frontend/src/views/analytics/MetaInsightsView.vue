@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, shallowRef, onMounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -72,7 +72,7 @@ const accounts = ref<MetaAnalyticsAccount[]>([])
 const selectedAccountId = ref<string>('all')
 const accountComboboxOpen = ref(false)
 const activeTab = ref<MetaAnalyticsType>('analytics')
-const analyticsData = ref<MetaAnalyticsResponse[]>([])
+const analyticsData = shallowRef<MetaAnalyticsResponse[]>([])
 const isCached = ref(false)
 
 // Granularity

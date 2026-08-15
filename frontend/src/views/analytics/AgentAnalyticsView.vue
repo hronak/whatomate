@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, shallowRef, onMounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -77,7 +77,7 @@ const usersStore = useUsersStore()
 // roles with the right permission should get the same view.
 const isAdminOrManager = computed(() => authStore.hasPermission('analytics.agents', 'read'))
 
-const analytics = ref<AgentAnalyticsResponse | null>(null)
+const analytics = shallowRef<AgentAnalyticsResponse | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 

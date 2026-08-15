@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, shallowRef, onMounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { GridLayout, GridItem } from 'grid-layout-plus'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -84,7 +84,7 @@ const canDeleteWidget = computed(() => authStore.hasPermission('analytics', 'del
 
 // Widgets state
 const widgets = ref<DashboardWidget[]>([])
-const widgetData = ref<Record<string, WidgetData>>({})
+const widgetData = shallowRef<Record<string, WidgetData>>({})
 
 const isLoading = ref(true)
 const isWidgetDataLoading = ref(false)

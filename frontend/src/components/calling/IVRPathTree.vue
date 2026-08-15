@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineComponent, h, type PropType } from 'vue'
 import { Phone, ArrowRight } from '@lucide/vue'
 
 interface Step {
@@ -41,16 +41,6 @@ const tree = computed(() => {
 
   return root
 })
-</script>
-
-<template>
-  <div class="ivr-path-tree">
-    <TreeNodes :nodes="tree" :depth="0" />
-  </div>
-</template>
-
-<script lang="ts">
-import { defineComponent, h, type PropType } from 'vue'
 
 interface TNode {
   step: {
@@ -173,3 +163,9 @@ const TreeNodes = defineComponent({
   }
 })
 </script>
+
+<template>
+  <div class="ivr-path-tree">
+    <TreeNodes :nodes="tree" :depth="0" />
+  </div>
+</template>
