@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { Component, HTMLAttributes } from 'vue'
-import { Button } from '@/components/ui/button'
+import { Button, type ButtonVariants } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 withDefaults(defineProps<{
   icon?: Component
   label: string
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
+  variant?: ButtonVariants['variant']
+  size?: ButtonVariants['size']
   class?: HTMLAttributes['class']
   disabled?: boolean
   loading?: boolean
