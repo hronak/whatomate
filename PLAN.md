@@ -1,295 +1,186 @@
-# Whatomate Go Refactor Plan
+# Frontend Refactor Plan
 
-*August 2026 — a phased plan to fix the correctness bugs, break up the 62k-line handlers package, and bring the backend in line with idiomatic Go, grounded in five parallel code audits (package structure, error handling, concurrency, `pkg/whatsapp` + tests, idiom sweep).*
+*August 2026 — dependency and component diet for `frontend/`. Principle: lean on Vue 3 language features and the shadcn-vue/reka-ui library already in the tree; a package earns its place only if neither can provide the functionality, and nothing stays installed for a single trivially-writable helper.*
 
-**Key numbers:** 90k lines of Go · 62k of them in `internal/handlers` · ~330 methods on one `App` struct · 7 P0 races/panic paths · 131/224 handlers with no permission check · 1/~636 GORM calls carrying context.
+**Key numbers:** 26 runtime deps, of which **7 are completely unused** and 1 more (`@vueuse/core`) is used for two one-liner helpers · 45 `src/components/ui/` directories, of which **17 are never imported** (2,812 lines) · ~530 lines of dead app code (`useApiMocker`, `usePagination`, `PaginationControls`) · 3 near-identical AlertDialog wrappers · `useCrudState` exists but only 3 of ~20 CRUD views use it.
 
-**Agreed scope:** full domain split of `internal/handlers`; all bug fixes included (RBAC gap too, via staged rollout); `pkg/whatsapp`'s exported API is free to break (no external consumers).
-
----
-
-## Where the code stands
-
-What's **good** is worth protecting: error wrapping discipline is real (66% of `fmt.Errorf` uses `%w`), the logger is dependency-injected with zero globals, the inbound webhook types in `pkg/whatsapp` are fully and correctly modeled, lock ordering in the calling `Manager` is consistent, `go vet` is clean, the `errEnvelopeSent` contract is honored at all ~295 call sites, and no deprecated stdlib survives anywhere.
-
-The debt is concentrated in five places:
-
-- **One mega-package.** `internal/handlers` holds two-thirds of the codebase: 224 HTTP handlers plus, hidden among them, thirteen files of pure business logic (the chatbot engine, SLA processor, webhook dispatcher, template engine, RBAC) that never touch HTTP. Four internal dependency cycles hold it together.
-- **Live concurrency bugs.** `internal/calling` has seven distinct data races and panic paths (an unsafe `safeClose`, unguarded channel-field reassignment, send-on-closed-channel windows), the WebSocket client races two fields between goroutines, and graceful shutdown in `main.go` abandons the hub, the workers, background tasks, and active calls.
-- **No error taxonomy, no context.** Zero exported sentinel errors; a DB outage returns 404 to every client; exactly one of ~636 GORM queries carries a context, so nothing in the request path is cancellable.
-- **An authorization gap.** 131 of 224 handlers perform org scoping but no `resource:action` permission check — route registration in `main.go` explicitly delegates the check to handlers, and most never took the handoff.
-- **A public library that isn't one.** `pkg/whatsapp` flattens Meta's structured errors into strings, builds every outbound payload as `map[string]any` (108 sites), has three constructors instead of options, no retry/backoff in a bulk-messaging product, and imports `internal/templateutil`.
+Every claim below was verified by grepping actual imports in `src/` (not just `package.json`). No code changes have been made yet.
 
 ---
 
-## Phase 0 — Mechanical groundwork & dead code
+## Verification harness (run after every phase)
 
-*3–4 small PRs · a few days · behavior-preserving except one flagged JSON fix*
-
-Cheap, low-risk wins that shrink the codebase before the churn starts, so later diffs are cleaner.
-
-### 0.1 Delete dead code (−1,068 LOC)
-
-- `test/testutil/mocks.go` (385 LOC) — `MockWhatsAppClient`, `MockQueue`, `MockJobHandler` have zero references and can't even be wired in (`App.WhatsApp` is a concrete type). Their signatures have already drifted from the real client.
-- `test/fixtures/models/factories.go` (683 LOC) — zero imports; duplicates the live `test/testutil/fixtures.go`.
-- `test/testutil/db.go:63` `SetupTestDBWithCleanup` — a no-op with zero callers.
-- Unify the drifted twin table lists `cleanupTables` / `TruncateTables` (`db.go:137` vs `:189` — six tables already missing from one copy) into a single list derived next to `runMigrations`.
-
-### 0.2 Modern-idiom sweep
-
-| Change | Scope |
-| --- | --- |
-| **Fix `omitempty` on a struct field (BUG)** | `pkg/whatsapp/analytics.go:193` — `omitempty` never omits struct values; needs `omitzero`. *This changes emitted JSON* — verify no consumer depends on the always-present empty `cursors`. |
-| Delete hand-rolled `strings.Repeat` | `internal/database/postgres.go:223` (`repeatChar`, an O(n²) loop), `internal/utils/phone.go:9` |
-| Adopt `slices`/`maps` | Delete `contains` (`widgets.go:653`, 6 call sites) and `containsEvent` (`webhook_dispatch.go:111`); convert 6 `sort.*` sites (incl. the `Atoi`-per-comparison sort in `pkg/whatsapp/message.go:308`); collapse `message.go:293` key-collection to `slices.Sorted(maps.Keys(m))` |
-| Adopt `cmp.Or` | 96 default-fallback sites; chiefly the config-defaulting run in `internal/config/config.go:230–272`, plus `internal/calling/ivr.go` |
-| `interface{}` → `any` | 22 stragglers, 21 of them in `handlers/embedded_signup_test.go` |
-| Misc | `max()` builtin at `templates.go:745`; ~18 `fmt.Sprintf("%s%s")` cache keys in `cache.go` → `+`; ~10 `for i := range n` conversions; `errors.New` for `fmt.Errorf("%s", …)` at `pkg/whatsapp/types.go:61` |
-
-### 0.3 Naming and hygiene
-
-- Rename `internal/utils` → `internal/privacy` (all three functions are PII masking; 10 importers). In Phase 5 the org-level masking policy (`ShouldMaskPhoneNumbers` / `MaskContactFields` from `organization.go`) joins it.
-- Add a package doc (`doc.go`) to `pkg/whatsapp` — the module's only public library has no package comment.
-- Commit a pinned `.golangci.yml` (matching CI's v2.11.4) enabling at minimum `errcheck`, `staticcheck`, `govet`, `usetesting`, and gopls's `modernize` analyzer — this locks in the sweep so the old idioms can't creep back.
-
----
-
-## Phase 1 — Concurrency & lifecycle correctness
-
-*~6 PRs · 1–2 weeks · fixes live panics, races, and data loss — lands before any package moves so the diffs stay reviewable and cherry-pickable*
-
-### 1.1 `internal/calling` races (P0)
-
-- `safeClose` (`session.go:500`) is check-then-act with no lock — two goroutines can both close the same channel and panic. Replace with a `sync.Once` per signal channel, or close only under the owning mutex, applied at every call site (`audio.go:100`, `bridge.go:225`, `outgoing.go:565`, and the seven transfer paths).
-- `session.DTMFBuffer`, `session.BridgeStarted`, `session.TransferAccepted` are read unlocked from consumer goroutines while other paths reassign or close them under (or without) `session.mu` — a send-on-closed-channel panic window and a stale-channel goroutine leak. Fix by making them accessible only through mutex-guarded accessor methods on `CallSession`; never close `DTMFBuffer`, nil it under the lock.
-- `outgoing.go:217–222` writes six session fields after pion callbacks reading them are already registered — move the writes under `session.mu` (or set fields before registering callbacks).
-- `transfer.go:605` uses a 25 ms `time.Sleep` to "ensure" the hold-music goroutine exited before reusing its track — replace with the done-channel pattern already used at `ivr.go:303`.
-- RTP consumer goroutines (`consumeAudioTrack`, `consumeAudioWithDTMF`, `handleDTMFTrack`) block forever on half-open connections — add `SetReadDeadline` + a ctx-aware exit at all 8 launch sites.
-
-### 1.2 WebSocket hub (P0)
-
-- `client.currentContact` and `client.authenticated` are raced between `ReadPump`, `WritePump`, and the hub goroutine — guard with a small `client.mu` (or `atomic.Bool` + mutex for the contact).
-- Add `Hub.Stop()` — `Run()` is currently unstoppable (needed by Phase 1.4's shutdown).
-- Lower-priority: move `countClients` out from under the write lock; disconnect clients after N consecutive full-buffer drops instead of silently losing messages.
-
-### 1.3 Fire-and-forget goroutines
-
-- `audit.LogAudit` spawns one untracked goroutine per audit event — unbounded under load, silently dropped on shutdown. Replace with a buffered channel + one drain worker owned by `App` and tracked by its WaitGroup.
-- Webhook ingest (`webhook.go`) launches up to 7 untracked goroutines *per Meta POST* — batches spawn hundreds, and shutdown drops messages already 200-ACKed to Meta. Bound with a semaphore (or `errgroup.SetLimit`) and track in `a.wg`.
-- Introduce one `App.spawn(fn)` helper that wraps: `wg.Add/Done`, a detached-but-bounded context, and a `recover()` that logs — today 23 raw `go func()` launches have no recover, so any panic in them kills the process. Migrate the stragglers (`contacts.go:1038`, `templates.go:344`, `middleware.go:222`, the calling callbacks, recording finalizers).
-- `agent_transfers.go:882` silently swallows a panic after `tx.Rollback()` — log and re-panic.
-
-### 1.4 Graceful shutdown, rewritten
-
-Current state in `main.go:317–345`: the hub is never stopped, the campaign-stats subscriber's Redis connection leaks, workers are cancelled but never awaited, `App.WaitForBackgroundTasks()` is called only by tests, active calls just die, and the HTTP server shuts down *after* the workers it feeds. Target order:
-
-```
-server.Shutdown()            // stop accepting; drain in-flight requests
-slaProcessor.Stop()          // stop producers
-workers: cancel + g.Wait()   // errgroup.WithContext replaces the bare spawn loops
-app.WaitForBackgroundTasks() // webhook dispatch, async sends, audit drain
-subscriber.Close()           // keep it on App so it's reachable
-callManager.Shutdown(ctx)    // end calls cleanly, finalize recordings
-hub.Stop()
+```bash
+cd frontend
+npm run typecheck        # vue-tsc --noEmit
+npm run lint
+npm run build            # catches dynamic-import/chunk breakage
+npx playwright test      # against `make dev` on :3000
 ```
 
-Also: remove the `lo.Fatal` inside the listener goroutine (`main.go:275` — `os.Exit` bypasses all of the above) and give `runWorker` the same await treatment.
-
-### 1.5 Queue semantics (data loss)
-
-- **The retry policy is inverted.** A permanently-missing campaign returns an error → redelivered every 5 minutes forever; a transient send failure returns `nil` → never retried. Fix the return-value convention, add an `XPENDING` delivery-count check and a dead-letter stream for poison messages.
-- Make the error backoff ctx-aware (`redis.go:175` blocks shutdown up to 1s), run `claimPendingMessages` on a ticker rather than once at startup, and let an in-flight job finish before the consumer exits.
-
-### 1.6 Unchecked writes
-
-- 24 GORM `Save/Create/Updates/Exec` statements never read `.Error` — contact assignment, call-log transitions, campaign counters silently fail. Check them all (the new `errcheck` lint keeps them checked).
-- Redis `Del` results on cache *invalidation* paths (6 sites in `cache.go`, plus refresh-token revocation at `auth.go:507`) must be checked and logged — a failed invalidation serves stale permissions or a revoked session.
-- `redirectTokens` (`custom_actions.go:69`) is the package's only mutable global: an in-memory token store that leaks unredeemed tokens forever and breaks under multi-instance deployment. Move it to Redis with TTL.
+Playwright is the only frontend test layer, so it is the safety net for all of this. Phases are ordered so each is independently shippable as a small, single-concern PR (per CONTRIBUTING.md).
 
 ---
 
-## Phase 2 — Error model & context propagation
+## Phase 1 — Remove dead packages (zero code risk)
 
-*3–4 PRs · ~1 week · establishes the conventions every later phase builds on*
+None of these are imported anywhere in `src/`, `e2e/`, or config (verified by full-text grep, not just `import` statements):
 
-### 2.1 A real error taxonomy
+| Package | Evidence | Notes |
+| --- | --- | --- |
+| `@tanstack/vue-query` | Only reference is `app.use(VueQueryPlugin)` in `src/main.ts:3` — **zero** `useQuery`/`useMutation` calls exist | Delete the two lines in `main.ts`, drop the dep. All data fetching already goes through `services/api.ts` + Pinia. |
+| `vee-validate` | Only used by the unused `ui/form/` dir (Phase 2) and `vite.config.ts` manualChunks | Forms are hand-rolled with `Input`/`Label`; validation is server-side envelopes. |
+| `@vee-validate/zod` | Zero imports | |
+| `zod` | Only `vite.config.ts` manualChunks | |
+| `dompurify` | Zero references anywhere | |
+| `vaul-vue` | Only used by the unused `ui/drawer/` dir (Phase 2) | |
+| `vuedraggable` | Zero references (drag needs are served by vue-flow and grid-layout-plus) | |
 
-- **`pkg/whatsapp`:** make `*MetaAPIError` implement `error` (plus `Unwrap` and a `StatusCode` field) instead of flattening it to a string at `types.go:51–64`. Add sentinels mapped from Meta codes — `ErrRateLimited`, `ErrInvalidToken`, `ErrReengagementRequired`, `ErrTemplateNotFound` — so the worker and handlers can branch with `errors.Is/As`. Today `errors.As` appears zero times in the repo because there has been nothing to assert against.
-- **Handlers:** introduce a small set of app sentinels (`errNotFound`, `errForbidden`, typed validation errors) and one `a.sendError(r, err)` mapper. `findByIDAndOrg` (64 call sites) currently returns 404 for *any* DB error — a Postgres outage masquerades as "not found"; distinguish `gorm.ErrRecordNotFound` from everything else.
-- Stop leaking `err.Error()` into API responses (32 sites) — the mapper returns generic client text and logs the detail.
-- Compare `redis.Nil` with `errors.Is`, not `==` (`queue/redis.go:167`).
+Dev dependencies to drop — CLAUDE.md already documents there is no vitest config or script; Playwright is the only test runner:
 
-### 2.2 Context through the stack
+- `vitest`, `@vue/test-utils`, `happy-dom` (zero references in any config or test file)
+- Keep `pg` + `@types/pg` — used by `e2e/global-cleanup.ts` and several specs.
 
-The repo has the pattern exactly inverted: `pkg/whatsapp` is ctx-first on 55 of 67 methods (exemplary), but its callers feed it `context.Background()` — 96 non-test occurrences — and 635 of ~636 GORM queries carry no context at all. Nothing in the request path is cancellable.
+Also in this phase:
 
-- `fasthttp.RequestCtx` implements `context.Context` — handlers derive a ctx from the request once and pass it down. Services take `ctx` as the first parameter.
-- Do the centralized fixes now: the 20 `context.Background()` sites in `cache.go`, the LLM calls in `chatbot_processor.go` (the longest-latency requests in the codebase, currently built with `http.NewRequest` and no deadline), the OAuth calls in `sso.go`, and `messages.go:866`'s bare `http.Get` on a *user-supplied URL* with no timeout (route it through the shared client + the existing SSRF guard).
-- The long tail of `.WithContext` on GORM chains is threaded per-domain *during* Phase 5 extraction, so each signature is touched once, not twice.
+- `vite.config.ts`: delete the `'validation': ['vee-validate', '@vee-validate/zod', 'zod']` manualChunks entry; remove `@vueuse/core` from the `'utils'` entry once Phase 3 lands.
+- `src/main.ts`: remove the VueQueryPlugin import + `app.use`.
 
-### 2.3 Log once, at the boundary
+## Phase 2 — Delete never-imported code
 
-`pkg/whatsapp` logs 79 times and also returns the error — every failed send is logged twice. Libraries return errors; remove the logging (or keep `Debug`-only behind an option) and let handlers log at the terminal `SendErrorEnvelope` site, which the codebase already does correctly 273 times. Also: replace the `fmt.Printf` migration progress bar in `internal/database/postgres.go:151–218` — the only non-main code writing to stdout — with the injected logger, and rebalance the 666-Error/68-Warn skew so alerts mean something.
+### 2a. Unused `src/components/ui/` directories (17 dirs, 2,812 lines)
 
----
+No file outside `components/ui/` imports these (checked app-wide, including relative and cross-`ui` imports):
 
-## Phase 3 — `pkg/whatsapp` redesign
+```
+aspect-ratio  calendar  context-menu  drawer  form  hover-card
+menubar  navigation-menu  number-field  pagination  pin-input
+resizable  sheet  slider  toast  toggle  toggle-group
+```
 
-*4–5 PRs · 1–1.5 weeks · self-contained, can run in parallel with Phases 1–2 · API breakage approved*
+Notes and traps:
 
-### 3.1 Construction & transport
+- `toggle` is imported **only** by `toggle-group`, which is itself unused — delete both together.
+- `calendar` is unused but `range-calendar` **is used** (by `shared/DateRangePicker.vue`) and does not import `calendar` — keep `range-calendar`.
+- `toast` (10 files incl. `use-toast.ts`) is fully superseded by `vue-sonner` (58 importing files via `useAppToast`) — delete the dir, keep vue-sonner.
+- `drawer` and `form` are what pin `vaul-vue` and `vee-validate` — delete them in the same PR as (or before) Phase 1.
+- Any of these can be re-synced from shadcn-vue later if a feature needs them (`components.json` stays); the CLAUDE.md rule about stripping upstream `text-sm`/`text-xs` applies on re-sync.
 
-- Collapse the three constructors into `New(opts ...Option)` with `WithTimeout`, `WithBaseURL`, `WithHTTPClient`, `WithLogger` — today there is no way to set timeout *and* base URL together, which is why `messages_test.go:131` silently talks to real `graph.facebook.com`. Unexport `HTTPClient` and `Log` (mutable exported fields on a shared client are racy by construction).
-- Add retry with exponential backoff + jitter honoring `Retry-After` and Meta's rate-limit codes. This is a bulk-messaging product with zero backoff anywhere.
-- Route the five bypass methods (`UploadMedia`, `DownloadMedia`, `ResumableUpload`, `ExchangeCodeForToken`, `UpdateFlowJSON`) through `doRequest` so all Meta errors surface uniformly; accept 2xx rather than exactly 200.
-- Fixes riding along: hardcoded multipart boundary + unescaped filename header (`client.go:312–325` → `mime/multipart`); `Handle[:20]` slice panic (`client.go:518`); silent `("", nil)` success (`call.go:130`); `client_secret` in the URL query string (`client.go:602` → POST form body); raw `"POST"` literals → `http.MethodPost`.
+After deletion the `ui/` surface drops from 45 dirs to 28, all with real consumers.
 
-### 3.2 Types over maps
+### 2b. Dead app code (~530 lines)
 
-- Replace the 108 `map[string]any` outbound payload sites with typed request structs mirroring the (already excellent) inbound `WebhookPayload` tree. Typos in wire keys become compile errors; payloads become unit-testable.
-- Turn the ~15 stringly-typed enums (template status/category, message type, granularity, OTP type…) into named string types with constants, following the `AnalyticsType` model already in the package.
-- Collapse duplication with the generics the module already uses: one `listResponse[T]` for the 8+ `{Data []T}` envelopes, one ID-response type for the 10 redeclared `{ID string}` structs, and adopt `doJSON[T]` (currently used 3 times) at the ~30 hand-rolled unmarshal sites.
-- Kill the variadic-as-optional signatures: `SendTextMessage(…, replyToMsgID ...string)` and `ButtonURLParamsToComponents(…, templateButtons ...[]any)` → options structs; `TemplateSubmission.Buttons []any` → `[]TemplateButton`.
+| File | Lines | Evidence |
+| --- | --- | --- |
+| `src/composables/useApiMocker.ts` | 214 | Zero consumers |
+| `src/composables/usePagination.ts` | 217 | Sole consumer is `PaginationControls.vue`, which is itself unused |
+| `src/components/shared/PaginationControls.vue` | 96 | Zero consumers outside `shared/index.ts` (live pagination is `useSearchPagination` + `useInfiniteScroll`) |
 
-### 3.3 Make it actually standalone, and actually used
+Remove their exports from `src/composables/index.ts` / `src/components/shared/index.ts`.
 
-- Move `templateutil.ExtParamNames` into the package — `pkg/` importing `internal/` is the one thing preventing genuine reuse. Its tests stop importing `test/testutil` for a nop logger.
-- Fix the bypasses in `internal/`: `flows.go` (4 sites) and `worker.go:49` call `whatsapp.New()`, which hardcodes the production base URL and silently ignores the `whatsapp.base_url` config — inject the configured client instead. `contacts.go:1056` builds a Graph API reaction request inline → becomes `client.SendReaction`. `accounts.go`'s private `fetchMetaJSON` → the typed client methods that already exist.
-- Split the 470-line `analytics.go` into its four sub-domains; fold the 16-line `profile_extras.go` away.
+## Phase 3 — Replace tiny-usage packages with short code
 
----
+### `@vueuse/core` → ~20 lines in `src/lib/utils.ts` (remove the package)
 
-## Phase 4 — Declarative authorization & HTTP boilerplate
+Actual usage across the entire app is exactly two functions:
 
-*2–3 PRs + a shadow-enforcement release · closes the RBAC gap in one artifact (SECURITY)*
+- `useDebounceFn` — 7 call sites (`useSearchPagination.ts` + 6 views' search boxes)
+- `onKeyStroke` — 1 call site (`chat/MediaViewerDialog.vue`, Escape/arrow keys)
 
-### 4.1 A route table that owns permissions
+Replacements, leveraging plain TS + Vue lifecycle:
 
-The 131-handler permission gap should not be fixed with 131 individual edits. Replace the 233 imperative registrations in `main.go` with a declarative table:
-
-```go
-type route struct {
-    method, path string
-    handler      fastglue.FastRequestHandler
-    permission   string // "campaigns:read"; "" = authenticated-only
-    public       bool   // replaces the hand-maintained allowlist
+```ts
+// lib/utils.ts
+export function debounce<T extends (...args: any[]) => void>(fn: T, ms = 300) {
+  let t: ReturnType<typeof setTimeout>
+  return (...args: Parameters<T>) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms) }
 }
 ```
 
-A single wrapper enforces the permission before invoking the handler; the public-path allowlist in the auth `Before` hook derives from the same table, so adding a public endpoint stops being a two-place edit. The table survives Phase 5 unchanged (it references handler funcs wherever they end up), and route permission strings can be asserted against the frontend's `meta.permission` strings in a test.
-
-> **This is a visible behavior change.** Under-privileged callers who today succeed will start receiving 403s. Roll out in two steps: a release where the wrapper only *logs* would-deny decisions (shadow enforcement) while each route is assigned its correct `resource:action`, then flip to enforcing. Coordinate with the frontend permission map.
-
-### 4.2 Collapse the handler boilerplate
-
-- With the table enforcing permissions, the 41 handlers that hand-roll `requireAuth`'s exact 12-line body and the 149 doing manual org extraction collapse to a single `getOrgAndUserID` call each.
-- Adopt `listEnvelope` at the ~22 list endpoints still building pagination maps inline; adopt `decodeRequest` at the 7 raw `r.Decode` sites; the Phase 2 error mapper absorbs most of the 874 hand-written `SendErrorEnvelope` branches as files get touched.
-- Extract shared, exported context-key constants (`organization_id`, `user_id`, …) used by `middleware`, `handlers`, and `testutil` — today they're string literals on both sides, and a typo in a test key silently skips authorization instead of failing.
-
----
-
-## Phase 5 — Domain package split
-
-*10–12 PRs · 3–4 weeks · the structural core of the refactor · each step keeps the build green and tests passing*
-
-### 5.1 Target layout
-
-Domain-named packages, one level deep, no layer names — `main.go` stays the wiring point. The existing well-factored packages (`calling`, `assignment`, `queue`, `websocket`, `audit`, `crypto`…) already follow this shape; the split brings `handlers` in line rather than inventing a new architecture:
-
-```
-internal/
-  httpd/       thin HTTP layer: route table, envelope/decode helpers,
-               error mapper, per-domain handler structs
-  authn/       login, JWT/refresh, SSO, API keys, cookies
-  rbac/        permissions + roles + the permission cache (out of cache.go)
-  orgs/        organizations, users, teams, audit-log queries
-  privacy/     PII masking policy (Phase 0 rename + org masking rules)
-  accounts/    WhatsApp account config, embedded signup, templates,
-               catalog, WhatsApp Flows, business profile
-  messaging/   outbound send core: SendOutgoingMessage, media,
-               broadcasts, template rendering (absorbs template_engine)
-  inbox/       contacts, conversations, notes, tags, canned responses
-  chatbot/     processor + graph runner + graph types + AI providers
-               + flow migration (the cycle disappears: one domain)
-  transfers/   agent transfers + SLA processor (same lifecycle domain)
-  inbound/     Meta webhook ingest + fan-out (message/status/call routing)
-  campaigns/
-  webhookout/  outbound webhook CRUD + dispatch engine
-  analytics/   widgets, agent analytics, meta analytics
-  dataio/      import/export + custom actions
+```ts
+// composables/useKeydown.ts (~10 lines)
+export function useKeydown(handler: (e: KeyboardEvent) => void) {
+  onMounted(() => window.addEventListener('keydown', handler))
+  onUnmounted(() => window.removeEventListener('keydown', handler))
+}
 ```
 
-### 5.2 Breaking the four cycles
+Then drop `@vueuse/core` and its manualChunks entry. (If the team would rather keep vueuse as a standing utility belt, that's defensible — but at 2 functions across 8 files it currently fails the "package for a single feature" test this refactor is applying.)
 
-| Cycle | Resolution |
+### `vue-chartjs` → one ~40-line wrapper component (optional, low priority)
+
+All chart rendering already funnels through `src/lib/charts.ts`, which re-exports `Line`, `Bar`, `Pie`, `Doughnut` from vue-chartjs to exactly 3 views. vue-chartjs is a thin lifecycle wrapper around chart.js; a single generic `<ChartCanvas type="line" :data :options>` component (canvas ref + `new Chart()` in `onMounted`, `watch` for data with `chart.update()`, `onUnmounted` destroy, `shallowRef` for the instance) replaces it with no consumer churn beyond the import in `charts.ts`. Do this last — it's the only replacement in the plan that trades a working dep for new code that can regress (chart reactivity edge cases), and the win is small.
+
+### Explicit keep list (earn their place)
+
+| Package | Why it stays |
 | --- | --- |
-| `chatbot_processor ↔ chatbot_graph_runner` | Same domain — they merge into `internal/chatbot` and the cycle ceases to exist. |
-| `chatbot_processor ↔ agent_transfers` | Both directions are service calls, not HTTP. `chatbot` depends on a small consumer-defined `TransferService` interface (create-to-queue/team, has-active); `transfers`' reverse needs (`isWithinBusinessHours` → `orgs`, `sendAndSaveTextMessage` → `messaging`) move to packages both may import. |
-| `agent_transfers ↔ sla_processor` | SLA deadlines are part of the transfer lifecycle — one `transfers` package. |
-| `contacts ↔ messages` | Extract the outbound-send core into `messaging`; both `inbox` handlers and everything else (10 domains call `SendOutgoingMessage` today) depend on it downward. |
+| `vue`, `vue-router`, `pinia`, `vue-i18n` | Framework core; i18n is Crowdin-synced across locales |
+| `axios` | `services/api.ts` (1,256 lines) depends on its interceptor model for CSRF injection, org header, and the single-use refresh-token mutex + Web Locks flow — CLAUDE.md explicitly says don't touch that. A fetch rewrite is high-risk, zero-feature. |
+| `reka-ui` + `clsx` + `tailwind-merge` + `class-variance-authority` | The shadcn-vue foundation; cva/clsx/tw-merge power `cn()` and variants in every `ui/` component |
+| `@lucide/vue` | 140 importing files |
+| `vue-sonner` | 58 importing files (the app's only toast system after `ui/toast` is deleted) |
+| `@vue-flow/*` (4 pkgs) | Chatbot + IVR flow builders; a canvas graph editor is not hand-writable |
+| `chart.js` | Real charting engine (analytics, dashboard) |
+| `grid-layout-plus` | Dashboard drag/resize grid — real functionality, 1 consumer but not replicable in short code |
+| `vue3-emoji-picker` | Chat composer; already lazy-loaded in `ChatView.vue`. An emoji dataset + picker is not "short code" — keep. |
+| `@playwright/test`, `pg`, `@types/pg` | E2E layer |
 
-Misplaced helpers get correct homes on the way: `resolveWhatsAppAccountByID` → `accounts` (and loses its `*fastglue.Request` parameter — it's account resolution, not a handler); `getMimeTypeFromExtension` → stdlib `mime.TypeByExtension`; `sanitizeFilename` → `storage`; `generateSlug`, `splitPermission`/`splitPermissionKey` dedup → their owning domains.
+Net result: runtime deps go from 26 → 18 (17 if the vue-chartjs swap happens).
 
-### 5.3 Dissolving the god object
+## Phase 4 — Consolidate duplicated shared components
 
-`App` (13 dependencies, ~330 methods) becomes per-domain structs with narrow constructors — `chatbot.Engine` needs the DB, cache, WhatsApp client, and a `TransferService`; `analytics.Handler` needs the DB and nothing else. `main.go` constructs each and hands them to the route table. The unexported `App.wg` becomes the Phase 1 `spawn` helper's runner, owned by `main` and shared by injection. `cache.go` splits along its two identities: the permission engine goes to `rbac`; each cached entity's getter/invalidator pair moves to its domain (the cache-invalidation-on-write coupling documented in CLAUDE.md becomes package-local instead of package-global).
+### Merge the three AlertDialog wrappers into one
 
-### 5.4 Migration order
+`ConfirmDialog.vue` (69 lines, 23 consumers), `DeleteConfirmDialog.vue` (73 lines, 17 consumers), and `UnsavedChangesDialog.vue` (38 lines, 12 consumers) are structurally identical AlertDialog shells differing only in defaults:
 
-Leaf-first, so each extraction only depends on already-extracted packages. Each step is one PR: move files, add ctx parameters (finishing Phase 2.2's long tail), move the tests alongside, keep `make test` and the e2e suite green.
+- `DeleteConfirmDialog` ≡ `ConfirmDialog` with `variant="destructive"`, delete-flavored default strings, and an `itemName` convenience prop. Fold `itemName` into `ConfirmDialog`, delete `DeleteConfirmDialog`, and mechanically update the 17 call sites (or keep a 5-line re-export shim during migration).
+- `UnsavedChangesDialog` additionally uses `open` as a plain prop with `stay`/`leave` emits instead of `defineModel` + `confirm`/`cancel`. Either express it as `<ConfirmDialog>` with i18n'd defaults, or keep it as a ~15-line specialization *of* ConfirmDialog. Its i18n usage (`$t(...)`) should be adopted by the merged component — the current ConfirmDialog/DeleteConfirmDialog hardcode English strings, which violates the i18n rule in CLAUDE.md anyway.
 
-1. `privacy`, then `rbac` (splitting `cache.go`) — everything depends on these
-2. `messaging` (breaks `contacts ↔ messages`)
-3. `webhookout`, `analytics`, `campaigns`, `dataio` — near-leaf, cheap wins to validate the pattern
-4. `chatbot` (absorbs the processor/runner cycle), then `transfers` (+SLA), wiring the interface between them in `main`
-5. `inbound` (webhook ingest fan-out over the now-extracted domains), `accounts`, `inbox`, `authn`/`orgs`
-6. Finally the thin `httpd` layer and the handler-struct split; `main.go` shrinks to config, construction, table, shutdown
+One component, one behavior (loading state, escape/cancel semantics), and future fixes land once instead of three times.
 
----
+### Smaller cleanups
 
-## Phase 6 — Testing hardening
+- `IconButton.vue` is a reasonable Tooltip+Button composition (20 consumers) — keep, but it duplicates the `variant`/`size` prop unions from `buttonVariants`; type them with `VariantProps<typeof buttonVariants>` from cva instead of hand-copied literals.
+- `Spinner.vue` (37 consumers): fine to keep as the single loading primitive; ensure new code uses it rather than ad-hoc `Loader2` spins.
+- `useSearchPagination` (10 consumers) is the surviving pagination pattern — document it in `shared/types.ts` or ARCHITECTURE notes as the default so `usePagination`-style reinvention doesn't come back.
 
-*~1 week focused + ongoing · runs interleaved with Phases 1 and 5*
+## Phase 5 — Actually use the abstractions that exist (`useCrudState` rollout)
 
-- **Test `internal/calling`.** 4,907 LOC of WebRTC/IVR/transfer state machines — the most concurrency-heavy code in the repo — has zero tests. Write them *with* the Phase 1 race fixes (the fixes make the package testable; `testing/synctest` makes the timer/timeout logic deterministic), and run the package under `-race` in CI.
-- **Kill the sleeps.** Of 14 `time.Sleep` sites in tests, 12 are synchronization-by-luck: the `embedded_signup_test.go` pair waits 50 ms for an async audit write (use `app.WaitForBackgroundTasks()` — it exists for exactly this); the negative-assertion sleeps in `hub_gaps_test.go` and `pubsub_test.go` can only produce false confidence (rewrite with `synctest`); the queue teardown sleeps become real synchronization.
-- **Make skipping loud.** Nearly all 1,283 tests silently skip without `TEST_DATABASE_URL`/`TEST_REDIS_URL`, so a bare `go test ./...` prints PASS while running almost nothing. Add a `TestMain` that prints a prominent skip summary; make the Redis helper skip like the DB helper does instead of returning nil.
-- **Cover the wiring.** Handler tests invoke methods directly, so no test ever exercises route registration, middleware chains, or the Phase 4 permission table. Add a small routed integration suite that boots the real fastglue router and asserts auth/permission behavior per route — this is the regression test for the RBAC fix.
-- Adopt `t.Context()` (currently used once) and delete the homegrown `testutil.TestContext`; convert the near-duplicate linear tests to tables opportunistically as files are touched — a wholesale rewrite of 941 test funcs is not worth its diff.
+CLAUDE.md says "Reuse `useCrudState` for list/dialog/delete state" — but only **3 of ~20** eligible CRUD list views do (`useCrudState` 131 lines; adopters vs. hand-rolled checked by grep). The settings/chatbot list views (`TagsView`, `WebhooksView`, `TeamsView`, `UsersView`, `RolesView`, `TemplatesView`, `CampaignsView`, `ContactsView`, `APIKeysView`, `CannedResponsesView`, `AccountsView`, `KeywordsView`, `AIContextsView`, `ChatbotFlowsView`, `CustomActionsView`, `FlowsView`, …) each re-derive the same refs: dialog open/close, edit-vs-create, delete-confirm target, submitting flags.
 
----
+Approach:
 
-## Sequencing, verification, non-goals
+1. Audit `useCrudState`'s API against what the hand-rolled views actually need (e.g. does it cover the delete-confirm + `isSubmitting` + toast-on-error shape most views repeat?). Extend it once if needed.
+2. Convert views mechanically, one PR per 3–5 views, running the matching Playwright specs per batch (`e2e/tests/settings/*.spec.ts` largely map 1:1 to these views).
+3. Pair each conversion with `CrudFormDialog` (currently 3 consumers) and the merged ConfirmDialog where the view's markup allows.
 
-### Why this order
+Expected effect: each converted view sheds 40–80 lines of state plumbing; behavior converges (e.g. consistent "dialog stays open on failed submit" semantics).
 
-Bugs before structure: the Phase 1 fixes are small, reviewable, cherry-pickable diffs — burying them inside package moves would make them unreviewable and unbisectable. Phase 2 sets the error/ctx conventions so extracted packages are born correct rather than migrated twice. Phase 3 is independent and parallelizable. Phase 4 lands before Phase 5 because the route table makes the handler layer thin enough to move, and the shadow-enforcement window needs calendar time anyway. The ctx long tail deliberately rides along with Phase 5 so every signature is touched exactly once.
+This phase is the largest by touched-file count but the most mechanical; it is deliberately after the deletions so conversions don't churn files that reference soon-dead code.
 
-### Verification, every phase
+## Phase 6 — Vue 3 idiom pass (small, opportunistic)
 
-- `make lint` (golangci-lint v2, now with the pinned config) and `go vet ./...`
-- Full suite with infrastructure: `TEST_DATABASE_URL=… TEST_REDIS_URL=… gotestsum -- -race -p 1 ./...` — never trust a green run without the env vars
-- Playwright e2e against `make dev`; `make test-e2e-embedded` before each release-bound merge
-- Per `CONTRIBUTING.md`: issues first for each phase, small single-concern conventional-commit PRs
+- `src/components/calling/IVRPathTree.vue` is the **only** non-`<script setup>` component left — convert to `<script setup>`.
+- `defineModel` is already the norm (see ConfirmDialog) — sweep for remaining `props.modelValue` + `emit('update:modelValue')` pairs during Phase 4/5 conversions rather than as a standalone pass.
+- Chart/flow data objects handed to chart.js or vue-flow should be `shallowRef`/`markRaw` where they aren't already — deep reactivity on chart datasets is wasted work (check `DashboardView.vue`, the two analytics views, `useFlowGraphSimulation.ts`).
+- Lazy-loading is already used well (emoji picker, route-level splitting) — no action.
 
-### Explicitly out of scope
+## Not in scope (explicitly considered and rejected)
 
-- **No migration off fastglue/fasthttp.** The stdlib `ServeMux` is the modern default for new code, but the middleware, envelope, and WebSocket layers are built on fasthttp — a router swap is a rewrite, not a refactor, and clears no cost bar here.
-- **No GORM replacement and no migration-file system** — AutoMigrate stays, per the project's existing convention.
-- **Don't flatten `internal/`.** The single-package-flat default is for small tools; a multi-domain service is exactly the case for one-level domain packages, which is what Phase 5 produces.
-- **No mocking frameworks or BDD.** The `httptest`-server style (99 sites) is the right pattern and stays; the functional-options fixture builders in `testutil` are already exemplary.
-- **Preserve what works:** the `errEnvelopeSent` contract (extend the mapper around it, don't replace it), the inbound webhook type tree, logger injection, the calling package's lock-ordering discipline, and `import_export.go`'s declarative config registry — which is the in-repo model the route table imitates.
+- **Replacing axios with `fetch`** — the refresh-mutex/CSRF interceptor machinery is load-bearing and documented as do-not-simplify.
+- **Splitting `ChatView.vue` (2,490 lines) and other monolith views** — worthwhile, but it's a feature-architecture refactor, not a dependency/component diet; do it separately so these PRs stay single-concern.
+- **Replacing `grid-layout-plus` or `vue3-emoji-picker` with hand-written code** — both fail the "short code" test in the other direction.
 
-### Rough footprint
+## Suggested PR sequence
 
-| Phase | PRs | Elapsed | Risk |
-| --- | --- | --- | --- |
-| 0 Groundwork | 3–4 | days | low |
-| 1 Concurrency & lifecycle | ~6 | 1–2 wk | medium — touches live call paths; race tests gate it |
-| 2 Errors & context | 3–4 | ~1 wk | low |
-| 3 pkg/whatsapp | 4–5 | 1–1.5 wk | low — httptest coverage is strong |
-| 4 Authorization | 2–3 + shadow release | ~1 wk + soak | visible — 403 behavior change, staged rollout |
-| 5 Package split | 10–12 | 3–4 wk | medium — mechanical but wide; green-per-PR discipline |
-| 6 Testing | interleaved | ~1 wk focused | low |
+| PR | Content | Risk |
+| --- | --- | --- |
+| 1 | Phase 2a ui-dir deletions + Phase 1 package removals + `vite.config.ts`/`main.ts` cleanup (one PR — the dirs pin the packages) | None (dead code); `npm run build` + full e2e |
+| 2 | Phase 2b dead composables/components | None |
+| 3 | Phase 3 `@vueuse/core` → local helpers | Low; e2e covers the 6 search boxes + media viewer keys |
+| 4 | Phase 4 dialog merge | Medium (52 call sites total, mechanical); full e2e |
+| 5–8 | Phase 5 `useCrudState` rollout in batches | Medium; per-view specs |
+| 9 | Phase 6 idiom pass + (optional) vue-chartjs swap | Low/Medium |
 
-Roughly two months of focused effort end-to-end, comfortably splittable across contributors after Phase 2 lands (Phases 3, 4, and the early Phase 5 extractions are independent).
+After PR 1, also confirm the embedded artifact: `make test-e2e-embedded` (the dev-server e2e run does not exercise the production chunking that `manualChunks` edits affect).
