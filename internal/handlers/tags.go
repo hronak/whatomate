@@ -84,21 +84,21 @@ func (a *App) CreateTag(r *fastglue.Request) error {
 	}
 
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "name is required", nil, "")
+		return a.sendError(r, invalidRequest("name is required"))
 	}
 
 	if len(req.Name) > 50 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "name must be at most 50 characters", nil, "")
+		return a.sendError(r, invalidRequest("name must be at most 50 characters"))
 	}
 
 	if !models.IsValidTagColor(req.Color) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "invalid color. Valid colors: blue, red, green, yellow, purple, gray", nil, "")
+		return a.sendError(r, invalidRequest("invalid color. Valid colors: blue, red, green, yellow, purple, gray"))
 	}
 
 	// Check for duplicate name
 	var existing models.Tag
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.Name).First(&existing).Error; err == nil {
-		return r.SendErrorEnvelope(fasthttp.StatusConflict, "Tag with this name already exists", nil, "")
+		return a.sendError(r, conflict("Tag with this name already exists"))
 	}
 
 	tag := models.Tag{
@@ -129,12 +129,12 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 	tagNameEncoded := r.RequestCtx.UserValue("name").(string)
 	tagName, err := url.PathUnescape(tagNameEncoded)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid tag name", nil, "")
+		return a.sendError(r, invalidRequest("Invalid tag name"))
 	}
 
 	var tag models.Tag
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, tagName).First(&tag).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Tag not found", nil, "")
+		return a.sendError(r, notFound("Tag"))
 	}
 
 	var req TagRequest
@@ -144,17 +144,17 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 
 	// Validate color if provided
 	if req.Color != "" && !models.IsValidTagColor(req.Color) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "invalid color. Valid colors: blue, red, green, yellow, purple, gray", nil, "")
+		return a.sendError(r, invalidRequest("invalid color. Valid colors: blue, red, green, yellow, purple, gray"))
 	}
 
 	// Check if renaming and new name already exists
 	if req.Name != "" && req.Name != tag.Name {
 		if len(req.Name) > 50 {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "name must be at most 50 characters", nil, "")
+			return a.sendError(r, invalidRequest("name must be at most 50 characters"))
 		}
 		var existing models.Tag
 		if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.Name).First(&existing).Error; err == nil {
-			return r.SendErrorEnvelope(fasthttp.StatusConflict, "Tag with this name already exists", nil, "")
+			return a.sendError(r, conflict("Tag with this name already exists"))
 		}
 	}
 
@@ -238,12 +238,12 @@ func (a *App) DeleteTag(r *fastglue.Request) error {
 	tagNameEncoded := r.RequestCtx.UserValue("name").(string)
 	tagName, err := url.PathUnescape(tagNameEncoded)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid tag name", nil, "")
+		return a.sendError(r, invalidRequest("Invalid tag name"))
 	}
 
 	var tag models.Tag
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, tagName).First(&tag).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Tag not found", nil, "")
+		return a.sendError(r, notFound("Tag"))
 	}
 
 	// Remove tag from all contacts that have it

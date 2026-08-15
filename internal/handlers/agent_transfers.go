@@ -105,7 +105,7 @@ type AgentTransferResponse struct {
 func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check permissions - users with write permission have full access (like admin)
@@ -400,25 +400,25 @@ func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req CreateAgentTransferRequest
 	if err := json.Unmarshal(r.RequestCtx.PostBody(), &req); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid request body", nil, "")
+		return a.sendError(r, invalidRequest("Invalid request body"))
 	}
 
 	if req.ContactID == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "contact_id is required", nil, "")
+		return a.sendError(r, invalidRequest("contact_id is required"))
 	}
 
 	contactID, err := uuid.Parse(req.ContactID)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid contact_id", nil, "")
+		return a.sendError(r, invalidRequest("Invalid contact_id"))
 	}
 
 	// Get contact
-	contact, err := findByIDAndOrg[models.Contact](a.DB, r, contactID, orgID, "Contact")
+	contact, err := findByIDAndOrg[models.Contact](a, r, contactID, orgID, "Contact")
 	if err != nil {
 		return nil
 	}
@@ -430,7 +430,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 		Count(&existingCount)
 
 	if existingCount > 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusConflict, "Contact already has an active transfer", nil, "")
+		return a.sendError(r, conflict("Contact already has an active transfer"))
 	}
 
 	// Get chatbot settings to check AssignToSameAgent (use cache)
@@ -441,12 +441,12 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	if req.TeamID != nil && *req.TeamID != "" {
 		parsedTeamID, err := uuid.Parse(*req.TeamID)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid team_id", nil, "")
+			return a.sendError(r, invalidRequest("Invalid team_id"))
 		}
 		// Verify team exists and is active
 		var team models.Team
 		if err := a.DB.Where("id = ? AND organization_id = ? AND is_active = ?", parsedTeamID, orgID, true).First(&team).Error; err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Team not found or inactive", nil, "")
+			return a.sendError(r, invalidRequest("Team not found or inactive"))
 		}
 		teamID = &parsedTeamID
 	}
@@ -458,15 +458,15 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	if req.AgentID != nil && *req.AgentID != "" {
 		parsedAgentID, err := uuid.Parse(*req.AgentID)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid agent_id", nil, "")
+			return a.sendError(r, invalidRequest("Invalid agent_id"))
 		}
 		// Verify agent exists and is available
-		agent, err := findByIDAndOrg[models.User](a.DB, r, parsedAgentID, orgID, "Agent")
+		agent, err := findByIDAndOrg[models.User](a, r, parsedAgentID, orgID, "Agent")
 		if err != nil {
 			return nil
 		}
 		if !agent.IsAvailable {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Agent is currently away", nil, "")
+			return a.sendError(r, invalidRequest("Agent is currently away"))
 		}
 		agentID = &parsedAgentID
 	} else if teamID != nil && a.Assigner != nil {
@@ -628,7 +628,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	transferID, err := parsePathUUID(r, "id", "transfer")
@@ -636,13 +636,13 @@ func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 		return nil
 	}
 
-	transfer, err := findByIDAndOrg[models.AgentTransfer](a.DB, r, transferID, orgID, "Transfer")
+	transfer, err := findByIDAndOrg[models.AgentTransfer](a, r, transferID, orgID, "Transfer")
 	if err != nil {
 		return nil
 	}
 
 	if transfer.Status != models.TransferStatusActive {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Transfer is not active", nil, "")
+		return a.sendError(r, invalidRequest("Transfer is not active"))
 	}
 
 	// Update transfer
@@ -685,7 +685,7 @@ func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check permissions - users with write permission can assign transfers to others
@@ -704,11 +704,11 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 	var transfer models.AgentTransfer
 	if err := a.DB.Where("id = ? AND organization_id = ?", transferID, orgID).
 		Preload("Contact").First(&transfer).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Transfer not found", nil, "")
+		return a.sendError(r, notFound("Transfer"))
 	}
 
 	if transfer.Status != models.TransferStatusActive {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Transfer is not active", nil, "")
+		return a.sendError(r, invalidRequest("Transfer is not active"))
 	}
 
 	// Determine target agent
@@ -717,21 +717,21 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 	if req.AgentID != nil && *req.AgentID != "" {
 		// Explicit assignment - requires write permission
 		if !hasWriteAccess {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to assign transfers to others", nil, "")
+			return a.sendError(r, forbidden("You don't have permission to assign transfers to others"))
 		}
 
 		parsedAgentID, err := uuid.Parse(*req.AgentID)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid agent_id", nil, "")
+			return a.sendError(r, invalidRequest("Invalid agent_id"))
 		}
 
 		// Verify agent exists and is available
-		agent, err := findByIDAndOrg[models.User](a.DB, r, parsedAgentID, orgID, "Agent")
+		agent, err := findByIDAndOrg[models.User](a, r, parsedAgentID, orgID, "Agent")
 		if err != nil {
 			return nil
 		}
 		if !agent.IsAvailable {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Agent is currently away", nil, "")
+			return a.sendError(r, invalidRequest("Agent is currently away"))
 		}
 		targetAgentID = &parsedAgentID
 	} else if req.AgentID == nil && !hasWriteAccess {
@@ -742,7 +742,7 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 	// Handle team reassignment (requires write permission)
 	if req.TeamID != nil {
 		if !hasWriteAccess {
-			return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to change team assignment", nil, "")
+			return a.sendError(r, forbidden("You don't have permission to change team assignment"))
 		}
 
 		if *req.TeamID == "" {
@@ -752,12 +752,12 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 			// Move to specific team
 			parsedTeamID, err := uuid.Parse(*req.TeamID)
 			if err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid team_id", nil, "")
+				return a.sendError(r, invalidRequest("Invalid team_id"))
 			}
 			// Verify team exists
 			var team models.Team
 			if err := a.DB.Where("id = ? AND organization_id = ?", parsedTeamID, orgID).First(&team).Error; err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Team not found", nil, "")
+				return a.sendError(r, invalidRequest("Team not found"))
 			}
 			transfer.TeamID = &parsedTeamID
 		}
@@ -841,7 +841,7 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Check permissions - users with write permission have full access
@@ -857,12 +857,12 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	// Users without full access need AllowQueuePickup enabled when settings exist.
 	// If settings haven't been configured yet (nil), allow pickup by default.
 	if !hasFullAccess && settings != nil && !settings.AgentAssignment.AllowQueuePickup {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Queue pickup is not allowed", nil, "")
+		return a.sendError(r, forbidden("Queue pickup is not allowed"))
 	}
 
 	// Users without full access need pickup permission
 	if !hasFullAccess && !hasPickupPermission {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You don't have permission to pick up transfers", nil, "")
+		return a.sendError(r, forbidden("You don't have permission to pick up transfers"))
 	}
 
 	// Get optional team filter
@@ -910,7 +910,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 					found := slices.Contains(userTeamIDs, teamID)
 					if !found {
 						tx.Rollback()
-						return r.SendErrorEnvelope(fasthttp.StatusForbidden, "You are not a member of this team", nil, "")
+						return a.sendError(r, forbidden("You are not a member of this team"))
 					}
 				}
 				query = query.Where("team_id = ?", teamID)

@@ -31,37 +31,139 @@ type MetaAPIResponse struct {
 	} `json:"messages"`
 }
 
-// MetaAPIError represents an error response from Meta API
-type MetaAPIError struct {
-	Error struct {
-		Message      string `json:"message"`
-		Type         string `json:"type"`
-		Code         int    `json:"code"`
-		ErrorSubcode int    `json:"error_subcode"`
-		ErrorUserMsg string `json:"error_user_msg"`
-		ErrorData    struct {
-			Details string `json:"details"`
-		} `json:"error_data"`
-		FBTraceID string `json:"fbtrace_id"`
-	} `json:"error"`
+// MetaErrorResponse is the wire shape of a Graph API error body.
+type MetaErrorResponse struct {
+	Error MetaErrorDetail `json:"error"`
 }
 
-// ParseMetaAPIError attempts to parse respBody as a Meta API error. If successful,
-// it returns a formatted error including code, message, details, and user message.
-// If parsing fails, it returns a generic error with the status code and raw body.
-func ParseMetaAPIError(statusCode int, respBody []byte) error {
-	var apiErr MetaAPIError
-	if err := json.Unmarshal(respBody, &apiErr); err == nil && apiErr.Error.Message != "" {
-		errMsg := fmt.Sprintf("API error %d: %s", apiErr.Error.Code, apiErr.Error.Message)
-		if apiErr.Error.ErrorData.Details != "" {
-			errMsg += " - Details: " + apiErr.Error.ErrorData.Details
-		}
-		if apiErr.Error.ErrorUserMsg != "" {
-			errMsg += " - " + apiErr.Error.ErrorUserMsg
-		}
-		return errors.New(errMsg)
+// MetaErrorDetail is the error object inside a MetaErrorResponse.
+type MetaErrorDetail struct {
+	Message      string `json:"message"`
+	Type         string `json:"type"`
+	Code         int    `json:"code"`
+	ErrorSubcode int    `json:"error_subcode"`
+	ErrorUserMsg string `json:"error_user_msg"`
+	ErrorData    struct {
+		Details string `json:"details"`
+	} `json:"error_data"`
+	FBTraceID string `json:"fbtrace_id"`
+}
+
+// Sentinels for the Meta failure modes callers actually branch on. Match them
+// with errors.Is against any error returned by this package:
+//
+//	if errors.Is(err, whatsapp.ErrRateLimited) { backOffAndRetry() }
+//
+// Everything else is a considered rejection from Meta and will fail the same
+// way on a retry; use errors.As to read the numeric code for those.
+var (
+	// ErrRateLimited means Meta is throttling; the send is worth retrying
+	// after a backoff.
+	ErrRateLimited = errors.New("whatsapp: rate limited")
+
+	// ErrInvalidToken means the account's access token is expired or revoked.
+	// Retrying cannot help until the account is re-authorized.
+	ErrInvalidToken = errors.New("whatsapp: invalid or expired access token")
+
+	// ErrReengagementRequired means the 24-hour customer service window has
+	// closed and only a template message may be sent.
+	ErrReengagementRequired = errors.New("whatsapp: re-engagement required, 24-hour window closed")
+
+	// ErrTemplateNotFound means the named template does not exist or is not
+	// approved for this account.
+	ErrTemplateNotFound = errors.New("whatsapp: template not found")
+)
+
+// Meta error codes that map onto the sentinels above.
+// See https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes
+var (
+	rateLimitedCodes = map[int]bool{
+		4:      true, // application request limit reached
+		80007:  true, // rate limit hit
+		130429: true, // Cloud API message throughput reached
+		131048: true, // spam rate limit hit
+		131056: true, // pair rate limit hit
+		133016: true, // rate limit hit during registration
 	}
-	return fmt.Errorf("API returned status %d: %s", statusCode, string(respBody))
+	invalidTokenCodes = map[int]bool{
+		0:   true, // AuthException
+		102: true, // session key invalid or expired
+		190: true, // access token expired/invalid/revoked
+	}
+)
+
+// MetaAPIError is a structured error from the Graph API.
+//
+// It implements error and Unwrap, so callers can branch with errors.Is against
+// the sentinels above or pull out the numeric code with errors.As:
+//
+//	var apiErr *whatsapp.MetaAPIError
+//	if errors.As(err, &apiErr) && apiErr.Detail.Code == 131026 { ... }
+//
+// Previously this was flattened to a string at the point of failure, which is
+// why nothing in the codebase could branch on a Meta failure at all.
+type MetaAPIError struct {
+	// StatusCode is the HTTP status Meta responded with.
+	StatusCode int
+
+	// Detail is Meta's parsed error object. Zero when the body was not a
+	// recognizable Meta error, in which case Body holds the raw response.
+	Detail MetaErrorDetail
+
+	// Body is the raw response body, retained when parsing failed.
+	Body string
+}
+
+// Error implements error.
+func (e *MetaAPIError) Error() string {
+	if e.Detail.Message == "" {
+		return fmt.Sprintf("API returned status %d: %s", e.StatusCode, e.Body)
+	}
+	msg := fmt.Sprintf("API error %d: %s", e.Detail.Code, e.Detail.Message)
+	if e.Detail.ErrorData.Details != "" {
+		msg += " - Details: " + e.Detail.ErrorData.Details
+	}
+	if e.Detail.ErrorUserMsg != "" {
+		msg += " - " + e.Detail.ErrorUserMsg
+	}
+	return msg
+}
+
+// Unwrap returns the sentinel matching Meta's error code, so errors.Is works
+// against ErrRateLimited and friends. It returns nil for codes with no
+// sentinel, which simply means errors.Is finds no match.
+func (e *MetaAPIError) Unwrap() error {
+	switch {
+	case rateLimitedCodes[e.Detail.Code]:
+		return ErrRateLimited
+	case invalidTokenCodes[e.Detail.Code]:
+		return ErrInvalidToken
+	case e.Detail.Code == 131047:
+		return ErrReengagementRequired
+	case e.Detail.Code == 132001:
+		return ErrTemplateNotFound
+	}
+	return nil
+}
+
+// Retryable reports whether another attempt could plausibly succeed. Only
+// throttling and 5xx qualify: a rejection Meta has already reasoned about
+// (bad number, unapproved template, closed window) fails identically on retry.
+func (e *MetaAPIError) Retryable() bool {
+	return rateLimitedCodes[e.Detail.Code] || e.StatusCode >= 500
+}
+
+// ParseMetaAPIError parses respBody as a Meta API error, always returning a
+// *MetaAPIError. When the body is not a recognizable Meta error it is retained
+// verbatim on the Body field.
+func ParseMetaAPIError(statusCode int, respBody []byte) error {
+	apiErr := &MetaAPIError{StatusCode: statusCode, Body: string(respBody)}
+
+	var envelope MetaErrorResponse
+	if err := json.Unmarshal(respBody, &envelope); err == nil && envelope.Error.Message != "" {
+		apiErr.Detail = envelope.Error
+	}
+	return apiErr
 }
 
 // TemplateResponse represents response from template submission

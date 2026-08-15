@@ -61,7 +61,7 @@ type TemplateResponse struct {
 func (a *App) ListTemplates(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -109,7 +109,7 @@ func (a *App) ListTemplates(r *fastglue.Request) error {
 func (a *App) CreateTemplate(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req TemplateRequest
@@ -120,33 +120,33 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 	// Validate required fields
 	isAuthTemplate := strings.ToUpper(req.Category) == "AUTHENTICATION"
 	if req.WhatsAppAccount == "" || req.Name == "" || req.Language == "" || req.Category == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "whatsapp_account, name, language, and category are required", nil, "")
+		return a.sendError(r, invalidRequest("whatsapp_account, name, language, and category are required"))
 	}
 	if !isAuthTemplate && req.BodyContent == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "body_content is required", nil, "")
+		return a.sendError(r, invalidRequest("body_content is required"))
 	}
 	if isAuthTemplate && req.CodeExpirationMinutes != 0 && (req.CodeExpirationMinutes < 1 || req.CodeExpirationMinutes > 90) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "code_expiration_minutes must be between 1 and 90", nil, "")
+		return a.sendError(r, invalidRequest("code_expiration_minutes must be between 1 and 90"))
 	}
 
 	// Validate no mixed positional and named parameters (non-auth only)
 	if !isAuthTemplate {
 		if err := templateutil.ValidateNoMixedParams(req.BodyContent); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+			return a.sendError(r, invalidRequest(err.Error()))
 		}
 		if req.HeaderType == "TEXT" {
 			if err := templateutil.ValidateNoMixedParams(req.HeaderContent); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+				return a.sendError(r, invalidRequest(err.Error()))
 			}
 			if err := templateutil.ValidateHeaderParamCount(req.HeaderContent); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+				return a.sendError(r, invalidRequest(err.Error()))
 			}
 		}
 	}
 
 	// Verify account belongs to organization
 	if _, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Normalize template name (lowercase, underscores)
@@ -155,7 +155,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 	// Check if template with same name exists for this account
 	var existingTemplate models.Template
 	if err := a.DB.Where("organization_id = ? AND whats_app_account = ? AND name = ?", orgID, req.WhatsAppAccount, templateName).First(&existingTemplate).Error; err == nil {
-		return r.SendErrorEnvelope(fasthttp.StatusConflict, "Template with this name already exists", nil, "")
+		return a.sendError(r, conflict("Template with this name already exists"))
 	}
 
 	displayName := req.DisplayName
@@ -199,7 +199,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 func (a *App) GetTemplate(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "template")
@@ -210,7 +210,7 @@ func (a *App) GetTemplate(r *fastglue.Request) error {
 	var template models.Template
 	if err := a.DB.Preload("CreatedBy").Preload("UpdatedBy").
 		Where("id = ? AND organization_id = ?", id, orgID).First(&template).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Template not found", nil, "")
+		return a.sendError(r, notFound("Template"))
 	}
 
 	resp := templateToResponse(template)
@@ -228,7 +228,7 @@ func (a *App) GetTemplate(r *fastglue.Request) error {
 func (a *App) UpdateTemplate(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "template")
@@ -236,7 +236,7 @@ func (a *App) UpdateTemplate(r *fastglue.Request) error {
 		return nil
 	}
 
-	template, err := findByIDAndOrg[models.Template](a.DB, r, id, orgID, "Template")
+	template, err := findByIDAndOrg[models.Template](a, r, id, orgID, "Template")
 	if err != nil {
 		return nil
 	}
@@ -261,20 +261,20 @@ func (a *App) UpdateTemplate(r *fastglue.Request) error {
 	if !isAuthTemplate {
 		if req.BodyContent != "" {
 			if err := templateutil.ValidateNoMixedParams(req.BodyContent); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+				return a.sendError(r, invalidRequest(err.Error()))
 			}
 		}
 		if req.HeaderType == "TEXT" && req.HeaderContent != "" {
 			if err := templateutil.ValidateNoMixedParams(req.HeaderContent); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+				return a.sendError(r, invalidRequest(err.Error()))
 			}
 			if err := templateutil.ValidateHeaderParamCount(req.HeaderContent); err != nil {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+				return a.sendError(r, invalidRequest(err.Error()))
 			}
 		}
 	}
 	if isAuthTemplate && req.CodeExpirationMinutes != 0 && (req.CodeExpirationMinutes < 1 || req.CodeExpirationMinutes > 90) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "code_expiration_minutes must be between 1 and 90", nil, "")
+		return a.sendError(r, invalidRequest("code_expiration_minutes must be between 1 and 90"))
 	}
 
 	// Update fields
@@ -324,7 +324,7 @@ func (a *App) UpdateTemplate(r *fastglue.Request) error {
 func (a *App) DeleteTemplate(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "template")
@@ -332,7 +332,7 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 		return nil
 	}
 
-	template, err := findByIDAndOrg[models.Template](a.DB, r, id, orgID, "Template")
+	template, err := findByIDAndOrg[models.Template](a, r, id, orgID, "Template")
 	if err != nil {
 		return nil
 	}
@@ -363,7 +363,7 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 func (a *App) SubmitTemplate(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "template")
@@ -371,7 +371,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 		return nil
 	}
 
-	template, err := findByIDAndOrg[models.Template](a.DB, r, id, orgID, "Template")
+	template, err := findByIDAndOrg[models.Template](a, r, id, orgID, "Template")
 	if err != nil {
 		return nil
 	}
@@ -380,7 +380,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 
 	// Only block if status is PENDING (awaiting approval - can't modify)
 	if template.MetaTemplateID != "" && template.Status == "PENDING" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Template is pending approval and cannot be modified", nil, "")
+		return a.sendError(r, invalidRequest("Template is pending approval and cannot be modified"))
 	}
 
 	// Validate media header has a handle uploaded
@@ -393,7 +393,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 	// Get the WhatsApp account
 	account, err := a.resolveWhatsAppAccount(orgID, template.WhatsAppAccount)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Check if this is an update to an existing template on Meta
@@ -460,7 +460,7 @@ func (a *App) submitTemplateToMeta(account *models.WhatsAppAccount, template *mo
 func (a *App) SyncTemplates(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Get account name from query or body
@@ -474,12 +474,12 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 	}
 
 	if accountName == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "whatsapp_account is required", nil, "")
+		return a.sendError(r, invalidRequest("whatsapp_account is required"))
 	}
 
 	account, err := a.resolveWhatsAppAccount(orgID, accountName)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "WhatsApp account not found", nil, "")
+		return a.sendError(r, notFound("WhatsApp account"))
 	}
 
 	// Fetch templates from Meta API
@@ -648,7 +648,7 @@ func convertFromJSONBArray(arr models.JSONBArray) []any {
 func (a *App) UploadTemplateMedia(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Get account name from form or query
@@ -657,24 +657,24 @@ func (a *App) UploadTemplateMedia(r *fastglue.Request) error {
 		accountName = string(r.RequestCtx.QueryArgs().Peek("account"))
 	}
 	if accountName == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "account is required", nil, "")
+		return a.sendError(r, invalidRequest("account is required"))
 	}
 
 	// Verify account belongs to organization
 	account, err := a.resolveWhatsAppAccount(orgID, accountName)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Check if account has app_id configured
 	if account.AppID == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account does not have app_id configured. Please update the account settings.", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account does not have app_id configured. Please update the account settings."))
 	}
 
 	// Get the uploaded file
 	fileHeader, err := r.RequestCtx.FormFile("file")
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "No file provided", nil, "")
+		return a.sendError(r, invalidRequest("No file provided"))
 	}
 
 	file, err := fileHeader.Open()

@@ -356,7 +356,7 @@ func (c *Client) UploadMedia(ctx context.Context, account *Account, data []byte,
 		return "", fmt.Errorf("no media ID in upload response")
 	}
 
-	c.Log.Info("Media uploaded", "media_id", uploadResp.ID)
+	c.Log.Debug("Media uploaded", "media_id", uploadResp.ID)
 	return uploadResp.ID, nil
 }
 
@@ -382,7 +382,7 @@ func (c *Client) sendMediaMessage(ctx context.Context, account *Account, rcpt Re
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("Media message sent", "type", mediaType, "message_id", messageID, "phone", rcpt.Phone)
+	c.Log.Debug("Media message sent", "type", mediaType, "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -461,7 +461,7 @@ func (c *Client) ResumableUpload(ctx context.Context, account *Account, data []b
 		"file_name":   filename,
 	}
 
-	c.Log.Info("Creating upload session", "url", sessionURL, "file_size", len(data), "mime_type", mimeType)
+	c.Log.Debug("Creating upload session", "url", sessionURL, "file_size", len(data), "mime_type", mimeType)
 
 	sessionResp, err := c.doRequest(ctx, http.MethodPost, sessionURL, sessionPayload, account.AccessToken)
 	if err != nil {
@@ -477,7 +477,7 @@ func (c *Client) ResumableUpload(ctx context.Context, account *Account, data []b
 		return "", fmt.Errorf("no session ID in upload response")
 	}
 
-	c.Log.Info("Upload session created", "session_id", uploadSession.ID)
+	c.Log.Debug("Upload session created", "session_id", uploadSession.ID)
 
 	// Step 2: Upload file data to session
 	uploadURL := fmt.Sprintf("%s/%s/%s", c.getBaseURL(), account.APIVersion, uploadSession.ID)
@@ -515,7 +515,7 @@ func (c *Client) ResumableUpload(ctx context.Context, account *Account, data []b
 		return "", fmt.Errorf("no handle in upload response")
 	}
 
-	c.Log.Info("Resumable upload completed", "handle", finishResp.Handle[:20]+"...")
+	c.Log.Debug("Resumable upload completed", "handle", finishResp.Handle[:20]+"...")
 	return finishResp.Handle, nil
 }
 
@@ -587,7 +587,7 @@ func (c *Client) SubscribeApp(ctx context.Context, account *Account) error {
 		return fmt.Errorf("subscription was not successful")
 	}
 
-	c.Log.Info("App subscribed to webhooks", "business_id", account.BusinessID)
+	c.Log.Debug("App subscribed to webhooks", "business_id", account.BusinessID)
 	return nil
 }
 
@@ -620,12 +620,9 @@ func (c *Client) ExchangeCodeForToken(ctx context.Context, code, appID, appSecre
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		// Parse Meta error using same pattern as doRequest
-		var metaErr MetaAPIError
-		if json.Unmarshal(respBody, &metaErr) == nil && metaErr.Error.Message != "" {
-			return "", fmt.Errorf("token exchange failed: %s", metaErr.Error.Message)
-		}
-		return "", fmt.Errorf("token exchange failed with status %d: %s", resp.StatusCode, string(respBody))
+		// Same structured error as doRequest, so callers can errors.Is this
+		// against ErrInvalidToken like any other failure from this package.
+		return "", fmt.Errorf("token exchange failed: %w", ParseMetaAPIError(resp.StatusCode, respBody))
 	}
 
 	var tokenResp TokenExchangeResponse
@@ -637,7 +634,7 @@ func (c *Client) ExchangeCodeForToken(ctx context.Context, code, appID, appSecre
 		return "", fmt.Errorf("no access token in response")
 	}
 
-	c.Log.Info("Token exchange successful")
+	c.Log.Debug("Token exchange successful")
 	return tokenResp.AccessToken, nil
 }
 
@@ -682,7 +679,7 @@ func (c *Client) RegisterPhoneNumber(ctx context.Context, phoneID, pin, accessTo
 		return fmt.Errorf("phone registration failed: %w", err)
 	}
 
-	c.Log.Info("Phone number registered successfully", "phone_id", phoneID)
+	c.Log.Debug("Phone number registered successfully", "phone_id", phoneID)
 	return nil
 }
 

@@ -68,7 +68,7 @@ func (a *App) GetIVRFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.IVRFlow](a.DB.Preload("CreatedBy").Preload("UpdatedBy"), r, flowID, orgID, "IVR Flow")
+	flow, err := findByIDAndOrgWith[models.IVRFlow](a, r, a.DB.Preload("CreatedBy").Preload("UpdatedBy"), flowID, orgID, "IVR Flow")
 	if err != nil {
 		return nil
 	}
@@ -89,10 +89,10 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	}
 
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name is required", nil, "")
+		return a.sendError(r, invalidRequest("Name is required"))
 	}
 	if req.WhatsAppAccount == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account is required", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account is required"))
 	}
 
 	// If marking this as call start, unset others for the same account
@@ -112,7 +112,7 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	// Validate and generate TTS for v2 flow graph
 	if req.Menu != nil {
 		if err := validateFlowGraph(req.Menu); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid flow graph: "+err.Error(), nil, "")
+			return a.sendError(r, invalidRequestf("Invalid flow graph: %v", err))
 		}
 		if a.TTS == nil {
 			if menuHasGreetingText(req.Menu) {
@@ -170,7 +170,7 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.IVRFlow](a.DB, r, flowID, orgID, "IVR Flow")
+	flow, err := findByIDAndOrg[models.IVRFlow](a, r, flowID, orgID, "IVR Flow")
 	if err != nil {
 		return nil
 	}
@@ -201,7 +201,7 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 	// Validate and generate TTS for v2 flow graph
 	if req.Menu != nil {
 		if err := validateFlowGraph(req.Menu); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid flow graph: "+err.Error(), nil, "")
+			return a.sendError(r, invalidRequestf("Invalid flow graph: %v", err))
 		}
 		if a.TTS == nil {
 			if menuHasGreetingText(req.Menu) {
@@ -426,7 +426,7 @@ func (a *App) DeleteIVRFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.IVRFlow](a.DB, r, flowID, orgID, "IVR Flow")
+	flow, err := findByIDAndOrg[models.IVRFlow](a, r, flowID, orgID, "IVR Flow")
 	if err != nil {
 		return nil
 	}
@@ -469,19 +469,19 @@ func (a *App) UploadIVRAudio(r *fastglue.Request) error {
 	form, err := r.RequestCtx.MultipartForm()
 	if err != nil {
 		a.Log.Error("Multipart parse failed", "error", err, "content_type", contentType)
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid multipart form: "+err.Error(), nil, "")
+		return a.sendError(r, invalidRequestf("Invalid multipart form: %v", err))
 	}
 
 	files := form.File["file"]
 	if len(files) == 0 {
 		a.Log.Error("No file in multipart form", "form_keys", fmt.Sprintf("%v", form.Value))
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "No file provided", nil, "")
+		return a.sendError(r, invalidRequest("No file provided"))
 	}
 
 	fileHeader := files[0]
 	file, err := fileHeader.Open()
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Failed to open file", nil, "")
+		return a.sendError(r, invalidRequest("Failed to open file"))
 	}
 	defer func() { _ = file.Close() }()
 
@@ -493,7 +493,7 @@ func (a *App) UploadIVRAudio(r *fastglue.Request) error {
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file", nil, "")
 	}
 	if len(data) > maxAudioSize {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "File too large. Maximum size is 5MB", nil, "")
+		return a.sendError(r, invalidRequest("File too large. Maximum size is 5MB"))
 	}
 
 	// Validate MIME type
@@ -519,7 +519,7 @@ func (a *App) UploadIVRAudio(r *fastglue.Request) error {
 	}
 	if !allowedAudio[mimeType] {
 		a.Log.Error("Unsupported audio MIME type", "mime_type", mimeType, "filename", fileHeader.Filename)
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Unsupported audio type: "+mimeType, nil, "")
+		return a.sendError(r, invalidRequestf("Unsupported audio type: %s", mimeType))
 	}
 
 	// Ensure audio directory exists
@@ -581,16 +581,16 @@ func (a *App) ServeIVRAudio(r *fastglue.Request) error {
 	}
 	fullPath, err := filepath.Abs(filepath.Join(baseDir, filename))
 	if err != nil || !strings.HasPrefix(fullPath, baseDir+string(os.PathSeparator)) {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid file path", nil, "")
+		return a.sendError(r, invalidRequest("Invalid file path"))
 	}
 
 	// Reject symlinks
 	info, err := os.Lstat(fullPath)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "File not found", nil, "")
+		return a.sendError(r, notFound("File"))
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid file path", nil, "")
+		return a.sendError(r, invalidRequest("Invalid file path"))
 	}
 
 	// Read file
@@ -621,24 +621,24 @@ func (a *App) UploadOrgAudio(r *fastglue.Request) error {
 
 	audioType := string(r.RequestCtx.QueryArgs().Peek("type"))
 	if audioType != "hold_music" && audioType != "ringback" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Query parameter 'type' must be 'hold_music' or 'ringback'", nil, "")
+		return a.sendError(r, invalidRequest("Query parameter 'type' must be 'hold_music' or 'ringback'"))
 	}
 
 	// Parse multipart form
 	form, err := r.RequestCtx.MultipartForm()
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid multipart form: "+err.Error(), nil, "")
+		return a.sendError(r, invalidRequestf("Invalid multipart form: %v", err))
 	}
 
 	files := form.File["file"]
 	if len(files) == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "No file provided", nil, "")
+		return a.sendError(r, invalidRequest("No file provided"))
 	}
 
 	fileHeader := files[0]
 	file, err := fileHeader.Open()
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Failed to open file", nil, "")
+		return a.sendError(r, invalidRequest("Failed to open file"))
 	}
 	defer func() { _ = file.Close() }()
 
@@ -650,7 +650,7 @@ func (a *App) UploadOrgAudio(r *fastglue.Request) error {
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file", nil, "")
 	}
 	if len(data) > maxAudioSize {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "File too large. Maximum size is 5MB", nil, "")
+		return a.sendError(r, invalidRequest("File too large. Maximum size is 5MB"))
 	}
 
 	// Validate MIME type
@@ -663,7 +663,7 @@ func (a *App) UploadOrgAudio(r *fastglue.Request) error {
 		"video/ogg": true,
 	}
 	if !allowedAudio[mimeType] {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Unsupported audio type: "+mimeType, nil, "")
+		return a.sendError(r, invalidRequestf("Unsupported audio type: %s", mimeType))
 	}
 
 	// Ensure audio directory exists

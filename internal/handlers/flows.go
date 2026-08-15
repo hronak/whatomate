@@ -44,7 +44,7 @@ type FlowResponse struct {
 func (a *App) ListFlows(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -90,7 +90,7 @@ func (a *App) ListFlows(r *fastglue.Request) error {
 func (a *App) CreateFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req FlowRequest
@@ -100,15 +100,15 @@ func (a *App) CreateFlow(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name is required", nil, "")
+		return a.sendError(r, invalidRequest("Name is required"))
 	}
 	if req.WhatsAppAccount == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account is required", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account is required"))
 	}
 
 	// Verify account exists and belongs to org
 	if _, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Set defaults
@@ -144,7 +144,7 @@ func (a *App) CreateFlow(r *fastglue.Request) error {
 func (a *App) GetFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -152,7 +152,7 @@ func (a *App) GetFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
@@ -166,7 +166,7 @@ func (a *App) GetFlow(r *fastglue.Request) error {
 func (a *App) UpdateFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -174,7 +174,7 @@ func (a *App) UpdateFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
@@ -225,7 +225,7 @@ func (a *App) UpdateFlow(r *fastglue.Request) error {
 func (a *App) DeleteFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -233,7 +233,7 @@ func (a *App) DeleteFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
@@ -255,7 +255,7 @@ func (a *App) DeleteFlow(r *fastglue.Request) error {
 func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -263,20 +263,20 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
 
 	// Deprecated flows cannot be updated
 	if flow.Status == "DEPRECATED" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Deprecated flows cannot be updated", nil, "")
+		return a.sendError(r, invalidRequest("Deprecated flows cannot be updated"))
 	}
 
 	// Get the WhatsApp account
 	account, err := a.resolveWhatsAppAccount(orgID, flow.WhatsAppAccount)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Create WhatsApp API client
@@ -315,7 +315,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 	if len(flow.Screens) > 0 {
 		// Validate flow structure before sending to Meta
 		if err := validateFlowStructure([]any(flow.Screens)); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+			return a.sendError(r, invalidRequest(err.Error()))
 		}
 
 		// Sanitize screens before sending to Meta
@@ -362,7 +362,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 func (a *App) PublishFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -370,25 +370,25 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
 
 	// Only DRAFT flows can be published
 	if flow.Status != "DRAFT" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Only DRAFT flows can be published", nil, "")
+		return a.sendError(r, invalidRequest("Only DRAFT flows can be published"))
 	}
 
 	// Flow must be saved to Meta first
 	if flow.MetaFlowID == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Flow must be saved to Meta first before publishing", nil, "")
+		return a.sendError(r, invalidRequest("Flow must be saved to Meta first before publishing"))
 	}
 
 	// Get the WhatsApp account
 	account, err := a.resolveWhatsAppAccount(orgID, flow.WhatsAppAccount)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Create WhatsApp API client
@@ -434,7 +434,7 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 func (a *App) DeprecateFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -442,14 +442,14 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
 
 	// Only PUBLISHED flows can be deprecated
 	if flow.Status != "PUBLISHED" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Only PUBLISHED flows can be deprecated", nil, "")
+		return a.sendError(r, invalidRequest("Only PUBLISHED flows can be deprecated"))
 	}
 
 	// Call Meta API to deprecate the flow if we have a Meta flow ID
@@ -457,7 +457,7 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 		// Get the WhatsApp account
 		account, err := a.resolveWhatsAppAccount(orgID, flow.WhatsAppAccount)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+			return a.sendError(r, invalidRequest("WhatsApp account not found"))
 		}
 
 		waClient := whatsapp.New(a.Log)
@@ -493,7 +493,7 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 func (a *App) DuplicateFlow(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "flow")
@@ -501,7 +501,7 @@ func (a *App) DuplicateFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	flow, err := findByIDAndOrg[models.WhatsAppFlow](a.DB, r, id, orgID, "Flow")
+	flow, err := findByIDAndOrg[models.WhatsAppFlow](a, r, id, orgID, "Flow")
 	if err != nil {
 		return nil
 	}
@@ -536,7 +536,7 @@ func (a *App) DuplicateFlow(r *fastglue.Request) error {
 func (a *App) SyncFlows(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Get account name from request
@@ -548,13 +548,13 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 	}
 
 	if req.WhatsAppAccount == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account is required", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account is required"))
 	}
 
 	// Get the WhatsApp account
 	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "WhatsApp account not found", nil, "")
+		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
 	// Create WhatsApp API client

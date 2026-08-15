@@ -25,6 +25,10 @@ import (
 	"golang.org/x/oauth2/microsoft"
 )
 
+// ssoRequestTimeout bounds an OAuth provider round trip (token exchange,
+// userinfo, email lookup). These had no deadline at all.
+const ssoRequestTimeout = 20 * time.Second
+
 // OAuth provider configurations (endpoints are hardcoded, only need client credentials)
 var oauthProviders = map[string]struct {
 	Endpoint    oauth2.Endpoint
@@ -141,14 +145,14 @@ func (a *App) InitSSO(r *fastglue.Request) error {
 	// Validate provider
 	if provider != "custom" {
 		if _, ok := oauthProviders[provider]; !ok {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid SSO provider", nil, "")
+			return a.sendError(r, invalidRequest("Invalid SSO provider"))
 		}
 	}
 
 	// Get first enabled SSO provider config for this provider type
 	var ssoConfig models.SSOProvider
 	if err := a.DB.Where("provider = ? AND is_enabled = ?", provider, true).First(&ssoConfig).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "SSO provider not configured or disabled", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "SSO provider not configured or disabled", kind: errNotFound})
 	}
 
 	// Generate state token
@@ -378,7 +382,7 @@ func (a *App) CallbackSSO(r *fastglue.Request) error {
 func (a *App) GetSSOSettings(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var providers []models.SSOProvider
@@ -411,7 +415,7 @@ func (a *App) GetSSOSettings(r *fastglue.Request) error {
 func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	provider := r.RequestCtx.UserValue("provider").(string)
@@ -420,7 +424,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 	validProviders := []string{"google", "microsoft", "github", "facebook", "custom"}
 	isValid := slices.Contains(validProviders, provider)
 	if !isValid {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid provider", nil, "")
+		return a.sendError(r, invalidRequest("Invalid provider"))
 	}
 
 	var req SSOProviderRequest
@@ -431,7 +435,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 	// Validate custom provider fields
 	if provider == "custom" {
 		if req.AuthURL == "" || req.TokenURL == "" || req.UserInfoURL == "" {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Custom provider requires auth_url, token_url, and user_info_url", nil, "")
+			return a.sendError(r, invalidRequest("Custom provider requires auth_url, token_url, and user_info_url"))
 		}
 	}
 
@@ -494,7 +498,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 func (a *App) DeleteSSOProvider(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	provider := r.RequestCtx.UserValue("provider").(string)
@@ -506,7 +510,7 @@ func (a *App) DeleteSSOProvider(r *fastglue.Request) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "SSO provider not found", nil, "")
+		return a.sendError(r, notFound("SSO provider"))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "SSO provider deleted"})
@@ -571,7 +575,10 @@ func (a *App) fetchUserInfo(provider string, ssoConfig *models.SSOProvider, toke
 		userInfoURL = oauthProviders[provider].UserInfoURL
 	}
 
-	req, err := http.NewRequest(http.MethodGet, userInfoURL, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), ssoRequestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, userInfoURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -654,7 +661,10 @@ func (a *App) fetchUserInfo(provider string, ssoConfig *models.SSOProvider, toke
 }
 
 func (a *App) fetchGitHubEmail(token *oauth2.Token) (string, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+	ctx, cancel := context.WithTimeout(context.Background(), ssoRequestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user/emails", nil)
 	if err != nil {
 		return "", err
 	}

@@ -18,6 +18,9 @@ import (
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
 )
 
+// flowAPICallTimeout bounds an api_call node's outbound HTTP request.
+const flowAPICallTimeout = 30 * time.Second
+
 func redactURLForLog(raw string) string {
 	parsed, err := url.Parse(raw)
 	if err != nil {
@@ -366,7 +369,7 @@ func (a *App) processIncomingMessageFull(phoneNumberID string, msg IncomingTextM
 	// If no keyword matched, try AI response if enabled
 	if settings.AI.Enabled && settings.AI.Provider != "" && settings.AI.APIKey != "" {
 		a.Log.Info("Attempting AI response", "provider", settings.AI.Provider, "model", settings.AI.Model)
-		aiResponse, err := a.generateAIResponse(settings, session, messageText)
+		aiResponse, err := a.generateAIResponse(context.Background(), settings, session, messageText)
 		if err != nil {
 			a.Log.Error("AI response failed", "error", err, "provider", settings.AI.Provider, "model", settings.AI.Model)
 			// Fall through to default response
@@ -759,7 +762,10 @@ func (a *App) executeConfiguredAPI(apiConfig models.JSONB, replaceVar func(strin
 		bodyReader = strings.NewReader(replaceVar(bodyTemplate))
 	}
 
-	req, err := http.NewRequest(method, apiURL, bodyReader)
+	ctx, cancel := context.WithTimeout(context.Background(), flowAPICallTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, method, apiURL, bodyReader)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -824,21 +830,34 @@ type ApiResponse struct {
 //
 // Mirrors fetchAPIContext in seeding implicit variables (phone_number) so flow-step
 // API templates can interpolate {{phone_number}} just like AI-context API templates.
-func (a *App) generateAIResponse(settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string) (string, error) {
+// generateAIResponse asks the configured LLM provider for a reply.
+//
+// ctx bounds the whole exchange. These are the longest-latency calls in the
+// codebase and previously ran on http.NewRequest with no deadline at all, so a
+// wedged provider held an inbound-webhook goroutine open indefinitely.
+func (a *App) generateAIResponse(ctx context.Context, settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string) (string, error) {
 	// Build context from AIContext entries
 	contextData := a.buildAIContext(settings.OrganizationID, session, userMessage)
 
+	ctx, cancel := context.WithTimeout(ctx, aiRequestTimeout)
+	defer cancel()
+
 	switch settings.AI.Provider {
 	case models.AIProviderOpenAI:
-		return a.generateOpenAIResponse(settings, session, userMessage, contextData)
+		return a.generateOpenAIResponse(ctx, settings, session, userMessage, contextData)
 	case models.AIProviderAnthropic:
-		return a.generateAnthropicResponse(settings, session, userMessage, contextData)
+		return a.generateAnthropicResponse(ctx, settings, session, userMessage, contextData)
 	case models.AIProviderGoogle:
-		return a.generateGoogleResponse(settings, session, userMessage, contextData)
+		return a.generateGoogleResponse(ctx, settings, session, userMessage, contextData)
 	default:
 		return "", fmt.Errorf("unsupported AI provider: %s", settings.AI.Provider)
 	}
 }
+
+// aiRequestTimeout bounds one LLM round trip, including retries inside the
+// shared HTTP client. Generous, because generation is genuinely slow, but
+// finite so an unresponsive provider cannot pin a webhook goroutine forever.
+const aiRequestTimeout = 2 * time.Minute
 
 // buildAIContext fetches and combines all AI context data
 func (a *App) buildAIContext(orgID uuid.UUID, session *models.ChatbotSession, userMessage string) string {
@@ -946,7 +965,7 @@ func isOpenAIReasoningModel(model string) bool {
 }
 
 // generateOpenAIResponse generates a response using OpenAI API
-func (a *App) generateOpenAIResponse(settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
+func (a *App) generateOpenAIResponse(ctx context.Context, settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
 	url := "https://api.openai.com/v1/chat/completions"
 
 	// Build messages array
@@ -1012,7 +1031,7 @@ func (a *App) generateOpenAIResponse(settings *models.ChatbotSettings, session *
 		return "", fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -1070,7 +1089,7 @@ func anthropicRejectsSamplingParams(model string) bool {
 }
 
 // generateAnthropicResponse generates a response using Anthropic API
-func (a *App) generateAnthropicResponse(settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
+func (a *App) generateAnthropicResponse(ctx context.Context, settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
 	url := "https://api.anthropic.com/v1/messages"
 
 	// Build messages array
@@ -1127,7 +1146,7 @@ func (a *App) generateAnthropicResponse(settings *models.ChatbotSettings, sessio
 		return "", fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -1174,7 +1193,7 @@ func (a *App) generateAnthropicResponse(settings *models.ChatbotSettings, sessio
 }
 
 // generateGoogleResponse generates a response using Google Gemini API
-func (a *App) generateGoogleResponse(settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
+func (a *App) generateGoogleResponse(ctx context.Context, settings *models.ChatbotSettings, session *models.ChatbotSession, userMessage string, contextData string) (string, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
 		settings.AI.Model, settings.AI.APIKey)
 
@@ -1241,7 +1260,7 @@ func (a *App) generateGoogleResponse(settings *models.ChatbotSettings, session *
 		return "", fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}

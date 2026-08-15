@@ -38,7 +38,6 @@ func (c *Client) SendTextMessage(ctx context.Context, account *Account, rcpt Rec
 
 	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to send text message", "error", err, "phone", rcpt.Phone)
 		return "", fmt.Errorf("failed to send text message: %w", err)
 	}
 
@@ -46,7 +45,7 @@ func (c *Client) SendTextMessage(ctx context.Context, account *Account, rcpt Rec
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("Text message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.Log.Debug("Text message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -132,7 +131,6 @@ func (c *Client) SendInteractiveButtons(ctx context.Context, account *Account, r
 
 	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to send interactive message", "error", err, "phone", rcpt.Phone)
 		return "", fmt.Errorf("failed to send interactive message: %w", err)
 	}
 
@@ -140,7 +138,7 @@ func (c *Client) SendInteractiveButtons(ctx context.Context, account *Account, r
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("Interactive message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.Log.Debug("Interactive message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -183,7 +181,6 @@ func (c *Client) SendCTAURLButton(ctx context.Context, account *Account, rcpt Re
 
 	respBody, err := c.doRequest(ctx, "POST", apiURL, payload, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to send CTA URL button message", "error", err, "phone", rcpt.Phone)
 		return "", fmt.Errorf("failed to send CTA URL button message: %w", err)
 	}
 
@@ -191,7 +188,7 @@ func (c *Client) SendCTAURLButton(ctx context.Context, account *Account, rcpt Re
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("CTA URL button message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.Log.Debug("CTA URL button message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -250,14 +247,13 @@ func (c *Client) SendVoiceCallButton(ctx context.Context, account *Account, rcpt
 	// ttl_minutes, and the agent-id payload actually leave our box, so when
 	// the incoming-call webhook arrives we know whether Meta echoed it back.
 	// The payload is an opaque "agent:<uuid>" — not PII.
-	c.Log.Info("Sending voice_call button message",
+	c.Log.Debug("Sending voice_call button message",
 		"phone", rcpt.Phone,
 		"parameters", parameters,
 	)
 
 	respBody, err := c.doRequest(ctx, "POST", url, msg, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to send voice_call button message", "error", err, "phone", rcpt.Phone)
 		return "", fmt.Errorf("failed to send voice_call button message: %w", err)
 	}
 
@@ -265,7 +261,7 @@ func (c *Client) SendVoiceCallButton(ctx context.Context, account *Account, rcpt
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("voice_call button message sent", "message_id", messageID, "phone", rcpt.Phone)
+	c.Log.Debug("voice_call button message sent", "message_id", messageID, "phone", rcpt.Phone)
 	return messageID, nil
 }
 
@@ -630,7 +626,6 @@ func (c *Client) SendFlowMessage(ctx context.Context, account *Account, rcpt Rec
 
 	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to send flow message", "error", err, "phone", rcpt.Phone, "flow_id", flowID)
 		return "", fmt.Errorf("failed to send flow message: %w", err)
 	}
 
@@ -638,7 +633,7 @@ func (c *Client) SendFlowMessage(ctx context.Context, account *Account, rcpt Rec
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("Flow message sent", "message_id", messageID, "phone", rcpt.Phone, "flow_id", flowID)
+	c.Log.Debug("Flow message sent", "message_id", messageID, "phone", rcpt.Phone, "flow_id", flowID)
 	return messageID, nil
 }
 
@@ -667,7 +662,6 @@ func (c *Client) SendTemplateMessage(ctx context.Context, account *Account, rcpt
 
 	respBody, err := c.doRequest(ctx, "POST", url, payload, account.AccessToken)
 	if err != nil {
-		c.Log.Error("Failed to send template message", "error", err, "phone", rcpt.Phone, "template", templateName)
 		return "", fmt.Errorf("failed to send template message: %w", err)
 	}
 
@@ -675,6 +669,6 @@ func (c *Client) SendTemplateMessage(ctx context.Context, account *Account, rcpt
 	if err != nil {
 		return "", err
 	}
-	c.Log.Info("Template message sent", "message_id", messageID, "phone", rcpt.Phone, "template", templateName)
+	c.Log.Debug("Template message sent", "message_id", messageID, "phone", rcpt.Phone, "template", templateName)
 	return messageID, nil
 }

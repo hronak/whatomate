@@ -19,7 +19,7 @@ const businessProfileHTTPTimeout = 30 * time.Second
 func (a *App) GetBusinessProfile(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "account")
@@ -48,7 +48,7 @@ func (a *App) GetBusinessProfile(r *fastglue.Request) error {
 func (a *App) UpdateBusinessProfile(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "account")
@@ -89,7 +89,7 @@ func (a *App) UpdateBusinessProfile(r *fastglue.Request) error {
 func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "account")
@@ -105,7 +105,7 @@ func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 	// 1. Get the file from request
 	fileHeader, err := r.RequestCtx.FormFile("file")
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Missing file", nil, "")
+		return a.sendError(r, invalidRequest("Missing file"))
 	}
 
 	// 2. Open and read file

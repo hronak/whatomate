@@ -137,18 +137,8 @@ func TestApp_ExchangeToken_Success_PendingRegistration(t *testing.T) {
 			if strings.HasSuffix(path, "/register") {
 				// Registration fails - PIN already exists
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Two-step verification is already enabled",
 						Code:    33,
 					},
@@ -202,18 +192,8 @@ func TestApp_ExchangeToken_InvalidCode(t *testing.T) {
 	// Mock Meta API server - invalid code
 	metaServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-			Error: struct {
-				Message      string `json:"message"`
-				Type         string `json:"type"`
-				Code         int    `json:"code"`
-				ErrorSubcode int    `json:"error_subcode"`
-				ErrorUserMsg string `json:"error_user_msg"`
-				ErrorData    struct {
-					Details string `json:"details"`
-				} `json:"error_data"`
-				FBTraceID string `json:"fbtrace_id"`
-			}{
+		_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+			Error: whatsapp.MetaErrorDetail{
 				Message: "Invalid authorization code",
 				Code:    100,
 			},
@@ -547,18 +527,8 @@ func TestApp_RegisterPhoneNumber_RegistrationFailed(t *testing.T) {
 	// Mock Meta API server - registration fails
 	metaServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-			Error: struct {
-				Message      string `json:"message"`
-				Type         string `json:"type"`
-				Code         int    `json:"code"`
-				ErrorSubcode int    `json:"error_subcode"`
-				ErrorUserMsg string `json:"error_user_msg"`
-				ErrorData    struct {
-					Details string `json:"details"`
-				} `json:"error_data"`
-				FBTraceID string `json:"fbtrace_id"`
-			}{
+		_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+			Error: whatsapp.MetaErrorDetail{
 				Message: "Phone number must be verified before registration",
 				Code:    368,
 			},

@@ -22,6 +22,9 @@ import (
 	"github.com/zerodha/fastglue"
 )
 
+// customActionTimeout bounds an operator-configured outbound webhook call.
+const customActionTimeout = 30 * time.Second
+
 // CustomActionRequest represents the request body for creating/updating a custom action
 type CustomActionRequest struct {
 	Name         string            `json:"name"`
@@ -101,7 +104,7 @@ func (a *App) mintRedirectToken(url string) (string, error) {
 func (a *App) ListCustomActions(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -137,7 +140,7 @@ func (a *App) ListCustomActions(r *fastglue.Request) error {
 func (a *App) GetCustomAction(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	actionID, err := parsePathUUID(r, "id", "action")
@@ -145,7 +148,7 @@ func (a *App) GetCustomAction(r *fastglue.Request) error {
 		return nil
 	}
 
-	action, err := findByIDAndOrg[models.CustomAction](a.DB, r, actionID, orgID, "Custom action")
+	action, err := findByIDAndOrg[models.CustomAction](a, r, actionID, orgID, "Custom action")
 	if err != nil {
 		return nil
 	}
@@ -157,7 +160,7 @@ func (a *App) GetCustomAction(r *fastglue.Request) error {
 func (a *App) CreateCustomAction(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req CustomActionRequest
@@ -167,18 +170,18 @@ func (a *App) CreateCustomAction(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name is required", nil, "")
+		return a.sendError(r, invalidRequest("Name is required"))
 	}
 	if req.ActionType == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Action type is required", nil, "")
+		return a.sendError(r, invalidRequest("Action type is required"))
 	}
 	if req.ActionType != models.ActionTypeWebhook && req.ActionType != models.ActionTypeURL && req.ActionType != models.ActionTypeJavascript {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid action type. Must be webhook, url, or javascript", nil, "")
+		return a.sendError(r, invalidRequest("Invalid action type. Must be webhook, url, or javascript"))
 	}
 
 	// Validate config based on action type
 	if err := validateActionConfig(req.ActionType, req.Config); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+		return a.sendError(r, invalidRequest(err.Error()))
 	}
 
 	action := models.CustomAction{
@@ -204,7 +207,7 @@ func (a *App) CreateCustomAction(r *fastglue.Request) error {
 func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	actionID, err := parsePathUUID(r, "id", "action")
@@ -212,7 +215,7 @@ func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 		return nil
 	}
 
-	action, err := findByIDAndOrg[models.CustomAction](a.DB, r, actionID, orgID, "Custom action")
+	action, err := findByIDAndOrg[models.CustomAction](a, r, actionID, orgID, "Custom action")
 	if err != nil {
 		return nil
 	}
@@ -232,7 +235,7 @@ func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 	}
 	if req.ActionType != "" {
 		if req.ActionType != models.ActionTypeWebhook && req.ActionType != models.ActionTypeURL && req.ActionType != models.ActionTypeJavascript {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid action type", nil, "")
+			return a.sendError(r, invalidRequest("Invalid action type"))
 		}
 		updates["action_type"] = req.ActionType
 	}
@@ -242,7 +245,7 @@ func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 			actionType = action.ActionType
 		}
 		if err := validateActionConfig(actionType, req.Config); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+			return a.sendError(r, invalidRequest(err.Error()))
 		}
 		configJSON, _ := json.Marshal(req.Config)
 		updates["config"] = configJSON
@@ -266,7 +269,7 @@ func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 func (a *App) DeleteCustomAction(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	actionID, err := parsePathUUID(r, "id", "action")
@@ -280,7 +283,7 @@ func (a *App) DeleteCustomAction(r *fastglue.Request) error {
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete custom action", nil, "")
 	}
 	if result.RowsAffected == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Custom action not found", nil, "")
+		return a.sendError(r, notFound("Custom action"))
 	}
 
 	a.Log.Info("Custom action deleted", "action_id", actionID)
@@ -291,7 +294,7 @@ func (a *App) DeleteCustomAction(r *fastglue.Request) error {
 func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	actionID, err := parsePathUUID(r, "id", "action")
@@ -305,22 +308,22 @@ func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 	}
 
 	// Get the action
-	action, err := findByIDAndOrg[models.CustomAction](a.DB, r, actionID, orgID, "Custom action")
+	action, err := findByIDAndOrg[models.CustomAction](a, r, actionID, orgID, "Custom action")
 	if err != nil {
 		return nil
 	}
 
 	if !action.IsActive {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Custom action is not active", nil, "")
+		return a.sendError(r, invalidRequest("Custom action is not active"))
 	}
 
 	// Get contact details
 	contactID, err := uuid.Parse(req.ContactID)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid contact ID", nil, "")
+		return a.sendError(r, invalidRequest("Invalid contact ID"))
 	}
 
-	contact, err := findByIDAndOrg[models.Contact](a.DB, r, contactID, orgID, "Contact")
+	contact, err := findByIDAndOrg[models.Contact](a, r, contactID, orgID, "Contact")
 	if err != nil {
 		return nil
 	}
@@ -346,7 +349,7 @@ func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 	case models.ActionTypeJavascript:
 		result, err = a.executeJavaScriptAction(*action, context)
 	default:
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Unknown action type", nil, "")
+		return a.sendError(r, invalidRequest("Unknown action type"))
 	}
 
 	if err != nil {
@@ -366,7 +369,7 @@ func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 func (a *App) CustomActionRedirect(r *fastglue.Request) error {
 	token, _ := r.RequestCtx.UserValue("token").(string)
 	if token == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Invalid or expired redirect token", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "Invalid or expired redirect token", kind: errNotFound})
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -380,7 +383,7 @@ func (a *App) CustomActionRedirect(r *fastglue.Request) error {
 		if !errors.Is(err, redis.Nil) {
 			a.Log.Error("Failed to read redirect token", "error", err)
 		}
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Invalid or expired redirect token", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "Invalid or expired redirect token", kind: errNotFound})
 	}
 
 	// Redirect to the actual URL
@@ -389,7 +392,7 @@ func (a *App) CustomActionRedirect(r *fastglue.Request) error {
 }
 
 // executeWebhookAction executes a webhook action
-func (a *App) executeWebhookAction(action models.CustomAction, context map[string]any) (*ActionResult, error) {
+func (a *App) executeWebhookAction(action models.CustomAction, vars map[string]any) (*ActionResult, error) {
 	// Parse config from JSONB (already a map)
 	configBytes, err := json.Marshal(action.Config)
 	if err != nil {
@@ -406,21 +409,21 @@ func (a *App) executeWebhookAction(action models.CustomAction, context map[strin
 	}
 
 	// Replace variables in URL
-	url := replaceVariables(config.URL, context)
+	url := replaceVariables(config.URL, vars)
 
 	// Replace variables in headers
 	headers := make(map[string]string)
 	for k, v := range config.Headers {
-		headers[k] = replaceVariables(v, context)
+		headers[k] = replaceVariables(v, vars)
 	}
 
 	// Replace variables in body or use default
 	var body string
 	if config.Body != "" {
-		body = replaceVariables(config.Body, context)
+		body = replaceVariables(config.Body, vars)
 	} else {
 		// Default body with all context
-		bodyJSON, _ := json.Marshal(context)
+		bodyJSON, _ := json.Marshal(vars)
 		body = string(bodyJSON)
 	}
 
@@ -430,7 +433,10 @@ func (a *App) executeWebhookAction(action models.CustomAction, context map[strin
 		method = "POST"
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBufferString(body))
+	ctx, cancel := context.WithTimeout(context.Background(), customActionTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBufferString(body))
 	if err != nil {
 		return nil, err
 	}
@@ -467,7 +473,7 @@ func (a *App) executeWebhookAction(action models.CustomAction, context map[strin
 }
 
 // executeURLAction executes a URL action by creating a redirect token
-func (a *App) executeURLAction(action models.CustomAction, context map[string]any) (*ActionResult, error) {
+func (a *App) executeURLAction(action models.CustomAction, vars map[string]any) (*ActionResult, error) {
 	// Parse config from JSONB (already a map)
 	configBytes, err := json.Marshal(action.Config)
 	if err != nil {
@@ -482,7 +488,7 @@ func (a *App) executeURLAction(action models.CustomAction, context map[string]an
 	}
 
 	// Replace variables in URL
-	finalURL := replaceVariables(config.URL, context)
+	finalURL := replaceVariables(config.URL, vars)
 
 	// Store the redirect token in Redis with a TTL.
 	//
@@ -504,7 +510,7 @@ func (a *App) executeURLAction(action models.CustomAction, context map[string]an
 
 // executeJavaScriptAction executes a JavaScript action server-side using goja.
 // The code runs in a sandboxed VM with no access to filesystem, network, or globals.
-func (a *App) executeJavaScriptAction(action models.CustomAction, context map[string]any) (*ActionResult, error) {
+func (a *App) executeJavaScriptAction(action models.CustomAction, vars map[string]any) (*ActionResult, error) {
 	configBytes, err := json.Marshal(action.Config)
 	if err != nil {
 		return nil, err
@@ -523,16 +529,16 @@ func (a *App) executeJavaScriptAction(action models.CustomAction, context map[st
 	vm := goja.New()
 
 	// Inject context variables (read-only data)
-	if err := vm.Set("context", context); err != nil {
+	if err := vm.Set("context", vars); err != nil {
 		return nil, fmt.Errorf("failed to set context: %w", err)
 	}
-	if contact, ok := context["contact"]; ok {
+	if contact, ok := vars["contact"]; ok {
 		_ = vm.Set("contact", contact)
 	}
-	if user, ok := context["user"]; ok {
+	if user, ok := vars["user"]; ok {
 		_ = vm.Set("user", user)
 	}
-	if org, ok := context["organization"]; ok {
+	if org, ok := vars["organization"]; ok {
 		_ = vm.Set("organization", org)
 	}
 
@@ -605,7 +611,7 @@ func buildActionContext(contact models.Contact, user models.User, org models.Org
 }
 
 // replaceVariables replaces {{variable}} placeholders with context values
-func replaceVariables(template string, context map[string]any) string {
+func replaceVariables(template string, vars map[string]any) string {
 	re := regexp.MustCompile(`\{\{([^}]+)\}\}`)
 	return re.ReplaceAllStringFunc(template, func(match string) string {
 		// Extract variable path (e.g., "contact.phone_number")
@@ -613,7 +619,7 @@ func replaceVariables(template string, context map[string]any) string {
 		path = strings.TrimSpace(path)
 
 		parts := strings.Split(path, ".")
-		var value any = context
+		var value any = vars
 
 		for _, part := range parts {
 			if m, ok := value.(map[string]any); ok {

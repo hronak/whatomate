@@ -25,6 +25,8 @@ func parsePathUUID(r *fastglue.Request, param, label string) (uuid.UUID, error) 
 	idStr, _ := r.RequestCtx.UserValue(param).(string)
 	id, err := uuid.Parse(idStr)
 	if err != nil {
+		// Free function: no *App in scope, so this writes the envelope
+		// directly rather than going through sendError.
 		_ = r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid "+label+" ID", nil, "")
 		return uuid.Nil, errEnvelopeSent
 	}
@@ -88,14 +90,49 @@ func endOfDay(t time.Time) time.Time {
 }
 
 // findByIDAndOrg fetches a single record scoped by ID and organization.
-// Sends a 404 error envelope on failure and returns the error.
-func findByIDAndOrg[T any](db *gorm.DB, r *fastglue.Request, id, orgID uuid.UUID, label string) (*T, error) {
+// It writes the error envelope on failure and returns errEnvelopeSent.
+//
+// A missing row is a 404; anything else is a 500. Collapsing the two — which
+// this did at all 60-odd call sites — made a Postgres outage indistinguishable
+// from a bad ID, so every client saw "not found" and nothing was logged.
+func findByIDAndOrg[T any](a *App, r *fastglue.Request, id, orgID uuid.UUID, label string) (*T, error) {
+	return findByIDAndOrgWith[T](a, r, a.DB, id, orgID, label)
+}
+
+// requestDBTimeout bounds a single database call made while serving a request.
+const requestDBTimeout = 30 * time.Second
+
+// dbContext returns the context to attach to database work done on behalf of a
+// request, along with its cancel func.
+//
+// Deliberately not r.RequestCtx. fasthttp's RequestCtx implements
+// context.Context in name only: Done() dereferences its server pointer, which
+// is nil for any RequestCtx a running server did not create — so it panics in
+// every unit test — and even when set it is closed only on server shutdown,
+// never on client disconnect. A plain timeout context is honest about what it
+// actually provides, and gives queries a ceiling they previously had none of.
+func dbContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), requestDBTimeout)
+}
+
+// findByIDAndOrgWith is findByIDAndOrg over a pre-scoped query, for callers
+// that need Preloads.
+func findByIDAndOrgWith[T any](a *App, r *fastglue.Request, query *gorm.DB, id, orgID uuid.UUID, label string) (*T, error) {
+	ctx, cancel := dbContext()
+	defer cancel()
+
 	var model T
-	if err := db.Where("id = ? AND organization_id = ?", id, orgID).First(&model).Error; err != nil {
-		_ = r.SendErrorEnvelope(fasthttp.StatusNotFound, label+" not found", nil, "")
-		return nil, errEnvelopeSent
+	err := query.WithContext(ctx).
+		Where("id = ? AND organization_id = ?", id, orgID).
+		First(&model).Error
+	switch {
+	case err == nil:
+		return &model, nil
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return nil, a.failRequest(r, notFound(label))
+	default:
+		return nil, a.failRequest(r, internalError("Failed to load "+label, err))
 	}
-	return &model, nil
 }
 
 // logAudit records an audit-log entry for a resource mutation, resolving the

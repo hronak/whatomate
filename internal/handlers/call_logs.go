@@ -14,7 +14,7 @@ import (
 func (a *App) ListCallLogs(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -103,7 +103,7 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 func (a *App) GetCallLog(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	logID, err := parsePathUUID(r, "id", "call log")
@@ -118,7 +118,7 @@ func (a *App) GetCallLog(r *fastglue.Request) error {
 
 	var callLog models.CallLog
 	if err := query.Preload("Contact").Preload("Agent").Preload("IVRFlow").First(&callLog).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Call log not found", nil, "")
+		return a.sendError(r, notFound("Call log"))
 	}
 
 	if a.ShouldMaskPhoneNumbers(orgID) {
@@ -149,11 +149,11 @@ func (a *App) GetCallLog(r *fastglue.Request) error {
 func (a *App) GetCallRecording(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	if a.S3Client == nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Recording not available", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "Recording not available", kind: errNotFound})
 	}
 
 	logID, err := parsePathUUID(r, "id", "call log")
@@ -168,11 +168,11 @@ func (a *App) GetCallRecording(r *fastglue.Request) error {
 
 	var callLog models.CallLog
 	if err := query.First(&callLog).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Call log not found", nil, "")
+		return a.sendError(r, notFound("Call log"))
 	}
 
 	if callLog.RecordingS3Key == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "No recording for this call", nil, "")
+		return a.sendError(r, &apiError{status: fasthttp.StatusNotFound, message: "No recording for this call", kind: errNotFound})
 	}
 
 	url, err := a.S3Client.GetPresignedURL(r.RequestCtx, callLog.RecordingS3Key, 15*time.Minute)

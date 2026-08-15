@@ -63,7 +63,7 @@ type PermissionResponse struct {
 func (a *App) ListRoles(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -111,7 +111,7 @@ func (a *App) ListRoles(r *fastglue.Request) error {
 func (a *App) GetRole(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "role")
@@ -122,7 +122,7 @@ func (a *App) GetRole(r *fastglue.Request) error {
 	var role models.CustomRole
 	if err := a.DB.Where("id = ? AND organization_id = ?", id, orgID).
 		First(&role).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Role not found", nil, "")
+		return a.sendError(r, notFound("Role"))
 	}
 
 	if err := a.loadRolePermissions(&role); err != nil {
@@ -140,7 +140,7 @@ func (a *App) GetRole(r *fastglue.Request) error {
 func (a *App) CreateRole(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req RoleRequest
@@ -150,13 +150,13 @@ func (a *App) CreateRole(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name is required", nil, "")
+		return a.sendError(r, invalidRequest("Name is required"))
 	}
 
 	// Check if name already exists
 	var existingRole models.CustomRole
 	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.Name).First(&existingRole).Error; err == nil {
-		return r.SendErrorEnvelope(fasthttp.StatusConflict, "Role with this name already exists", nil, "")
+		return a.sendError(r, conflict("Role with this name already exists"))
 	}
 
 	// Get permissions from database
@@ -207,7 +207,7 @@ func (a *App) CreateRole(r *fastglue.Request) error {
 func (a *App) UpdateRole(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "role")
@@ -218,7 +218,7 @@ func (a *App) UpdateRole(r *fastglue.Request) error {
 	var role models.CustomRole
 	if err := a.DB.Where("id = ? AND organization_id = ?", id, orgID).
 		First(&role).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Role not found", nil, "")
+		return a.sendError(r, notFound("Role"))
 	}
 
 	if err := a.loadRolePermissions(&role); err != nil {
@@ -278,7 +278,7 @@ func (a *App) UpdateRole(r *fastglue.Request) error {
 		// Check if name already exists for another role
 		var existingRole models.CustomRole
 		if err := a.DB.Where("organization_id = ? AND name = ? AND id != ?", orgID, req.Name, id).First(&existingRole).Error; err == nil {
-			return r.SendErrorEnvelope(fasthttp.StatusConflict, "Role with this name already exists", nil, "")
+			return a.sendError(r, conflict("Role with this name already exists"))
 		}
 		role.Name = req.Name
 	}
@@ -338,7 +338,7 @@ func (a *App) UpdateRole(r *fastglue.Request) error {
 func (a *App) DeleteRole(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	id, err := parsePathUUID(r, "id", "role")
@@ -346,21 +346,21 @@ func (a *App) DeleteRole(r *fastglue.Request) error {
 		return nil
 	}
 
-	role, err := findByIDAndOrg[models.CustomRole](a.DB, r, id, orgID, "Role")
+	role, err := findByIDAndOrg[models.CustomRole](a, r, id, orgID, "Role")
 	if err != nil {
 		return nil
 	}
 
 	// Cannot delete system roles
 	if role.IsSystem {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot delete system roles", nil, "")
+		return a.sendError(r, invalidRequest("Cannot delete system roles"))
 	}
 
 	// Check if any users have this role
 	var userCount int64
 	a.DB.Model(&models.User{}).Where("role_id = ?", id).Count(&userCount)
 	if userCount > 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Cannot delete role with assigned users", nil, "")
+		return a.sendError(r, invalidRequest("Cannot delete role with assigned users"))
 	}
 
 	// Load permissions for audit snapshot before deletion

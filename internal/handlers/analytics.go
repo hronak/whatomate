@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -34,7 +33,7 @@ type RecentMessageResponse struct {
 func (a *App) GetDashboardStats(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	now := time.Now()
@@ -48,7 +47,7 @@ func (a *App) GetDashboardStats(r *fastglue.Request) error {
 		var errMsg string
 		periodStart, periodEnd, errMsg = parseDateRange(fromStr, toStr)
 		if errMsg != "" {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, errMsg, nil, "")
+			return a.sendError(r, invalidRequest(errMsg))
 		}
 	} else {
 		// Default to current month

@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/config"
 	"github.com/shridarpatil/whatomate/internal/models"
+	"github.com/zerodha/logf"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -130,8 +132,14 @@ func AutoMigrate(db *gorm.DB) error {
 	return nil
 }
 
-// RunMigrationWithProgress runs migrations with a progress bar display
-func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) error {
+// RunMigrationWithProgress runs migrations, drawing a progress bar to out.
+//
+// The bar is a deliberate CLI affordance for `server -migrate`, so it is
+// written to an injected io.Writer rather than reaching for os.Stdout: this is
+// library code, and it was previously the only package outside main printing to
+// stdout. A nil out disables the bar entirely, which is what a non-interactive
+// caller wants. Failures go to the logger, not the bar.
+func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig, lo logf.Logger, out io.Writer) error {
 	// Silence GORM logging during migration
 	silentDB := db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)})
 
@@ -144,22 +152,29 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) 
 	barWidth := 40
 
 	printProgress := func(step int, total int) {
+		if out == nil {
+			return
+		}
 		percent := float64(step) / float64(total)
 		filled := int(percent * float64(barWidth))
 		empty := barWidth - filled
 
 		bar := strings.Repeat("█", filled) + "\033[90m" + strings.Repeat("░", empty) + "\033[0m"
-		fmt.Printf("\r  Running migrations  %s %3d%%", bar, int(percent*100))
-		_ = os.Stdout.Sync()
+		_, _ = fmt.Fprintf(out, "\r  Running migrations  %s %3d%%", bar, int(percent*100))
+		if f, ok := out.(*os.File); ok {
+			_ = f.Sync()
+		}
 	}
 
-	fmt.Println()
+	if out != nil {
+		_, _ = fmt.Fprintln(out)
+	}
 
 	// Migrate models
 	for _, m := range migrationModels {
 		printProgress(currentStep, totalSteps)
 		if err := silentDB.AutoMigrate(m.Model); err != nil {
-			fmt.Printf("\n  \033[31m✗ Migration failed: %s\033[0m\n\n", m.Name)
+			lo.Error("Migration step failed", "step", "automigrate", "model", m.Name, "error", err)
 			return fmt.Errorf("failed to migrate %s: %w", m.Name, err)
 		}
 		currentStep++
@@ -169,7 +184,7 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) 
 	for _, idx := range indexes {
 		printProgress(currentStep, totalSteps)
 		if err := silentDB.Exec(idx).Error; err != nil {
-			fmt.Printf("\n  \033[31m✗ Index creation failed\033[0m\n\n")
+			lo.Error("Migration step failed", "step", "create_indexes", "error", err)
 			return fmt.Errorf("failed to create index: %w", err)
 		}
 		currentStep++
@@ -178,26 +193,26 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) 
 	// Seed permissions (always run, will skip if already seeded)
 	printProgress(currentStep, totalSteps)
 	if err := SeedPermissionsAndRoles(silentDB); err != nil {
-		fmt.Printf("\n  \033[31m✗ Failed to seed permissions\033[0m\n\n")
+		lo.Error("Migration step failed", "step", "seed_permissions", "error", err)
 		return err
 	}
 
 	// Fix existing organizations - link permissions to system roles if missing
 	if err := SeedSystemRolesForAllOrgs(silentDB); err != nil {
-		fmt.Printf("\n  \033[31m✗ Failed to fix existing role permissions\033[0m\n\n")
+		lo.Error("Migration step failed", "step", "seed_system_roles", "error", err)
 		return err
 	}
 
 	// Backfill user_organizations from existing users
 	if err := MigrateUserOrganizations(silentDB); err != nil {
-		fmt.Printf("\n  \033[31m✗ Failed to backfill user organizations\033[0m\n\n")
+		lo.Error("Migration step failed", "step", "backfill_user_organizations", "error", err)
 		return err
 	}
 
 	// Create default admin (only runs if no users exist)
 	printProgress(currentStep, totalSteps)
 	if err := CreateDefaultAdmin(silentDB, adminCfg); err != nil {
-		fmt.Printf("\n  \033[31m✗ Setup failed\033[0m\n\n")
+		lo.Error("Migration step failed", "step", "create_default_admin", "error", err)
 		return err
 	}
 	currentStep++
@@ -205,18 +220,21 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig) 
 	// Seed default widgets for all organizations
 	printProgress(currentStep, totalSteps)
 	if err := SeedDefaultWidgets(silentDB); err != nil {
-		fmt.Printf("\n  \033[31m✗ Failed to seed widgets\033[0m\n\n")
+		lo.Error("Migration step failed", "step", "seed_widgets", "error", err)
 		return err
 	}
 
 	// Backfill last_inbound_at from existing messages
 	if err := BackfillLastInboundAt(silentDB); err != nil {
-		fmt.Printf("\n  \033[31m✗ Failed to backfill last_inbound_at\033[0m\n\n")
+		lo.Error("Migration step failed", "step", "backfill_last_inbound_at", "error", err)
 		return err
 	}
 
 	printProgress(currentStep, totalSteps)
-	fmt.Printf("\n  \033[32m✓ Migration completed\033[0m\n\n")
+	if out != nil {
+		_, _ = fmt.Fprintf(out, "\n  \033[32m✓ Migration completed\033[0m\n\n")
+	}
+	lo.Info("Migrations completed", "steps", totalSteps)
 
 	return nil
 }

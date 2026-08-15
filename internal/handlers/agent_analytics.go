@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -56,7 +55,7 @@ type AgentAnalyticsResponse struct {
 func (a *App) GetAgentAnalytics(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	// Parse date range
@@ -75,7 +74,7 @@ func (a *App) GetAgentAnalytics(r *fastglue.Request) error {
 		var errMsg string
 		periodStart, periodEnd, errMsg = parseDateRange(fromStr, toStr)
 		if errMsg != "" {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, errMsg, nil, "")
+			return a.sendError(r, invalidRequest(errMsg))
 		}
 	} else {
 		// Default to current month
@@ -162,7 +161,7 @@ func (a *App) GetAgentDetails(r *fastglue.Request) error {
 	}
 
 	// Verify agent exists
-	_, err = findByIDAndOrg[models.User](a.DB, r, agentID, orgID, "Agent")
+	_, err = findByIDAndOrg[models.User](a, r, agentID, orgID, "Agent")
 	if err != nil {
 		return nil
 	}
@@ -180,11 +179,11 @@ func (a *App) GetAgentDetails(r *fastglue.Request) error {
 func (a *App) GetAgentComparison(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	if !a.HasPermission(userID, models.ResourceAnalytics, models.ActionRead, orgID) {
-		return r.SendErrorEnvelope(fasthttp.StatusForbidden, "Access denied", nil, "")
+		return a.sendError(r, forbidden("Access denied"))
 	}
 
 	// Parse date range

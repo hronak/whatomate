@@ -121,7 +121,7 @@ var AvailableWebhookEvents = []map[string]string{
 func (a *App) ListWebhooks(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	pg := parsePagination(r)
@@ -163,7 +163,7 @@ func (a *App) ListWebhooks(r *fastglue.Request) error {
 func (a *App) GetWebhook(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	webhookID, err := parsePathUUID(r, "id", "webhook")
@@ -171,7 +171,7 @@ func (a *App) GetWebhook(r *fastglue.Request) error {
 		return nil
 	}
 
-	webhook, err := findByIDAndOrg[models.Webhook](a.DB, r, webhookID, orgID, "Webhook")
+	webhook, err := findByIDAndOrg[models.Webhook](a, r, webhookID, orgID, "Webhook")
 	if err != nil {
 		return nil
 	}
@@ -183,7 +183,7 @@ func (a *App) GetWebhook(r *fastglue.Request) error {
 func (a *App) CreateWebhook(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	var req WebhookRequest
@@ -192,15 +192,15 @@ func (a *App) CreateWebhook(r *fastglue.Request) error {
 	}
 
 	if req.Name == "" || req.URL == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "name and url are required", nil, "")
+		return a.sendError(r, invalidRequest("name and url are required"))
 	}
 
 	if err := validateWebhookURL(req.URL); err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+		return a.sendError(r, invalidRequest(err.Error()))
 	}
 
 	if len(req.Events) == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "at least one event must be selected", nil, "")
+		return a.sendError(r, invalidRequest("at least one event must be selected"))
 	}
 
 	// Convert headers to JSONB
@@ -243,7 +243,7 @@ func (a *App) CreateWebhook(r *fastglue.Request) error {
 func (a *App) UpdateWebhook(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	webhookID, err := parsePathUUID(r, "id", "webhook")
@@ -251,7 +251,7 @@ func (a *App) UpdateWebhook(r *fastglue.Request) error {
 		return nil
 	}
 
-	webhook, err := findByIDAndOrg[models.Webhook](a.DB, r, webhookID, orgID, "Webhook")
+	webhook, err := findByIDAndOrg[models.Webhook](a, r, webhookID, orgID, "Webhook")
 	if err != nil {
 		return nil
 	}
@@ -268,7 +268,7 @@ func (a *App) UpdateWebhook(r *fastglue.Request) error {
 	}
 	if req.URL != "" {
 		if err := validateWebhookURL(req.URL); err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, err.Error(), nil, "")
+			return a.sendError(r, invalidRequest(err.Error()))
 		}
 		webhook.URL = req.URL
 	}
@@ -310,7 +310,7 @@ func (a *App) UpdateWebhook(r *fastglue.Request) error {
 func (a *App) DeleteWebhook(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	webhookID, err := parsePathUUID(r, "id", "webhook")
@@ -320,7 +320,7 @@ func (a *App) DeleteWebhook(r *fastglue.Request) error {
 
 	var webhook models.Webhook
 	if err := a.DB.Where("id = ? AND organization_id = ?", webhookID, orgID).First(&webhook).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "Webhook not found", nil, "")
+		return a.sendError(r, notFound("Webhook"))
 	}
 
 	if err := a.DB.Delete(&webhook).Error; err != nil {
@@ -341,7 +341,7 @@ func (a *App) DeleteWebhook(r *fastglue.Request) error {
 func (a *App) TestWebhook(r *fastglue.Request) error {
 	orgID, err := a.getOrgID(r)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusUnauthorized, "Unauthorized", nil, "")
+		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
 	webhookID, err := parsePathUUID(r, "id", "webhook")
@@ -349,7 +349,7 @@ func (a *App) TestWebhook(r *fastglue.Request) error {
 		return nil
 	}
 
-	webhook, err := findByIDAndOrg[models.Webhook](a.DB, r, webhookID, orgID, "Webhook")
+	webhook, err := findByIDAndOrg[models.Webhook](a, r, webhookID, orgID, "Webhook")
 	if err != nil {
 		return nil
 	}

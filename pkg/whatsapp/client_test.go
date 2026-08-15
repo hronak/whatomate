@@ -74,18 +74,8 @@ func TestClient_SendTextMessage(t *testing.T) {
 			text:  "Hello",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Invalid phone number format",
 						Code:    100,
 					},
@@ -100,18 +90,8 @@ func TestClient_SendTextMessage(t *testing.T) {
 			text:  "Hello",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusUnauthorized)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Invalid access token",
 						Code:    190,
 					},
@@ -205,18 +185,8 @@ func TestClient_GetMediaURL(t *testing.T) {
 			mediaID: "nonexistent",
 			serverResponse: func(t *testing.T, w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
-				_ = json.NewEncoder(w).Encode(whatsapp.MetaAPIError{
-					Error: struct {
-						Message      string `json:"message"`
-						Type         string `json:"type"`
-						Code         int    `json:"code"`
-						ErrorSubcode int    `json:"error_subcode"`
-						ErrorUserMsg string `json:"error_user_msg"`
-						ErrorData    struct {
-							Details string `json:"details"`
-						} `json:"error_data"`
-						FBTraceID string `json:"fbtrace_id"`
-					}{
+				_ = json.NewEncoder(w).Encode(whatsapp.MetaErrorResponse{
+					Error: whatsapp.MetaErrorDetail{
 						Message: "Media not found",
 						Code:    100,
 					},

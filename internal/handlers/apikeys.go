@@ -106,7 +106,7 @@ func (a *App) GetAPIKey(r *fastglue.Request) error {
 
 	var apiKey models.APIKey
 	if err := a.DB.Where("id = ? AND organization_id = ?", id, orgID).First(&apiKey).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "API key not found", nil, "")
+		return a.sendError(r, notFound("API key"))
 	}
 
 	return r.SendEnvelope(APIKeyResponse{
@@ -134,7 +134,7 @@ func (a *App) UpdateAPIKey(r *fastglue.Request) error {
 
 	var apiKey models.APIKey
 	if err := a.DB.Where("id = ? AND organization_id = ?", id, orgID).First(&apiKey).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "API key not found", nil, "")
+		return a.sendError(r, notFound("API key"))
 	}
 
 	var req struct {
@@ -178,7 +178,7 @@ func (a *App) CreateAPIKey(r *fastglue.Request) error {
 
 	// Validate required fields
 	if req.Name == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Name is required", nil, "")
+		return a.sendError(r, invalidRequest("Name is required"))
 	}
 
 	// Parse expiration date if provided
@@ -186,7 +186,7 @@ func (a *App) CreateAPIKey(r *fastglue.Request) error {
 	if req.ExpiresAt != nil && *req.ExpiresAt != "" {
 		t, err := time.Parse(time.RFC3339, *req.ExpiresAt)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest, "Invalid expires_at format. Use RFC3339 format", nil, "")
+			return a.sendError(r, invalidRequest("Invalid expires_at format. Use RFC3339 format"))
 		}
 		expiresAt = &t
 	}
@@ -252,7 +252,7 @@ func (a *App) DeleteAPIKey(r *fastglue.Request) error {
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete API key", nil, "")
 	}
 	if result.RowsAffected == 0 {
-		return r.SendErrorEnvelope(fasthttp.StatusNotFound, "API key not found", nil, "")
+		return a.sendError(r, notFound("API key"))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "API key deleted successfully"})
