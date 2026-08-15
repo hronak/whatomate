@@ -105,6 +105,19 @@ type AppConfig struct {
 	Environment   string `koanf:"environment"` // development, staging, production
 	Debug         bool   `koanf:"debug"`
 	EncryptionKey string `koanf:"encryption_key"` // AES-256 key for encrypting secrets at rest
+
+	// EnforceRoutePermissions turns the route table's permission checks from
+	// advisory into binding.
+	//
+	// It defaults to false — shadow mode — because 129 of 224 handlers never
+	// checked a permission, so switching them all on at once would start
+	// returning 403 to callers who succeed today. In shadow mode every
+	// would-be denial is logged with the route and the permission it wanted,
+	// which is the data needed to fix role assignments (and any wrong entry in
+	// the table) before flipping this to true.
+	//
+	// Set WHATOMATE_APP__ENFORCE_ROUTE_PERMISSIONS=true to enforce.
+	EnforceRoutePermissions bool `koanf:"enforce_route_permissions"`
 }
 
 type ServerConfig struct {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"github.com/shridarpatil/whatomate/internal/middleware"
 	"net/http"
 	"runtime/debug"
 	"sync"
@@ -154,7 +155,7 @@ func (a *App) spawnIngest(name string, fn func(ctx context.Context)) {
 func (a *App) getOrgID(r *fastglue.Request) (uuid.UUID, error) {
 	// Get user's default organization ID from JWT
 	var defaultOrgID uuid.UUID
-	orgIDVal := r.RequestCtx.UserValue("organization_id")
+	orgIDVal := r.RequestCtx.UserValue(middleware.ContextKeyOrganizationID)
 	if orgIDVal == nil {
 		return uuid.Nil, errors.New("organization_id not found in context")
 	}
@@ -172,7 +173,7 @@ func (a *App) getOrgID(r *fastglue.Request) (uuid.UUID, error) {
 	}
 
 	// Check for X-Organization-ID header to switch organizations
-	userID, _ := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, _ := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	overrideOrgID := string(r.RequestCtx.Request.Header.Peek("X-Organization-ID"))
 	if overrideOrgID != "" {
 		parsedOrgID, err := uuid.Parse(overrideOrgID)
@@ -325,7 +326,7 @@ func (a *App) getOrgAndUserID(r *fastglue.Request) (orgID, userID uuid.UUID, err
 		return uuid.Nil, uuid.Nil, err
 	}
 
-	userIDVal := r.RequestCtx.UserValue("user_id")
+	userIDVal := r.RequestCtx.UserValue(middleware.ContextKeyUserID)
 	if userIDVal == nil {
 		return uuid.Nil, uuid.Nil, errors.New("user_id not found in context")
 	}

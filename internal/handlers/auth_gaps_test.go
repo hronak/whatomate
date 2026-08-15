@@ -216,7 +216,7 @@ func TestApp_GetWSToken_MissingUserID(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 
 	req := testutil.NewGETRequest(t)
-	req.RequestCtx.SetUserValue("organization_id", org.ID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, org.ID)
 
 	require.NoError(t, app.GetWSToken(req))
 	testutil.AssertErrorResponse(t, req, fasthttp.StatusUnauthorized, "Unauthorized")
@@ -226,7 +226,7 @@ func TestApp_GetWSToken_MissingOrgID(t *testing.T) {
 	app := newTestApp(t)
 
 	req := testutil.NewGETRequest(t)
-	req.RequestCtx.SetUserValue("user_id", uuid.New())
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, uuid.New())
 
 	require.NoError(t, app.GetWSToken(req))
 	testutil.AssertErrorResponse(t, req, fasthttp.StatusUnauthorized, "Unauthorized")

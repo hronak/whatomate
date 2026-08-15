@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"maps"
 	"strconv"
 	"time"
 
@@ -182,6 +183,14 @@ func listEnvelope(key string, items, total any, pg Pagination) map[string]any {
 		"page":  pg.Page,
 		"limit": pg.Limit,
 	}
+}
+
+// listEnvelopeWith is listEnvelope plus extra top-level fields, for the list
+// endpoints that return something alongside the page (has_more, online_count).
+func listEnvelopeWith(key string, items, total any, pg Pagination, extra map[string]any) map[string]any {
+	env := listEnvelope(key, items, total, pg)
+	maps.Copy(env, extra)
+	return env
 }
 
 // parseDateRange parses start and end date strings in YYYY-MM-DD format.

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/shridarpatil/whatomate/internal/middleware"
 	"net/mail"
 	"time"
 
@@ -179,13 +180,9 @@ func (a *App) ListUsers(r *fastglue.Request) error {
 		response[i] = resp
 	}
 
-	return r.SendEnvelope(map[string]any{
-		"users":        response,
-		"total":        total,
-		"page":         pg.Page,
-		"limit":        pg.Limit,
+	return r.SendEnvelope(listEnvelopeWith("users", response, total, pg, map[string]any{
 		"online_count": len(onlineIDs),
-	})
+	}))
 }
 
 // GetUser returns a single user
@@ -382,7 +379,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
-	currentUserID, _ := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	currentUserID, _ := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 
 	id, err := parsePathUUID(r, "id", "user")
 	if err != nil {
@@ -421,9 +418,8 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 	oldSnap := userAuditSnapshot(&user)
 
 	var req UserRequest
-	if err := r.Decode(&req, "json"); err != nil {
-		a.Log.Error("UpdateUser: Failed to decode request", "error", err, "body", string(r.RequestCtx.PostBody()))
-		return a.sendError(r, invalidRequest("Invalid request body"))
+	if err := a.decodeRequest(r, &req); err != nil {
+		return nil
 	}
 
 	// Only users with users:write permission can change roles
@@ -554,7 +550,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
-	currentUserID, _ := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	currentUserID, _ := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !a.HasPermission(currentUserID, models.ResourceUsers, models.ActionDelete, orgID) {
 		return a.sendError(r, forbidden("Insufficient permissions"))
 	}
@@ -635,7 +631,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 
 // GetCurrentUser returns the current authenticated user's details
 func (a *App) GetCurrentUser(r *fastglue.Request) error {
-	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, ok := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
@@ -648,7 +644,7 @@ func (a *App) GetCurrentUser(r *fastglue.Request) error {
 	}
 
 	// Use org from JWT context (may differ from DB after org switch)
-	orgID, _ := r.RequestCtx.UserValue("organization_id").(uuid.UUID)
+	orgID, _ := r.RequestCtx.UserValue(middleware.ContextKeyOrganizationID).(uuid.UUID)
 	if orgID != uuid.Nil {
 		user.OrganizationID = orgID
 
@@ -751,7 +747,7 @@ func notificationSettingsSnapshot(settings models.JSONB) map[string]any {
 
 // ChangePassword changes the current user's password
 func (a *App) ChangePassword(r *fastglue.Request) error {
-	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, ok := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
@@ -872,7 +868,7 @@ type MyOrganizationResponse struct {
 
 // ListMyOrganizations returns all organizations the current user belongs to
 func (a *App) ListMyOrganizations(r *fastglue.Request) error {
-	userID, ok := r.RequestCtx.UserValue("user_id").(uuid.UUID)
+	userID, ok := r.RequestCtx.UserValue(middleware.ContextKeyUserID).(uuid.UUID)
 	if !ok {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}

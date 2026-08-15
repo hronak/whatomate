@@ -131,18 +131,18 @@ func CreateTestUser(t *testing.T, db *gorm.DB, orgID uuid.UUID, opts ...UserOpti
 
 // SetAuthContext sets organization_id and user_id in the request context.
 func SetAuthContext(req *fastglue.Request, orgID, userID uuid.UUID) {
-	req.RequestCtx.SetUserValue("organization_id", orgID)
-	req.RequestCtx.SetUserValue("user_id", userID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, orgID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, userID)
 }
 
 // SetFullAuthContext sets org, user, role, and super admin status in the request context.
 func SetFullAuthContext(req *fastglue.Request, orgID, userID uuid.UUID, roleID *uuid.UUID, isSuperAdmin bool) {
-	req.RequestCtx.SetUserValue("organization_id", orgID)
-	req.RequestCtx.SetUserValue("user_id", userID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyOrganizationID, orgID)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyUserID, userID)
 	if roleID != nil {
-		req.RequestCtx.SetUserValue("role_id", *roleID)
+		req.RequestCtx.SetUserValue(middleware.ContextKeyRoleID, *roleID)
 	}
-	req.RequestCtx.SetUserValue("is_super_admin", isSuperAdmin)
+	req.RequestCtx.SetUserValue(middleware.ContextKeyIsSuperAdmin, isSuperAdmin)
 }
 
 // --- WhatsApp Account ---
