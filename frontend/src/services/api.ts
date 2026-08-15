@@ -82,8 +82,15 @@ function onRefreshComplete(success: boolean) {
 // a single tab. Falls back to a plain request where Web Locks is unavailable
 // (older browsers / insecure contexts).
 async function refreshAccessToken(): Promise<void> {
+  // Sent outside the `api` instance, so the request interceptor's CSRF header
+  // is not applied — add it here. Without it a refresh made while the access
+  // cookie is still live (any 401 that is not an expiry) is rejected 403 by
+  // CSRFProtection, and the caller below reads that as a dead session.
   const doRefresh = () =>
-    axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+    axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
+      withCredentials: true,
+      headers: getRequestHeaders({ csrf: true }),
+    })
 
   if (navigator.locks?.request) {
     await navigator.locks.request('whm-token-refresh', async () => {
