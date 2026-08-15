@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TagBadge, PageHeader, SearchInput, DataTable, ConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { contactsService, accountsService, type ImportResult } from '@/services/api'
 import { toast } from 'vue-sonner'
 import { Plus, Users, Pencil, Trash2, MessageSquare, Download } from '@lucide/vue'
@@ -47,8 +48,7 @@ const isLoading = ref(false)
 const isDeleting = ref(false)
 const error = ref(false)
 const isCreateDialogOpen = ref(false)
-const deleteDialogOpen = ref(false)
-const contactToDelete = ref<Contact | null>(null)
+const { deleteDialogOpen, itemToDelete: contactToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Contact, Record<string, never>>({})
 
 // Sorting state
 const sortKey = ref('last_message_at')
@@ -75,16 +75,6 @@ function onImported(_result: ImportResult) {
   // Refresh the contacts list but keep dialog open to show import results
   fetchContacts()
   // Dialog stays open so user can see import results
-}
-
-function openDeleteDialog(contact: Contact) {
-  contactToDelete.value = contact
-  deleteDialogOpen.value = true
-}
-
-function closeDeleteDialog() {
-  deleteDialogOpen.value = false
-  contactToDelete.value = null
 }
 
 async function fetchContacts() {

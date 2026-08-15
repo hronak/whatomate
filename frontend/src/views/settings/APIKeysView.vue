@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader, DataTable, SearchInput, ConfirmDialog, IconButton, ErrorState, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { toast } from 'vue-sonner'
 import { Plus, Trash2, Pencil, Key } from '@lucide/vue'
 import { getErrorMessage } from '@/lib/api-utils'
@@ -35,8 +36,7 @@ const error = ref<string | null>(null)
 const canWrite = computed(() => authStore.hasPermission('api_keys', 'write'))
 const canDelete = computed(() => authStore.hasPermission('api_keys', 'delete'))
 
-const isDeleteDialogOpen = ref(false)
-const keyToDelete = ref<APIKey | null>(null)
+const { deleteDialogOpen: isDeleteDialogOpen, itemToDelete: keyToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<APIKey, Record<string, never>>({})
 
 const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } = useSearchPagination({
   fetchFn: () => fetchItems(),
@@ -81,8 +81,7 @@ async function deleteAPIKey() {
     await apiKeysService.delete(keyToDelete.value.id)
     await fetchItems()
     toast.success(t('common.deletedSuccess', { resource: t('resources.APIKey') }))
-    isDeleteDialogOpen.value = false
-    keyToDelete.value = null
+    closeDeleteDialog()
   } catch (err) {
     toast.error(getErrorMessage(err, t('common.failedDelete', { resource: t('resources.APIKey') })))
   } finally {
@@ -155,7 +154,7 @@ onMounted(() => fetchItems())
                     <RouterLink :to="`/settings/api-keys/${key.id}`">
                       <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" />
                     </RouterLink>
-                    <IconButton v-if="canDelete" :icon="Trash2" :label="$t('apiKeys.deleteApiKeyLabel')" variant="ghost" class="size-8 text-destructive" @click="keyToDelete = key; isDeleteDialogOpen = true" />
+                    <IconButton v-if="canDelete" :icon="Trash2" :label="$t('apiKeys.deleteApiKeyLabel')" variant="ghost" class="size-8 text-destructive" @click="openDeleteDialog(key)" />
                   </div>
                 </template>
                 <template #empty-action>

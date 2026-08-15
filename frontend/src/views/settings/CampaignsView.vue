@@ -17,6 +17,7 @@ import { campaignsService } from '@/services/api'
 import { wsService } from '@/services/websocket'
 import { toast } from 'vue-sonner'
 import { PageHeader, DataTable, ConfirmDialog, SearchInput, IconButton, ErrorState, DateRangePicker, type Column } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { getErrorMessage } from '@/lib/api-utils'
 import {
   Plus,
@@ -98,8 +99,7 @@ const statusOptions = computed(() => [
 ])
 
 // AlertDialog state
-const deleteDialogOpen = ref(false)
-const campaignToDelete = ref<Campaign | null>(null)
+const { deleteDialogOpen, itemToDelete: campaignToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Campaign, Record<string, never>>({})
 const isDeletingCampaign = ref(false)
 
 // Error state
@@ -176,11 +176,6 @@ watch([filterStatus, selectedRange], () => {
   }
 })
 
-function openDeleteDialog(campaign: Campaign) {
-  campaignToDelete.value = campaign
-  deleteDialogOpen.value = true
-}
-
 async function confirmDeleteCampaign() {
   if (!campaignToDelete.value) return
 
@@ -188,8 +183,7 @@ async function confirmDeleteCampaign() {
   try {
     await campaignsService.delete(campaignToDelete.value.id)
     toast.success(t('common.deletedSuccess', { resource: t('resources.Campaign') }))
-    deleteDialogOpen.value = false
-    campaignToDelete.value = null
+    closeDeleteDialog()
     await fetchCampaigns()
   } catch (error: any) {
     toast.error(getErrorMessage(error, t('common.failedDelete', { resource: t('resources.campaign') })))

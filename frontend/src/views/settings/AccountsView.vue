@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { PageHeader, DataTable, ConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
+import { useCrudState } from '@/composables/useCrudState'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/services/api'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -53,8 +54,7 @@ interface WhatsAppAccount {
 const accounts = ref<WhatsAppAccount[]>([])
 const isLoading = ref(true)
 const fetchError = ref(false)
-const deleteDialogOpen = ref(false)
-const accountToDelete = ref<WhatsAppAccount | null>(null)
+const { deleteDialogOpen, itemToDelete: accountToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<WhatsAppAccount, Record<string, never>>({})
 const isDeleting = ref(false)
 
 // Facebook Embedded Signup State
@@ -227,19 +227,13 @@ async function exchangeCodeForToken(code: string, phoneNumberId: string, wabaId:
   }
 }
 
-function openDeleteDialog(account: WhatsAppAccount) {
-  accountToDelete.value = account
-  deleteDialogOpen.value = true
-}
-
 async function confirmDelete() {
   if (!accountToDelete.value) return
   isDeleting.value = true
   try {
     await api.delete(`/accounts/${accountToDelete.value.id}`)
     toast.success(t('common.deletedSuccess', { resource: t('resources.Account') }))
-    deleteDialogOpen.value = false
-    accountToDelete.value = null
+    closeDeleteDialog()
     await fetchAccounts()
   } catch (e) {
     toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.account') })))
