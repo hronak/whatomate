@@ -270,8 +270,12 @@ func (a *App) RefreshToken(r *fastglue.Request) error {
 	refreshTokenStr := string(r.RequestCtx.Request.Header.Cookie(cookieRefreshName))
 	if refreshTokenStr == "" {
 		var req RefreshRequest
-		_ = r.Decode(&req, "json")
-		refreshTokenStr = req.RefreshToken
+		if len(r.RequestCtx.PostBody()) > 0 {
+			if err := a.decodeRequest(r, &req); err != nil {
+				return nil
+			}
+			refreshTokenStr = req.RefreshToken
+		}
 	}
 	if refreshTokenStr == "" {
 		return a.sendError(r, unauthorized("Missing refresh token"))

@@ -467,8 +467,12 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 		var body struct {
 			WhatsAppAccount string `json:"whatsapp_account"`
 		}
-		_ = r.Decode(&body, "json")
-		accountName = body.WhatsAppAccount
+		if len(r.RequestCtx.PostBody()) > 0 {
+			if err := a.decodeRequest(r, &body); err != nil {
+				return nil
+			}
+			accountName = body.WhatsAppAccount
+		}
 	}
 
 	if accountName == "" {

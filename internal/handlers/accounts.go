@@ -833,7 +833,11 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 	var req struct {
 		Pin string `json:"pin"` // Optional custom PIN
 	}
-	_ = r.Decode(&req, "json")
+	if len(r.RequestCtx.PostBody()) > 0 {
+		if err := a.decodeRequest(r, &req); err != nil {
+			return nil
+		}
+	}
 
 	account, err := a.resolveWhatsAppAccountByID(r, id, orgID)
 	if err != nil {
