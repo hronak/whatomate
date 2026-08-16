@@ -302,7 +302,11 @@ func runServer(args []string) {
 		ReadTimeout:        time.Duration(cfg.Server.ReadTimeout) * time.Second,
 		WriteTimeout:       time.Duration(cfg.Server.WriteTimeout) * time.Second,
 		MaxRequestBodySize: 15 * 1024 * 1024,
-		Name:               "Whatomate",
+		// Headers, not body — see ServerConfig.ReadBufferSize. fasthttp's 4KB
+		// default drops the connection outright once cookies and forwarded
+		// headers add up, which surfaces as an unexplained failed request.
+		ReadBufferSize: cfg.Server.ReadBufferSize,
+		Name:           "Whatomate",
 	}
 
 	// Start server in goroutine. A listen failure signals the shutdown path

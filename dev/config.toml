@@ -36,6 +36,10 @@ host = "0.0.0.0"
 port = 8080
 read_timeout = 30
 write_timeout = 30
+# Request line + headers. Generous on purpose: on localhost the browser sends
+# cookies set by anything else you have running on another port, and fasthttp's
+# 4KB default drops those connections outright.
+read_buffer_size = 32768
 base_path = ""
 allowed_origins = ""  # Empty = allow all. Fine for dev only.
 

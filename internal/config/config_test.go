@@ -148,6 +148,24 @@ func TestLoad_FrontendDirDefaultsToEmbedded(t *testing.T) {
 	assert.Empty(t, cfg.App.FrontendDir, "shipped binaries must default to the embedded frontend")
 }
 
+// fasthttp's own default is 4KB, which cookie auth plus a proxy's forwarded
+// headers can exceed — and the failure mode is a dropped connection, not a
+// readable error. Pin the larger default so it can't silently regress.
+func TestLoad_ReadBufferSizeDefault(t *testing.T) {
+	cfg, err := config.Load(writeConfig(t, ""))
+	require.NoError(t, err)
+	assert.Equal(t, 16*1024, cfg.Server.ReadBufferSize)
+}
+
+func TestLoad_ReadBufferSizeOverride(t *testing.T) {
+	cfg, err := config.Load(writeConfig(t, `
+[server]
+read_buffer_size = 32768
+`))
+	require.NoError(t, err)
+	assert.Equal(t, 32768, cfg.Server.ReadBufferSize)
+}
+
 func TestLoad_EmptyConfigPathStillLoadsDefaults(t *testing.T) {
 	cfg, err := config.Load("")
 	require.NoError(t, err)

@@ -28,6 +28,10 @@ host = "0.0.0.0"
 port = 8080
 read_timeout = 30
 write_timeout = 30
+read_buffer_size = 16384  # Max size of the request line + all request headers, in bytes.
+                          # fasthttp's 4KB default is tight for cookie auth behind a
+                          # proxy; exceeding it drops the connection before any handler
+                          # runs ("small read buffer" in the logs). Raise if you see that.
 base_path = ""  # Set to "/subpath" if behind nginx proxy pass
 allowed_origins = ""  # Comma-separated CORS origins (e.g., "https://app.example.com,https://admin.example.com"). Empty = allow all (dev only).
 

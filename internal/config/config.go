@@ -143,6 +143,17 @@ type ServerConfig struct {
 	WriteTimeout   int    `koanf:"write_timeout"`
 	BasePath       string `koanf:"base_path"`       // Base path for frontend (e.g., "/whatomate" for proxy pass)
 	AllowedOrigins string `koanf:"allowed_origins"` // Comma-separated list of allowed CORS origins
+
+	// ReadBufferSize caps the request line plus all request headers. Exceeding
+	// it doesn't return a tidy 431 from our code — fasthttp rejects the
+	// connection before any handler runs, logging "small read buffer", so the
+	// browser just sees a failed request.
+	//
+	// fasthttp defaults to 4KB, which is tight for cookie auth: whm_access,
+	// whm_refresh and whm_csrf together are a good fraction of it before a
+	// reverse proxy adds forwarded headers, and on localhost the browser also
+	// sends cookies set by anything else running on another port. Default 16KB.
+	ReadBufferSize int `koanf:"read_buffer_size"`
 }
 
 type DatabaseConfig struct {
@@ -264,6 +275,7 @@ func setDefaults(cfg *Config) {
 	cfg.Server.Port = cmp.Or(cfg.Server.Port, 8080)
 	cfg.Server.ReadTimeout = cmp.Or(cfg.Server.ReadTimeout, 30)
 	cfg.Server.WriteTimeout = cmp.Or(cfg.Server.WriteTimeout, 30)
+	cfg.Server.ReadBufferSize = cmp.Or(cfg.Server.ReadBufferSize, 16*1024)
 
 	cfg.Database.Port = cmp.Or(cfg.Database.Port, 5432)
 	cfg.Database.SSLMode = cmp.Or(cfg.Database.SSLMode, "disable")
