@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -36,7 +37,18 @@ function reportBackendDown(proxy: { on: (ev: string, cb: (...args: any[]) => voi
 export default defineConfig({
   base: './',
   plugins: [
-    vue(),
+    vue({
+      script: {
+        fs: {
+          fileExists(file: string): boolean {
+            return fs.existsSync(file)
+          },
+          readFile(file: string): string | undefined {
+            return fs.readFileSync(file, 'utf-8')
+          }
+        }
+      }
+    }),
     // Gzip compression
     compression({
       algorithm: 'gzip',
