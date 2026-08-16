@@ -258,7 +258,6 @@ onMounted(async () => {
         isNew ? $t('webhooks.newWebhook', 'New Webhook') : webhook?.name || ''
       "
       :icon="WebhookIcon"
-      icon-gradient="bg-linear-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20"
       back-link="/settings/webhooks"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

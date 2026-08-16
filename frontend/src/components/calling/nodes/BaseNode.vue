@@ -30,7 +30,7 @@ const headerGradient = computed(
 
 <template>
   <div
-    class="base-node relative bg-background border rounded-lg shadow-md hover:shadow-lg min-w-48 w-max max-w-sm overflow-visible"
+    class="base-node relative bg-card border rounded-lg shadow-md hover:shadow-lg min-w-48 w-max max-w-sm overflow-visible"
   >
     <!-- Input handle (top) -->
     <Handle

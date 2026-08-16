@@ -516,16 +516,16 @@ const messagingChartData = computed(() => {
       {
         label: t('metaInsights.sent'),
         data: data.timeSeries.map(d => d.sent),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: 'var(--color-chart-1)',
+        backgroundColor: 'color-mix(in oklab, var(--color-chart-1) 10%, transparent)',
         fill: true,
         tension: 0.3
       },
       {
         label: t('metaInsights.delivered'),
         data: data.timeSeries.map(d => d.delivered),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderColor: 'var(--color-chart-2)',
+        backgroundColor: 'color-mix(in oklab, var(--color-chart-2) 10%, transparent)',
         fill: true,
         tension: 0.3
       }
@@ -547,12 +547,12 @@ const pricingChartData = computed(() => {
       {
         label: t('metaInsights.messaging'),
         data: categories.map(([, val]) => val.volume),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)'
+        backgroundColor: 'var(--color-chart-1)'
       },
       {
         label: t('metaInsights.cost'),
         data: categories.map(([, val]) => val.cost),
-        backgroundColor: 'rgba(16, 185, 129, 0.8)'
+        backgroundColor: 'var(--color-chart-2)'
       }
     ]
   }
@@ -571,16 +571,16 @@ const callChartData = computed(() => {
       {
         label: t('metaInsights.incoming'),
         data: data.timeSeries.map(d => d.incoming),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: 'var(--color-chart-1)',
+        backgroundColor: 'color-mix(in oklab, var(--color-chart-1) 10%, transparent)',
         fill: true,
         tension: 0.3
       },
       {
         label: t('metaInsights.outgoing'),
         data: data.timeSeries.map(d => d.outgoing),
-        borderColor: 'rgb(168, 85, 247)',
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+        borderColor: 'var(--color-chart-4)',
+        backgroundColor: 'color-mix(in oklab, var(--color-chart-4) 10%, transparent)',
         fill: true,
         tension: 0.3
       }
@@ -641,7 +641,6 @@ const chartOptions = {
       :title="$t('metaInsights.title')"
       :description="$t('metaInsights.subtitle')"
       :icon="BarChart3"
-      icon-gradient="bg-linear-to-br from-green-500 to-emerald-600 shadow-green-500/20"
     >
       <template #actions>
         <!-- Account Filter -->
@@ -778,8 +777,8 @@ const chartOptions = {
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                     <span class="font-medium text-foreground/50">{{ $t('metaInsights.messagesDelivered') }}</span>
-                    <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <CheckCircle class="size-5 text-emerald-400" />
+                    <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center">
+                      <CheckCircle class="size-5 text-success" />
                     </div>
                   </div>
                   <div class="pt-2">
@@ -853,8 +852,8 @@ const chartOptions = {
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                     <span class="font-medium text-foreground/50">{{ $t('metaInsights.totalCost') }}</span>
-                    <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <DollarSign class="size-5 text-emerald-400" />
+                    <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center">
+                      <DollarSign class="size-5 text-success" />
                     </div>
                   </div>
                   <div class="pt-2">
@@ -899,7 +898,7 @@ const chartOptions = {
                         <span class="text-foreground/70">{{ $t('metaInsights.freeEntryPoint') }}</span>
                         <span class="font-semibold text-foreground">{{ (aggregatedData as ReturnType<typeof aggregatePricingData>).freeMessages.entryPoint.toLocaleString() }}</span>
                       </div>
-                      <div class="flex items-center justify-between py-2 bg-green-500/10 rounded px-2 -mx-2">
+                      <div class="flex items-center justify-between py-2 bg-success/10 rounded px-2 -mx-2">
                         <span class="font-medium text-success">{{ $t('metaInsights.totalFree') }}</span>
                         <span class="font-bold text-success">{{ (aggregatedData as ReturnType<typeof aggregatePricingData>).freeMessages.total.toLocaleString() }}</span>
                       </div>
@@ -942,7 +941,7 @@ const chartOptions = {
                         <span class="text-foreground/70">{{ formatCategory(category as string) }}</span>
                         <span class="font-semibold text-foreground">{{ formatCurrency(cost as number) }}</span>
                       </div>
-                      <div class="flex items-center justify-between py-2 bg-emerald-500/10 rounded px-2 -mx-2">
+                      <div class="flex items-center justify-between py-2 bg-success/10 rounded px-2 -mx-2">
                         <span class="font-medium text-success">{{ $t('metaInsights.totalCost') }}</span>
                         <span class="font-bold text-success">{{ formatCurrency((aggregatedData as ReturnType<typeof aggregatePricingData>).totals.cost) }}</span>
                       </div>
@@ -1007,8 +1006,8 @@ const chartOptions = {
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                     <span class="font-medium text-foreground/50">{{ $t('metaInsights.delivered') }}</span>
-                    <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <CheckCircle class="size-5 text-emerald-400" />
+                    <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center">
+                      <CheckCircle class="size-5 text-success" />
                     </div>
                   </div>
                   <div class="pt-2">
@@ -1201,8 +1200,8 @@ const chartOptions = {
                 <div class="card-depth rounded-xl border border-border bg-card p-6">
                   <div class="flex flex-row items-center justify-between space-y-0 pb-2">
                     <span class="font-medium text-foreground/50">{{ $t('metaInsights.avgDuration') }}</span>
-                    <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <TrendingUp class="size-5 text-emerald-400" />
+                    <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center">
+                      <TrendingUp class="size-5 text-success" />
                     </div>
                   </div>
                   <div class="pt-2">

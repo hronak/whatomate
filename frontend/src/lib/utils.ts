@@ -89,20 +89,19 @@ export function formatLabel(key: string): string {
 }
 
 export function getQualityBadgeClass(rating: string): string {
-  if (!rating)
-    return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+  if (!rating) return "bg-muted text-muted-foreground border border-border";
   switch (rating.toUpperCase()) {
     case "GREEN":
     case "HIGH":
-      return "bg-green-100 text-green-800 border border-green-800/40 dark:bg-green-950 dark:text-green-400";
+      return "bg-success/10 text-success border border-success/20";
     case "YELLOW":
     case "MEDIUM":
-      return "bg-yellow-100 text-yellow-800 border border-yellow-800/40 dark:bg-yellow-950 dark:text-yellow-400";
+      return "bg-warning/10 text-warning border border-warning/20";
     case "RED":
     case "LOW":
-      return "bg-red-100 text-red-800 border border-red-800/40 dark:bg-red-950 dark:text-red-400";
+      return "bg-destructive/10 text-destructive border border-destructive/20";
     default:
-      return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+      return "bg-muted text-muted-foreground border border-border";
   }
 }
 
@@ -129,18 +128,17 @@ export function getQualityRatingLabel(
 }
 
 export function getVerificationBadgeClass(status: string): string {
-  if (!status)
-    return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+  if (!status) return "bg-muted text-muted-foreground border border-border";
   switch (status.toUpperCase()) {
     case "VERIFIED":
     case "VERIFIED_CODE":
-      return "bg-green-100 text-green-800 border border-green-800/40 dark:bg-green-950 dark:text-green-400";
+      return "bg-success/10 text-success border border-success/20";
     case "NOT_VERIFIED":
-      return "bg-red-100 text-red-800 border border-red-800/40 dark:bg-red-950 dark:text-red-400";
+      return "bg-destructive/10 text-destructive border border-destructive/20";
     case "EXPIRED":
-      return "bg-amber-100 text-amber-800 border border-amber-800/40 dark:bg-amber-950 dark:text-amber-400";
+      return "bg-warning/10 text-warning border border-warning/20";
     default:
-      return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+      return "bg-muted text-muted-foreground border border-border";
   }
 }
 

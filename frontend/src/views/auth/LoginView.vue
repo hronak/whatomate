@@ -42,13 +42,11 @@ const providerIcons: Record<string, string> = {
 };
 
 const providerColors: Record<string, string> = {
-  google: "hover:bg-destructive border-destructive",
-  microsoft: "hover:bg-info border-info",
-  github:
-    "hover:bg-gray-100 border-gray-300 dark:hover:bg-gray-800 dark:border-gray-600",
-  facebook: "hover:bg-info border-info",
-  custom:
-    "hover:bg-purple-950 border-purple-800 dark:hover:bg-purple-50 dark:border-purple-200",
+  google: "border-input bg-background hover:bg-accent",
+  microsoft: "border-input bg-background hover:bg-accent",
+  github: "border-input bg-background hover:bg-accent",
+  facebook: "border-input bg-background hover:bg-accent",
+  custom: "border-input bg-background hover:bg-accent",
 };
 
 onMounted(async () => {
@@ -100,7 +98,7 @@ const initiateSSO = (provider: string) => {
 
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 dark:bg-none dark:bg-[#0a0a0b] p-4"
+    class="min-h-screen flex items-center justify-center bg-background p-4"
   >
     <div
       class="w-full max-w-md rounded-2xl border border-border bg-card backdrop-blur-sm shadow-xl"
@@ -151,7 +149,7 @@ const initiateSSO = (provider: string) => {
           </div>
           <Button
             type="submit"
-            class="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20"
+            class="w-full"
             :disabled="isLoading"
           >
             <Spinner v-if="isLoading" class="mr-2 size-4" />
@@ -165,7 +163,7 @@ const initiateSSO = (provider: string) => {
         <div class="relative my-2">
           <Separator class="bg-muted" />
           <span
-            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#0a0a0b] px-2 text-foreground/40"
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-foreground/40"
           >
             {{ $t("auth.orContinueWith") }}
           </span>

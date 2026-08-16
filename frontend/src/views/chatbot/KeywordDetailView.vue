@@ -263,7 +263,6 @@ onMounted(async () => {
           : keyword?.name || form.keywords.split(',')[0]?.trim() || ''
       "
       :icon="Key"
-      icon-gradient="bg-linear-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20"
       back-link="/chatbot/keywords"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

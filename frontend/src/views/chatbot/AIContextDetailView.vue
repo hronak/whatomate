@@ -225,7 +225,6 @@ onMounted(async () => {
           : contextData?.name || ''
       "
       :icon="Sparkles"
-      icon-gradient="bg-linear-to-br from-violet-500 to-purple-600 shadow-violet-500/20"
       back-link="/chatbot/ai"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

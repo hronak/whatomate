@@ -333,7 +333,6 @@ onMounted(() => {
     <DetailPageLayout
       :title="pageTitle"
       :icon="MessageSquareText"
-      icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20"
       back-link="/settings/canned-responses"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

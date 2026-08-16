@@ -133,7 +133,7 @@ function handleSubmit() {
     <DialogContent class="sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <Globe class="size-5 text-blue-500" />
+          <Globe class="size-5 text-info" />
           Configure API Mock
         </DialogTitle>
         <DialogDescription>
@@ -144,11 +144,11 @@ function handleSubmit() {
 
       <div class="space-y-4 py-4">
         <!-- API Info -->
-        <div v-if="step" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <div class="font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div v-if="step" class="p-3 bg-muted rounded-lg">
+          <div class="font-medium text-foreground mb-1">
             {{ step.step_name }}
           </div>
-          <div class="text-gray-500 dark:text-gray-400 font-mono">
+          <div class="text-muted-foreground font-mono">
             {{ step.api_config?.method || "GET" }}
             {{ step.api_config?.url || "N/A" }}
           </div>
@@ -156,12 +156,12 @@ function handleSubmit() {
 
         <!-- Response Mapping Info -->
         <div v-if="responseMappingInfo.length > 0">
-          <Label class="text-gray-500">Variables to extract:</Label>
+          <Label class="text-muted-foreground">Variables to extract:</Label>
           <div class="mt-1 flex flex-wrap gap-2">
             <span
               v-for="mapping in responseMappingInfo"
               :key="mapping.varName"
-              class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded font-mono"
+              class="px-2 py-0.5 bg-primary/10 text-primary rounded font-mono"
             >
               {{ mapping.varName }} ← {{ mapping.path }}
             </span>
@@ -205,7 +205,7 @@ function handleSubmit() {
             <Label>Response Body (JSON)</Label>
             <span
               v-if="parseError"
-              class="text-red-500 flex items-center gap-1"
+              class="text-destructive flex items-center gap-1"
             >
               <AlertCircle class="size-3" />
               {{ parseError }}
@@ -214,7 +214,7 @@ function handleSubmit() {
           <Textarea
             v-model="responseBody"
             :class="
-              'font-mono min-h-[150px]' + (parseError ? ' border-red-500' : '')
+              'font-mono min-h-[150px]' + (parseError ? ' border-destructive' : '')
             "
             placeholder='{"key": "value"}'
           />

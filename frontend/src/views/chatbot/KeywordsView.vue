@@ -155,7 +155,6 @@ const emptyDescription = computed(() => {
     <PageHeader
       :title="$t('keywords.title')"
       :icon="Key"
-      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
       back-link="/chatbot"
       :breadcrumbs="[
         { label: $t('keywords.backToChatbot'), href: '/chatbot' },

@@ -174,7 +174,6 @@ async function toggleContext(context: AIContext) {
     <PageHeader
       :title="$t('aiContexts.title')"
       :icon="Sparkles"
-      icon-gradient="bg-linear-to-br from-orange-500 to-amber-600 shadow-orange-500/20"
       back-link="/chatbot"
       :breadcrumbs="[
         { label: $t('aiContexts.backToChatbot'), href: '/chatbot' },

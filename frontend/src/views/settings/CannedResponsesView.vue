@@ -164,7 +164,6 @@ function getCategoryLabel(category: string): string {
     <PageHeader
       :title="$t('cannedResponses.title')"
       :icon="MessageSquareText"
-      icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20"
       back-link="/settings"
       :breadcrumbs="breadcrumbs"
     >
@@ -276,7 +275,7 @@ function getCategoryLabel(category: string): string {
                 <template #cell-status="{ item: response }">
                   <Badge
                     v-if="response.is_active"
-                    class="bg-emerald-500/20 text-emerald-400 border-transparent"
+                    class="bg-muted text-muted-foreground border-transparent"
                     >{{ $t("common.active") }}</Badge
                   >
                   <Badge v-else variant="secondary">{{

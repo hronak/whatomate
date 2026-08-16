@@ -29,7 +29,7 @@ enforce_route_permissions = false
 #
 # It is still a *build*, not live source: develop against :3000 (Vite), which
 # serves the frontend straight from source and proxies the API here.
-frontend_dir = "frontend/dist"
+frontend_dir = ""
 
 [server]
 host = "0.0.0.0"

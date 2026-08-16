@@ -135,7 +135,7 @@ const statCards = computed(() => [
     title: t("chatbot.activeSessions"),
     key: "active_sessions",
     icon: MessageSquare,
-    color: "text-green-500",
+    color: "text-success",
   },
   {
     title: t("chatbot.messagesHandled"),
@@ -158,7 +158,6 @@ const statCards = computed(() => [
       :title="$t('chatbot.title')"
       :description="$t('chatbot.subtitle')"
       :icon="Bot"
-      icon-gradient="bg-linear-to-br from-purple-500 to-pink-600 shadow-purple-500/20"
     >
       <template #actions>
         <div class="flex items-center gap-3">
@@ -181,7 +180,7 @@ const statCards = computed(() => [
             :class="
               settings.enabled
                 ? 'border-red-500/50 text-red-400 hover:bg-red-500/10'
-                : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'
+                : 'border-primary/50 text-primary hover:bg-primary/10'
             "
           >
             <Power class="size-4 mr-2" />
@@ -265,7 +264,7 @@ const statCards = computed(() => [
                   :class="[
                     'size-10 rounded-lg flex items-center justify-center',
                     card.key === 'total_sessions' ? 'bg-blue-500/20' : '',
-                    card.key === 'active_sessions' ? 'bg-emerald-500/20' : '',
+                    card.key === 'active_sessions' ? 'bg-success/10' : '',
                     card.key === 'messages_handled' ? 'bg-purple-500/20' : '',
                     card.key === 'ai_responses' ? 'bg-orange-500/20' : '',
                   ]"
@@ -275,7 +274,7 @@ const statCards = computed(() => [
                     :class="[
                       'size-5',
                       card.key === 'total_sessions' ? 'text-blue-400' : '',
-                      card.key === 'active_sessions' ? 'text-emerald-400' : '',
+                      card.key === 'active_sessions' ? 'text-success' : '',
                       card.key === 'messages_handled' ? 'text-purple-400' : '',
                       card.key === 'ai_responses' ? 'text-orange-400' : '',
                     ]"

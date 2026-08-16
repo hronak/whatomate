@@ -159,13 +159,13 @@ function getFieldValue(key: string): string {
 function getColorClass(color?: string): string {
   switch (color) {
     case "success":
-      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      return "bg-success/10 text-success border border-success/20";
     case "warning":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+      return "bg-warning/10 text-warning border border-warning/20";
     case "error":
-      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      return "bg-destructive/10 text-destructive border border-destructive/20";
     case "info":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      return "bg-info/10 text-info border border-info/20";
     default:
       return "bg-muted text-muted-foreground";
   }

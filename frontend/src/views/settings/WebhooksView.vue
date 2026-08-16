@@ -224,7 +224,6 @@ onMounted(() => fetchWebhooks());
       :title="$t('webhooks.title')"
       :subtitle="$t('webhooks.subtitle')"
       :icon="WebhookIcon"
-      icon-gradient="bg-linear-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20"
       back-link="/settings"
     >
       <template #actions>

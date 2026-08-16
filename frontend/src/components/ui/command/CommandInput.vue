@@ -25,8 +25,8 @@ const { filterState } = useCommand();
 </script>
 
 <template>
-  <div class="flex items-center border-b px-3" cmdk-input-wrapper>
-    <Search class="mr-2 size-4 shrink-0 opacity-50" />
+  <div class="flex h-9 items-center gap-2 border-b px-3" cmdk-input-wrapper>
+    <Search class="size-4 shrink-0 opacity-50" />
     <ListboxFilter
       v-bind="{ ...forwardedProps, ...$attrs }"
       v-model="filterState.search"

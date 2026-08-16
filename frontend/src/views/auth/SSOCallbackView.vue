@@ -52,7 +52,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-linear-to-br from-violet-50 to-violet-100 dark:from-gray-900 dark:to-gray-800 p-4"
+    class="min-h-screen flex items-center justify-center bg-background p-4"
   >
     <Card class="w-full max-w-md">
       <CardHeader class="text-center">

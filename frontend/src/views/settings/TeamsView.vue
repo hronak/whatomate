@@ -186,7 +186,6 @@ async function confirmDelete() {
     <PageHeader
       :title="$t('teams.title')"
       :icon="Users"
-      icon-gradient="bg-linear-to-br from-cyan-500 to-blue-600 shadow-cyan-500/20"
       back-link="/settings"
       :breadcrumbs="breadcrumbs"
     >
@@ -296,7 +295,7 @@ async function confirmDelete() {
                   <Badge
                     variant="outline"
                     :class="
-                      team.is_active ? 'border-green-600 text-green-600' : ''
+                      team.is_active ? 'border-success/40 text-success' : ''
                     "
                     >{{
                       team.is_active

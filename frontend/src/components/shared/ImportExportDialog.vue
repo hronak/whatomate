@@ -395,13 +395,13 @@ function downloadSampleCsv() {
               :class="
                 importResult.errors > 0
                   ? 'bg-amber-500/10 border border-amber-500/20'
-                  : 'bg-green-500/10 border border-green-500/20'
+                  : 'bg-success/10 border border-success/20'
               "
             >
               <div class="flex items-center gap-2">
                 <Check
                   v-if="importResult.errors === 0"
-                  class="size-4 text-green-500"
+                  class="size-4 text-success"
                 />
                 <AlertCircle v-else class="size-4 text-amber-500" />
                 <span class="font-medium">{{

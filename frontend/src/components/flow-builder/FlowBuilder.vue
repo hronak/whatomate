@@ -513,7 +513,7 @@ defineExpose({
                       v-else
                       disabled
                       :placeholder="comp.label"
-                      class="mt-1 w-full p-2 rounded-md border bg-background"
+                      class="mt-1 w-full p-2 rounded-md border bg-card"
                       rows="3"
                     />
                   </template>
@@ -527,7 +527,7 @@ defineExpose({
                       >
                     </Label>
                     <div
-                      class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between"
+                      class="mt-1 p-2 rounded-md border bg-card flex items-center justify-between"
                     >
                       <span class="text-muted-foreground">Select...</span>
                       <ChevronDown class="size-4" />
@@ -583,7 +583,7 @@ defineExpose({
                       >
                     </Label>
                     <div
-                      class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between"
+                      class="mt-1 p-2 rounded-md border bg-card flex items-center justify-between"
                     >
                       <span class="text-muted-foreground">Select date...</span>
                       <Calendar class="size-4" />

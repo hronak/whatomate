@@ -1845,7 +1845,7 @@ async function sendMediaMessage() {
   <div class="flex h-full bg-background">
     <!-- Contacts List -->
     <div
-      class="w-80 border-r border-border flex flex-col bg-white dark:bg-[#0a0a0b]"
+      class="w-80 border-r border-border flex flex-col bg-background"
     >
       <!-- Search Header -->
       <div class="p-2 border-b border-border">
@@ -2036,7 +2036,7 @@ async function sendMediaMessage() {
       </ScrollArea>
     </div>
     <!-- Chat Area -->
-    <div class="flex-1 flex flex-col bg-gray-50 dark:bg-[#0f0f10]">
+    <div class="flex-1 flex flex-col bg-muted/30">
       <!-- No Contact Selected -->
       <div
         v-if="!contactsStore.currentContact"
@@ -2058,7 +2058,7 @@ async function sendMediaMessage() {
       <template v-else>
         <!-- Chat Header -->
         <div
-          class="h-14 shrink-0 px-4 border-b border-border flex items-center justify-between bg-white dark:bg-[#0f0f10]"
+          class="h-14 shrink-0 px-4 border-b border-border flex items-center justify-between bg-background"
         >
           <div class="flex items-center gap-2">
             <Avatar class="size-8 ring-2 ring-border">
@@ -2277,7 +2277,7 @@ async function sendMediaMessage() {
                 'rounded-md px-3 py-1 font-medium whitespace-nowrap transition-colors',
                 acct.name === selectedAccount
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-background text-foreground/70 hover:text-foreground hover:bg-accent',
+                  : 'bg-card text-foreground/70 hover:text-foreground hover:bg-accent',
               ]"
               @click="switchAccount(acct.name)"
             >
@@ -2928,7 +2928,7 @@ async function sendMediaMessage() {
           </button>
         </div>
         <!-- Message Input -->
-        <div class="p-4 border-t border-border bg-white dark:bg-[#0f0f10]">
+        <div class="p-4 border-t border-border bg-background">
           <form
             @submit.prevent="sendMessage"
             class="flex items-center gap-2 p-2 rounded-xl bg-muted border border-border"

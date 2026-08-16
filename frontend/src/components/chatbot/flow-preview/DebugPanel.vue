@@ -65,19 +65,19 @@ const statusLabel = computed(() => {
 const statusColor = computed(() => {
   switch (props.state.status) {
     case "idle":
-      return "bg-gray-500";
+      return "bg-muted-foreground";
     case "running":
-      return "bg-green-500";
+      return "bg-success";
     case "paused":
-      return "bg-yellow-500";
+      return "bg-warning";
     case "waiting_input":
-      return "bg-blue-500";
+      return "bg-info";
     case "completed":
-      return "bg-green-600";
+      return "bg-success";
     case "error":
-      return "bg-red-500";
+      return "bg-destructive";
     default:
-      return "bg-gray-500";
+      return "bg-muted-foreground";
   }
 });
 
@@ -102,16 +102,16 @@ function handlePlayPause() {
 
 <template>
   <div
-    class="h-full flex flex-col bg-gray-50 dark:bg-[#111b21] border-l border-gray-200 dark:border-gray-700"
+    class="h-full flex flex-col bg-muted/30 border-l border-border"
   >
     <!-- Header -->
     <div
-      class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#202c33]"
+      class="px-3 py-2 border-b border-border bg-card"
     >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="size-2 rounded-full animate-pulse" :class="statusColor" />
-          <span class="font-medium text-gray-600 dark:text-gray-300">
+          <span class="font-medium text-foreground">
             {{ statusLabel }}
           </span>
         </div>
@@ -182,7 +182,7 @@ function handlePlayPause() {
       <!-- Current Step -->
       <div
         v-if="state.currentStepName"
-        class="mt-1 text-gray-500 dark:text-gray-400"
+        class="mt-1 text-muted-foreground"
       >
         Step {{ (state.currentStepIndex ?? 0) + 1 }}:
         <span class="font-mono">{{ state.currentStepName }}</span>
@@ -194,23 +194,23 @@ function handlePlayPause() {
         <!-- Variables Section -->
         <Collapsible v-model:open="variablesExpanded">
           <CollapsibleTrigger
-            class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded font-medium text-gray-700 dark:text-gray-300"
+            class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-accent rounded font-medium text-foreground"
           >
             <ChevronDown v-if="variablesExpanded" class="size-4" />
             <ChevronRight v-else class="size-4" />
             <Braces class="size-4" />
             Variables
-            <span class="ml-auto text-gray-400">{{
+            <span class="ml-auto text-muted-foreground">{{
               variableEntries.length
             }}</span>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div
-              class="mt-1 px-2 py-1 bg-white dark:bg-[#202c33] rounded border border-gray-200 dark:border-gray-700"
+              class="mt-1 px-2 py-1 bg-card rounded border border-border"
             >
               <div
                 v-if="variableEntries.length === 0"
-                class="text-gray-400 py-2 text-center"
+                class="text-muted-foreground py-2 text-center"
               >
                 No variables set
               </div>
@@ -221,10 +221,10 @@ function handlePlayPause() {
                   class="flex items-start gap-2 py-1"
                 >
                   <span
-                    class="font-mono text-purple-600 dark:text-purple-400 shrink-0"
+                    class="font-mono text-primary shrink-0"
                     >{{ key }}:</span
                   >
-                  <span class="text-gray-700 dark:text-gray-300 break-all">
+                  <span class="text-foreground break-all">
                     {{
                       typeof value === "object" ? JSON.stringify(value) : value
                     }}
@@ -238,26 +238,26 @@ function handlePlayPause() {
         <!-- Steps Section -->
         <Collapsible v-model:open="stepsExpanded">
           <CollapsibleTrigger
-            class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded font-medium text-gray-700 dark:text-gray-300"
+            class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-accent rounded font-medium text-foreground"
           >
             <ChevronDown v-if="stepsExpanded" class="size-4" />
             <ChevronRight v-else class="size-4" />
             <ListTree class="size-4" />
             Steps
-            <span class="ml-auto text-gray-400">{{ steps.length }}</span>
+            <span class="ml-auto text-muted-foreground">{{ steps.length }}</span>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div
-              class="mt-1 px-2 py-1 bg-white dark:bg-[#202c33] rounded border border-gray-200 dark:border-gray-700 max-h-40 overflow-y-auto"
+              class="mt-1 px-2 py-1 bg-card rounded border border-border max-h-40 overflow-y-auto"
             >
               <div
                 v-for="(step, idx) in steps"
                 :key="step.step_name"
                 class="flex items-center gap-2 py-1.5 px-1 rounded cursor-pointer transition-colors"
                 :class="{
-                  'bg-blue-50 dark:bg-blue-900/30':
+                  'bg-accent':
                     state.currentStepName === step.step_name,
-                  'hover:bg-gray-50 dark:hover:bg-gray-800':
+                  'hover:bg-accent':
                     state.currentStepName !== step.step_name,
                 }"
                 @click="emit('goToStep', step.step_name)"
@@ -265,13 +265,13 @@ function handlePlayPause() {
                 <CircleDot
                   class="size-3"
                   :class="{
-                    'text-green-500': state.currentStepName === step.step_name,
-                    'text-gray-300 dark:text-gray-600':
+                    'text-success': state.currentStepName === step.step_name,
+                    'text-muted-foreground/40':
                       state.currentStepName !== step.step_name,
                   }"
                 />
-                <span class="text-gray-500">{{ idx + 1 }}.</span>
-                <span class="font-mono text-gray-700 dark:text-gray-300">{{
+                <span class="text-muted-foreground">{{ idx + 1 }}.</span>
+                <span class="font-mono text-foreground">{{
                   step.step_name
                 }}</span>
               </div>
@@ -282,18 +282,18 @@ function handlePlayPause() {
         <!-- Timeline Section -->
         <Collapsible v-model:open="timelineExpanded">
           <CollapsibleTrigger
-            class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded font-medium text-gray-700 dark:text-gray-300"
+            class="flex items-center gap-2 w-full px-2 py-1.5 hover:bg-accent rounded font-medium text-foreground"
           >
             <ChevronDown v-if="timelineExpanded" class="size-4" />
             <ChevronRight v-else class="size-4" />
             Timeline
-            <span class="ml-auto text-gray-400">{{
+            <span class="ml-auto text-muted-foreground">{{
               state.executionLog.length
             }}</span>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div
-              class="mt-1 bg-white dark:bg-[#202c33] rounded border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto"
+              class="mt-1 bg-card rounded border border-border max-h-60 overflow-y-auto"
             >
               <ExecutionTimeline
                 :entries="state.executionLog"

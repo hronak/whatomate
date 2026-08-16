@@ -206,8 +206,8 @@ const trendChartData = computed(() => {
       {
         label: t("agentAnalytics.transfersHandled"),
         data: analytics.value.trend_data.map((d) => d.transfers_handled),
-        borderColor: "rgb(59, 130, 246)",
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "var(--color-chart-1)",
+        backgroundColor: "color-mix(in oklab, var(--color-chart-1) 10%, transparent)",
         fill: true,
         tension: 0.3,
       },
@@ -253,10 +253,10 @@ const sourceChartData = computed(() => {
       {
         data,
         backgroundColor: [
-          "rgba(59, 130, 246, 0.8)",
-          "rgba(16, 185, 129, 0.8)",
-          "rgba(245, 158, 11, 0.8)",
-          "rgba(139, 92, 246, 0.8)",
+          "var(--color-chart-1)",
+          "var(--color-chart-2)",
+          "var(--color-chart-3)",
+          "var(--color-chart-4)",
         ],
         borderWidth: 0,
       },
@@ -288,12 +288,12 @@ const comparisonChartData = computed(() => {
       {
         label: t("agentAnalytics.transfersHandled"),
         data: analytics.value.agent_stats.map((a) => a.transfers_handled),
-        backgroundColor: "rgba(59, 130, 246, 0.8)",
+        backgroundColor: "var(--color-chart-1)",
       },
       {
         label: t("agentAnalytics.messagesSent"),
         data: analytics.value.agent_stats.map((a) => a.messages_sent),
-        backgroundColor: "rgba(16, 185, 129, 0.8)",
+        backgroundColor: "var(--color-chart-2)",
       },
     ],
   };
@@ -334,7 +334,6 @@ void _displayStats.value; // Suppress unused warning
           : $t('agentAnalytics.myMetrics')
       "
       :icon="BarChart3"
-      icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
     >
       <template #actions>
         <!-- Agent Filter (Admin/Manager only) -->
@@ -461,9 +460,9 @@ void _displayStats.value; // Suppress unused warning
                   $t("agentAnalytics.transfersHandled")
                 }}</span>
                 <div
-                  class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center"
+                  class="size-10 rounded-lg bg-success/10 flex items-center justify-center"
                 >
-                  <CheckCircle class="size-5 text-emerald-400" />
+                  <CheckCircle class="size-5 text-success" />
                 </div>
               </div>
               <div class="pt-2">

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,14 +46,13 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
-  /* App shell surfaces — three steps of the same neutral, darkest at the nav
-     rail and lightest under the page content, so neither theme bottoms out on
-     pure white / near-black. Cards keep using --card and lift off --shell. */
+  /* App shell surfaces — stock shadcn sidebar tone for the nav rails, plain
+     --background under the content. Cards keep using --card. */
   --color-sidebar: var(--sidebar);
   --color-subnav: var(--subnav);
   --color-shell: var(--shell);
 
-  /* Status tokens — not yet consumed; badge/alert pick these up when re-synced with upstream */
+  /* Status tokens (HSL channel triplets, unlike the oklch tokens above) */
   --color-success: hsl(var(--success));
   --color-success-foreground: hsl(var(--success-foreground));
   --color-warning: hsl(var(--warning));
@@ -60,12 +60,12 @@
   --color-info: hsl(var(--info));
   --color-info-foreground: hsl(var(--info-foreground));
 
-  /* Chart palette — not yet consumed; replaces hardcoded rgba() literals in chart views */
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
+  /* Chart palette — stock shadcn oklch values */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --color-whatsapp-green: #25d366;
   --color-whatsapp-teal: #128c7e;
@@ -77,30 +77,37 @@
   --color-facebook-hover: #166fe5;
   --color-facebook-hoverDark: #0a4dad;
 
-  --color-violet-50: #f5f3ff;
-  --color-violet-100: #ede9fe;
-  --color-violet-200: #ddd6fe;
-  --color-violet-300: #c4b5fd;
-  --color-violet-400: #a78bfa;
-  --color-violet-500: #8b5cf6;
-  --color-violet-600: #7c3aed;
-  --color-violet-700: #6d28d9;
-  --color-violet-800: #5b21b6;
-  --color-violet-900: #4c1d95;
-  --color-violet-950: #2e1065;
-
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
   --blur-xs: 2px;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--reka-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--reka-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
 }
 
 @layer base {
-  /* Light-first, stock shadcn-vue "neutral" OKLCH palette. Emerald primary/ring
-     (WhatsApp brand identity) is the one deliberate deviation from stock neutral,
-     which is otherwise grayscale — kept identical across both themes, matching
-     how this project has always treated --primary. */
+  /* Stock shadcn-vue "neutral" OKLCH palette, verbatim. WhatsApp green lives
+     only in the --color-whatsapp-* tokens above and the chat styles below —
+     the app chrome itself is stock. */
   :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -109,7 +116,7 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
 
-    --primary: oklch(0.696 0.17 162.48);
+    --primary: oklch(0.205 0 0);
     --primary-foreground: oklch(0.985 0 0);
 
     --secondary: oklch(0.97 0 0);
@@ -129,20 +136,20 @@
     --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
 
-    --chart-1: 160 84% 39%;
-    --chart-2: 217 91% 60%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 258 90% 66%;
-    --chart-5: 330 81% 60%;
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
 
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: oklch(0.696 0.17 162.48);
-    --radius: 0.75rem;
+    --ring: oklch(0.708 0 0);
+    --radius: 0.625rem;
 
-    --sidebar: oklch(0.968 0 0);
-    --subnav: oklch(0.978 0 0);
-    --shell: oklch(0.985 0 0);
+    --sidebar: oklch(0.985 0 0);
+    --subnav: oklch(0.985 0 0);
+    --shell: oklch(1 0 0);
   }
 
   .dark {
@@ -153,8 +160,8 @@
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
 
-    --primary: oklch(0.696 0.17 162.48);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
 
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
@@ -173,19 +180,19 @@
     --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
 
-    --chart-1: 160 84% 39%;
-    --chart-2: 217 91% 60%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 258 90% 66%;
-    --chart-5: 330 81% 60%;
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
 
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.696 0.17 162.48);
+    --ring: oklch(0.556 0 0);
 
-    --sidebar: oklch(0.2 0 0);
-    --subnav: oklch(0.185 0 0);
-    --shell: oklch(0.165 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --subnav: oklch(0.205 0 0);
+    --shell: oklch(0.145 0 0);
   }
 }
 
@@ -209,19 +216,6 @@
     letter-spacing: 0.02em;
     line-height: 1.65;
     font-weight: 400;
-    /* Subtle gradient for depth like Linear/Vercel */
-    background-image: radial-gradient(
-      ellipse 80% 50% at 50% -20%,
-      rgba(16, 185, 129, 0.05),
-      transparent
-    );
-  }
-  .dark body {
-    background-image: radial-gradient(
-      ellipse 80% 50% at 50% -20%,
-      rgba(16, 185, 129, 0.08),
-      transparent
-    );
   }
   h1,
   h2,
@@ -325,34 +319,10 @@
 
 /* Non-clickable stat cards. Every call site already carries its own
    `rounded-xl border border-border bg-card`, so this adds no surface of its
-   own — only the positioning context for the hover accent line below.
-   Cards are flat by design; don't reintroduce a box-shadow here. */
+   own — stock cards are flat and don't react to hover. The class stays so the
+   ~30 call sites keep working as a positioning context. */
 .card-depth {
   @apply relative overflow-hidden;
-}
-
-/* Bottom accent line, shown on hover (no sweep — motion is removed app-wide) */
-.card-depth::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, #22c55e, #10b981, #059669);
-  opacity: 0;
-}
-
-.card-depth:hover::after {
-  opacity: 1;
-}
-
-.card-depth:hover {
-  @apply border-gray-300;
-}
-
-.dark .card-depth:hover {
-  @apply border-white/12;
 }
 
 /* Clickable cards — hover reads as a border emphasis only. */
@@ -361,11 +331,7 @@
 }
 
 .card-interactive:hover {
-  @apply border-gray-300;
-}
-
-.dark .card-interactive:hover {
-  @apply border-white/20;
+  border-color: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
 }
 
 /* Chat background */

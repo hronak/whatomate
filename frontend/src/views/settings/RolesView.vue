@@ -144,7 +144,6 @@ function editTooltip(role: Role): string {
       :title="$t('roles.title')"
       :subtitle="$t('roles.subtitle')"
       :icon="Shield"
-      icon-gradient="bg-linear-to-br from-purple-500 to-indigo-600 shadow-purple-500/20"
       back-link="/settings"
     >
       <template #actions>

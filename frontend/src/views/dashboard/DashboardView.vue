@@ -143,121 +143,101 @@ const SHORTCUT_REGISTRY = computed(() => ({
     label: t("dashboard.startChat"),
     to: "/chat",
     icon: MessageSquare,
-    gradient: "from-emerald-500 to-green-600",
   },
   campaigns: {
     label: t("nav.campaigns"),
     to: "/campaigns",
     icon: Megaphone,
-    gradient: "from-orange-500 to-amber-600",
   },
   templates: {
     label: t("nav.templates"),
     to: "/templates",
     icon: FileText,
-    gradient: "from-blue-500 to-cyan-600",
   },
   chatbot: {
     label: t("nav.chatbot"),
     to: "/chatbot",
     icon: Bot,
-    gradient: "from-purple-500 to-pink-600",
   },
   contacts: {
     label: t("nav.contacts"),
     to: "/settings/contacts",
     icon: Contact,
-    gradient: "from-cyan-500 to-blue-600",
   },
   flows: {
     label: t("nav.flows"),
     to: "/flows",
     icon: Workflow,
-    gradient: "from-indigo-500 to-violet-600",
   },
   transfers: {
     label: t("nav.transfers"),
     to: "/chatbot/transfers",
     icon: UserX,
-    gradient: "from-rose-500 to-red-600",
   },
   agentAnalytics: {
     label: t("nav.agentAnalytics"),
     to: "/analytics/agents",
     icon: BarChart3,
-    gradient: "from-teal-500 to-cyan-600",
   },
   metaInsights: {
     label: t("nav.metaInsights"),
     to: "/analytics/meta-insights",
     icon: LineChart,
-    gradient: "from-sky-500 to-blue-600",
   },
   settings: {
     label: t("nav.settings"),
     to: "/settings",
     icon: Settings,
-    gradient: "from-gray-500 to-zinc-600",
   },
   accounts: {
     label: t("nav.accounts"),
     to: "/settings/accounts",
     icon: Users,
-    gradient: "from-violet-500 to-purple-600",
   },
   cannedResponses: {
     label: t("nav.cannedResponses"),
     to: "/settings/canned-responses",
     icon: MessageSquareText,
-    gradient: "from-amber-500 to-yellow-600",
   },
   tags: {
     label: t("nav.tags"),
     to: "/settings/tags",
     icon: Tags,
-    gradient: "from-pink-500 to-rose-600",
   },
   teams: {
     label: t("nav.teams"),
     to: "/settings/teams",
     icon: Users,
-    gradient: "from-lime-500 to-green-600",
   },
   users: {
     label: t("nav.users"),
     to: "/settings/users",
     icon: Users,
-    gradient: "from-fuchsia-500 to-pink-600",
   },
   roles: {
     label: t("nav.roles"),
     to: "/settings/roles",
     icon: Shield,
-    gradient: "from-slate-500 to-gray-600",
   },
   apiKeys: {
     label: t("nav.apiKeys"),
     to: "/settings/api-keys",
     icon: Key,
-    gradient: "from-yellow-500 to-orange-600",
   },
   webhooks: {
     label: t("nav.webhooks"),
     to: "/settings/webhooks",
     icon: Webhook,
-    gradient: "from-red-500 to-rose-600",
   },
   customActions: {
     label: t("nav.customActions"),
     to: "/settings/custom-actions",
     icon: Zap,
-    gradient: "from-amber-500 to-orange-600",
   },
   sso: {
     label: t("nav.sso"),
     to: "/settings/sso",
     icon: ShieldCheck,
-    gradient: "from-emerald-500 to-teal-600",
   },
 }));
 
@@ -308,16 +288,16 @@ const chartTypeOptions = computed(() => [
   { value: "pie", label: t("dashboard.chartPie") },
 ]);
 
-// Chart color palette for pie charts
+// Chart color palette for pie charts — theme chart tokens, cycled
 const chartColors = [
-  "rgba(59, 130, 246, 0.8)",
-  "rgba(16, 185, 129, 0.8)",
-  "rgba(245, 158, 11, 0.8)",
-  "rgba(139, 92, 246, 0.8)",
-  "rgba(239, 68, 68, 0.8)",
-  "rgba(6, 182, 212, 0.8)",
-  "rgba(236, 72, 153, 0.8)",
-  "rgba(234, 179, 8, 0.8)",
+  "var(--color-chart-1)",
+  "var(--color-chart-2)",
+  "var(--color-chart-3)",
+  "var(--color-chart-4)",
+  "var(--color-chart-5)",
+  "var(--color-chart-1)",
+  "var(--color-chart-2)",
+  "var(--color-chart-3)",
 ];
 
 const getChartComponentData = (widget: DashboardWidget) => {
@@ -914,14 +894,12 @@ onMounted(() => {
 <template>
   <div class="flex flex-col h-full bg-background">
     <!-- Header -->
-    <header
-      class="border-b border-border bg-white/95 dark:bg-[#0a0a0b]/95 backdrop-blur-sm"
-    >
+    <header class="border-b border-border bg-background/95 backdrop-blur-sm">
       <div class="flex h-16 items-center px-6">
         <div
-          class="size-8 rounded-lg bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center mr-3 shadow-lg shadow-emerald-500/20"
+          class="size-8 rounded-lg border bg-muted text-foreground flex items-center justify-center mr-3"
         >
-          <LayoutDashboard class="size-4 text-white" />
+          <LayoutDashboard class="size-4" />
         </div>
         <div class="flex-1">
           <h1 class="text-xl font-semibold text-foreground">
@@ -950,7 +928,7 @@ onMounted(() => {
             @click="isDragMode = !isDragMode"
             :class="[
               isDragMode
-                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300'
+                ? 'bg-primary text-primary-foreground border-transparent hover:bg-primary/90 hover:text-primary-foreground'
                 : 'bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground',
             ]"
           >
@@ -1121,18 +1099,18 @@ onMounted(() => {
                     :class="[
                       'size-3 mr-1',
                       widgetData[item.i]?.change > 0
-                        ? 'text-emerald-400'
+                        ? 'text-success'
                         : widgetData[item.i]?.change < 0
-                          ? 'text-red-400'
+                          ? 'text-destructive'
                           : 'text-foreground/30',
                     ]"
                   />
                   <span
                     :class="
                       widgetData[item.i]?.change > 0
-                        ? 'text-emerald-400'
+                        ? 'text-success'
                         : widgetData[item.i]?.change < 0
-                          ? 'text-red-400'
+                          ? 'text-destructive'
                           : 'text-foreground/30'
                     "
                   >
@@ -1358,8 +1336,8 @@ onMounted(() => {
                         :class="[
                           'size-10 rounded-lg flex items-center justify-center font-medium shrink-0',
                           row.direction === 'incoming'
-                            ? 'bg-linear-to-br from-emerald-500 to-green-600 text-white'
-                            : 'bg-linear-to-br from-blue-500 to-cyan-600 text-white',
+                            ? 'bg-success/15 text-success'
+                            : 'bg-info/15 text-info',
                         ]"
                       >
                         {{
@@ -1508,13 +1486,7 @@ onMounted(() => {
                       class="card-interactive flex flex-col items-center justify-center p-4 rounded-xl border border-border bg-muted"
                     >
                       <div
-                        :class="[
-                          'size-12 rounded-lg bg-linear-to-br flex items-center justify-center mb-2 shadow-lg',
-                          SHORTCUT_REGISTRY[
-                            key as keyof typeof SHORTCUT_REGISTRY
-                          ].gradient,
-                          'shadow-' + (key as string) + '-500/20',
-                        ]"
+                        class="size-12 rounded-lg border bg-background text-foreground flex items-center justify-center mb-2"
                       >
                         <component
                           :is="
@@ -1522,7 +1494,7 @@ onMounted(() => {
                               key as keyof typeof SHORTCUT_REGISTRY
                             ].icon
                           "
-                          class="size-6 text-white"
+                          class="size-6"
                         />
                       </div>
                       <span class="font-medium text-foreground">{{
@@ -1747,16 +1719,13 @@ onMounted(() => {
                   type="checkbox"
                   :value="key"
                   v-model="selectedShortcuts"
-                  class="rounded border-border bg-card text-emerald-500 focus:ring-emerald-500"
+                  class="rounded border-input accent-primary"
                 />
                 <div class="flex items-center gap-2">
                   <div
-                    :class="[
-                      'size-8 rounded-lg bg-linear-to-br flex items-center justify-center',
-                      shortcut.gradient,
-                    ]"
+                    class="size-8 rounded-lg border bg-muted text-foreground flex items-center justify-center"
                   >
-                    <component :is="shortcut.icon" class="size-4 text-white" />
+                    <component :is="shortcut.icon" class="size-4" />
                   </div>
                   <span class="text-foreground/70">{{ shortcut.label }}</span>
                 </div>
@@ -1929,7 +1898,7 @@ onMounted(() => {
 
     <!-- Delete Confirmation Dialog -->
     <AlertDialog v-model:open="deleteDialogOpen">
-      <AlertDialogContent class="bg-white border-border dark:bg-[#141414]">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle class="text-foreground">{{
             $t("dashboard.deleteWidgetTitle")
@@ -1977,7 +1946,7 @@ onMounted(() => {
 }
 
 .vgl-layout .vgl-item--placeholder {
-  border: 2px dashed rgba(16, 185, 129, 0.4);
+  border: 2px dashed color-mix(in oklab, var(--primary) 40%, transparent);
   border-radius: 0.75rem;
 }
 

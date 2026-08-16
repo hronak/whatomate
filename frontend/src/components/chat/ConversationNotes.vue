@@ -171,7 +171,7 @@ function formatNoteTime(dateStr: string) {
 <template>
   <div
     id="notes-panel"
-    class="w-80 border-l border-border bg-white dark:bg-[#111113] flex flex-col"
+    class="w-80 border-l border-border bg-background flex flex-col"
   >
     <!-- Header -->
     <div
@@ -225,13 +225,8 @@ function formatNoteTime(dateStr: string) {
             v-for="note in notesStore.notes"
             :key="note.id"
             data-testid="note-card"
-            class="group relative rounded-xl p-3 backdrop-blur-sm border border-border bg-linear-to-br from-gray-50 to-white dark:from-white/4 dark:to-white/2 hover:from-gray-100 hover:to-gray-50 dark:hover:from-white/6 dark:hover:to-white/3 transition-colors duration-200"
+            class="group relative rounded-xl p-3 border border-border bg-muted/50 hover:bg-muted transition-colors"
           >
-            <!-- Gradient accent line -->
-            <div
-              class="absolute top-0 left-3 right-3 h-[2px] rounded-full bg-linear-to-r from-amber-500/60 via-orange-500/40 to-transparent"
-            />
-
             <!-- Editing mode -->
             <template v-if="editingNoteId === note.id">
               <Textarea
@@ -252,7 +247,7 @@ function formatNoteTime(dateStr: string) {
                 </Button>
                 <Button
                   size="sm"
-                  class="h-7 bg-amber-600 hover:bg-amber-500 text-white"
+                  class="h-7 bg-primary hover:bg-primary/90 text-primary-foreground"
                   :disabled="!editingContent.trim() || isSaving"
                   @click="saveEdit(note.id)"
                 >

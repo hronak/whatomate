@@ -196,7 +196,6 @@ function getDisplayName(contact: Contact): string {
       :title="$t('contacts.title')"
       :subtitle="$t('contacts.subtitle')"
       :icon="Users"
-      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
       back-link="/settings"
     >
       <template

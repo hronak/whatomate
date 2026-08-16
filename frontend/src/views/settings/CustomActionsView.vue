@@ -393,7 +393,6 @@ onMounted(() => fetchActions());
       :title="$t('customActions.title')"
       :subtitle="$t('customActions.subtitle')"
       :icon="Zap"
-      icon-gradient="bg-linear-to-br from-yellow-500 to-orange-600 shadow-yellow-500/20"
     >
       <template #actions>
         <Button variant="outline" size="sm" @click="openCreateDialog"

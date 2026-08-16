@@ -36,7 +36,7 @@ const sizeClass = computed(() => {
     <Loader2
       :class="
         cn(
-          'animate-spin text-gray-400 dark:text-white/40',
+          'animate-spin text-muted-foreground',
           sizeClass,
           props.class,
         )

@@ -307,28 +307,28 @@ async function confirmDeleteTemplate() {
 function getStatusBadgeClass(status: string) {
   switch (status) {
     case "APPROVED":
-      return "bg-success text-success";
+      return "bg-success/10 text-success border border-success/20";
     case "PENDING":
-      return "bg-yellow-100 text-yellow-300 dark:bg-yellow-900 dark:text-yellow-800";
+      return "bg-warning/10 text-warning border border-warning/20";
     case "REJECTED":
-      return "bg-destructive text-destructive";
+      return "bg-destructive/10 text-destructive border border-destructive/20";
     case "DRAFT":
-      return "bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800";
+      return "bg-muted text-muted-foreground border border-border";
     default:
-      return "bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800";
+      return "bg-muted text-muted-foreground border border-border";
   }
 }
 
 function getCategoryBadgeClass(category: string) {
   switch (category) {
     case "UTILITY":
-      return "bg-info text-info";
+      return "bg-info/10 text-info border border-info/20";
     case "MARKETING":
-      return "bg-purple-100 text-purple-300 dark:bg-purple-900 dark:text-purple-800";
+      return "bg-primary/10 text-primary border border-primary/20";
     case "AUTHENTICATION":
-      return "bg-orange-100 text-orange-300 dark:bg-orange-900 dark:text-orange-800";
+      return "bg-warning/10 text-warning border border-warning/20";
     default:
-      return "bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800";
+      return "bg-muted text-muted-foreground border border-border";
   }
 }
 
@@ -352,7 +352,6 @@ function getHeaderIcon(type: string) {
       :title="$t('templates.title')"
       :subtitle="$t('templates.subtitle')"
       :icon="FileText"
-      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
     >
       <template #actions>
         <Button

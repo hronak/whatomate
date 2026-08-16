@@ -518,7 +518,7 @@ onMounted(() => {
   <div class="h-screen flex flex-col">
     <!-- Toolbar -->
     <div
-      class="flex items-center gap-3 px-4 py-2 border-b bg-background shrink-0"
+      class="flex items-center gap-3 px-4 py-2 border-b bg-card shrink-0"
     >
       <Button
         variant="ghost"
@@ -614,7 +614,7 @@ onMounted(() => {
 
       <!-- Right Panel -->
       <div
-        class="w-[420px] min-w-0 border-l bg-background shrink-0 flex flex-col overflow-hidden"
+        class="w-[420px] min-w-0 border-l bg-card shrink-0 flex flex-col overflow-hidden"
       >
         <!-- Node Properties (when a node is selected) -->
         <div v-if="selectedIVRNode" class="flex-1 overflow-y-auto">

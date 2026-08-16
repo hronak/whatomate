@@ -15,16 +15,13 @@ defineProps<{
   title: string;
   description?: string;
   icon?: Component;
-  iconGradient?: string;
   backLink?: string;
   breadcrumbs?: Array<{ label: string; href?: string }>;
 }>();
 </script>
 
 <template>
-  <header
-    class="border-b border-border bg-white/95 dark:bg-[#0a0a0b]/95 backdrop-blur-sm"
-  >
+  <header class="border-b border-border bg-background/95 backdrop-blur-sm">
     <div class="flex h-16 items-center px-6">
       <RouterLink v-if="backLink" :to="backLink">
         <Button variant="ghost" size="icon" class="mr-3">
@@ -33,13 +30,9 @@ defineProps<{
       </RouterLink>
       <div
         v-if="icon"
-        class="size-8 rounded-lg flex items-center justify-center mr-3 shadow-lg"
-        :class="
-          iconGradient ||
-          'bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20'
-        "
+        class="size-8 rounded-lg border bg-muted text-foreground flex items-center justify-center mr-3"
       >
-        <component :is="icon" class="size-4 text-white" />
+        <component :is="icon" class="size-4" />
       </div>
       <div class="flex-1">
         <h1 class="text-xl font-semibold text-foreground">{{ title }}</h1>

@@ -190,7 +190,6 @@ onMounted(async () => {
     <DetailPageLayout
       :title="isNew ? t('roles.createRole') : role?.name || ''"
       :icon="Shield"
-      icon-gradient="bg-linear-to-br from-purple-500 to-indigo-600 shadow-purple-500/20"
       back-link="/settings/roles"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"

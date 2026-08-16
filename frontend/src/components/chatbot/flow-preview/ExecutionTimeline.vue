@@ -30,20 +30,20 @@ const formattedEntries = computed(() => {
       });
 
       let icon = Play;
-      let color = "text-gray-500";
+      let color = "text-muted-foreground";
       let label = "";
       let details = "";
 
       switch (entry.type) {
         case "flow_start":
           icon = Play;
-          color = "text-green-500";
+          color = "text-success";
           label = "Flow started";
           details = `${entry.details.stepsCount} steps`;
           break;
         case "step_enter":
           icon = LogIn;
-          color = "text-blue-500";
+          color = "text-info";
           label = `Enter: ${entry.stepName}`;
           details =
             (entry.details.type as string) ||
@@ -54,7 +54,7 @@ const formattedEntries = computed(() => {
           break;
         case "step_exit":
           icon = LogOut;
-          color = "text-gray-400";
+          color = "text-muted-foreground/60";
           label = `Exit: ${entry.stepName}`;
           details =
             (entry.details.outcome as string) ||
@@ -63,13 +63,13 @@ const formattedEntries = computed(() => {
           break;
         case "variable_set":
           icon = Tag;
-          color = "text-purple-500";
+          color = "text-primary";
           label = `Set: ${entry.details.key}`;
           details = String(entry.details.value).substring(0, 30);
           break;
         case "condition_eval":
           icon = GitBranch;
-          color = entry.details.result ? "text-green-500" : "text-orange-500";
+          color = entry.details.result ? "text-success" : "text-warning";
           label = `Condition: ${entry.details.type}`;
           details = entry.details.result ? "true" : "false";
           break;
@@ -81,12 +81,12 @@ const formattedEntries = computed(() => {
           break;
         case "validation_pass":
           icon = CheckCircle;
-          color = "text-green-500";
+          color = "text-success";
           label = "Validation passed";
           break;
         case "validation_fail":
           icon = XCircle;
-          color = "text-red-500";
+          color = "text-destructive";
           label = "Validation failed";
           details = `Retry ${entry.details.retryCount}/${entry.details.maxRetries}`;
           break;
@@ -98,13 +98,13 @@ const formattedEntries = computed(() => {
           break;
         case "flow_complete":
           icon = Flag;
-          color = "text-green-600";
+          color = "text-success";
           label = "Flow completed";
           details = entry.details.reason;
           break;
         case "flow_error":
           icon = AlertCircle;
-          color = "text-red-600";
+          color = "text-destructive";
           label = "Error";
           details = entry.details.error;
           break;
@@ -130,7 +130,7 @@ const formattedEntries = computed(() => {
       v-for="entry in formattedEntries"
       :key="entry.id"
       class="flex items-start gap-2 py-1 px-2 rounded transition-colors"
-      :class="{ 'bg-blue-50 dark:bg-blue-900/20': entry.isCurrent }"
+      :class="{ 'bg-accent': entry.isCurrent }"
     >
       <component
         :is="entry.icon"
@@ -139,14 +139,14 @@ const formattedEntries = computed(() => {
       />
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2">
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{
+          <span class="font-medium text-foreground">{{
             entry.label
           }}</span>
-          <span class="text-gray-400">{{ entry.time }}</span>
+          <span class="text-muted-foreground/60">{{ entry.time }}</span>
         </div>
         <p
           v-if="entry.details"
-          class="text-gray-500 dark:text-gray-400 truncate"
+          class="text-muted-foreground truncate"
         >
           {{ entry.details }}
         </p>
@@ -155,7 +155,7 @@ const formattedEntries = computed(() => {
 
     <div
       v-if="formattedEntries.length === 0"
-      class="text-center text-gray-400 py-4"
+      class="text-center text-muted-foreground py-4"
     >
       No execution logs yet
     </div>

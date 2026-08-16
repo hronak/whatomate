@@ -295,7 +295,7 @@ function typeIcon(type?: string) {
         <div v-else-if="btn.type === 'flow'" class="space-y-1">
           <select
             :value="btn.flow_id || ''"
-            class="h-7 w-full rounded-md border bg-background px-2"
+            class="h-7 w-full rounded-md border bg-card px-2"
             :disabled="disabled"
             @change="
               updateButton(idx, {

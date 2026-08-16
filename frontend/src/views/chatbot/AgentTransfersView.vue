@@ -404,7 +404,6 @@ function formatTimeRemaining(deadline: string | undefined): string {
       :title="$t('agentTransfers.title')"
       :subtitle="$t('agentTransfers.subtitle')"
       :icon="UserX"
-      icon-gradient="bg-linear-to-br from-red-500 to-orange-600 shadow-red-500/20"
     >
       <template v-if="!isAdminOrManager" #actions>
         <div class="flex items-center gap-4">

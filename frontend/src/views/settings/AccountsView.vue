@@ -316,7 +316,6 @@ async function confirmDelete() {
     <PageHeader
       :title="$t('accounts.title')"
       :icon="Phone"
-      icon-gradient="bg-linear-to-br from-emerald-500 to-green-600 shadow-emerald-500/20"
       back-link="/settings"
       :breadcrumbs="breadcrumbs"
     >
@@ -407,9 +406,9 @@ async function confirmDelete() {
                     class="flex items-center gap-3 text-inherit no-underline hover:opacity-80"
                   >
                     <div
-                      class="size-9 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"
+                      class="size-9 rounded-full bg-muted flex items-center justify-center shrink-0"
                     >
-                      <Phone class="size-4 text-emerald-500" />
+                      <Phone class="size-4 text-foreground" />
                     </div>
                     <p class="font-medium truncate">{{ account.name }}</p>
                   </RouterLink>
@@ -447,7 +446,7 @@ async function confirmDelete() {
                     variant="outline"
                     :class="
                       account.status === 'active'
-                        ? 'border-green-600 text-green-600'
+                        ? 'border-success/40 text-success'
                         : ''
                     "
                   >
@@ -511,7 +510,7 @@ async function confirmDelete() {
           >
             {{ $t("accounts.connectTitle") }}
           </DialogTitle>
-          <DialogDescription class="text-gray-500 dark:text-gray-400 mt-1">
+          <DialogDescription class="text-muted-foreground mt-1">
             {{ $t("accounts.connectDesc") }}
           </DialogDescription>
         </DialogHeader>
@@ -520,7 +519,7 @@ async function confirmDelete() {
           <!-- Coexistence Option Card -->
           <div
             @click="launchWhatsAppSignup(true)"
-            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-success/20 bg-gray-50/50 hover:bg-gray-100/70 hover:border-success/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.05)] dark:bg-[#141419] dark:hover:bg-[#181822] dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] transition-colors duration-300 overflow-hidden"
+            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-border bg-muted/50 hover:bg-muted hover:border-ring transition-colors overflow-hidden"
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
@@ -543,7 +542,7 @@ async function confirmDelete() {
               {{ $t("accounts.coexistenceTitle") }}
             </h3>
             <p
-              class="text-gray-600 dark:text-gray-400 mt-2 grow leading-relaxed"
+              class="text-muted-foreground mt-2 grow leading-relaxed"
             >
               {{ $t("accounts.coexistenceDesc") }}
             </p>
@@ -559,7 +558,7 @@ async function confirmDelete() {
           <!-- Classic Option Card -->
           <div
             @click="launchWhatsAppSignup(false)"
-            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100/70 hover:border-info/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.05)] dark:bg-[#141419] dark:border-[#222227] dark:hover:bg-[#181822] dark:hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-colors duration-300 overflow-hidden"
+            class="relative group cursor-pointer flex flex-col p-5 rounded-xl border border-border bg-muted/50 hover:bg-muted hover:border-ring transition-colors overflow-hidden"
           >
             <!-- Badge -->
             <div class="absolute top-3 right-3">
@@ -582,7 +581,7 @@ async function confirmDelete() {
               {{ $t("accounts.classicTitle") }}
             </h3>
             <p
-              class="text-gray-600 dark:text-gray-400 mt-2 grow leading-relaxed"
+              class="text-muted-foreground mt-2 grow leading-relaxed"
             >
               {{ $t("accounts.classicDesc") }}
             </p>

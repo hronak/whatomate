@@ -679,7 +679,7 @@ const greetingTab = computed(() =>
             "
           >
             <span>{{ callbackLabels[event] }}</span>
-            <span v-if="getCallbackConfig(event).url" class="text-emerald-500"
+            <span v-if="getCallbackConfig(event).url" class="text-success"
               >Configured</span
             >
           </button>

@@ -334,7 +334,6 @@ async function copyInviteLink() {
     <PageHeader
       :title="$t('users.title')"
       :icon="Users"
-      icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
       back-link="/settings"
       :breadcrumbs="breadcrumbs"
     >
@@ -381,10 +380,10 @@ async function copyInviteLink() {
                     <CardTitle>{{ $t("users.yourUsers") }}</CardTitle>
                     <Badge
                       variant="outline"
-                      class="border-green-600 text-green-600 gap-1.5"
+                      class="border-success/40 text-success gap-1.5"
                     >
                       <span
-                        class="inline-block size-2 rounded-full bg-green-600"
+                        class="inline-block size-2 rounded-full bg-success"
                       />
                       {{ onlineCount }} {{ $t("users.online", "online") }}
                     </Badge>
@@ -506,7 +505,7 @@ async function copyInviteLink() {
                   <Badge
                     variant="outline"
                     :class="
-                      user.is_active ? 'border-green-600 text-green-600' : ''
+                      user.is_active ? 'border-success/40 text-success' : ''
                     "
                     >{{
                       user.is_active

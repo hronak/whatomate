@@ -302,7 +302,6 @@ onMounted(() => {
       :title="$t('sso.title')"
       :subtitle="$t('sso.subtitle')"
       :icon="ShieldCheck"
-      icon-gradient="bg-linear-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20"
     />
 
     <ErrorState
@@ -481,7 +480,7 @@ onMounted(() => {
                 class="shrink-0"
                 @click="copyRedirectUrl"
               >
-                <Check v-if="copiedRedirectUrl" class="size-4 text-green-500" />
+                <Check v-if="copiedRedirectUrl" class="size-4 text-success" />
                 <Copy v-else class="size-4" />
               </Button>
             </div>

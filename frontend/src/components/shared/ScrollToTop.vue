@@ -43,7 +43,7 @@ onUnmounted(() => {
     v-show="isVisible"
     variant="secondary"
     size="icon"
-    class="fixed bottom-6 right-6 z-40 size-10 rounded-full shadow-lg shadow-gray-300/30 ring-1 ring-border dark:shadow-black/20"
+    class="fixed bottom-6 right-6 z-40 size-10 rounded-full shadow-md ring-1 ring-border"
     aria-label="Scroll to top"
     @click="scrollToTop"
   >

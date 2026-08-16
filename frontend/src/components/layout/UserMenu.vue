@@ -170,13 +170,13 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="border-t border-border p-2">
+  <div class="p-1">
     <Popover v-model:open="isUserMenuOpen">
       <PopoverTrigger as-child>
         <Button
           variant="ghost"
           :class="[
-            'flex items-center justify-start w-full h-auto px-2 py-1.5 gap-2 hover:bg-accent',
+            'flex items-center justify-start w-full h-auto px-2 py-1.5 gap-2 hover:bg-accent rounded-lg',
             collapsed && 'md:justify-center',
           ]"
           aria-label="User menu"
@@ -184,7 +184,7 @@ const handleLogout = () => {
           <Avatar class="size-7 ring-2 ring-border">
             <AvatarImage :src="undefined" />
             <AvatarFallback
-              class="bg-linear-to-br from-emerald-500 to-green-600 text-white"
+              class="bg-muted text-foreground"
             >
               {{ getInitials(authStore.user?.full_name || "U") }}
             </AvatarFallback>

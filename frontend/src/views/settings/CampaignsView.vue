@@ -258,7 +258,7 @@ function getStatusIcon(status: string) {
 function getStatusClass(status: string): string {
   switch (status) {
     case "completed":
-      return "border-green-600 text-green-600";
+      return "border-success/40 text-success";
     case "running":
     case "processing":
     case "queued":
@@ -283,7 +283,6 @@ function getProgressPercentage(campaign: Campaign): number {
       :title="$t('campaigns.title')"
       :subtitle="$t('campaigns.subtitle')"
       :icon="Megaphone"
-      icon-gradient="bg-linear-to-br from-rose-500 to-pink-600 shadow-rose-500/20"
     >
       <template #actions>
         <RouterLink to="/campaigns/new">
@@ -418,7 +417,7 @@ function getProgressPercentage(campaign: Campaign): number {
                           campaign.total_recipients
                         }}</span
                       >
-                      <span class="text-green-600" title="Delivered">{{
+                      <span class="text-success" title="Delivered">{{
                         campaign.delivered_count
                       }}</span>
                       <span class="text-blue-600" title="Read">{{

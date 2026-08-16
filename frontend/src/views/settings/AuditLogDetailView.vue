@@ -80,7 +80,7 @@ function formatValue(val: any): string {
 function actionVariant(action: string): string {
   switch (action) {
     case "created":
-      return "bg-green-500/10 text-green-500 border-green-500/20";
+      return "bg-success/10 text-success border-success/20";
     case "updated":
       return "bg-blue-500/10 text-blue-500 border-blue-500/20";
     case "deleted":
@@ -131,7 +131,7 @@ onMounted(async () => {
                     formatValue(change.old_value)
                   }}</span>
                   <ArrowRight class="size-4 shrink-0 mt-0.5" />
-                  <span class="text-green-400 wrap-break-word">{{
+                  <span class="text-success wrap-break-word">{{
                     formatValue(change.new_value)
                   }}</span>
                 </div>

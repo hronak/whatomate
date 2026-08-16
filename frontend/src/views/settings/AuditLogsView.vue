@@ -118,7 +118,7 @@ function applyFilter() {
 function actionVariant(action: string): string {
   switch (action) {
     case "created":
-      return "bg-green-500/10 text-green-500 border-green-500/20";
+      return "bg-success/10 text-success border-success/20";
     case "updated":
       return "bg-blue-500/10 text-blue-500 border-blue-500/20";
     case "deleted":
@@ -147,7 +147,6 @@ onMounted(async () => {
       :title="t('auditLogs.title')"
       :description="t('auditLogs.description')"
       :icon="ScrollText"
-      icon-gradient="bg-linear-to-br from-amber-500 to-orange-600 shadow-amber-500/20"
     />
 
     <ScrollArea class="flex-1">

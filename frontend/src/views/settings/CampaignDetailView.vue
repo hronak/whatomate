@@ -329,7 +329,7 @@ function getStatusIcon(status: string) {
 function getStatusClass(status: string): string {
   switch (status) {
     case "completed":
-      return "border-green-600 text-green-600";
+      return "border-success/40 text-success";
     case "running":
     case "processing":
     case "queued":
@@ -346,7 +346,7 @@ function getRecipientStatusClass(status: string): string {
   switch (status) {
     case "sent":
     case "delivered":
-      return "border-green-600 text-green-600";
+      return "border-success/40 text-success";
     case "failed":
       return "border-destructive text-destructive";
     default:
@@ -1103,7 +1103,6 @@ onUnmounted(() => {
           : campaign?.name || ''
       "
       :icon="Megaphone"
-      icon-gradient="bg-linear-to-br from-pink-500 to-rose-600 shadow-pink-500/20"
       back-link="/campaigns"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"
@@ -1381,7 +1380,7 @@ onUnmounted(() => {
               }}</span>
             </div>
             <div class="flex flex-col items-center gap-1 rounded-lg border p-3">
-              <CheckCircle class="size-4 text-green-500" />
+              <CheckCircle class="size-4 text-success" />
               <span class="text-lg font-semibold">{{
                 campaign.delivered_count
               }}</span>
@@ -1429,7 +1428,7 @@ onUnmounted(() => {
               class="h-2.5 w-full bg-muted rounded-full overflow-hidden flex"
             >
               <div
-                class="bg-green-500 h-full"
+                class="bg-success h-full"
                 :style="{
                   width: `${(campaign.delivered_count / campaign.total_recipients) * 100}%`,
                 }"
@@ -1449,7 +1448,7 @@ onUnmounted(() => {
             </div>
             <div class="flex items-center gap-4 text-muted-foreground">
               <span class="flex items-center gap-1"
-                ><span class="size-2 rounded-full bg-green-500" />
+                ><span class="size-2 rounded-full bg-success" />
                 {{ $t("campaigns.delivered", "Delivered") }}</span
               >
               <span class="flex items-center gap-1"
@@ -1741,7 +1740,7 @@ onUnmounted(() => {
             </div>
             <!-- Validation Feedback -->
             <div v-if="recipientsInput.trim()">
-              <p v-if="manualInputValidation.isValid" class="text-green-600">
+              <p v-if="manualInputValidation.isValid" class="text-success">
                 {{ manualInputValidation.validLines }} valid recipient{{
                   manualInputValidation.validLines !== 1 ? "s" : ""
                 }}

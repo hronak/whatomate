@@ -333,7 +333,6 @@ onMounted(async () => {
         isNew ? $t('accounts.newAccount', 'New Account') : account?.name || ''
       "
       :icon="Phone"
-      icon-gradient="bg-linear-to-br from-emerald-500 to-green-600 shadow-emerald-500/20"
       back-link="/settings/accounts"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"
@@ -584,7 +583,7 @@ onMounted(async () => {
               <Badge
                 v-if="account?.has_access_token"
                 variant="outline"
-                class="border-green-600 text-green-600"
+                class="border-success/40 text-success"
               >
                 <Check class="size-3 mr-1" />
                 {{ $t("accounts.configured", "Configured") }}
@@ -608,7 +607,7 @@ onMounted(async () => {
               <Badge
                 v-if="account?.has_app_secret"
                 variant="outline"
-                class="border-green-600 text-green-600"
+                class="border-success/40 text-success"
               >
                 <Check class="size-3 mr-1" />
                 {{ $t("accounts.configured", "Configured") }}

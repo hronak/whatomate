@@ -800,7 +800,6 @@ onMounted(async () => {
           : template?.display_name || template?.name || ''
       "
       :icon="FileText"
-      icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
       back-link="/templates"
       :breadcrumbs="breadcrumbs"
       :is-loading="isLoading"
@@ -1067,7 +1066,7 @@ onMounted(async () => {
               class="bg-success border border-success rounded-lg p-2.5"
             >
               <div class="flex items-center gap-2">
-                <Check class="size-3.5 text-green-600" />
+                <Check class="size-3.5 text-success" />
                 <span class="text-success">{{
                   $t("templates.mediaUploadedSuccess", "Media uploaded")
                 }}</span>
@@ -1150,7 +1149,7 @@ onMounted(async () => {
                 type="checkbox"
                 v-model="form.add_security_recommendation"
                 :disabled="!canWrite || !isEditable"
-                class="size-4 rounded border-gray-300"
+                class="size-4 rounded border-input"
               />
               <Label for="security-rec" class="cursor-pointer">{{
                 $t(
@@ -1173,7 +1172,7 @@ onMounted(async () => {
                       : 0
                   "
                   :disabled="!canWrite || !isEditable"
-                  class="size-4 rounded border-gray-300"
+                  class="size-4 rounded border-input"
                 />
                 <Label for="code-expiration" class="cursor-pointer">{{
                   $t(
@@ -1221,7 +1220,7 @@ onMounted(async () => {
                   type="checkbox"
                   v-model="zeroTapAccepted"
                   :disabled="!canWrite || !isEditable"
-                  class="size-4 mt-0.5 rounded border-gray-300"
+                  class="size-4 mt-0.5 rounded border-input"
                 />
                 <Label
                   for="zero-tap-tos"

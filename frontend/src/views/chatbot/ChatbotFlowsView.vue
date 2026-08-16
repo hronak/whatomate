@@ -170,7 +170,6 @@ async function confirmDeleteFlow() {
     <PageHeader
       :title="$t('chatbotFlows.title')"
       :icon="Workflow"
-      icon-gradient="bg-linear-to-br from-purple-500 to-pink-600 shadow-purple-500/20"
       back-link="/chatbot"
       :breadcrumbs="[
         { label: $t('chatbotFlows.backToChatbot'), href: '/chatbot' },
