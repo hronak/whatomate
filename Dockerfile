@@ -34,17 +34,15 @@ COPY . .
 COPY --from=frontend-builder /app/frontend/dist/ ./internal/frontend/dist/
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -installsuffix cgo -o whatomate ./cmd/whatomate
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldflags="-s -w" -a -installsuffix cgo -o whatomate ./cmd/whatomate
 
-# Final stage (Debian for glibc)
-FROM debian:bookworm-slim
+# Final stage (Alpine for small size)
+FROM alpine:latest
 
 WORKDIR /app
 
 # Install runtime dependencies (transcoding: ffmpeg)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates tzdata ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache ca-certificates tzdata ffmpeg
 
 # Copy binary from builder
 COPY --from=builder /app/whatomate .
