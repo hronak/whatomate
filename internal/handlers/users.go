@@ -346,21 +346,26 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 		IsSuperAdmin:   isSuperAdmin,
 	}
 
-	if err := a.DB.Create(&user).Error; err != nil {
+	err = a.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&user).Error; err != nil {
+			return err
+		}
+
+		userOrg := models.UserOrganization{
+			UserID:         user.ID,
+			OrganizationID: orgID,
+			RoleID:         roleID,
+			IsDefault:      true,
+		}
+		if err := tx.Create(&userOrg).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
 		a.Log.Error("Failed to create user", "error", err)
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create user", nil, "")
-	}
-
-	// Create UserOrganization entry
-	userOrg := models.UserOrganization{
-		UserID:         user.ID,
-		OrganizationID: orgID,
-		RoleID:         roleID,
-		IsDefault:      true,
-	}
-	if err := a.DB.Create(&userOrg).Error; err != nil {
-		a.Log.Error("Failed to create user organization entry", "error", err)
-		// Non-fatal: user was already created
 	}
 
 	// Load role for response
