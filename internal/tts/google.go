@@ -33,7 +33,14 @@ func (p *GoogleTTS) Generate(ctx context.Context, text string) (string, error) {
 		return "", fmt.Errorf("failed to create audio directory: %w", err)
 	}
 
-	creds, err := google.CredentialsFromJSON(ctx, p.CredentialsJSON, "https://www.googleapis.com/auth/cloud-platform")
+	creds, err := google.CredentialsFromJSONWithTypeAndParams(
+		ctx,
+		p.CredentialsJSON,
+		google.ServiceAccount,
+		google.CredentialsParams{
+			Scopes: []string{"https://www.googleapis.com/auth/cloud-platform"},
+		},
+	)
 	if err != nil {
 		return "", fmt.Errorf("google tts invalid credentials: %w", err)
 	}
