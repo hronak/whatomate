@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DialogRootEmits, DialogRootProps } from "reka-ui";
-import { useForwardPropsEmits } from "reka-ui";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useForwardPropsEmits, VisuallyHidden } from "reka-ui";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import Command from "./Command.vue";
 
 const props = defineProps<DialogRootProps>();
@@ -13,6 +13,9 @@ const forwarded = useForwardPropsEmits(props, emits);
 <template>
   <Dialog v-bind="forwarded">
     <DialogContent class="overflow-hidden p-0 shadow-lg">
+      <VisuallyHidden as-child>
+        <DialogTitle>Command Menu</DialogTitle>
+      </VisuallyHidden>
       <Command
         class="**:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 **:[[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:size-5 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:size-5"
       >
