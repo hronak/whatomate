@@ -615,8 +615,8 @@ func (a *App) CreateKeywordRule(r *fastglue.Request) error {
 		Enabled         bool                `json:"enabled"`
 	}
 
-	if err := json.Unmarshal(r.RequestCtx.PostBody(), &req); err != nil {
-		return a.sendError(r, invalidRequest("Invalid request body"))
+	if err := a.decodeRequest(r, &req); err != nil {
+		return nil
 	}
 
 	if len(req.Keywords) == 0 {
@@ -740,8 +740,8 @@ func (a *App) UpdateKeywordRule(r *fastglue.Request) error {
 		Enabled         *bool                `json:"enabled"`
 	}
 
-	if err := json.Unmarshal(r.RequestCtx.PostBody(), &req); err != nil {
-		return a.sendError(r, invalidRequest("Invalid request body"))
+	if err := a.decodeRequest(r, &req); err != nil {
+		return nil
 	}
 
 	// Update fields if provided

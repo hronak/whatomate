@@ -551,8 +551,8 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 
 	// Parse request body
 	var req SendMessageRequest
-	if err := json.Unmarshal(r.RequestCtx.PostBody(), &req); err != nil {
-		return a.sendError(r, invalidRequest("Invalid request body"))
+	if err := a.decodeRequest(r, &req); err != nil {
+		return nil
 	}
 
 	// Get contact (users without full read permission can only message their assigned contacts)
