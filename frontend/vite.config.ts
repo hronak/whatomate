@@ -1,42 +1,12 @@
 import fs from 'node:fs'
-import path from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
-import { createRequire } from 'node:module'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import compression from 'vite-plugin-compression'
 import { FRONTEND_PORT, BACKEND_PORT, BACKEND_URL } from './ports.ts'
-
-const _require = createRequire(import.meta.url)
-try {
-  const ts = _require('typescript')
-  if (!ts.sys) {
-    ts.sys = {
-      fileExists: (p) => fs.existsSync(p),
-      readFile: (p) => fs.readFileSync(p, 'utf-8'),
-      useCaseSensitiveFileNames: true
-    }
-  }
-  if (!ts.findConfigFile) ts.findConfigFile = () => undefined
-  if (!ts.resolveModuleName) {
-    ts.resolveModuleName = (source, containingFile) => {
-      try {
-        let resolved = _require.resolve(source, { paths: [path.dirname(containingFile)] })
-        if (resolved.endsWith('.js') || resolved.endsWith('.cjs') || resolved.endsWith('.mjs')) {
-          resolved = resolved.replace(/\.[cm]?js$/, '.d.ts')
-          if (!fs.existsSync(resolved) && source === 'reka-ui') {
-            resolved = _require.resolve('reka-ui/dist/index.d.ts')
-          }
-        }
-        return { resolvedModule: { resolvedFileName: resolved } }
-      } catch (e) {
-        return { resolvedModule: undefined }
-      }
-    }
-  }
-} catch (e) {
-  // typescript not found or couldn't be patched, ignore
-}
+import * as compiler from '@vue/compiler-sfc'
+import * as ts from 'typescript/unstable/sync'
+import path from 'node:path'
 
 /**
  * Without this, a backend that isn't running surfaces as a bare 502 whose body
@@ -66,6 +36,27 @@ function reportBackendDown(proxy: { on: (ev: string, cb: (...args: any[]) => voi
     res.end(JSON.stringify({ status: 'error', message: hint, data: null }))
   })
 }
+
+compiler.registerTS(() => {
+  return {
+    ...ts,
+    sys: ts.sys || {
+      fileExists: fs.existsSync,
+      readFile: (f: string) => fs.readFileSync(f, 'utf-8'),
+      realpath: fs.realpathSync,
+      useCaseSensitiveFileNames: true
+    },
+    findConfigFile: ts.findConfigFile || function(searchPath: string, fileExists: (f: string) => boolean, configName = "tsconfig.json") {
+      let currentDir = searchPath;
+      while (currentDir !== path.dirname(currentDir)) {
+        const p = path.join(currentDir, configName);
+        if (fileExists(p)) return p;
+        currentDir = path.dirname(currentDir);
+      }
+      return undefined;
+    }
+  } as any
+})
 
 export default defineConfig({
   base: './',
