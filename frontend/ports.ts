@@ -7,15 +7,18 @@
  *   :3000  Vite dev server — the frontend from live source, proxying /api and
  *          /ws through to :8080. This is the app. Develop and test here.
  *
- *   :8080  the Go backend — the API, and (only when built by `make build-prod`)
- *          the frontend snapshot embedded into the binary at build time. That
- *          snapshot is whatever was last embedded, so browsing or testing here
- *          after editing frontend source silently exercises the *previous*
- *          build. CI points at :8080 deliberately, because there the binary was
- *          just built from the current tree and that is the shipped artifact.
+ *   :8080  the Go backend — the API, plus a *built* copy of the frontend.
+ *          Which copy depends on app.frontend_dir: dev/config.toml sets it to
+ *          frontend/dist, so :8080 reflects the last `make frontend-build` and
+ *          a plain rebuild is enough to refresh it. Shipped binaries leave it
+ *          empty and serve the copy embedded by `make build-prod` instead —
+ *          that one is a snapshot frozen at build time, which is why CI points
+ *          at :8080: there the binary was just built from the current tree and
+ *          is the artifact that ships.
  *
- * Rule of thumb: use :3000 unless you are specifically verifying the embedded
- * production binary, and run `make build-prod` first when you are.
+ * Rule of thumb: use :3000 unless you are specifically verifying a built
+ * artifact. `make frontend-build` refreshes :8080 in dev; `make
+ * test-e2e-embedded` is what checks the embedded production binary.
  *
  * Override either port via the FRONTEND_PORT / BACKEND_PORT env vars — `make
  * dev` forwards both, and also passes BACKEND_PORT to the server as

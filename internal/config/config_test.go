@@ -117,6 +117,37 @@ port = 8080
 	assert.Equal(t, 1234, cfg.Server.Port, "WHATOMATE_SERVER__PORT must override file")
 }
 
+// An empty env var must clear a value the file set, not be ignored as
+// "unset". `make test-e2e-embedded` relies on WHATOMATE_APP__FRONTEND_DIR= to
+// switch the server back to the embedded frontend even though dev/config.toml
+// sets frontend_dir — without this it would silently test frontend/dist and
+// prove nothing about the embed.
+func TestLoad_EmptyEnvVarClearsFileValue(t *testing.T) {
+	t.Setenv("WHATOMATE_APP__FRONTEND_DIR", "")
+
+	cfg, err := config.Load(writeConfig(t, `
+[app]
+frontend_dir = "frontend/dist"
+`))
+	require.NoError(t, err)
+	assert.Empty(t, cfg.App.FrontendDir, "an empty env var must override the file, not be skipped")
+}
+
+func TestLoad_FrontendDirFromFile(t *testing.T) {
+	cfg, err := config.Load(writeConfig(t, `
+[app]
+frontend_dir = "frontend/dist"
+`))
+	require.NoError(t, err)
+	assert.Equal(t, "frontend/dist", cfg.App.FrontendDir)
+}
+
+func TestLoad_FrontendDirDefaultsToEmbedded(t *testing.T) {
+	cfg, err := config.Load(writeConfig(t, ""))
+	require.NoError(t, err)
+	assert.Empty(t, cfg.App.FrontendDir, "shipped binaries must default to the embedded frontend")
+}
+
 func TestLoad_EmptyConfigPathStillLoadsDefaults(t *testing.T) {
 	cfg, err := config.Load("")
 	require.NoError(t, err)

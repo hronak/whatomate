@@ -1,0 +1,96 @@
+# Development configuration — checked into git on purpose.
+#
+# This is what `make dev`, `make run`, and `make install` use by default, so a
+# fresh clone runs with no copying and no editing. It contains no secrets: every
+# value here is a throwaway that only ever points at the local dev stack from
+# dev/docker-compose.yml.
+#
+# For anything real (staging, production, your own Meta credentials) copy
+# config.example.toml to config.toml instead — that file is gitignored — and
+# pass `-config config.toml`.
+#
+# Hosts below are "localhost" because the app normally runs natively against the
+# containerized db/redis. The containerized `app` service in
+# dev/docker-compose.yml overrides them with WHATOMATE_DATABASE__HOST=db etc.
+
+[app]
+name = "Whatomate"
+environment = "development"
+debug = true
+encryption_key = "dev-only-encryption-key-32chars!"
+enforce_route_permissions = false
+
+# Serve the frontend from disk rather than from the copy embedded in the binary.
+#
+# Without this, :8080 serves whatever was embedded at the last `make build-prod`
+# — a snapshot that goes stale silently and is the classic "I fixed it but
+# nothing changed" trap. Pointing at frontend/dist means :8080 always reflects
+# the last `make frontend-build`, with no rebuild of the Go binary needed.
+#
+# It is still a *build*, not live source: develop against :3000 (Vite), which
+# serves the frontend straight from source and proxies the API here.
+frontend_dir = "frontend/dist"
+
+[server]
+host = "0.0.0.0"
+port = 8080
+read_timeout = 30
+write_timeout = 30
+base_path = ""
+allowed_origins = ""  # Empty = allow all. Fine for dev only.
+
+[database]
+host = "localhost"
+port = 5432
+user = "whatomate"
+password = "whatomate"
+name = "whatomate"
+ssl_mode = "disable"
+max_open_conns = 25
+max_idle_conns = 5
+conn_max_lifetime = 300
+
+[redis]
+host = "localhost"
+port = 6379
+username = ""
+password = ""
+db = 0
+tls = false
+
+[jwt]
+secret = "dev-only-jwt-secret-not-for-production-use"
+access_expiry_mins = 15
+refresh_expiry_days = 1
+
+[storage]
+type = "local"
+local_path = "./uploads"
+
+[whatsapp]
+webhook_verify_token = "dev-verify-token"
+api_version = "v26.0"
+base_url = "https://graph.facebook.com"
+app_id = ""
+app_secret = ""
+config_id = ""
+
+[cookie]
+domain = ""
+secure = false
+
+[rate_limit]
+enabled = false
+
+[calling]
+max_call_duration = 300
+audio_dir = "./audio"
+transfer_timeout_secs = 120
+recording_enabled = false
+udp_port_min = 10000
+udp_port_max = 10100
+
+[default_admin]
+email = "admin@admin.com"
+password = "admin"
+full_name = "Admin"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -34,30 +35,57 @@ var mimeTypes = map[string]string{
 //go:embed all:dist
 var distFS embed.FS
 
-// cachedIndexHTML stores the modified index.html with injected base path
-var cachedIndexHTML []byte
-
-// Handler returns a fasthttp handler that serves the embedded frontend files
-// basePath should be empty string for root deployment or "/subpath" for subdirectory
-// If frontend is not embedded, returns a handler that shows a helpful message
+// Handler returns a fasthttp handler that serves the frontend embedded into the
+// binary at build time by `make build-prod`.
+//
+// basePath should be empty string for root deployment or "/subpath" for
+// subdirectory. If the frontend is not embedded, the returned handler shows a
+// helpful message instead.
 func Handler(basePath string) fasthttp.RequestHandler {
-	// Normalize base path
-	basePath = strings.TrimSuffix(basePath, "/")
-
-	// Get the dist subdirectory
 	distSubFS, err := fs.Sub(distFS, "dist")
 	if err != nil {
 		return notEmbeddedHandler("Frontend not embedded: " + err.Error())
 	}
+	return handlerFor(basePath, distSubFS, false)
+}
 
-	// Read and modify index.html to inject base path
-	indexContent, err := fs.ReadFile(distSubFS, "index.html")
+// DirHandler returns a handler that serves the frontend from dir on disk
+// (typically frontend/dist) rather than from the embedded copy.
+//
+// This exists so the backend port doesn't lie during development. The embedded
+// copy is whatever was snapshotted at the last `make build-prod`, so it goes
+// stale silently — you edit the frontend, reload, and see the previous build
+// with no indication why. Serving from disk means a plain `make frontend-build`
+// is enough, with no Go rebuild and no restart: index.html is re-read per
+// request, so the new asset hashes are picked up immediately.
+//
+// It is still a build, not live source. Vite on the frontend port remains the
+// thing to develop against.
+func DirHandler(basePath, dir string) fasthttp.RequestHandler {
+	return handlerFor(basePath, os.DirFS(dir), true)
+}
+
+// DirHasIndex reports whether dir looks like a built frontend, so callers can
+// warn at startup rather than serving 404s.
+func DirHasIndex(dir string) bool {
+	st, err := os.Stat(filepath.Join(dir, "index.html"))
+	return err == nil && !st.IsDir()
+}
+
+// IsEmbedded returns true if the frontend dist folder is embedded
+func IsEmbedded() bool {
+	entries, err := distFS.ReadDir("dist")
 	if err != nil {
-		return notEmbeddedHandler("Frontend not embedded: index.html not found. Run 'make build-prod' to embed frontend.")
+		return false
 	}
+	return len(entries) > 0
+}
 
-	// Inject base tag right after <head> so it's processed before any relative URLs
-	// Base tag ensures relative URLs (./assets/...) resolve from basePath, not current page path
+// injectBasePath rewrites index.html so a subpath deployment resolves its
+// relative asset URLs correctly and the SPA knows where it is mounted.
+func injectBasePath(indexContent []byte, basePath string) []byte {
+	// Inject base tag right after <head> so it's processed before any relative URLs.
+	// Base tag ensures relative URLs (./assets/...) resolve from basePath, not current page path.
 	baseHref := basePath + "/"
 	if basePath == "" {
 		baseHref = "/"
@@ -67,10 +95,48 @@ func Handler(basePath string) fasthttp.RequestHandler {
 
 	// Inject base path script before </head>
 	basePathScript := fmt.Sprintf(`<script>window.__BASE_PATH__ = "%s";</script></head>`, basePath)
-	cachedIndexHTML = []byte(strings.Replace(modifiedHTML, "</head>", basePathScript, 1))
+	return []byte(strings.Replace(modifiedHTML, "</head>", basePathScript, 1))
+}
+
+// handlerFor serves fsys as a single-page app: real files when they exist,
+// index.html for everything else.
+//
+// When reload is false the injected index.html is built once up front, which
+// also lets construction fail fast if the frontend isn't there. When it is true
+// index.html is re-read on every request so an out-of-band rebuild of the
+// directory takes effect without a restart.
+func handlerFor(basePath string, fsys fs.FS, reload bool) fasthttp.RequestHandler {
+	// Normalize base path
+	basePath = strings.TrimSuffix(basePath, "/")
+
+	// Written once during construction in the cached case and read-only
+	// thereafter, so concurrent requests never race on it. In reload mode it
+	// stays nil and every call re-reads from fsys.
+	var cachedIndexHTML []byte
+
+	indexHTML := func() ([]byte, error) {
+		if cachedIndexHTML != nil {
+			return cachedIndexHTML, nil
+		}
+		raw, err := fs.ReadFile(fsys, "index.html")
+		if err != nil {
+			return nil, err
+		}
+		injected := injectBasePath(raw, basePath)
+		if !reload {
+			cachedIndexHTML = injected
+		}
+		return injected, nil
+	}
+
+	if !reload {
+		if _, err := indexHTML(); err != nil {
+			return notEmbeddedHandler("Frontend not embedded: index.html not found. Run 'make build-prod' to embed frontend.")
+		}
+	}
 
 	// Create file server
-	fileServer := http.FileServer(http.FS(distSubFS))
+	fileServer := http.FileServer(http.FS(fsys))
 
 	// Wrap with SPA fallback and proper MIME types
 	spaHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +146,7 @@ func Handler(basePath string) fasthttp.RequestHandler {
 		if path != "/" && !strings.HasPrefix(path, "/api") {
 			// Check if file exists
 			filePath := strings.TrimPrefix(path, "/")
-			file, err := distSubFS.Open(filePath)
+			file, err := fsys.Open(filePath)
 			if err == nil {
 				defer func() { _ = file.Close() }()
 
@@ -112,7 +178,7 @@ func Handler(basePath string) fasthttp.RequestHandler {
 
 				// Try Brotli first (better compression)
 				if strings.Contains(acceptEncoding, "br") {
-					if brContent, err := fs.ReadFile(distSubFS, filePath+".br"); err == nil {
+					if brContent, err := fs.ReadFile(fsys, filePath+".br"); err == nil {
 						content = brContent
 						contentEncoding = "br"
 					}
@@ -120,7 +186,7 @@ func Handler(basePath string) fasthttp.RequestHandler {
 
 				// Fall back to gzip
 				if content == nil && strings.Contains(acceptEncoding, "gzip") {
-					if gzContent, err := fs.ReadFile(distSubFS, filePath+".gz"); err == nil {
+					if gzContent, err := fs.ReadFile(fsys, filePath+".gz"); err == nil {
 						content = gzContent
 						contentEncoding = "gzip"
 					}
@@ -128,7 +194,7 @@ func Handler(basePath string) fasthttp.RequestHandler {
 
 				// Fall back to uncompressed
 				if content == nil {
-					content, err = fs.ReadFile(distSubFS, filePath)
+					content, err = fs.ReadFile(fsys, filePath)
 					if err != nil {
 						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 						return
@@ -146,8 +212,18 @@ func Handler(basePath string) fasthttp.RequestHandler {
 
 		// For root or non-existent files (SPA routes), serve modified index.html
 		if path == "/" || (!strings.HasPrefix(path, "/api") && !strings.Contains(path, ".")) {
+			index, err := indexHTML()
+			if err != nil {
+				http.Error(w, "Frontend not built: index.html not found. Run 'make frontend-build'.", http.StatusNotFound)
+				return
+			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			_, _ = w.Write(cachedIndexHTML)
+			// The disk copy changes underneath us by design; don't let a browser
+			// or proxy pin the old asset hashes.
+			if reload {
+				w.Header().Set("Cache-Control", "no-store")
+			}
+			_, _ = w.Write(index)
 			return
 		}
 
@@ -157,15 +233,6 @@ func Handler(basePath string) fasthttp.RequestHandler {
 
 	// Convert to fasthttp handler
 	return fasthttpadaptor.NewFastHTTPHandler(spaHandler)
-}
-
-// IsEmbedded returns true if the frontend dist folder is embedded
-func IsEmbedded() bool {
-	entries, err := distFS.ReadDir("dist")
-	if err != nil {
-		return false
-	}
-	return len(entries) > 0
 }
 
 // notEmbeddedHandler returns a handler that displays a message when frontend is not embedded

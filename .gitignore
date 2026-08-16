@@ -10,6 +10,10 @@ bin/
 
 # Config with secrets
 config.toml
+# ...but dev/config.toml is a checked-in, secret-free dev config so that a fresh
+# clone runs without copying or editing anything. The pattern above is
+# unanchored and would otherwise swallow it.
+!dev/config.toml
 
 # Test binary, built with `go test -c`
 *.test

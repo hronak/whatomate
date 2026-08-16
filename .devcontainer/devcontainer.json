@@ -1,0 +1,41 @@
+{
+  "name": "Whatomate",
+
+  // dev/docker-compose.yml supplies Postgres and Redis; the second file adds
+  // the container this editor attaches to. Same stack `make dev-infra` uses.
+  "dockerComposeFile": [
+    "../dev/docker-compose.yml",
+    "docker-compose.yml"
+  ],
+  "service": "devcontainer",
+  "runServices": ["devcontainer", "db", "redis"],
+  "workspaceFolder": "/workspaces/whatomate",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" }
+  },
+
+  // 3000 is the app (Vite, live frontend source). 8080 is the API, and serves
+  // the last `make frontend-build`.
+  "forwardPorts": [3000, 8080],
+  "portsAttributes": {
+    "3000": { "label": "App (Vite)", "onAutoForward": "openBrowserOnce" },
+    "8080": { "label": "API (Go)", "onAutoForward": "silent" }
+  },
+
+  // Create the schema and the default admin so the container comes up on a
+  // usable app. -idempotent -yes makes a rebuild against an existing volume a
+  // no-op instead of a prompt nobody is there to answer.
+  "postCreateCommand": "make install ARGS='-idempotent -yes' && make frontend-install",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "Vue.volar",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

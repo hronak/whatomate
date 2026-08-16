@@ -16,7 +16,9 @@ set -uo pipefail
 BACKEND_PORT="${BACKEND_PORT:-8080}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 BINARY="${BINARY:-./whatomate}"
-CONFIG="${CONFIG:-config.toml}"
+# Matches the Makefile's CONFIG default: checked in, no secrets, localhost
+# hosts, so running this straight from a fresh clone works.
+CONFIG="${CONFIG:-dev/config.toml}"
 
 cd "$(dirname "$0")/.."
 
@@ -63,7 +65,7 @@ fi
 
 cat <<EOF
 
-  API      http://localhost:${BACKEND_PORT}   (backend only)
+  API      http://localhost:${BACKEND_PORT}   (also serves the last frontend build)
   App      http://localhost:${FRONTEND_PORT}   <-- open this
 
 EOF

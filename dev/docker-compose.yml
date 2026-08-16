@@ -1,0 +1,113 @@
+# Development stack. Separate from the root docker-compose.yml, which runs the
+# released image and is what README's install instructions describe.
+#
+# Two modes, both driven from the Makefile:
+#
+#   make dev-infra   -> Postgres + Redis only, published on localhost. The app
+#                       runs natively via `make dev`. This is the default and
+#                       the one to use: Go and Vite are faster outside a
+#                       container, and you keep your own toolchain.
+#
+#   make dev-docker  -> the above plus containerized backend (go run) and Vite,
+#                       via the "full" profile. For reproducing a clean machine
+#                       or when you don't want Go/Node installed locally.
+#
+# The db/redis ports are the same ones the root compose publishes, so don't run
+# both stacks at once.
+
+name: whatomate-dev
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: whatomate_dev_db
+    restart: unless-stopped
+    networks:
+      - whatomate-dev
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-whatomate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-whatomate}
+      POSTGRES_DB: ${POSTGRES_DB:-whatomate}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-whatomate} -d ${POSTGRES_DB:-whatomate}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - dev-postgres-data:/var/lib/postgresql
+
+  redis:
+    image: redis:8-alpine
+    container_name: whatomate_dev_redis
+    restart: unless-stopped
+    networks:
+      - whatomate-dev
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - dev-redis-data:/data
+
+  # --- "full" profile: the app itself, containerized ------------------------
+  # Not started by `docker compose up` / `make dev-infra`. Use `make dev-docker`.
+
+  app:
+    image: golang:1.26.6-alpine
+    container_name: whatomate_dev_app
+    profiles: ["full"]
+    working_dir: /app
+    command: ["go", "run", "./cmd/whatomate", "server", "-config", "dev/config.toml", "-migrate"]
+    networks:
+      - whatomate-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ..:/app:rw
+      - dev-go-modules:/go/pkg/mod
+    environment:
+      # dev/config.toml points at localhost for native runs; inside the network
+      # the services are reachable by name instead.
+      - WHATOMATE_DATABASE__HOST=db
+      - WHATOMATE_REDIS__HOST=redis
+      - BACKEND_PORT=8080
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: node:24-alpine
+    container_name: whatomate_dev_frontend
+    profiles: ["full"]
+    working_dir: /app/frontend
+    command: ["sh", "-c", "npm install && npm run dev"]
+    networks:
+      - whatomate-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/app:rw
+      - dev-frontend-node-modules:/app/frontend/node_modules
+    environment:
+      - FRONTEND_PORT=3000
+      # frontend/ports.ts reads this so the Vite proxy target isn't hardcoded
+      # to localhost — inside the network the backend is the "app" service.
+      - BACKEND_HOST=app
+    depends_on:
+      - app
+
+networks:
+  whatomate-dev:
+
+volumes:
+  dev-postgres-data:
+  dev-redis-data:
+  dev-frontend-node-modules:
+  dev-go-modules:

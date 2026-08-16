@@ -106,6 +106,7 @@ make build-prod
 ## CLI Usage
 
 ```bash
+./whatomate install             # Set up the database, then exit
 ./whatomate server              # API + 1 worker (default)
 ./whatomate server -workers=0   # API only
 ./whatomate worker -workers=4   # Workers only (for scaling)
@@ -117,11 +118,58 @@ make build-prod
 The backend is written in Go ([Fastglue](https://github.com/zerodha/fastglue)) and the frontend is Vue.js 3 with shadcn-vue.
 - If you are interested in contributing, please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
 
+**Requirements:** Go 1.26, Node 24, and Docker (for Postgres and Redis).
+
 ```bash
-# Development setup
-make run-migrate    # Backend (port 8080)
-cd frontend && npm run dev   # Frontend (port 3000)
+git clone https://github.com/hronak/whatomate.git
+cd whatomate
+
+make dev-infra   # Postgres + Redis in Docker
+make install     # Create the schema and the default admin
+make dev         # Backend + frontend
 ```
+
+Open <http://localhost:3000> and log in with `admin@admin.com` / `admin`.
+
+There is nothing to copy and nothing to edit first: development targets use
+[`dev/config.toml`](dev/config.toml), which is checked in and contains no
+secrets. For real credentials copy `config.example.toml` to `config.toml`
+(gitignored) and pass `make run CONFIG=config.toml`.
+
+`make install` is idempotent, so it is safe to re-run after a `git pull`. Add
+`make seed` for demo contacts, tags, and a starter chatbot flow to look at.
+
+### The two ports
+
+| | Serves | Use when |
+| --- | --- | --- |
+| **:3000** Vite | the frontend from live source, `/api` and `/ws` proxied to :8080 | always, while developing |
+| **:8080** Go | the API, plus the frontend from `frontend/dist` | verifying a build |
+
+In development `app.frontend_dir` points the backend at `frontend/dist`, so
+`make frontend-build` alone refreshes :8080 — no Go rebuild, no restart. Shipped
+binaries leave that unset and serve the frontend embedded by `make build-prod`.
+
+### Everything in containers
+
+If you would rather not install Go and Node locally:
+
+```bash
+make dev-docker    # backend + Vite + Postgres + Redis, all containerized
+make rm-dev-docker # tear it down, including the database volume
+```
+
+VS Code users can instead run **Dev Containers: Reopen in Container** — the
+[`.devcontainer`](.devcontainer) config brings up the same stack and runs
+`make install` for you.
+
+> The dev stack publishes Postgres on 5432 and Redis on 6379, the same ports as
+> the production `docker-compose.yml`. Don't run both at once.
+
+### Other targets
+
+`make help` lists them all. The common ones are `make test`, `make lint`,
+`make build-prod`, and `make test-e2e`.
 
 ## License
 

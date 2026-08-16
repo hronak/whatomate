@@ -112,6 +112,16 @@ type AppConfig struct {
 	Debug         bool   `koanf:"debug"`
 	EncryptionKey string `koanf:"encryption_key"` // AES-256 key for encrypting secrets at rest
 
+	// FrontendDir serves the SPA from this directory on disk instead of from
+	// the copy embedded in the binary. Empty (the default) uses the embedded
+	// copy, which is what shipped binaries do.
+	//
+	// dev/config.toml sets it to "frontend/dist" so the backend port reflects
+	// the last `make frontend-build` rather than the frontend snapshot taken at
+	// the last `make build-prod` — a snapshot that otherwise goes stale with no
+	// visible sign. Override with WHATOMATE_APP__FRONTEND_DIR or -frontend-dir.
+	FrontendDir string `koanf:"frontend_dir"`
+
 	// EnforceRoutePermissions turns the route table's permission checks from
 	// advisory into binding.
 	//

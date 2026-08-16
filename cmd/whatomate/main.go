@@ -45,6 +45,8 @@ func main() {
 	}
 
 	switch os.Args[1] {
+	case "install":
+		runInstall(os.Args[2:])
 	case "server":
 		runServer(os.Args[2:])
 	case "worker":
@@ -67,21 +69,33 @@ Usage:
   whatomate <command> [options]
 
 Commands:
+  install   Initialize the database, then exit
   server    Start the API server (with optional embedded workers)
   worker    Start background workers only (no API server)
   version   Show version information
   help      Show this help message
 
-Server Options:
+Install Options:
   -config string    Path to config file (default "config.toml")
-  -migrate          Run database migrations on startup
-  -workers int      Number of embedded workers (0 to disable) (default 1)
+  -idempotent       Exit successfully if the database is already installed
+  -yes              Don't prompt before migrating a database that has tables
+  -seed             Also insert demo contacts, tags and a starter chatbot flow
+
+Server Options:
+  -config string       Path to config file (default "config.toml")
+  -migrate             Run database migrations on startup
+  -workers int         Number of embedded workers (0 to disable) (default 1)
+  -frontend-dir string Serve the frontend from this directory instead of the
+                       copy embedded in the binary (development)
 
 Worker Options:
   -config string    Path to config file (default "config.toml")
   -workers int      Number of workers to run (default 1)
 
 Examples:
+  whatomate install                    # Set up a fresh database, then exit
+  whatomate install -seed              # ...and add demo data to look at
+  whatomate install -idempotent -yes   # Safe to run unconditionally in scripts
   whatomate server                     # API + 1 embedded worker
   whatomate server -workers 0          # API only (no workers)
   whatomate server -workers 4          # API + 4 embedded workers
@@ -103,6 +117,7 @@ func runServer(args []string) {
 	configPath := serverFlags.String("config", "config.toml", "Path to config file")
 	migrate := serverFlags.Bool("migrate", false, "Run database migrations")
 	numWorkers := serverFlags.Int("workers", 1, "Number of workers to run (0 to disable embedded workers)")
+	frontendDir := serverFlags.String("frontend-dir", "", "Serve the frontend from this directory instead of the embedded copy")
 	_ = serverFlags.Parse(args)
 
 	// Initialize logger
@@ -120,6 +135,11 @@ func runServer(args []string) {
 	cfg, err := config.Load(*configPath)
 	if err != nil {
 		lo.Fatal("Failed to load config", "error", err)
+	}
+
+	// An explicit flag beats whatever the config file said.
+	if *frontendDir != "" {
+		cfg.App.FrontendDir = *frontendDir
 	}
 
 	// Validate JWT secret
@@ -156,15 +176,11 @@ func runServer(args []string) {
 	}
 	lo.Info("Connected to PostgreSQL")
 
-	// Run migrations if requested
+	// Run migrations if requested. Same work the `install` command does, minus
+	// the seeding and the prompts.
 	if *migrate {
-		if err := database.RunMigrationWithProgress(db, &cfg.DefaultAdmin, lo, os.Stdout); err != nil {
+		if err := migrateSchema(db, cfg, lo, os.Stdout); err != nil {
 			lo.Fatal("Migration failed", "error", err)
-		}
-		// Backfill v2 graph for any legacy chatbot flow still on Steps[].
-		// Idempotent — re-running is a no-op once every row is converted.
-		if err := handlers.BackfillChatbotFlowGraph(db, lo); err != nil {
-			lo.Fatal("Chatbot flow graph backfill failed", "error", err)
 		}
 	}
 
@@ -592,10 +608,26 @@ func setupRoutes(g *fastglue.Fastglue, app *handlers.App, lo logf.Logger, basePa
 	}
 	registerRoutes(g, app, lo, cfg.App.EnforceRoutePermissions, limiters)
 
-	// Serve embedded frontend (SPA)
-	if frontend.IsEmbedded() {
+	// Serve the frontend (SPA). A directory on disk wins over the embedded copy
+	// so development can point at frontend/dist and always see the current
+	// build; shipped binaries leave frontend_dir empty and use the embedded one.
+	var frontendHandler fasthttp.RequestHandler
+	switch {
+	case cfg.App.FrontendDir != "":
+		if !frontend.DirHasIndex(cfg.App.FrontendDir) {
+			lo.Warn("app.frontend_dir has no index.html — run 'make frontend-build'",
+				"dir", cfg.App.FrontendDir)
+		}
+		lo.Info("Serving frontend from disk", "dir", cfg.App.FrontendDir, "base_path", basePath)
+		frontendHandler = frontend.DirHandler(basePath, cfg.App.FrontendDir)
+	case frontend.IsEmbedded():
 		lo.Info("Serving embedded frontend", "base_path", basePath)
-		frontendHandler := frontend.Handler(basePath)
+		frontendHandler = frontend.Handler(basePath)
+	default:
+		lo.Info("Frontend not embedded, API-only mode")
+	}
+
+	if frontendHandler != nil {
 		// Catch-all for frontend routes
 		g.GET("/{path:*}", func(r *fastglue.Request) error {
 			frontendHandler(r.RequestCtx)
@@ -605,8 +637,6 @@ func setupRoutes(g *fastglue.Fastglue, app *handlers.App, lo logf.Logger, basePa
 			frontendHandler(r.RequestCtx)
 			return nil
 		})
-	} else {
-		lo.Info("Frontend not embedded, API-only mode")
 	}
 }
 

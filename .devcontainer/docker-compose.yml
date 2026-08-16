@@ -1,0 +1,29 @@
+# Adds the devcontainer itself to the dev stack.
+#
+# Merged on top of dev/docker-compose.yml by .devcontainer/devcontainer.json, so
+# db and redis come from there and are reachable by service name. Kept separate
+# rather than added to dev/docker-compose.yml so that `make dev-infra` doesn't
+# build a devcontainer nobody asked for.
+
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/go:1.26
+    command: sleep infinity
+    working_dir: /workspaces/whatomate
+    volumes:
+      - ..:/workspaces/whatomate:cached
+    environment:
+      # dev/config.toml points at localhost for native runs; in here the
+      # databases are sibling containers on the compose network.
+      - WHATOMATE_DATABASE__HOST=db
+      - WHATOMATE_REDIS__HOST=redis
+      # frontend/ports.ts reads this so Vite proxies to the backend running in
+      # this same container.
+      - BACKEND_HOST=localhost
+    networks:
+      - whatomate-dev
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
