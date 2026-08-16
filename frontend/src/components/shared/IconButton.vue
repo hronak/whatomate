@@ -1,26 +1,33 @@
 <script setup lang="ts">
-import type { Component, HTMLAttributes } from 'vue'
-import { Button, type ButtonVariants } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import type { Component, HTMLAttributes } from "vue";
+import { Button, type ButtonVariants } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-withDefaults(defineProps<{
-  icon?: Component
-  label: string
-  variant?: ButtonVariants['variant']
-  size?: ButtonVariants['size']
-  class?: HTMLAttributes['class']
-  disabled?: boolean
-  loading?: boolean
-}>(), {
-  variant: 'ghost',
-  size: 'icon',
-  disabled: false,
-  loading: false,
-})
+withDefaults(
+  defineProps<{
+    icon?: Component;
+    label: string;
+    variant?: ButtonVariants["variant"];
+    size?: ButtonVariants["size"];
+    class?: HTMLAttributes["class"];
+    disabled?: boolean;
+    loading?: boolean;
+  }>(),
+  {
+    variant: "ghost",
+    size: "icon",
+    disabled: false,
+    loading: false,
+  },
+);
 
 defineEmits<{
-  click: [e: MouseEvent]
-}>()
+  click: [e: MouseEvent];
+}>();
 </script>
 
 <template>

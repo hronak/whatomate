@@ -1,71 +1,76 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Send, Mic } from '@lucide/vue'
+import { ref, computed } from "vue";
+import { Send, Mic } from "@lucide/vue";
 
 const props = defineProps<{
-  inputType: string | null
-  disabled?: boolean
-  placeholder?: string
-}>()
+  inputType: string | null;
+  disabled?: boolean;
+  placeholder?: string;
+}>();
 
 const emit = defineEmits<{
-  submit: [value: string]
-}>()
+  submit: [value: string];
+}>();
 
-const inputValue = ref('')
+const inputValue = ref("");
 
 const inputPlaceholder = computed(() => {
-  if (props.placeholder) return props.placeholder
+  if (props.placeholder) return props.placeholder;
 
   switch (props.inputType) {
-    case 'email':
-      return 'Enter your email address...'
-    case 'phone':
-      return 'Enter your phone number...'
-    case 'number':
-      return 'Enter a number...'
-    case 'date':
-      return 'Enter a date (YYYY-MM-DD)...'
-    case 'text':
-      return 'Type a message...'
+    case "email":
+      return "Enter your email address...";
+    case "phone":
+      return "Enter your phone number...";
+    case "number":
+      return "Enter a number...";
+    case "date":
+      return "Enter a date (YYYY-MM-DD)...";
+    case "text":
+      return "Type a message...";
     default:
-      return 'Type a message...'
+      return "Type a message...";
   }
-})
+});
 
 const inputTypeAttr = computed(() => {
   switch (props.inputType) {
-    case 'email':
-      return 'email'
-    case 'phone':
-      return 'tel'
-    case 'number':
-      return 'number'
-    case 'date':
-      return 'date'
+    case "email":
+      return "email";
+    case "phone":
+      return "tel";
+    case "number":
+      return "number";
+    case "date":
+      return "date";
     default:
-      return 'text'
+      return "text";
   }
-})
+});
 
 const isEnabled = computed(() => {
-  return !props.disabled && props.inputType && props.inputType !== 'none' && props.inputType !== 'button'
-})
+  return (
+    !props.disabled &&
+    props.inputType &&
+    props.inputType !== "none" &&
+    props.inputType !== "button"
+  );
+});
 
 // Convert input to string (handles number inputs)
-const inputString = computed(() => String(inputValue.value ?? '').trim())
+const inputString = computed(() => String(inputValue.value ?? "").trim());
 
 function handleSubmit() {
-  if (!inputString.value || !isEnabled.value) return
+  if (!inputString.value || !isEnabled.value) return;
 
-  emit('submit', inputString.value)
-  inputValue.value = ''
+  emit("submit", inputString.value);
+  inputValue.value = "";
 }
 
 function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault()
-    handleSubmit()
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    handleSubmit();
   }
 }
 </script>
@@ -82,15 +87,17 @@ function handleKeydown(event: KeyboardEvent) {
         @keydown="handleKeydown"
       />
       <p v-else class="text-gray-400">
-        {{ disabled ? 'Waiting...' : 'Type a message' }}
+        {{ disabled ? "Waiting..." : "Type a message" }}
       </p>
     </div>
 
     <button
       class="size-10 rounded-full flex items-center justify-center transition-colors"
       :class="{
-        'bg-[#00a884] hover:bg-[#008f6d] cursor-pointer': isEnabled && inputString,
-        'bg-gray-300 dark:bg-gray-600 cursor-not-allowed': !isEnabled || !inputString
+        'bg-[#00a884] hover:bg-[#008f6d] cursor-pointer':
+          isEnabled && inputString,
+        'bg-gray-300 dark:bg-gray-600 cursor-not-allowed':
+          !isEnabled || !inputString,
       }"
       :disabled="!isEnabled || !inputString"
       @click="handleSubmit"

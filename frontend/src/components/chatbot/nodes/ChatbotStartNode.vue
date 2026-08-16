@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { Play } from '@lucide/vue'
-import BaseNode from '@/components/calling/nodes/BaseNode.vue'
+import { Play } from "@lucide/vue";
+import BaseNode from "@/components/calling/nodes/BaseNode.vue";
 
-defineOptions({ inheritAttrs: false })
-defineProps<{ data: any }>()
+defineOptions({ inheritAttrs: false });
+defineProps<{ data: any }>();
 </script>
 
 <template>
-  <BaseNode :label="data?.label || 'Start'" header-class="bg-emerald-600" :has-input="false">
+  <BaseNode
+    :label="data?.label || 'Start'"
+    header-class="bg-emerald-600"
+    :has-input="false"
+  >
     <template #icon><Play class="size-4" /></template>
     <p class="text-muted-foreground">Flow entry point</p>
   </BaseNode>

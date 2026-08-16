@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { PhoneOff } from '@lucide/vue'
-import BaseNode from './BaseNode.vue'
+import { PhoneOff } from "@lucide/vue";
+import BaseNode from "./BaseNode.vue";
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ inheritAttrs: false });
 
-defineProps<{ data: Record<string, any> }>()
+defineProps<{ data: Record<string, any> }>();
 </script>
 
 <template>
-  <BaseNode :label="data?.label || 'Hangup'" header-class="bg-red-600" :output-handles="[]" :has-input="!data?.isEntryNode">
+  <BaseNode
+    :label="data?.label || 'Hangup'"
+    header-class="bg-red-600"
+    :output-handles="[]"
+    :has-input="!data?.isEntryNode"
+  >
     <template #icon><PhoneOff class="size-4" /></template>
-    <p v-if="data?.config?.audio_file || data?.config?.greeting_text" class="truncate">
+    <p
+      v-if="data?.config?.audio_file || data?.config?.greeting_text"
+      class="truncate"
+    >
       {{ data.config.greeting_text || data.config.audio_file }}
     </p>
     <p v-else>End call</p>

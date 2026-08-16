@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { SUPPORTED_LOCALES, setLocale } from '@/i18n'
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { SUPPORTED_LOCALES, setLocale } from "@/i18n";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Globe } from '@lucide/vue'
+} from "@/components/ui/select";
+import { Globe } from "@lucide/vue";
 
-const { locale } = useI18n()
+const { locale } = useI18n();
 
 const currentLocale = computed({
   get: () => locale.value,
-  set: (value: string) => setLocale(value)
-})
+  set: (value: string) => setLocale(value),
+});
 
 const currentLocaleName = computed(() => {
-  const found = SUPPORTED_LOCALES.find(l => l.code === locale.value)
-  return found?.nativeName || locale.value
-})
+  const found = SUPPORTED_LOCALES.find((l) => l.code === locale.value);
+  return found?.nativeName || locale.value;
+});
 </script>
 
 <template>

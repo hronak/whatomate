@@ -1,243 +1,257 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ref, watch, computed, onMounted } from "vue";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList
-} from '@/components/ui/command'
-import { X, ChevronDown, Phone, User, Plus, Check, Tags } from '@lucide/vue'
-import { TagBadge, Spinner } from '@/components/shared'
-import MetadataSection from '@/components/chat/MetadataSection.vue'
-import { getInitials, getAvatarGradient, formatLabel } from '@/lib/utils'
-import { getTagColorClass } from '@/lib/constants'
-import { useTagsStore } from '@/stores/tags'
-import { useAuthStore } from '@/stores/auth'
-import { contactsService, type Tag } from '@/services/api'
-import { toast } from 'vue-sonner'
-import type { Contact } from '@/stores/contacts'
+  CommandList,
+} from "@/components/ui/command";
+import { X, ChevronDown, Phone, User, Plus, Check, Tags } from "@lucide/vue";
+import { TagBadge, Spinner } from "@/components/shared";
+import MetadataSection from "@/components/chat/MetadataSection.vue";
+import { getInitials, getAvatarGradient, formatLabel } from "@/lib/utils";
+import { getTagColorClass } from "@/lib/constants";
+import { useTagsStore } from "@/stores/tags";
+import { useAuthStore } from "@/stores/auth";
+import { contactsService, type Tag } from "@/services/api";
+import { toast } from "vue-sonner";
+import type { Contact } from "@/stores/contacts";
 
 interface PanelFieldConfig {
-  key: string
-  label: string
-  order: number
-  display_type?: 'text' | 'badge' | 'tag'
-  color?: 'default' | 'success' | 'warning' | 'error' | 'info'
+  key: string;
+  label: string;
+  order: number;
+  display_type?: "text" | "badge" | "tag";
+  color?: "default" | "success" | "warning" | "error" | "info";
 }
 
 interface PanelSection {
-  id: string
-  label: string
-  columns: number
-  collapsible: boolean
-  default_collapsed: boolean
-  order: number
-  fields: PanelFieldConfig[]
+  id: string;
+  label: string;
+  columns: number;
+  collapsible: boolean;
+  default_collapsed: boolean;
+  order: number;
+  fields: PanelFieldConfig[];
 }
 
 interface PanelConfig {
-  sections: PanelSection[]
+  sections: PanelSection[];
 }
 
 interface SessionData {
-  session_id?: string
-  flow_id?: string
-  flow_name?: string
-  session_data: Record<string, any>
-  panel_config: PanelConfig
+  session_id?: string;
+  flow_id?: string;
+  flow_name?: string;
+  session_data: Record<string, any>;
+  panel_config: PanelConfig;
 }
 
 const props = defineProps<{
-  contact: Contact
-  sessionData?: SessionData | null
-}>()
+  contact: Contact;
+  sessionData?: SessionData | null;
+}>();
 
 const emit = defineEmits<{
-  close: []
-  tagsUpdated: [tags: string[]]
-}>()
+  close: [];
+  tagsUpdated: [tags: string[]];
+}>();
 
-const tagsStore = useTagsStore()
-const authStore = useAuthStore()
-const collapsedSections = ref<Record<string, boolean>>({})
-const tagSelectorOpen = ref(false)
-const isUpdatingTags = ref(false)
+const tagsStore = useTagsStore();
+const authStore = useAuthStore();
+const collapsedSections = ref<Record<string, boolean>>({});
+const tagSelectorOpen = ref(false);
+const isUpdatingTags = ref(false);
 
 // Resizable panel state
-const MIN_WIDTH = 280
-const MAX_WIDTH = 480
-const panelWidth = ref(MAX_WIDTH) // Default to max width
-const isResizing = ref(false)
+const MIN_WIDTH = 280;
+const MAX_WIDTH = 480;
+const panelWidth = ref(MAX_WIDTH); // Default to max width
+const isResizing = ref(false);
 
 // Check if user can edit tags
-const canEditTags = computed(() => authStore.hasPermission('contacts', 'write'))
+const canEditTags = computed(() =>
+  authStore.hasPermission("contacts", "write"),
+);
 
 // Fetch tags on mount
 onMounted(async () => {
   if (tagsStore.tags.length === 0) {
-    try { await tagsStore.fetchTags() } catch { /* tags won't be available */ }
+    try {
+      await tagsStore.fetchTags();
+    } catch {
+      /* tags won't be available */
+    }
   }
-})
+});
 
 function startResize(e: MouseEvent) {
-  isResizing.value = true
-  const startX = e.clientX
-  const startWidth = panelWidth.value
+  isResizing.value = true;
+  const startX = e.clientX;
+  const startWidth = panelWidth.value;
 
   function onMouseMove(e: MouseEvent) {
     // Dragging left increases width, dragging right decreases
-    const delta = startX - e.clientX
-    const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + delta))
-    panelWidth.value = newWidth
+    const delta = startX - e.clientX;
+    const newWidth = Math.min(
+      MAX_WIDTH,
+      Math.max(MIN_WIDTH, startWidth + delta),
+    );
+    panelWidth.value = newWidth;
   }
 
   function onMouseUp() {
-    isResizing.value = false
-    document.removeEventListener('mousemove', onMouseMove)
-    document.removeEventListener('mouseup', onMouseUp)
+    isResizing.value = false;
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
   }
 
-  document.addEventListener('mousemove', onMouseMove)
-  document.addEventListener('mouseup', onMouseUp)
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
 }
 
 // Initialize collapsed state when session data changes
-watch(() => props.sessionData, (newData) => {
-  if (newData?.panel_config?.sections) {
-    for (const section of newData.panel_config.sections) {
-      if (collapsedSections.value[section.id] === undefined) {
-        collapsedSections.value[section.id] = section.default_collapsed
+watch(
+  () => props.sessionData,
+  (newData) => {
+    if (newData?.panel_config?.sections) {
+      for (const section of newData.panel_config.sections) {
+        if (collapsedSections.value[section.id] === undefined) {
+          collapsedSections.value[section.id] = section.default_collapsed;
+        }
       }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+);
 
 function toggleSection(sectionId: string) {
-  collapsedSections.value[sectionId] = !collapsedSections.value[sectionId]
+  collapsedSections.value[sectionId] = !collapsedSections.value[sectionId];
 }
 
 function isSectionCollapsed(sectionId: string): boolean {
-  return collapsedSections.value[sectionId] ?? false
+  return collapsedSections.value[sectionId] ?? false;
 }
 
 function getFieldValue(key: string): string {
-  if (!props.sessionData?.session_data) return '-'
-  const value = props.sessionData.session_data[key]
-  if (value === undefined || value === null || value === '') return '-'
-  return String(value)
+  if (!props.sessionData?.session_data) return "-";
+  const value = props.sessionData.session_data[key];
+  if (value === undefined || value === null || value === "") return "-";
+  return String(value);
 }
 
 function getColorClass(color?: string): string {
   switch (color) {
-    case 'success':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-    case 'warning':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-    case 'error':
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-    case 'info':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case "success":
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+    case "warning":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+    case "error":
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+    case "info":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
     default:
-      return 'bg-muted text-muted-foreground'
+      return "bg-muted text-muted-foreground";
   }
 }
 
 // Sort sections by order
 const sortedSections = computed(() => {
-  if (!props.sessionData?.panel_config?.sections) return []
-  return [...props.sessionData.panel_config.sections].sort((a, b) => a.order - b.order)
-})
+  if (!props.sessionData?.panel_config?.sections) return [];
+  return [...props.sessionData.panel_config.sections].sort(
+    (a, b) => a.order - b.order,
+  );
+});
 
 // Get tags from contact
 const contactTags = computed(() => {
-  if (!props.contact.tags || !Array.isArray(props.contact.tags)) return []
-  return props.contact.tags as string[]
-})
+  if (!props.contact.tags || !Array.isArray(props.contact.tags)) return [];
+  return props.contact.tags as string[];
+});
 
 // Contact metadata
 const hasMetadata = computed(() => {
-  const md = props.contact.metadata
-  return md && typeof md === 'object' && Object.keys(md).length > 0
-})
+  const md = props.contact.metadata;
+  return md && typeof md === "object" && Object.keys(md).length > 0;
+});
 
 const metadataPrimitives = computed(() => {
-  if (!hasMetadata.value) return []
+  if (!hasMetadata.value) return [];
   return Object.entries(props.contact.metadata).filter(
-    ([, v]) => v === null || typeof v !== 'object'
-  )
-})
+    ([, v]) => v === null || typeof v !== "object",
+  );
+});
 
 const metadataSections = computed(() => {
-  if (!hasMetadata.value) return []
+  if (!hasMetadata.value) return [];
   return Object.entries(props.contact.metadata).filter(
-    ([, v]) => v !== null && typeof v === 'object'
-  )
-})
+    ([, v]) => v !== null && typeof v === "object",
+  );
+});
 
 // Get tag details for display
 function getTagDetails(tagName: string): Tag | undefined {
-  return tagsStore.getTagByName(tagName)
+  return tagsStore.getTagByName(tagName);
 }
 
 // Check if a tag is selected
 function isTagSelected(tagName: string): boolean {
-  return contactTags.value.includes(tagName)
+  return contactTags.value.includes(tagName);
 }
 
 // Toggle tag on contact
 async function toggleTag(tagName: string) {
-  if (isUpdatingTags.value) return
+  if (isUpdatingTags.value) return;
 
-  const currentTags = [...contactTags.value]
-  let newTags: string[]
+  const currentTags = [...contactTags.value];
+  let newTags: string[];
 
   if (currentTags.includes(tagName)) {
-    newTags = currentTags.filter(t => t !== tagName)
+    newTags = currentTags.filter((t) => t !== tagName);
   } else {
-    newTags = [...currentTags, tagName]
+    newTags = [...currentTags, tagName];
   }
 
-  await updateContactTags(newTags)
+  await updateContactTags(newTags);
 }
 
 // Remove tag from contact
 async function removeTag(tagName: string) {
-  if (isUpdatingTags.value) return
+  if (isUpdatingTags.value) return;
 
-  const newTags = contactTags.value.filter(t => t !== tagName)
-  await updateContactTags(newTags)
+  const newTags = contactTags.value.filter((t) => t !== tagName);
+  await updateContactTags(newTags);
 }
 
 // Update contact tags via API
 async function updateContactTags(tags: string[]) {
-  isUpdatingTags.value = true
+  isUpdatingTags.value = true;
   try {
-    await contactsService.updateTags(props.contact.id, tags)
-    emit('tagsUpdated', tags)
-    toast.success('Tags updated')
+    await contactsService.updateTags(props.contact.id, tags);
+    emit("tagsUpdated", tags);
+    toast.success("Tags updated");
   } catch (e: any) {
-    toast.error(e.response?.data?.message || 'Failed to update tags')
+    toast.error(e.response?.data?.message || "Failed to update tags");
   } finally {
-    isUpdatingTags.value = false
+    isUpdatingTags.value = false;
   }
 }
-
 </script>
 
 <template>
@@ -266,7 +280,12 @@ async function updateContactTags(tags: string[]) {
         <div class="flex flex-col items-center text-center pb-4 border-b">
           <Avatar class="size-16 mb-3">
             <AvatarImage :src="contact.avatar_url" />
-            <AvatarFallback :class="'text-lg bg-linear-to-br text-white ' + getAvatarGradient(contact.name || contact.phone_number)">
+            <AvatarFallback
+              :class="
+                'text-lg bg-linear-to-br text-white ' +
+                getAvatarGradient(contact.name || contact.phone_number)
+              "
+            >
               {{ getInitials(contact.name || contact.phone_number) }}
             </AvatarFallback>
           </Avatar>
@@ -310,10 +329,18 @@ async function updateContactTags(tags: string[]) {
                         @select="toggleTag(tag.name)"
                       >
                         <div class="flex items-center gap-2 flex-1">
-                          <span :class="['size-2 rounded-full', getTagColorClass(tag.color).split('')[0]]"></span>
+                          <span
+                            :class="[
+                              'size-2 rounded-full',
+                              getTagColorClass(tag.color).split('')[0],
+                            ]"
+                          ></span>
                           <span>{{ tag.name }}</span>
                         </div>
-                        <Check v-if="isTagSelected(tag.name)" class="size-4 text-primary" />
+                        <Check
+                          v-if="isTagSelected(tag.name)"
+                          class="size-4 text-primary"
+                        />
                       </CommandItem>
                     </CommandGroup>
                   </CommandList>
@@ -342,7 +369,10 @@ async function updateContactTags(tags: string[]) {
               </TagBadge>
             </template>
             <span v-else class="text-muted-foreground">No tags</span>
-            <Spinner v-if="isUpdatingTags" class="size-4 text-muted-foreground" />
+            <Spinner
+              v-if="isUpdatingTags"
+              class="size-4 text-muted-foreground"
+            />
           </div>
         </div>
 
@@ -364,34 +394,48 @@ async function updateContactTags(tags: string[]) {
         </div>
 
         <!-- No Session Data or no panel config -->
-        <div v-if="!props.sessionData || sortedSections.length === 0" class="text-center py-6 text-muted-foreground border-t">
+        <div
+          v-if="!props.sessionData || sortedSections.length === 0"
+          class="text-center py-6 text-muted-foreground border-t"
+        >
           <User class="size-8 mx-auto mb-2 opacity-50" />
           <p>No data configured</p>
-          <p class="mt-1">Configure panel display in the chatbot flow settings.</p>
+          <p class="mt-1">
+            Configure panel display in the chatbot flow settings.
+          </p>
         </div>
 
         <!-- Session Data with panel config -->
         <template v-else>
           <!-- Flow Name Badge -->
-          <div v-if="props.sessionData?.flow_name" class="flex items-center gap-2">
+          <div
+            v-if="props.sessionData?.flow_name"
+            class="flex items-center gap-2"
+          >
             <Badge variant="outline">
               {{ props.sessionData?.flow_name }}
             </Badge>
           </div>
 
           <!-- Dynamic Sections -->
-          <div v-for="section in sortedSections" :key="section.id" class="space-y-2 border-t pt-4">
+          <div
+            v-for="section in sortedSections"
+            :key="section.id"
+            class="space-y-2 border-t pt-4"
+          >
             <Collapsible
               v-if="section.collapsible"
               :open="!isSectionCollapsed(section.id)"
               @update:open="toggleSection(section.id)"
             >
-              <CollapsibleTrigger class="flex items-center justify-between w-full py-2 font-medium hover:text-primary transition-colors">
+              <CollapsibleTrigger
+                class="flex items-center justify-between w-full py-2 font-medium hover:text-primary transition-colors"
+              >
                 <span>{{ section.label }}</span>
                 <ChevronDown
                   :class="[
                     'size-4',
-                    isSectionCollapsed(section.id) ? '-rotate-90' : ''
+                    isSectionCollapsed(section.id) ? '-rotate-90' : '',
                   ]"
                 />
               </CollapsibleTrigger>
@@ -399,31 +443,45 @@ async function updateContactTags(tags: string[]) {
                 <div
                   :class="[
                     'grid gap-2 pt-2',
-                    section.columns === 2 ? 'grid-cols-2' : 'grid-cols-1'
+                    section.columns === 2 ? 'grid-cols-2' : 'grid-cols-1',
                   ]"
                 >
                   <div
-                    v-for="field in section.fields.sort((a, b) => a.order - b.order)"
+                    v-for="field in section.fields.sort(
+                      (a, b) => a.order - b.order,
+                    )"
                     :key="field.key"
                     class="bg-muted/50 rounded-md px-3 py-2"
                   >
-                    <p class="uppercase tracking-wide text-muted-foreground font-medium">{{ field.label }}</p>
+                    <p
+                      class="uppercase tracking-wide text-muted-foreground font-medium"
+                    >
+                      {{ field.label }}
+                    </p>
                     <!-- Badge display -->
                     <span
                       v-if="field.display_type === 'badge'"
-                      :class="['inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold mt-1', getColorClass(field.color)]"
+                      :class="[
+                        'inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold mt-1',
+                        getColorClass(field.color),
+                      ]"
                     >
                       {{ getFieldValue(field.key) }}
                     </span>
                     <!-- Tag display -->
                     <span
                       v-else-if="field.display_type === 'tag'"
-                      :class="['inline-flex items-center rounded-md px-2 py-1 font-medium mt-1', getColorClass(field.color)]"
+                      :class="[
+                        'inline-flex items-center rounded-md px-2 py-1 font-medium mt-1',
+                        getColorClass(field.color),
+                      ]"
                     >
                       {{ getFieldValue(field.key) }}
                     </span>
                     <!-- Default text display -->
-                    <p v-else class="font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
+                    <p v-else class="font-semibold wrap-break-word mt-0.5">
+                      {{ getFieldValue(field.key) }}
+                    </p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -435,31 +493,45 @@ async function updateContactTags(tags: string[]) {
               <div
                 :class="[
                   'grid gap-2',
-                  section.columns === 2 ? 'grid-cols-2' : 'grid-cols-1'
+                  section.columns === 2 ? 'grid-cols-2' : 'grid-cols-1',
                 ]"
               >
                 <div
-                  v-for="field in section.fields.sort((a, b) => a.order - b.order)"
+                  v-for="field in section.fields.sort(
+                    (a, b) => a.order - b.order,
+                  )"
                   :key="field.key"
                   class="bg-muted/50 rounded-md px-3 py-2"
                 >
-                  <p class="uppercase tracking-wide text-muted-foreground font-medium">{{ field.label }}</p>
+                  <p
+                    class="uppercase tracking-wide text-muted-foreground font-medium"
+                  >
+                    {{ field.label }}
+                  </p>
                   <!-- Badge display -->
                   <span
                     v-if="field.display_type === 'badge'"
-                    :class="['inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold mt-1', getColorClass(field.color)]"
+                    :class="[
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold mt-1',
+                      getColorClass(field.color),
+                    ]"
                   >
                     {{ getFieldValue(field.key) }}
                   </span>
                   <!-- Tag display -->
                   <span
                     v-else-if="field.display_type === 'tag'"
-                    :class="['inline-flex items-center rounded-md px-2 py-1 font-medium mt-1', getColorClass(field.color)]"
+                    :class="[
+                      'inline-flex items-center rounded-md px-2 py-1 font-medium mt-1',
+                      getColorClass(field.color),
+                    ]"
                   >
                     {{ getFieldValue(field.key) }}
                   </span>
                   <!-- Default text display -->
-                  <p v-else class="font-semibold wrap-break-word mt-0.5">{{ getFieldValue(field.key) }}</p>
+                  <p v-else class="font-semibold wrap-break-word mt-0.5">
+                    {{ getFieldValue(field.key) }}
+                  </p>
                 </div>
               </div>
             </div>

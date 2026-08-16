@@ -1,23 +1,33 @@
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { agentAnalyticsService } from '@/services/api'
-import { useAuthStore } from '@/stores/auth'
-import { useUsersStore } from '@/stores/users'
-import { PageHeader, ErrorState, DateRangePicker } from '@/components/shared'
+import { ref, shallowRef, onMounted, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { agentAnalyticsService } from "@/services/api";
+import { useAuthStore } from "@/stores/auth";
+import { useUsersStore } from "@/stores/users";
+import { PageHeader, ErrorState, DateRangePicker } from "@/components/shared";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList
-} from '@/components/ui/command'
+  CommandList,
+} from "@/components/ui/command";
 import {
   Clock,
   CheckCircle,
@@ -26,76 +36,78 @@ import {
   Activity,
   ChevronsUpDown,
   Check,
-  Coffee
-} from '@lucide/vue'
+  Coffee,
+} from "@lucide/vue";
 // Centralized Chart.js setup (registered once)
-import { Line, Bar, Doughnut } from '@/lib/charts'
-import { useDateRange } from '@/composables/useDateRange'
+import { Line, Bar, Doughnut } from "@/lib/charts";
+import { useDateRange } from "@/composables/useDateRange";
 
 interface AgentAnalyticsSummary {
-  total_transfers_handled: number
-  active_transfers: number
-  avg_queue_time_mins: number
-  avg_first_response_mins: number
-  avg_resolution_mins: number
-  transfers_by_source: Record<string, number>
-  total_break_time_mins: number
-  break_count: number
+  total_transfers_handled: number;
+  active_transfers: number;
+  avg_queue_time_mins: number;
+  avg_first_response_mins: number;
+  avg_resolution_mins: number;
+  transfers_by_source: Record<string, number>;
+  total_break_time_mins: number;
+  break_count: number;
 }
 
 interface AgentPerformanceStats {
-  agent_id: string
-  agent_name: string
-  avg_first_response_mins: number
-  avg_resolution_mins: number
-  transfers_handled: number
-  active_transfers: number
-  messages_sent: number
-  total_break_time_mins: number
-  break_count: number
-  is_available: boolean
-  current_break_start?: string
+  agent_id: string;
+  agent_name: string;
+  avg_first_response_mins: number;
+  avg_resolution_mins: number;
+  transfers_handled: number;
+  active_transfers: number;
+  messages_sent: number;
+  total_break_time_mins: number;
+  break_count: number;
+  is_available: boolean;
+  current_break_start?: string;
 }
 
 interface TrendPoint {
-  date: string
-  transfers_handled: number
-  avg_response_mins: number
+  date: string;
+  transfers_handled: number;
+  avg_response_mins: number;
 }
 
 interface AgentAnalyticsResponse {
-  summary: AgentAnalyticsSummary
-  agent_stats?: AgentPerformanceStats[]
-  trend_data: TrendPoint[]
-  my_stats?: AgentPerformanceStats
+  summary: AgentAnalyticsSummary;
+  agent_stats?: AgentPerformanceStats[];
+  trend_data: TrendPoint[];
+  my_stats?: AgentPerformanceStats;
 }
 
-const { t } = useI18n()
-const authStore = useAuthStore()
-const usersStore = useUsersStore()
+const { t } = useI18n();
+const authStore = useAuthStore();
+const usersStore = useUsersStore();
 // Permission-driven (analytics.agents:read), not role-name based — custom
 // roles with the right permission should get the same view.
-const isAdminOrManager = computed(() => authStore.hasPermission('analytics.agents', 'read'))
+const isAdminOrManager = computed(() =>
+  authStore.hasPermission("analytics.agents", "read"),
+);
 
-const analytics = shallowRef<AgentAnalyticsResponse | null>(null)
-const isLoading = ref(true)
-const error = ref<string | null>(null)
+const analytics = shallowRef<AgentAnalyticsResponse | null>(null);
+const isLoading = ref(true);
+const error = ref<string | null>(null);
 
 // Agent filter for admins/managers
 interface Agent {
-  id: string
-  full_name: string
-  role: string
+  id: string;
+  full_name: string;
+  role: string;
 }
-const agents = ref<Agent[]>([])
-const selectedAgentId = ref<string>('all')
-const agentComboboxOpen = ref(false)
+const agents = ref<Agent[]>([]);
+const selectedAgentId = ref<string>("all");
+const agentComboboxOpen = ref(false);
 
 const selectedAgentName = computed(() => {
-  if (selectedAgentId.value === 'all') return t('agentAnalytics.allAgents')
-  const agent = agents.value.find(a => a.id === selectedAgentId.value)
-  return agent?.full_name || t('agentAnalytics.selectAgent')
-})
+  if (selectedAgentId.value === "all") return t("agentAnalytics.allAgents");
+  const agent = agents.value.find((a) => a.id === selectedAgentId.value);
+  return agent?.full_name || t("agentAnalytics.selectAgent");
+});
 
 // Time range filter
 const {
@@ -105,124 +117,135 @@ const {
   dateRange,
   formatDateRangeDisplay,
   applyCustomRange: applyCustomRangeBase,
-} = useDateRange({ storageKey: 'agent_analytics' })
+} = useDateRange({ storageKey: "agent_analytics" });
 
 const formatMinutes = (mins: number): string => {
-  if (!mins || mins === 0) return '0m'
-  if (mins < 60) return `${Math.round(mins)}m`
-  const hours = Math.floor(mins / 60)
-  const remainingMins = Math.round(mins % 60)
-  return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`
-}
+  if (!mins || mins === 0) return "0m";
+  if (mins < 60) return `${Math.round(mins)}m`;
+  const hours = Math.floor(mins / 60);
+  const remainingMins = Math.round(mins % 60);
+  return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
+};
 
 const fetchAgents = async () => {
-  if (!isAdminOrManager.value) return
+  if (!isAdminOrManager.value) return;
   try {
-    await usersStore.fetchUsers()
-    agents.value = usersStore.users
-      .map((u) => ({ id: u.id, full_name: u.full_name, role: u.role?.name || '' }))
+    await usersStore.fetchUsers();
+    agents.value = usersStore.users.map((u) => ({
+      id: u.id,
+      full_name: u.full_name,
+      role: u.role?.name || "",
+    }));
   } catch (error) {
-    console.error('Failed to load agents:', error)
+    console.error("Failed to load agents:", error);
   }
-}
+};
 
 const fetchAnalytics = async () => {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true;
+  error.value = null;
   try {
-    const { from, to } = dateRange.value
-    const params: { from: string; to: string; agent_id?: string } = { from, to }
-    if (isAdminOrManager.value && selectedAgentId.value !== 'all') {
-      params.agent_id = selectedAgentId.value
+    const { from, to } = dateRange.value;
+    const params: { from: string; to: string; agent_id?: string } = {
+      from,
+      to,
+    };
+    if (isAdminOrManager.value && selectedAgentId.value !== "all") {
+      params.agent_id = selectedAgentId.value;
     }
-    const response = await agentAnalyticsService.getSummary(params)
-    const data = response.data.data || response.data
-    analytics.value = data
+    const response = await agentAnalyticsService.getSummary(params);
+    const data = response.data.data || response.data;
+    analytics.value = data;
   } catch (err) {
-    console.error('Failed to load agent analytics:', err)
-    error.value = t('agentAnalytics.errorLoadingAnalytics')
-    analytics.value = null
+    console.error("Failed to load agent analytics:", err);
+    error.value = t("agentAnalytics.errorLoadingAnalytics");
+    analytics.value = null;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const applyCustomRange = () => {
-  applyCustomRangeBase()
-  fetchAnalytics()
-}
+  applyCustomRangeBase();
+  fetchAnalytics();
+};
 
 watch(selectedRange, (newValue) => {
-  if (newValue !== 'custom') {
-    fetchAnalytics()
+  if (newValue !== "custom") {
+    fetchAnalytics();
   }
-})
+});
 
 watch(selectedAgentId, () => {
-  fetchAnalytics()
-})
+  fetchAnalytics();
+});
 
 onMounted(() => {
-  fetchAgents()
-  fetchAnalytics()
-})
+  fetchAgents();
+  fetchAnalytics();
+});
 
 // Chart configurations
 const trendChartData = computed(() => {
   if (!analytics.value?.trend_data?.length) {
     return {
       labels: [],
-      datasets: []
-    }
+      datasets: [],
+    };
   }
 
   return {
-    labels: analytics.value.trend_data.map(t => {
-      const date = new Date(t.date)
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    labels: analytics.value.trend_data.map((t) => {
+      const date = new Date(t.date);
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
     }),
     datasets: [
       {
-        label: t('agentAnalytics.transfersHandled'),
-        data: analytics.value.trend_data.map(d => d.transfers_handled),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        label: t("agentAnalytics.transfersHandled"),
+        data: analytics.value.trend_data.map((d) => d.transfers_handled),
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
         fill: true,
-        tension: 0.3
-      }
-    ]
-  }
-})
+        tension: 0.3,
+      },
+    ],
+  };
+});
 
 const trendChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      display: false
-    }
+      display: false,
+    },
   },
   scales: {
     y: {
       beginAtZero: true,
       ticks: {
-        stepSize: 1
-      }
-    }
-  }
-}
+        stepSize: 1,
+      },
+    },
+  },
+};
 
 const sourceChartData = computed(() => {
   if (!analytics.value?.summary?.transfers_by_source) {
     return {
       labels: [],
-      datasets: []
-    }
+      datasets: [],
+    };
   }
 
-  const sources = analytics.value.summary.transfers_by_source
-  const labels = Object.keys(sources).map(s => s.charAt(0).toUpperCase() + s.slice(1))
-  const data = Object.values(sources)
+  const sources = analytics.value.summary.transfers_by_source;
+  const labels = Object.keys(sources).map(
+    (s) => s.charAt(0).toUpperCase() + s.slice(1),
+  );
+  const data = Object.values(sources);
 
   return {
     labels,
@@ -230,82 +253,86 @@ const sourceChartData = computed(() => {
       {
         data,
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(139, 92, 246, 0.8)'
+          "rgba(59, 130, 246, 0.8)",
+          "rgba(16, 185, 129, 0.8)",
+          "rgba(245, 158, 11, 0.8)",
+          "rgba(139, 92, 246, 0.8)",
         ],
-        borderWidth: 0
-      }
-    ]
-  }
-})
+        borderWidth: 0,
+      },
+    ],
+  };
+});
 
 const sourceChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'bottom' as const
-    }
-  }
-}
+      position: "bottom" as const,
+    },
+  },
+};
 
 const comparisonChartData = computed(() => {
   if (!analytics.value?.agent_stats?.length) {
     return {
       labels: [],
-      datasets: []
-    }
+      datasets: [],
+    };
   }
 
   return {
-    labels: analytics.value.agent_stats.map(a => a.agent_name || 'Unknown'),
+    labels: analytics.value.agent_stats.map((a) => a.agent_name || "Unknown"),
     datasets: [
       {
-        label: t('agentAnalytics.transfersHandled'),
-        data: analytics.value.agent_stats.map(a => a.transfers_handled),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)'
+        label: t("agentAnalytics.transfersHandled"),
+        data: analytics.value.agent_stats.map((a) => a.transfers_handled),
+        backgroundColor: "rgba(59, 130, 246, 0.8)",
       },
       {
-        label: t('agentAnalytics.messagesSent'),
-        data: analytics.value.agent_stats.map(a => a.messages_sent),
-        backgroundColor: 'rgba(16, 185, 129, 0.8)'
-      }
-    ]
-  }
-})
+        label: t("agentAnalytics.messagesSent"),
+        data: analytics.value.agent_stats.map((a) => a.messages_sent),
+        backgroundColor: "rgba(16, 185, 129, 0.8)",
+      },
+    ],
+  };
+});
 
 const comparisonChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'bottom' as const
-    }
+      position: "bottom" as const,
+    },
   },
   scales: {
     y: {
-      beginAtZero: true
-    }
-  }
-}
+      beginAtZero: true,
+    },
+  },
+};
 
 // Stats to display based on role (reserved for future use)
 const _displayStats = computed(() => {
   if (isAdminOrManager.value) {
-    return analytics.value?.summary
+    return analytics.value?.summary;
   }
-  return analytics.value?.my_stats
-})
-void _displayStats.value // Suppress unused warning
+  return analytics.value?.my_stats;
+});
+void _displayStats.value; // Suppress unused warning
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <PageHeader
       :title="$t('agentAnalytics.title')"
-      :description="isAdminOrManager ? $t('agentAnalytics.subtitle') : $t('agentAnalytics.myMetrics')"
+      :description="
+        isAdminOrManager
+          ? $t('agentAnalytics.subtitle')
+          : $t('agentAnalytics.myMetrics')
+      "
       :icon="BarChart3"
       icon-gradient="bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20"
     >
@@ -314,7 +341,12 @@ void _displayStats.value // Suppress unused warning
         <div v-if="isAdminOrManager" class="flex items-center gap-2 mr-4">
           <Popover v-model:open="agentComboboxOpen">
             <PopoverTrigger as-child>
-              <Button variant="outline" role="combobox" :aria-expanded="agentComboboxOpen" class="w-[200px] justify-between">
+              <Button
+                variant="outline"
+                role="combobox"
+                :aria-expanded="agentComboboxOpen"
+                class="w-[200px] justify-between"
+              >
                 <span class="truncate">{{ selectedAgentName }}</span>
                 <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
@@ -323,22 +355,48 @@ void _displayStats.value // Suppress unused warning
               <Command>
                 <CommandInput :placeholder="$t('agentAnalytics.searchAgent')" />
                 <CommandList>
-                  <CommandEmpty>{{ $t('agentAnalytics.noAgentFound') }}</CommandEmpty>
+                  <CommandEmpty>{{
+                    $t("agentAnalytics.noAgentFound")
+                  }}</CommandEmpty>
                   <CommandGroup>
                     <CommandItem
                       value="all"
-                      @select="() => { selectedAgentId = 'all'; agentComboboxOpen = false }"
+                      @select="
+                        () => {
+                          selectedAgentId = 'all';
+                          agentComboboxOpen = false;
+                        }
+                      "
                     >
-                      <Check :class="['mr-2 size-4', selectedAgentId === 'all' ? 'opacity-100' : 'opacity-0']" />
-                      {{ $t('agentAnalytics.allAgents') }}
+                      <Check
+                        :class="[
+                          'mr-2 size-4',
+                          selectedAgentId === 'all'
+                            ? 'opacity-100'
+                            : 'opacity-0',
+                        ]"
+                      />
+                      {{ $t("agentAnalytics.allAgents") }}
                     </CommandItem>
                     <CommandItem
                       v-for="agent in agents"
                       :key="agent.id"
                       :value="agent.full_name"
-                      @select="() => { selectedAgentId = agent.id; agentComboboxOpen = false }"
+                      @select="
+                        () => {
+                          selectedAgentId = agent.id;
+                          agentComboboxOpen = false;
+                        }
+                      "
                     >
-                      <Check :class="['mr-2 size-4', selectedAgentId === agent.id ? 'opacity-100' : 'opacity-0']" />
+                      <Check
+                        :class="[
+                          'mr-2 size-4',
+                          selectedAgentId === agent.id
+                            ? 'opacity-100'
+                            : 'opacity-0',
+                        ]"
+                      />
                       {{ agent.full_name }}
                     </CommandItem>
                   </CommandGroup>
@@ -376,8 +434,14 @@ void _displayStats.value // Suppress unused warning
         <!-- Stats Cards -->
         <div v-if="!error" class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <template v-if="isLoading">
-            <div v-for="i in 5" :key="i" class="rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div
+              v-for="i in 5"
+              :key="i"
+              class="rounded-xl border border-border bg-card p-6"
+            >
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
                 <Skeleton class="h-4 w-24 bg-muted" />
                 <Skeleton class="size-10 rounded-lg bg-muted" />
               </div>
@@ -390,77 +454,131 @@ void _displayStats.value // Suppress unused warning
           <template v-else-if="analytics">
             <!-- Transfers Handled -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.transfersHandled') }}</span>
-                <div class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  $t("agentAnalytics.transfersHandled")
+                }}</span>
+                <div
+                  class="size-10 rounded-lg bg-emerald-500/20 flex items-center justify-center"
+                >
                   <CheckCircle class="size-5 text-emerald-400" />
                 </div>
               </div>
               <div class="pt-2">
                 <div class="text-3xl font-bold text-foreground">
-                  {{ selectedAgentId === 'all'
-                    ? (analytics.summary?.total_transfers_handled ?? 0)
-                    : (analytics.my_stats?.transfers_handled ?? 0) }}
+                  {{
+                    selectedAgentId === "all"
+                      ? (analytics.summary?.total_transfers_handled ?? 0)
+                      : (analytics.my_stats?.transfers_handled ?? 0)
+                  }}
                 </div>
-                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.completedConversations') }}</p>
+                <p class="text-foreground/40 mt-1">
+                  {{ $t("agentAnalytics.completedConversations") }}
+                </p>
               </div>
             </div>
 
             <!-- Active Conversations -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.activeConversations') }}</span>
-                <div class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  $t("agentAnalytics.activeConversations")
+                }}</span>
+                <div
+                  class="size-10 rounded-lg bg-blue-500/20 flex items-center justify-center"
+                >
                   <Activity class="size-5 text-blue-400" />
                 </div>
               </div>
               <div class="pt-2">
                 <div class="text-3xl font-bold text-foreground">
-                  {{ selectedAgentId === 'all'
-                    ? (analytics.summary?.active_transfers ?? 0)
-                    : (analytics.my_stats?.active_transfers ?? 0) }}
+                  {{
+                    selectedAgentId === "all"
+                      ? (analytics.summary?.active_transfers ?? 0)
+                      : (analytics.my_stats?.active_transfers ?? 0)
+                  }}
                 </div>
-                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.currentlyInProgress') }}</p>
+                <p class="text-foreground/40 mt-1">
+                  {{ $t("agentAnalytics.currentlyInProgress") }}
+                </p>
               </div>
             </div>
 
             <!-- Avg Resolution Time -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.avgResolutionTime') }}</span>
-                <div class="size-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  $t("agentAnalytics.avgResolutionTime")
+                }}</span>
+                <div
+                  class="size-10 rounded-lg bg-orange-500/20 flex items-center justify-center"
+                >
                   <Clock class="size-5 text-orange-400" />
                 </div>
               </div>
               <div class="pt-2">
                 <div class="text-3xl font-bold text-foreground">
-                  {{ formatMinutes(selectedAgentId === 'all'
-                    ? (analytics.summary?.avg_resolution_mins ?? 0)
-                    : (analytics.my_stats?.avg_resolution_mins ?? 0)) }}
+                  {{
+                    formatMinutes(
+                      selectedAgentId === "all"
+                        ? (analytics.summary?.avg_resolution_mins ?? 0)
+                        : (analytics.my_stats?.avg_resolution_mins ?? 0),
+                    )
+                  }}
                 </div>
-                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.timeToResolve') }}</p>
+                <p class="text-foreground/40 mt-1">
+                  {{ $t("agentAnalytics.timeToResolve") }}
+                </p>
               </div>
             </div>
 
             <!-- Messages Sent (for specific agent) or Queue Time (for all agents) -->
-            <div v-if="isAdminOrManager && selectedAgentId === 'all'" class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.avgQueueTime') }}</span>
-                <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+            <div
+              v-if="isAdminOrManager && selectedAgentId === 'all'"
+              class="card-depth rounded-xl border border-border bg-card p-6"
+            >
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  $t("agentAnalytics.avgQueueTime")
+                }}</span>
+                <div
+                  class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center"
+                >
                   <Clock class="size-5 text-purple-400" />
                 </div>
               </div>
               <div class="pt-2">
                 <div class="text-3xl font-bold text-foreground">
-                  {{ formatMinutes(analytics.summary?.avg_queue_time_mins || 0) }}
+                  {{
+                    formatMinutes(analytics.summary?.avg_queue_time_mins || 0)
+                  }}
                 </div>
-                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.waitBeforeAssignment') }}</p>
+                <p class="text-foreground/40 mt-1">
+                  {{ $t("agentAnalytics.waitBeforeAssignment") }}
+                </p>
               </div>
             </div>
-            <div v-else class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.messagesSent') }}</span>
-                <div class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+            <div
+              v-else
+              class="card-depth rounded-xl border border-border bg-card p-6"
+            >
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  $t("agentAnalytics.messagesSent")
+                }}</span>
+                <div
+                  class="size-10 rounded-lg bg-purple-500/20 flex items-center justify-center"
+                >
                   <MessageSquare class="size-5 text-purple-400" />
                 </div>
               </div>
@@ -468,24 +586,45 @@ void _displayStats.value // Suppress unused warning
                 <div class="text-3xl font-bold text-foreground">
                   {{ analytics.my_stats?.messages_sent || 0 }}
                 </div>
-                <p class="text-foreground/40 mt-1">{{ $t('agentAnalytics.outgoingMessages') }}</p>
+                <p class="text-foreground/40 mt-1">
+                  {{ $t("agentAnalytics.outgoingMessages") }}
+                </p>
               </div>
             </div>
 
             <!-- Break Time -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ $t('agentAnalytics.breakTime') }}</span>
-                <div class="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  $t("agentAnalytics.breakTime")
+                }}</span>
+                <div
+                  class="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center"
+                >
                   <Coffee class="size-5 text-amber-400" />
                 </div>
               </div>
               <div class="pt-2">
                 <div class="text-3xl font-bold text-foreground">
-                  {{ formatMinutes(analytics.my_stats?.total_break_time_mins ?? analytics.summary?.total_break_time_mins ?? 0) }}
+                  {{
+                    formatMinutes(
+                      analytics.my_stats?.total_break_time_mins ??
+                        analytics.summary?.total_break_time_mins ??
+                        0,
+                    )
+                  }}
                 </div>
                 <p class="text-foreground/40 mt-1">
-                  {{ $t('agentAnalytics.breaksTaken', { count: analytics.my_stats?.break_count ?? analytics.summary?.break_count ?? 0 }) }}
+                  {{
+                    $t("agentAnalytics.breaksTaken", {
+                      count:
+                        analytics.my_stats?.break_count ??
+                        analytics.summary?.break_count ??
+                        0,
+                    })
+                  }}
                 </p>
               </div>
             </div>
@@ -497,8 +636,10 @@ void _displayStats.value // Suppress unused warning
           <!-- Trend Chart -->
           <Card>
             <CardHeader>
-              <CardTitle>{{ $t('agentAnalytics.transferTrends') }}</CardTitle>
-              <CardDescription>{{ $t('agentAnalytics.transfersOverTime') }}</CardDescription>
+              <CardTitle>{{ $t("agentAnalytics.transferTrends") }}</CardTitle>
+              <CardDescription>{{
+                $t("agentAnalytics.transfersOverTime")
+              }}</CardDescription>
             </CardHeader>
             <CardContent>
               <div class="h-64">
@@ -509,8 +650,10 @@ void _displayStats.value // Suppress unused warning
                   <Line :data="trendChartData" :options="trendChartOptions" />
                 </template>
                 <template v-else>
-                  <div class="h-full flex items-center justify-center text-muted-foreground">
-                    {{ $t('agentAnalytics.noDataAvailable') }}
+                  <div
+                    class="h-full flex items-center justify-center text-muted-foreground"
+                  >
+                    {{ $t("agentAnalytics.noDataAvailable") }}
                   </div>
                 </template>
               </div>
@@ -520,8 +663,12 @@ void _displayStats.value // Suppress unused warning
           <!-- Source Distribution -->
           <Card>
             <CardHeader>
-              <CardTitle>{{ $t('agentAnalytics.conversationSources') }}</CardTitle>
-              <CardDescription>{{ $t('agentAnalytics.howConversationsInitiated') }}</CardDescription>
+              <CardTitle>{{
+                $t("agentAnalytics.conversationSources")
+              }}</CardTitle>
+              <CardDescription>{{
+                $t("agentAnalytics.howConversationsInitiated")
+              }}</CardDescription>
             </CardHeader>
             <CardContent>
               <div class="h-64">
@@ -529,11 +676,16 @@ void _displayStats.value // Suppress unused warning
                   <Skeleton class="size-full" />
                 </template>
                 <template v-else-if="sourceChartData.labels.length > 0">
-                  <Doughnut :data="sourceChartData" :options="sourceChartOptions" />
+                  <Doughnut
+                    :data="sourceChartData"
+                    :options="sourceChartOptions"
+                  />
                 </template>
                 <template v-else>
-                  <div class="h-full flex items-center justify-center text-muted-foreground">
-                    {{ $t('agentAnalytics.noDataAvailable') }}
+                  <div
+                    class="h-full flex items-center justify-center text-muted-foreground"
+                  >
+                    {{ $t("agentAnalytics.noDataAvailable") }}
                   </div>
                 </template>
               </div>
@@ -542,11 +694,15 @@ void _displayStats.value // Suppress unused warning
         </div>
 
         <!-- Agent Comparison (Admin/Manager only, when viewing all agents) -->
-        <template v-if="!error && isAdminOrManager && selectedAgentId === 'all'">
+        <template
+          v-if="!error && isAdminOrManager && selectedAgentId === 'all'"
+        >
           <Card>
             <CardHeader>
-              <CardTitle>{{ $t('agentAnalytics.agentComparison') }}</CardTitle>
-              <CardDescription>{{ $t('agentAnalytics.performanceComparison') }}</CardDescription>
+              <CardTitle>{{ $t("agentAnalytics.agentComparison") }}</CardTitle>
+              <CardDescription>{{
+                $t("agentAnalytics.performanceComparison")
+              }}</CardDescription>
             </CardHeader>
             <CardContent>
               <div class="h-64">
@@ -554,11 +710,16 @@ void _displayStats.value // Suppress unused warning
                   <Skeleton class="size-full" />
                 </template>
                 <template v-else-if="comparisonChartData.labels.length > 0">
-                  <Bar :data="comparisonChartData" :options="comparisonChartOptions" />
+                  <Bar
+                    :data="comparisonChartData"
+                    :options="comparisonChartOptions"
+                  />
                 </template>
                 <template v-else>
-                  <div class="h-full flex items-center justify-center text-muted-foreground">
-                    {{ $t('agentAnalytics.noAgentsFound') }}
+                  <div
+                    class="h-full flex items-center justify-center text-muted-foreground"
+                  >
+                    {{ $t("agentAnalytics.noAgentsFound") }}
                   </div>
                 </template>
               </div>

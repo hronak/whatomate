@@ -1,23 +1,38 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { Switch } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, AuditLogPanel, Spinner } from '@/components/shared'
-import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
-import { toast } from 'vue-sonner'
-import { Settings, Bell, Globe, Phone, Upload, Play, Pause, Music } from '@lucide/vue'
-import { usersService, organizationService } from '@/services/api'
-import { useAuthStore } from '@/stores/auth'
+import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PageHeader, AuditLogPanel, Spinner } from "@/components/shared";
+import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
+import { toast } from "vue-sonner";
+import {
+  Settings,
+  Bell,
+  Globe,
+  Phone,
+  Upload,
+  Play,
+  Pause,
+  Music,
+} from "@lucide/vue";
+import { usersService, organizationService } from "@/services/api";
+import { useAuthStore } from "@/stores/auth";
 
-const { t } = useI18n()
-const authStore = useAuthStore()
+const { t } = useI18n();
+const authStore = useAuthStore();
 
 // The active org may be overridden by the X-Organization-ID header
 // (localStorage.selected_organization_id) when a super admin switches orgs.
@@ -25,230 +40,282 @@ const authStore = useAuthStore()
 // too — otherwise the activity log panel would query the user's default org
 // instead of the currently-active one.
 const orgID = computed(
-  () => localStorage.getItem('selected_organization_id') || authStore.organizationId,
-)
-const userID = computed(() => authStore.user?.id || '')
-const canWriteAccounts = computed(() => authStore.hasPermission('accounts', 'write'))
+  () =>
+    localStorage.getItem("selected_organization_id") ||
+    authStore.organizationId,
+);
+const userID = computed(() => authStore.user?.id || "");
+const canWriteAccounts = computed(() =>
+  authStore.hasPermission("accounts", "write"),
+);
 
-const isSubmitting = ref(false)
-const isLoading = ref(true)
+const isSubmitting = ref(false);
+const isLoading = ref(true);
 
 // General Settings
 const generalSettings = ref({
-  organization_name: 'My Organization',
-  default_timezone: 'UTC',
-  date_format: 'YYYY-MM-DD',
+  organization_name: "My Organization",
+  default_timezone: "UTC",
+  date_format: "YYYY-MM-DD",
   mask_phone_numbers: false,
-  meta_app_id: '',
-  meta_config_id: '',
-  meta_app_secret: '',
-  has_meta_app_secret: false
-})
+  meta_app_id: "",
+  meta_config_id: "",
+  meta_app_secret: "",
+  has_meta_app_secret: false,
+});
 
 // Notification Settings
 const notificationSettings = ref({
   email_notifications: true,
   new_message_alerts: true,
-  campaign_updates: true
-})
+  campaign_updates: true,
+});
 
 // Calling Settings
 const callingSettings = ref({
   calling_enabled: false,
   max_call_duration: 300,
   transfer_timeout_secs: 120,
-  hold_music_file: '',
-  ringback_file: ''
-})
+  hold_music_file: "",
+  ringback_file: "",
+});
 
-const isUploadingHoldMusic = ref(false)
-const isUploadingRingback = ref(false)
-const holdMusicInput = ref<HTMLInputElement | null>(null)
-const ringbackInput = ref<HTMLInputElement | null>(null)
-const holdMusicAudio = ref<HTMLAudioElement | null>(null)
-const ringbackAudio = ref<HTMLAudioElement | null>(null)
-const playingHoldMusic = ref(false)
-const playingRingback = ref(false)
+const isUploadingHoldMusic = ref(false);
+const isUploadingRingback = ref(false);
+const holdMusicInput = ref<HTMLInputElement | null>(null);
+const ringbackInput = ref<HTMLInputElement | null>(null);
+const holdMusicAudio = ref<HTMLAudioElement | null>(null);
+const ringbackAudio = ref<HTMLAudioElement | null>(null);
+const playingHoldMusic = ref(false);
+const playingRingback = ref(false);
 
 // Bump these keys to force the AuditLogPanel to remount and refetch after a save.
 // The backend writes audit entries asynchronously in a goroutine, so we delay
 // the remount slightly to give the write time to hit the DB before refetching.
-const generalLogKey = ref(0)
-const notificationLogKey = ref(0)
-const callingLogKey = ref(0)
+const generalLogKey = ref(0);
+const notificationLogKey = ref(0);
+const callingLogKey = ref(0);
 
 function refreshActivityLog(key: typeof generalLogKey) {
-  setTimeout(() => { key.value++ }, 500)
+  setTimeout(() => {
+    key.value++;
+  }, 500);
 }
 
 onMounted(async () => {
   try {
     const [orgResponse, userResponse] = await Promise.all([
       organizationService.getSettings(),
-      usersService.me()
-    ])
+      usersService.me(),
+    ]);
 
     // Organization settings
-    const orgData = orgResponse.data.data || orgResponse.data
+    const orgData = orgResponse.data.data || orgResponse.data;
     if (orgData) {
       generalSettings.value = {
-        organization_name: orgData.name || 'My Organization',
-        default_timezone: orgData.settings?.timezone || 'UTC',
-        date_format: orgData.settings?.date_format || 'YYYY-MM-DD',
+        organization_name: orgData.name || "My Organization",
+        default_timezone: orgData.settings?.timezone || "UTC",
+        date_format: orgData.settings?.date_format || "YYYY-MM-DD",
         mask_phone_numbers: orgData.settings?.mask_phone_numbers || false,
-        meta_app_id: orgData.settings?.meta_app_id || '',
-        meta_config_id: orgData.settings?.meta_config_id || '',
-        meta_app_secret: '',
-        has_meta_app_secret: orgData.settings?.has_meta_app_secret || false
-      }
+        meta_app_id: orgData.settings?.meta_app_id || "",
+        meta_config_id: orgData.settings?.meta_config_id || "",
+        meta_app_secret: "",
+        has_meta_app_secret: orgData.settings?.has_meta_app_secret || false,
+      };
       callingSettings.value = {
         calling_enabled: orgData.settings?.calling_enabled || false,
         max_call_duration: orgData.settings?.max_call_duration || 300,
         transfer_timeout_secs: orgData.settings?.transfer_timeout_secs || 120,
-        hold_music_file: orgData.settings?.hold_music_file || '',
-        ringback_file: orgData.settings?.ringback_file || ''
-      }
+        hold_music_file: orgData.settings?.hold_music_file || "",
+        ringback_file: orgData.settings?.ringback_file || "",
+      };
     }
 
     // User notification settings
-    const user = userResponse.data.data || userResponse.data
+    const user = userResponse.data.data || userResponse.data;
     if (user.settings) {
       notificationSettings.value = {
         email_notifications: user.settings.email_notifications ?? true,
         new_message_alerts: user.settings.new_message_alerts ?? true,
-        campaign_updates: user.settings.campaign_updates ?? true
-      }
+        campaign_updates: user.settings.campaign_updates ?? true,
+      };
     }
   } catch (error) {
-    console.error('Failed to load settings:', error)
+    console.error("Failed to load settings:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 
 async function saveGeneralSettings() {
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
     const payload: any = {
       name: generalSettings.value.organization_name,
       timezone: generalSettings.value.default_timezone,
       date_format: generalSettings.value.date_format,
-      mask_phone_numbers: generalSettings.value.mask_phone_numbers
-    }
+      mask_phone_numbers: generalSettings.value.mask_phone_numbers,
+    };
     if (canWriteAccounts.value) {
-      payload.meta_app_id = generalSettings.value.meta_app_id
-      payload.meta_config_id = generalSettings.value.meta_config_id
+      payload.meta_app_id = generalSettings.value.meta_app_id;
+      payload.meta_config_id = generalSettings.value.meta_config_id;
       if (generalSettings.value.meta_app_secret) {
-        payload.meta_app_secret = generalSettings.value.meta_app_secret
+        payload.meta_app_secret = generalSettings.value.meta_app_secret;
       }
     }
-    await organizationService.updateSettings(payload)
-    toast.success(t('settings.generalSaved'))
+    await organizationService.updateSettings(payload);
+    toast.success(t("settings.generalSaved"));
     // Clear secret input after save
-    generalSettings.value.meta_app_secret = ''
+    generalSettings.value.meta_app_secret = "";
     // Refresh organization settings to update has_meta_app_secret status
-    const orgResponse = await organizationService.getSettings()
-    const orgData = orgResponse.data.data || orgResponse.data
+    const orgResponse = await organizationService.getSettings();
+    const orgData = orgResponse.data.data || orgResponse.data;
     if (orgData) {
-      generalSettings.value.has_meta_app_secret = orgData.settings?.has_meta_app_secret || false
+      generalSettings.value.has_meta_app_secret =
+        orgData.settings?.has_meta_app_secret || false;
     }
-    refreshActivityLog(generalLogKey)
+    refreshActivityLog(generalLogKey);
   } catch (error) {
-    toast.error(t('common.failedSave', { resource: t('resources.settings') }))
+    toast.error(t("common.failedSave", { resource: t("resources.settings") }));
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
 async function saveNotificationSettings() {
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
     await usersService.updateSettings({
       email_notifications: notificationSettings.value.email_notifications,
       new_message_alerts: notificationSettings.value.new_message_alerts,
-      campaign_updates: notificationSettings.value.campaign_updates
-    })
-    toast.success(t('settings.notificationsSaved'))
-    refreshActivityLog(notificationLogKey)
+      campaign_updates: notificationSettings.value.campaign_updates,
+    });
+    toast.success(t("settings.notificationsSaved"));
+    refreshActivityLog(notificationLogKey);
   } catch (error) {
-    toast.error(t('common.failedSave', { resource: t('resources.notificationSettings') }))
+    toast.error(
+      t("common.failedSave", { resource: t("resources.notificationSettings") }),
+    );
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
 async function saveCallingSettings() {
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
     await organizationService.updateSettings({
       calling_enabled: callingSettings.value.calling_enabled,
       max_call_duration: callingSettings.value.max_call_duration,
-      transfer_timeout_secs: callingSettings.value.transfer_timeout_secs
-    })
-    toast.success(t('settings.callingSaved'))
-    refreshActivityLog(callingLogKey)
+      transfer_timeout_secs: callingSettings.value.transfer_timeout_secs,
+    });
+    toast.success(t("settings.callingSaved"));
+    refreshActivityLog(callingLogKey);
   } catch (error) {
-    toast.error(t('common.failedSave', { resource: t('resources.settings') }))
+    toast.error(t("common.failedSave", { resource: t("resources.settings") }));
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
-async function uploadAudio(type: 'hold_music' | 'ringback', event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input?.files?.[0]
-  if (!file) return
+async function uploadAudio(type: "hold_music" | "ringback", event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input?.files?.[0];
+  if (!file) return;
 
-  const isHold = type === 'hold_music'
-  if (isHold) isUploadingHoldMusic.value = true
-  else isUploadingRingback.value = true
+  const isHold = type === "hold_music";
+  if (isHold) isUploadingHoldMusic.value = true;
+  else isUploadingRingback.value = true;
 
   try {
-    const response = await organizationService.uploadOrgAudio(file, type)
-    const data = response.data.data || response.data
-    if (isHold) callingSettings.value.hold_music_file = data.filename
-    else callingSettings.value.ringback_file = data.filename
-    toast.success(t('settings.audioUploaded'))
+    const response = await organizationService.uploadOrgAudio(file, type);
+    const data = response.data.data || response.data;
+    if (isHold) callingSettings.value.hold_music_file = data.filename;
+    else callingSettings.value.ringback_file = data.filename;
+    toast.success(t("settings.audioUploaded"));
   } catch (error) {
-    toast.error(t('settings.audioUploadFailed'))
+    toast.error(t("settings.audioUploadFailed"));
   } finally {
-    if (isHold) isUploadingHoldMusic.value = false
-    else isUploadingRingback.value = false
-    input.value = ''
+    if (isHold) isUploadingHoldMusic.value = false;
+    else isUploadingRingback.value = false;
+    input.value = "";
   }
 }
 
-function togglePlayAudio(type: 'hold_music' | 'ringback') {
-  const isHold = type === 'hold_music'
-  const filename = isHold ? callingSettings.value.hold_music_file : callingSettings.value.ringback_file
-  if (!filename) return
+function togglePlayAudio(type: "hold_music" | "ringback") {
+  const isHold = type === "hold_music";
+  const filename = isHold
+    ? callingSettings.value.hold_music_file
+    : callingSettings.value.ringback_file;
+  if (!filename) return;
 
-  const audioRef = isHold ? holdMusicAudio : ringbackAudio
-  const playingRef = isHold ? playingHoldMusic : playingRingback
+  const audioRef = isHold ? holdMusicAudio : ringbackAudio;
+  const playingRef = isHold ? playingHoldMusic : playingRingback;
 
   if (playingRef.value && audioRef.value) {
-    audioRef.value.pause()
-    audioRef.value.currentTime = 0
-    playingRef.value = false
-    return
+    audioRef.value.pause();
+    audioRef.value.currentTime = 0;
+    playingRef.value = false;
+    return;
   }
 
-  const audio = new Audio(`/api/ivr-flows/audio/${filename}`)
-  audioRef.value = audio
-  playingRef.value = true
-  audio.play()
-  audio.onended = () => { playingRef.value = false }
+  const audio = new Audio(`/api/ivr-flows/audio/${filename}`);
+  audioRef.value = audio;
+  playingRef.value = true;
+  audio.play();
+  audio.onended = () => {
+    playingRef.value = false;
+  };
 }
 </script>
 
 <template>
   <div class="flex flex-col h-full bg-background">
-    <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" :icon="Settings" icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20" /> <ScrollArea class="flex-1"> <div class="p-6 space-y-4 max-w-4xl mx-auto"> <Tabs default-value="general" class="w-full"> <TabsList class="grid w-full grid-cols-3 mb-6 border border-border"> <TabsTrigger value="general" class="data-[state=active]:bg-card text-foreground/50"> <Settings class="size-4 mr-2" /> {{ $t('settings.general') }} </TabsTrigger> <TabsTrigger value="notifications" class="data-[state=active]:bg-card text-foreground/50"> <Bell class="size-4 mr-2" /> {{ $t('settings.notifications') }} </TabsTrigger> <TabsTrigger value="calling" class="data-[state=active]:bg-card text-foreground/50"> <Phone class="size-4 mr-2" /> {{ $t('settings.calling') }} </TabsTrigger> </TabsList> <!-- General Settings Tab --> <TabsContent value="general"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.generalSettings') }}</h3>
-                <p class="text-foreground/40">{{ $t('settings.generalSettingsDesc') }}</p>
+    <PageHeader
+      :title="$t('settings.title')"
+      :subtitle="$t('settings.subtitle')"
+      :icon="Settings"
+      icon-gradient="bg-linear-to-br from-gray-500 to-gray-600 shadow-gray-500/20"
+    />
+    <ScrollArea class="flex-1">
+      <div class="p-6 space-y-4 max-w-4xl mx-auto">
+        <Tabs default-value="general" class="w-full">
+          <TabsList class="grid w-full grid-cols-3 mb-6 border border-border">
+            <TabsTrigger
+              value="general"
+              class="data-[state=active]:bg-card text-foreground/50"
+            >
+              <Settings class="size-4 mr-2" /> {{ $t("settings.general") }}
+            </TabsTrigger>
+            <TabsTrigger
+              value="notifications"
+              class="data-[state=active]:bg-card text-foreground/50"
+            >
+              <Bell class="size-4 mr-2" /> {{ $t("settings.notifications") }}
+            </TabsTrigger>
+            <TabsTrigger
+              value="calling"
+              class="data-[state=active]:bg-card text-foreground/50"
+            >
+              <Phone class="size-4 mr-2" /> {{ $t("settings.calling") }}
+            </TabsTrigger>
+          </TabsList>
+          <!-- General Settings Tab -->
+          <TabsContent value="general">
+            <div class="rounded-xl border border-border bg-card">
+              <div class="p-6 pb-3">
+                <h3 class="text-lg font-semibold text-foreground">
+                  {{ $t("settings.generalSettings") }}
+                </h3>
+                <p class="text-foreground/40">
+                  {{ $t("settings.generalSettingsDesc") }}
+                </p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="space-y-2">
-                  <Label for="org_name" class="text-foreground/70">{{ $t('settings.organizationName') }}</Label>
+                  <Label for="org_name" class="text-foreground/70">{{
+                    $t("settings.organizationName")
+                  }}</Label>
                   <Input
                     id="org_name"
                     v-model="generalSettings.organization_name"
@@ -257,19 +324,37 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-2">
-                    <Label for="timezone" class="text-foreground/70">{{ $t('settings.defaultTimezone') }}</Label> <Select v-model="generalSettings.default_timezone"> <SelectTrigger> <SelectValue :placeholder="$t('settings.selectTimezone')" />
+                    <Label for="timezone" class="text-foreground/70">{{
+                      $t("settings.defaultTimezone")
+                    }}</Label>
+                    <Select v-model="generalSettings.default_timezone">
+                      <SelectTrigger>
+                        <SelectValue
+                          :placeholder="$t('settings.selectTimezone')"
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="UTC">UTC</SelectItem>
-                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                        <SelectItem value="America/New_York"
+                          >Eastern Time</SelectItem
+                        >
+                        <SelectItem value="America/Los_Angeles"
+                          >Pacific Time</SelectItem
+                        >
                         <SelectItem value="Europe/London">London</SelectItem>
                         <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div class="space-y-2">
-                    <Label for="date_format" class="text-foreground/70">{{ $t('settings.dateFormat') }}</Label> <Select v-model="generalSettings.date_format"> <SelectTrigger> <SelectValue :placeholder="$t('settings.selectFormat')" />
+                    <Label for="date_format" class="text-foreground/70">{{
+                      $t("settings.dateFormat")
+                    }}</Label>
+                    <Select v-model="generalSettings.date_format">
+                      <SelectTrigger>
+                        <SelectValue
+                          :placeholder="$t('settings.selectFormat')"
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
@@ -282,22 +367,63 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                 <div class="space-y-2">
                   <Label class="text-foreground/70">
                     <Globe class="size-4 inline mr-1" />
-                    {{ $t('settings.language') }}
+                    {{ $t("settings.language") }}
                   </Label>
                   <LanguageSwitcher class="max-w-xs" />
-                  <p class="text-foreground/40">{{ $t('settings.languageDesc') }}</p>
+                  <p class="text-foreground/40">
+                    {{ $t("settings.languageDesc") }}
+                  </p>
                 </div>
                 <Separator class="bg-muted" />
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="font-medium text-foreground">{{ $t('settings.maskPhoneNumbers') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.maskPhoneNumbersDesc') }}</p> </div> <Switch :checked="generalSettings.mask_phone_numbers" @update:checked="generalSettings.mask_phone_numbers = $event" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <!-- Meta App Credentials Card (Gated on canWriteAccounts) --> <div v-if="canWriteAccounts" class="mt-6 rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.metaAppCredentials') }}</h3>
-                <p class="text-foreground/40">{{ $t('settings.metaAppCredentialsDesc') }}</p>
+                    <p class="font-medium text-foreground">
+                      {{ $t("settings.maskPhoneNumbers") }}
+                    </p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.maskPhoneNumbersDesc") }}
+                    </p>
+                  </div>
+                  <Switch
+                    :checked="generalSettings.mask_phone_numbers"
+                    @update:checked="
+                      generalSettings.mask_phone_numbers = $event
+                    "
+                  />
+                </div>
+                <div class="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
+                    @click="saveGeneralSettings"
+                    :disabled="isSubmitting"
+                  >
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
+                    {{ $t("settings.save") }}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <!-- Meta App Credentials Card (Gated on canWriteAccounts) -->
+            <div
+              v-if="canWriteAccounts"
+              class="mt-6 rounded-xl border border-border bg-card"
+            >
+              <div class="p-6 pb-3">
+                <h3 class="text-lg font-semibold text-foreground">
+                  {{ $t("settings.metaAppCredentials") }}
+                </h3>
+                <p class="text-foreground/40">
+                  {{ $t("settings.metaAppCredentialsDesc") }}
+                </p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-2">
-                    <Label for="meta_app_id" class="text-foreground/70">{{ $t('settings.metaAppId') }}</Label>
+                    <Label for="meta_app_id" class="text-foreground/70">{{
+                      $t("settings.metaAppId")
+                    }}</Label>
                     <Input
                       id="meta_app_id"
                       v-model="generalSettings.meta_app_id"
@@ -305,7 +431,9 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                     />
                   </div>
                   <div class="space-y-2">
-                    <Label for="meta_config_id" class="text-foreground/70">{{ $t('settings.metaConfigId') }}</Label>
+                    <Label for="meta_config_id" class="text-foreground/70">{{
+                      $t("settings.metaConfigId")
+                    }}</Label>
                     <Input
                       id="meta_config_id"
                       v-model="generalSettings.meta_config_id"
@@ -314,48 +442,146 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   </div>
                 </div>
                 <div class="space-y-2">
-                  <Label for="meta_app_secret" class="text-foreground/70">{{ $t('settings.metaAppSecret') }}</Label>
+                  <Label for="meta_app_secret" class="text-foreground/70">{{
+                    $t("settings.metaAppSecret")
+                  }}</Label>
                   <Input
                     id="meta_app_secret"
                     type="password"
                     v-model="generalSettings.meta_app_secret"
-                    :placeholder="generalSettings.has_meta_app_secret ? '••••••••••••' : 'Enter Meta App Secret'" /> </div> <div class="flex justify-end"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveGeneralSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="orgID" class="mt-4"> <AuditLogPanel :key="generalLogKey" resource-type="settings.general" :resource-id="orgID" /> </div> </TabsContent> <!-- Notification Settings Tab --> <TabsContent value="notifications"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.notifications') }}</h3>
-                <p class="text-foreground/40">{{ $t('settings.notificationsDesc') }}</p>
+                    :placeholder="
+                      generalSettings.has_meta_app_secret
+                        ? '••••••••••••'
+                        : 'Enter Meta App Secret'
+                    "
+                  />
+                </div>
+                <div class="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
+                    @click="saveGeneralSettings"
+                    :disabled="isSubmitting"
+                  >
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
+                    {{ $t("settings.save") }}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div v-if="orgID" class="mt-4">
+              <AuditLogPanel
+                :key="generalLogKey"
+                resource-type="settings.general"
+                :resource-id="orgID"
+              />
+            </div>
+          </TabsContent>
+          <!-- Notification Settings Tab -->
+          <TabsContent value="notifications">
+            <div class="rounded-xl border border-border bg-card">
+              <div class="p-6 pb-3">
+                <h3 class="text-lg font-semibold text-foreground">
+                  {{ $t("settings.notifications") }}
+                </h3>
+                <p class="text-foreground/40">
+                  {{ $t("settings.notificationsDesc") }}
+                </p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="font-medium text-foreground">{{ $t('settings.emailNotifications') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.emailNotificationsDesc') }}</p>
+                    <p class="font-medium text-foreground">
+                      {{ $t("settings.emailNotifications") }}
+                    </p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.emailNotificationsDesc") }}
+                    </p>
                   </div>
                   <Switch
                     :checked="notificationSettings.email_notifications"
-                    @update:checked="notificationSettings.email_notifications = $event"
+                    @update:checked="
+                      notificationSettings.email_notifications = $event
+                    "
                   />
                 </div>
                 <Separator class="bg-muted" />
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="font-medium text-foreground">{{ $t('settings.newMessageAlerts') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.newMessageAlertsDesc') }}</p>
+                    <p class="font-medium text-foreground">
+                      {{ $t("settings.newMessageAlerts") }}
+                    </p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.newMessageAlertsDesc") }}
+                    </p>
                   </div>
                   <Switch
                     :checked="notificationSettings.new_message_alerts"
-                    @update:checked="notificationSettings.new_message_alerts = $event"
+                    @update:checked="
+                      notificationSettings.new_message_alerts = $event
+                    "
                   />
                 </div>
                 <Separator class="bg-muted" />
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="font-medium text-foreground">{{ $t('settings.campaignUpdates') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.campaignUpdatesDesc') }}</p> </div> <Switch :checked="notificationSettings.campaign_updates" @update:checked="notificationSettings.campaign_updates = $event" /> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveNotificationSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }} </Button> </div> </div> </div> <div v-if="userID" class="mt-4"> <AuditLogPanel :key="notificationLogKey" resource-type="settings.notification" :resource-id="userID" /> </div> </TabsContent> <!-- Calling Settings Tab --> <TabsContent value="calling"> <div class="rounded-xl border border-border bg-card"> <div class="p-6 pb-3"> <h3 class="text-lg font-semibold text-foreground">{{ $t('settings.callingSettings') }}</h3>
-                <p class="text-foreground/40">{{ $t('settings.callingSettingsDesc') }}</p>
+                    <p class="font-medium text-foreground">
+                      {{ $t("settings.campaignUpdates") }}
+                    </p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.campaignUpdatesDesc") }}
+                    </p>
+                  </div>
+                  <Switch
+                    :checked="notificationSettings.campaign_updates"
+                    @update:checked="
+                      notificationSettings.campaign_updates = $event
+                    "
+                  />
+                </div>
+                <div class="flex justify-end pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
+                    @click="saveNotificationSettings"
+                    :disabled="isSubmitting"
+                  >
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
+                    {{ $t("settings.save") }}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div v-if="userID" class="mt-4">
+              <AuditLogPanel
+                :key="notificationLogKey"
+                resource-type="settings.notification"
+                :resource-id="userID"
+              />
+            </div>
+          </TabsContent>
+          <!-- Calling Settings Tab -->
+          <TabsContent value="calling">
+            <div class="rounded-xl border border-border bg-card">
+              <div class="p-6 pb-3">
+                <h3 class="text-lg font-semibold text-foreground">
+                  {{ $t("settings.callingSettings") }}
+                </h3>
+                <p class="text-foreground/40">
+                  {{ $t("settings.callingSettingsDesc") }}
+                </p>
               </div>
               <div class="p-6 pt-3 space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="font-medium text-foreground">{{ $t('settings.callingEnabled') }}</p>
-                    <p class="text-foreground/40">{{ $t('settings.callingEnabledDesc') }}</p>
+                    <p class="font-medium text-foreground">
+                      {{ $t("settings.callingEnabled") }}
+                    </p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.callingEnabledDesc") }}
+                    </p>
                   </div>
                   <Switch
                     :checked="callingSettings.calling_enabled"
@@ -363,9 +589,17 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                   />
                 </div>
                 <Separator class="bg-muted" />
-                <div class="grid grid-cols-2 gap-4" :class="{ 'opacity-50 pointer-events-none': !callingSettings.calling_enabled }">
+                <div
+                  class="grid grid-cols-2 gap-4"
+                  :class="{
+                    'opacity-50 pointer-events-none':
+                      !callingSettings.calling_enabled,
+                  }"
+                >
                   <div class="space-y-2">
-                    <Label for="max_call_duration" class="text-foreground/70">{{ $t('settings.maxCallDuration') }}</Label>
+                    <Label for="max_call_duration" class="text-foreground/70">{{
+                      $t("settings.maxCallDuration")
+                    }}</Label>
                     <Input
                       id="max_call_duration"
                       type="number"
@@ -373,10 +607,14 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                       :min="60"
                       :max="3600"
                     />
-                    <p class="text-foreground/40">{{ $t('settings.maxCallDurationDesc') }}</p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.maxCallDurationDesc") }}
+                    </p>
                   </div>
                   <div class="space-y-2">
-                    <Label for="transfer_timeout" class="text-foreground/70">{{ $t('settings.transferTimeout') }}</Label>
+                    <Label for="transfer_timeout" class="text-foreground/70">{{
+                      $t("settings.transferTimeout")
+                    }}</Label>
                     <Input
                       id="transfer_timeout"
                       type="number"
@@ -384,54 +622,155 @@ function togglePlayAudio(type: 'hold_music' | 'ringback') {
                       :min="30"
                       :max="600"
                     />
-                    <p class="text-foreground/40">{{ $t('settings.transferTimeoutDesc') }}</p>
+                    <p class="text-foreground/40">
+                      {{ $t("settings.transferTimeoutDesc") }}
+                    </p>
                   </div>
                 </div>
                 <Separator class="bg-muted" />
                 <!-- Hold Music Upload -->
-                <div class="space-y-3" :class="{ 'opacity-50 pointer-events-none': !callingSettings.calling_enabled }">
+                <div
+                  class="space-y-3"
+                  :class="{
+                    'opacity-50 pointer-events-none':
+                      !callingSettings.calling_enabled,
+                  }"
+                >
                   <div>
                     <Label class="text-foreground/70 flex items-center gap-2">
                       <Music class="size-4" />
-                      {{ $t('settings.holdMusic') }} </Label> <p class="text-foreground/40 mt-1">{{ $t('settings.holdMusicDesc') }}</p>
+                      {{ $t("settings.holdMusic") }}
+                    </Label>
+                    <p class="text-foreground/40 mt-1">
+                      {{ $t("settings.holdMusicDesc") }}
+                    </p>
                   </div>
                   <div class="flex items-center gap-3">
                     <span class="text-foreground/50">
-                      {{ callingSettings.hold_music_file ? `${$t('settings.currentFile')}: ${callingSettings.hold_music_file}` : $t('settings.noFileUploaded') }} </span> <Button v-if="callingSettings.hold_music_file" variant="ghost" size="sm" class="size-8 p-0 text-foreground/50 hover:text-foreground" @click="togglePlayAudio('hold_music')"
+                      {{
+                        callingSettings.hold_music_file
+                          ? `${$t("settings.currentFile")}: ${callingSettings.hold_music_file}`
+                          : $t("settings.noFileUploaded")
+                      }}
+                    </span>
+                    <Button
+                      v-if="callingSettings.hold_music_file"
+                      variant="ghost"
+                      size="sm"
+                      class="size-8 p-0 text-foreground/50 hover:text-foreground"
+                      @click="togglePlayAudio('hold_music')"
                     >
                       <Pause v-if="playingHoldMusic" class="size-4" />
                       <Play v-else class="size-4" />
                     </Button>
                   </div>
                   <div class="flex items-center gap-2">
-                    <input ref="holdMusicInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('hold_music', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="holdMusicInput?.click()" :disabled="isUploadingHoldMusic"> <Spinner v-if="isUploadingHoldMusic" class="mr-2 size-4" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }}
+                    <input
+                      ref="holdMusicInput"
+                      type="file"
+                      accept=".ogg,.opus,.mp3,.wav"
+                      class="hidden"
+                      @change="uploadAudio('hold_music', $event)"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
+                      @click="holdMusicInput?.click()"
+                      :disabled="isUploadingHoldMusic"
+                    >
+                      <Spinner
+                        v-if="isUploadingHoldMusic"
+                        class="mr-2 size-4"
+                      />
+                      <Upload v-else class="mr-2 size-4" />
+                      {{ $t("settings.uploadAudio") }}
                     </Button>
-                    <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span>
+                    <span class="text-foreground/30"
+                      >.ogg, .opus, .mp3, .wav (max 5MB)</span
+                    >
                   </div>
                 </div>
                 <!-- Ringback Tone Upload -->
-                <div class="space-y-3" :class="{ 'opacity-50 pointer-events-none': !callingSettings.calling_enabled }">
+                <div
+                  class="space-y-3"
+                  :class="{
+                    'opacity-50 pointer-events-none':
+                      !callingSettings.calling_enabled,
+                  }"
+                >
                   <div>
                     <Label class="text-foreground/70 flex items-center gap-2">
                       <Phone class="size-4" />
-                      {{ $t('settings.ringbackTone') }} </Label> <p class="text-foreground/40 mt-1">{{ $t('settings.ringbackToneDesc') }}</p>
+                      {{ $t("settings.ringbackTone") }}
+                    </Label>
+                    <p class="text-foreground/40 mt-1">
+                      {{ $t("settings.ringbackToneDesc") }}
+                    </p>
                   </div>
                   <div class="flex items-center gap-3">
                     <span class="text-foreground/50">
-                      {{ callingSettings.ringback_file ? `${$t('settings.currentFile')}: ${callingSettings.ringback_file}` : $t('settings.noFileUploaded') }} </span> <Button v-if="callingSettings.ringback_file" variant="ghost" size="sm" class="size-8 p-0 text-foreground/50 hover:text-foreground" @click="togglePlayAudio('ringback')"
+                      {{
+                        callingSettings.ringback_file
+                          ? `${$t("settings.currentFile")}: ${callingSettings.ringback_file}`
+                          : $t("settings.noFileUploaded")
+                      }}
+                    </span>
+                    <Button
+                      v-if="callingSettings.ringback_file"
+                      variant="ghost"
+                      size="sm"
+                      class="size-8 p-0 text-foreground/50 hover:text-foreground"
+                      @click="togglePlayAudio('ringback')"
                     >
                       <Pause v-if="playingRingback" class="size-4" />
                       <Play v-else class="size-4" />
                     </Button>
                   </div>
                   <div class="flex items-center gap-2">
-                    <input ref="ringbackInput" type="file" accept=".ogg,.opus,.mp3,.wav" class="hidden" @change="uploadAudio('ringback', $event)" /> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="ringbackInput?.click()" :disabled="isUploadingRingback"> <Spinner v-if="isUploadingRingback" class="mr-2 size-4" /> <Upload v-else class="mr-2 size-4" /> {{ $t('settings.uploadAudio') }} </Button> <span class="text-foreground/30">.ogg, .opus, .mp3, .wav (max 5MB)</span> </div> </div> <div class="flex justify-end pt-4"> <Button variant="outline" size="sm" class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground" @click="saveCallingSettings" :disabled="isSubmitting"> <Spinner v-if="isSubmitting" class="mr-2 size-4" /> {{ $t('settings.save') }}
+                    <input
+                      ref="ringbackInput"
+                      type="file"
+                      accept=".ogg,.opus,.mp3,.wav"
+                      class="hidden"
+                      @change="uploadAudio('ringback', $event)"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
+                      @click="ringbackInput?.click()"
+                      :disabled="isUploadingRingback"
+                    >
+                      <Spinner v-if="isUploadingRingback" class="mr-2 size-4" />
+                      <Upload v-else class="mr-2 size-4" />
+                      {{ $t("settings.uploadAudio") }}
+                    </Button>
+                    <span class="text-foreground/30"
+                      >.ogg, .opus, .mp3, .wav (max 5MB)</span
+                    >
+                  </div>
+                </div>
+                <div class="flex justify-end pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="bg-card border-border text-foreground/70 hover:bg-accent hover:text-foreground"
+                    @click="saveCallingSettings"
+                    :disabled="isSubmitting"
+                  >
+                    <Spinner v-if="isSubmitting" class="mr-2 size-4" />
+                    {{ $t("settings.save") }}
                   </Button>
                 </div>
               </div>
             </div>
             <div v-if="orgID" class="mt-4">
-              <AuditLogPanel :key="callingLogKey" resource-type="settings.calling" :resource-id="orgID" />
+              <AuditLogPanel
+                :key="callingLogKey"
+                resource-type="settings.calling"
+                :resource-id="orgID"
+              />
             </div>
           </TabsContent>
         </Tabs>

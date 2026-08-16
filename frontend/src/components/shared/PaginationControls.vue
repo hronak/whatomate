@@ -1,44 +1,47 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Button } from '@/components/ui/button'
+import { computed } from "vue";
+import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-} from '@lucide/vue'
-import { getPageNumbers } from '@/composables/usePagination'
+} from "@lucide/vue";
+import { getPageNumbers } from "@/composables/usePagination";
 
 const props = defineProps<{
-  currentPage: number
-  totalPages: number
-  totalItems: number
-  pageSize: number
-  itemName?: string
-}>()
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  itemName?: string;
+}>();
 
 const emit = defineEmits<{
-  'update:currentPage': [page: number]
-}>()
+  "update:currentPage": [page: number];
+}>();
 
 const paginationInfo = computed(() => {
-  const start = (props.currentPage - 1) * props.pageSize + 1
-  const end = Math.min(props.currentPage * props.pageSize, props.totalItems)
-  return { start, end }
-})
+  const start = (props.currentPage - 1) * props.pageSize + 1;
+  const end = Math.min(props.currentPage * props.pageSize, props.totalItems);
+  return { start, end };
+});
 
-const pageNumbers = computed(() => getPageNumbers(props.currentPage, props.totalPages))
+const pageNumbers = computed(() =>
+  getPageNumbers(props.currentPage, props.totalPages),
+);
 
-function goToPage(page: number | '...') {
-  if (page === '...') return
-  emit('update:currentPage', page)
+function goToPage(page: number | "...") {
+  if (page === "...") return;
+  emit("update:currentPage", page);
 }
 </script>
 
 <template>
   <div class="flex items-center justify-between">
     <p class="text-muted-foreground">
-      Showing {{ paginationInfo.start }} to {{ paginationInfo.end }} of {{ totalItems }} {{ itemName || 'items' }}
+      Showing {{ paginationInfo.start }} to {{ paginationInfo.end }} of
+      {{ totalItems }} {{ itemName || "items" }}
     </p>
     <div class="flex items-center gap-1">
       <Button

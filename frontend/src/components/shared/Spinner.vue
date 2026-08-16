@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue"
-import { computed } from "vue"
-import { Loader2 } from "@lucide/vue"
-import { cn } from "@/lib/utils"
+import type { HTMLAttributes } from "vue";
+import { computed } from "vue";
+import { Loader2 } from "@lucide/vue";
+import { cn } from "@/lib/utils";
 
 interface SpinnerProps {
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg";
   // When true, the spinner fills its nearest positioned ancestor and centers itself.
-  overlay?: boolean
-  class?: HTMLAttributes["class"]
+  overlay?: boolean;
+  class?: HTMLAttributes["class"];
 }
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
   size: "md",
   overlay: false,
-})
+});
 
 const sizeClass = computed(() => {
   switch (props.size) {
     case "sm":
-      return "size-4"
+      return "size-4";
     case "lg":
-      return "size-8"
+      return "size-8";
     default:
-      return "size-6"
+      return "size-6";
   }
-})
+});
 </script>
 
 <template>
@@ -33,10 +33,15 @@ const sizeClass = computed(() => {
     v-if="overlay"
     class="absolute inset-0 z-20 flex items-center justify-center"
   >
-    <Loader2 :class="cn('animate-spin text-gray-400 dark:text-white/40', sizeClass, props.class)" />
+    <Loader2
+      :class="
+        cn(
+          'animate-spin text-gray-400 dark:text-white/40',
+          sizeClass,
+          props.class,
+        )
+      "
+    />
   </div>
-  <Loader2
-    v-else
-    :class="cn('animate-spin', sizeClass, props.class)"
-  />
+  <Loader2 v-else :class="cn('animate-spin', sizeClass, props.class)" />
 </template>

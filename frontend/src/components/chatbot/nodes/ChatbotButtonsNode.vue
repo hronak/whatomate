@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { MousePointerClick } from '@lucide/vue'
-import BaseNode from '@/components/calling/nodes/BaseNode.vue'
+import { computed } from "vue";
+import { MousePointerClick } from "@lucide/vue";
+import BaseNode from "@/components/calling/nodes/BaseNode.vue";
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ inheritAttrs: false });
 
-const props = defineProps<{ data: any }>()
+const props = defineProps<{ data: any }>();
 
-const buttons = computed(() => props.data?.config?.buttons || [])
+const buttons = computed(() => props.data?.config?.buttons || []);
 
 const outputHandles = computed(() => {
   // Handle id becomes the edge condition on save. The graph runner routes
@@ -16,19 +16,29 @@ const outputHandles = computed(() => {
   // "default" or "true"), so the handle must carry that prefix too.
   return buttons.value.map((b: any) => ({
     id: `button:${b.id}`,
-    label: b.title || '—',
-    title: b.title || '—',
-  }))
-})
+    label: b.title || "—",
+    title: b.title || "—",
+  }));
+});
 </script>
 
 <template>
-  <BaseNode :label="data?.label || 'Buttons'" header-class="bg-purple-600" :output-handles="outputHandles" :has-input="!data?.isEntryNode">
+  <BaseNode
+    :label="data?.label || 'Buttons'"
+    header-class="bg-purple-600"
+    :output-handles="outputHandles"
+    :has-input="!data?.isEntryNode"
+  >
     <template #icon><MousePointerClick class="size-4" /></template>
     <div v-if="buttons.length > 0" class="space-y-0.5">
-      <div v-for="(btn, idx) in buttons" :key="btn.id" class="flex gap-1" :title="btn.title">
+      <div
+        v-for="(btn, idx) in buttons"
+        :key="btn.id"
+        class="flex gap-1"
+        :title="btn.title"
+      >
         <span class="font-mono font-bold">{{ Number(idx) + 1 }}:</span>
-        <span class="truncate">{{ btn.title || '—' }}</span>
+        <span class="truncate">{{ btn.title || "—" }}</span>
       </div>
     </div>
     <p v-else class="text-muted-foreground italic">No buttons</p>

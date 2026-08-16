@@ -1,29 +1,30 @@
 <script setup lang="ts">
-import { Input } from '@/components/ui/input'
-import { Search, X } from '@lucide/vue'
+import { Input } from "@/components/ui/input";
+import { Search, X } from "@lucide/vue";
 
-const model = defineModel<string>({ default: '' })
+const model = defineModel<string>({ default: "" });
 
-withDefaults(defineProps<{
-  placeholder?: string
-  class?: string
-}>(), {
-  placeholder: 'Search...',
-})
+withDefaults(
+  defineProps<{
+    placeholder?: string;
+    class?: string;
+  }>(),
+  {
+    placeholder: "Search...",
+  },
+);
 
 function clear() {
-  model.value = ''
+  model.value = "";
 }
 </script>
 
 <template>
   <div class="relative" :class="$props.class">
-    <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-    <Input
-      v-model="model"
-      :placeholder="placeholder"
-      class="pl-9 pr-8"
+    <Search
+      class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
     />
+    <Input v-model="model" :placeholder="placeholder" class="pl-9 pr-8" />
     <button
       v-if="model"
       type="button"

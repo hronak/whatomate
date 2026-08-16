@@ -1,305 +1,374 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, SearchInput, DataTable, IconButton, ConfirmDialog, ErrorState, type Column, Spinner } from '@/components/shared'
-import { useCrudState } from '@/composables/useCrudState'
-import { api, templatesService } from '@/services/api'
-import { useOrganizationsStore } from '@/stores/organizations'
-import { toast } from 'vue-sonner'
-import { Plus, RefreshCw, FileText, Pencil, Trash2, MessageSquare, Image, FileIcon, Video } from '@lucide/vue'
-import { getErrorMessage } from '@/lib/api-utils'
-import { useSearchPagination } from '@/composables/useSearchPagination'
-import { getQualityBadgeClass, getQualityRatingLabel } from '@/lib/utils'
+import { ref, onMounted, watch, computed } from "vue";
+import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  PageHeader,
+  SearchInput,
+  DataTable,
+  IconButton,
+  ConfirmDialog,
+  ErrorState,
+  type Column,
+  Spinner,
+} from "@/components/shared";
+import { useCrudState } from "@/composables/useCrudState";
+import { api, templatesService } from "@/services/api";
+import { useOrganizationsStore } from "@/stores/organizations";
+import { toast } from "vue-sonner";
+import {
+  Plus,
+  RefreshCw,
+  FileText,
+  Pencil,
+  Trash2,
+  MessageSquare,
+  Image,
+  FileIcon,
+  Video,
+} from "@lucide/vue";
+import { getErrorMessage } from "@/lib/api-utils";
+import { useSearchPagination } from "@/composables/useSearchPagination";
+import { getQualityBadgeClass, getQualityRatingLabel } from "@/lib/utils";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 interface WhatsAppAccount {
-  id: string
-  name: string
-  phone_id: string
+  id: string;
+  name: string;
+  phone_id: string;
 }
 
 interface Template {
-  id: string
-  whatsapp_account: string
-  meta_template_id: string
-  name: string
-  display_name: string
-  language: string
-  category: string
-  status: string
-  header_type: string
-  header_content: string
-  body_content: string
-  footer_content: string
-  buttons: any[]
-  sample_values: any[]
-  created_at: string
-  updated_at: string
-  quality_rating?: string
+  id: string;
+  whatsapp_account: string;
+  meta_template_id: string;
+  name: string;
+  display_name: string;
+  language: string;
+  category: string;
+  status: string;
+  header_type: string;
+  header_content: string;
+  body_content: string;
+  footer_content: string;
+  buttons: any[];
+  sample_values: any[];
+  created_at: string;
+  updated_at: string;
+  quality_rating?: string;
 }
 
-const organizationsStore = useOrganizationsStore()
+const organizationsStore = useOrganizationsStore();
 
-const templates = ref<Template[]>([])
-const accounts = ref<WhatsAppAccount[]>([])
-const isLoading = ref(true)
-const error = ref<string | null>(null)
-const isSyncing = ref(false)
-const selectedAccount = ref<string>(localStorage.getItem('templates_selected_account') || 'all')
+const templates = ref<Template[]>([]);
+const accounts = ref<WhatsAppAccount[]>([]);
+const isLoading = ref(true);
+const error = ref<string | null>(null);
+const isSyncing = ref(false);
+const selectedAccount = ref<string>(
+  localStorage.getItem("templates_selected_account") || "all",
+);
 
 // Delete dialog state
-const { deleteDialogOpen, itemToDelete: templateToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Template, Record<string, never>>({})
-const isDeleting = ref(false)
+const {
+  deleteDialogOpen,
+  itemToDelete: templateToDelete,
+  openDeleteDialog,
+  closeDeleteDialog,
+} = useCrudState<Template, Record<string, never>>({});
+const isDeleting = ref(false);
 
-const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } = useSearchPagination({
-  fetchFn: () => fetchTemplates(),
-})
+const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } =
+  useSearchPagination({
+    fetchFn: () => fetchTemplates(),
+  });
 
 const columns = computed<Column<Template>[]>(() => [
-  { key: 'name', label: t('templates.name'), sortable: true },
-  { key: 'category', label: t('templates.category'), sortable: true },
-  { key: 'status', label: t('templates.status'), sortable: true },
-  { key: 'quality_rating', label: t('templates.qualityRating'), sortable: true },
-  { key: 'language', label: t('templates.language'), sortable: true },
-  { key: 'header_type', label: t('templates.header') },
-  { key: 'actions', label: '', align: 'right' },
-])
+  { key: "name", label: t("templates.name"), sortable: true },
+  { key: "category", label: t("templates.category"), sortable: true },
+  { key: "status", label: t("templates.status"), sortable: true },
+  {
+    key: "quality_rating",
+    label: t("templates.qualityRating"),
+    sortable: true,
+  },
+  { key: "language", label: t("templates.language"), sortable: true },
+  { key: "header_type", label: t("templates.header") },
+  { key: "actions", label: "", align: "right" },
+]);
 
-const sortKey = ref('name')
-const sortDirection = ref<'asc' | 'desc'>('asc')
+const sortKey = ref("name");
+const sortDirection = ref<"asc" | "desc">("asc");
 
 const languages = [
-  { code: 'af', name: 'Afrikaans' },
-  { code: 'sq', name: 'Albanian' },
-  { code: 'ar', name: 'Arabic' },
-  { code: 'az', name: 'Azerbaijani' },
-  { code: 'bn', name: 'Bengali' },
-  { code: 'bg', name: 'Bulgarian' },
-  { code: 'ca', name: 'Catalan' },
-  { code: 'zh_CN', name: 'Chinese (CHN)' },
-  { code: 'zh_HK', name: 'Chinese (HKG)' },
-  { code: 'zh_TW', name: 'Chinese (TAI)' },
-  { code: 'hr', name: 'Croatian' },
-  { code: 'cs', name: 'Czech' },
-  { code: 'da', name: 'Danish' },
-  { code: 'nl', name: 'Dutch' },
-  { code: 'en', name: 'English' },
-  { code: 'en_GB', name: 'English (UK)' },
-  { code: 'en_US', name: 'English (US)' },
-  { code: 'et', name: 'Estonian' },
-  { code: 'fil', name: 'Filipino' },
-  { code: 'fi', name: 'Finnish' },
-  { code: 'fr', name: 'French' },
-  { code: 'ka', name: 'Georgian' },
-  { code: 'de', name: 'German' },
-  { code: 'el', name: 'Greek' },
-  { code: 'gu', name: 'Gujarati' },
-  { code: 'ha', name: 'Hausa' },
-  { code: 'he', name: 'Hebrew' },
-  { code: 'hi', name: 'Hindi' },
-  { code: 'hu', name: 'Hungarian' },
-  { code: 'id', name: 'Indonesian' },
-  { code: 'ga', name: 'Irish' },
-  { code: 'it', name: 'Italian' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'kn', name: 'Kannada' },
-  { code: 'kk', name: 'Kazakh' },
-  { code: 'rw_RW', name: 'Kinyarwanda' },
-  { code: 'ko', name: 'Korean' },
-  { code: 'ky_KG', name: 'Kyrgyz (Kyrgyzstan)' },
-  { code: 'lo', name: 'Lao' },
-  { code: 'lv', name: 'Latvian' },
-  { code: 'lt', name: 'Lithuanian' },
-  { code: 'mk', name: 'Macedonian' },
-  { code: 'ms', name: 'Malay' },
-  { code: 'ml', name: 'Malayalam' },
-  { code: 'mr', name: 'Marathi' },
-  { code: 'nb', name: 'Norwegian (Bokm\u00e5l)' },
-  { code: 'fa', name: 'Persian' },
-  { code: 'pl', name: 'Polish' },
-  { code: 'pt_BR', name: 'Portuguese (BR)' },
-  { code: 'pt_PT', name: 'Portuguese (POR)' },
-  { code: 'pa', name: 'Punjabi' },
-  { code: 'ro', name: 'Romanian' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'sr', name: 'Serbian' },
-  { code: 'sk', name: 'Slovak' },
-  { code: 'sl', name: 'Slovenian' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'es_AR', name: 'Spanish (ARG)' },
-  { code: 'es_MX', name: 'Spanish (MEX)' },
-  { code: 'es_ES', name: 'Spanish (SPA)' },
-  { code: 'sw', name: 'Swahili' },
-  { code: 'sv', name: 'Swedish' },
-  { code: 'ta', name: 'Tamil' },
-  { code: 'te', name: 'Telugu' },
-  { code: 'th', name: 'Thai' },
-  { code: 'tr', name: 'Turkish' },
-  { code: 'uk', name: 'Ukrainian' },
-  { code: 'ur', name: 'Urdu' },
-  { code: 'uz', name: 'Uzbek' },
-  { code: 'vi', name: 'Vietnamese' },
-  { code: 'zu', name: 'Zulu' },
-]
+  { code: "af", name: "Afrikaans" },
+  { code: "sq", name: "Albanian" },
+  { code: "ar", name: "Arabic" },
+  { code: "az", name: "Azerbaijani" },
+  { code: "bn", name: "Bengali" },
+  { code: "bg", name: "Bulgarian" },
+  { code: "ca", name: "Catalan" },
+  { code: "zh_CN", name: "Chinese (CHN)" },
+  { code: "zh_HK", name: "Chinese (HKG)" },
+  { code: "zh_TW", name: "Chinese (TAI)" },
+  { code: "hr", name: "Croatian" },
+  { code: "cs", name: "Czech" },
+  { code: "da", name: "Danish" },
+  { code: "nl", name: "Dutch" },
+  { code: "en", name: "English" },
+  { code: "en_GB", name: "English (UK)" },
+  { code: "en_US", name: "English (US)" },
+  { code: "et", name: "Estonian" },
+  { code: "fil", name: "Filipino" },
+  { code: "fi", name: "Finnish" },
+  { code: "fr", name: "French" },
+  { code: "ka", name: "Georgian" },
+  { code: "de", name: "German" },
+  { code: "el", name: "Greek" },
+  { code: "gu", name: "Gujarati" },
+  { code: "ha", name: "Hausa" },
+  { code: "he", name: "Hebrew" },
+  { code: "hi", name: "Hindi" },
+  { code: "hu", name: "Hungarian" },
+  { code: "id", name: "Indonesian" },
+  { code: "ga", name: "Irish" },
+  { code: "it", name: "Italian" },
+  { code: "ja", name: "Japanese" },
+  { code: "kn", name: "Kannada" },
+  { code: "kk", name: "Kazakh" },
+  { code: "rw_RW", name: "Kinyarwanda" },
+  { code: "ko", name: "Korean" },
+  { code: "ky_KG", name: "Kyrgyz (Kyrgyzstan)" },
+  { code: "lo", name: "Lao" },
+  { code: "lv", name: "Latvian" },
+  { code: "lt", name: "Lithuanian" },
+  { code: "mk", name: "Macedonian" },
+  { code: "ms", name: "Malay" },
+  { code: "ml", name: "Malayalam" },
+  { code: "mr", name: "Marathi" },
+  { code: "nb", name: "Norwegian (Bokm\u00e5l)" },
+  { code: "fa", name: "Persian" },
+  { code: "pl", name: "Polish" },
+  { code: "pt_BR", name: "Portuguese (BR)" },
+  { code: "pt_PT", name: "Portuguese (POR)" },
+  { code: "pa", name: "Punjabi" },
+  { code: "ro", name: "Romanian" },
+  { code: "ru", name: "Russian" },
+  { code: "sr", name: "Serbian" },
+  { code: "sk", name: "Slovak" },
+  { code: "sl", name: "Slovenian" },
+  { code: "es", name: "Spanish" },
+  { code: "es_AR", name: "Spanish (ARG)" },
+  { code: "es_MX", name: "Spanish (MEX)" },
+  { code: "es_ES", name: "Spanish (SPA)" },
+  { code: "sw", name: "Swahili" },
+  { code: "sv", name: "Swedish" },
+  { code: "ta", name: "Tamil" },
+  { code: "te", name: "Telugu" },
+  { code: "th", name: "Thai" },
+  { code: "tr", name: "Turkish" },
+  { code: "uk", name: "Ukrainian" },
+  { code: "ur", name: "Urdu" },
+  { code: "uz", name: "Uzbek" },
+  { code: "vi", name: "Vietnamese" },
+  { code: "zu", name: "Zulu" },
+];
 
 function getLanguageName(code: string): string {
-  return languages.find(l => l.code === code)?.name || code
+  return languages.find((l) => l.code === code)?.name || code;
 }
 
 // Refetch data when organization changes
-watch(() => organizationsStore.selectedOrgId, async () => {
-  await fetchAccounts()
-  await fetchTemplates()
-})
+watch(
+  () => organizationsStore.selectedOrgId,
+  async () => {
+    await fetchAccounts();
+    await fetchTemplates();
+  },
+);
 
 onMounted(async () => {
-  await fetchAccounts()
-  await fetchTemplates()
-})
+  await fetchAccounts();
+  await fetchTemplates();
+});
 
 async function fetchAccounts() {
   try {
-    const response = await api.get('/accounts')
-    accounts.value = response.data.data?.accounts || []
+    const response = await api.get("/accounts");
+    accounts.value = response.data.data?.accounts || [];
     // Validate stored account still exists, fallback to 'all' if not
-    if (selectedAccount.value !== 'all' && !accounts.value.some(a => a.name === selectedAccount.value)) {
-      selectedAccount.value = 'all'
-      localStorage.setItem('templates_selected_account', 'all')
+    if (
+      selectedAccount.value !== "all" &&
+      !accounts.value.some((a) => a.name === selectedAccount.value)
+    ) {
+      selectedAccount.value = "all";
+      localStorage.setItem("templates_selected_account", "all");
     }
   } catch (error) {
-    console.error('Failed to fetch accounts:', error)
+    console.error("Failed to fetch accounts:", error);
   }
 }
 
-function onAccountChange(value: string | number | bigint | Record<string, any> | null) {
-  if (typeof value !== 'string') return
-  localStorage.setItem('templates_selected_account', value)
-  currentPage.value = 1
-  fetchTemplates()
+function onAccountChange(
+  value: string | number | bigint | Record<string, any> | null,
+) {
+  if (typeof value !== "string") return;
+  localStorage.setItem("templates_selected_account", value);
+  currentPage.value = 1;
+  fetchTemplates();
 }
 
 async function fetchTemplates() {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true;
+  error.value = null;
   try {
     const response = await templatesService.list({
-      account: selectedAccount.value !== 'all' ? selectedAccount.value : undefined,
+      account:
+        selectedAccount.value !== "all" ? selectedAccount.value : undefined,
       search: searchQuery.value || undefined,
       page: currentPage.value,
-      limit: pageSize
-    })
-    const data = (response.data as any).data || response.data
-    templates.value = data.templates || []
-    totalItems.value = data.total ?? templates.value.length
+      limit: pageSize,
+    });
+    const data = (response.data as any).data || response.data;
+    templates.value = data.templates || [];
+    totalItems.value = data.total ?? templates.value.length;
   } catch (err: any) {
-    console.error('Failed to fetch templates:', err)
-    error.value = t('templates.errorLoadingTemplates')
-    toast.error(t('common.failedLoad', { resource: t('resources.templates') }))
-    templates.value = []
+    console.error("Failed to fetch templates:", err);
+    error.value = t("templates.errorLoadingTemplates");
+    toast.error(t("common.failedLoad", { resource: t("resources.templates") }));
+    templates.value = [];
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 async function syncTemplates() {
-  if (!selectedAccount.value || selectedAccount.value === 'all') {
-    toast.error(t('templates.selectAccountFirst'))
-    return
+  if (!selectedAccount.value || selectedAccount.value === "all") {
+    toast.error(t("templates.selectAccountFirst"));
+    return;
   }
 
-  isSyncing.value = true
+  isSyncing.value = true;
   try {
-    const response = await api.post('/templates/sync', {
-      whatsapp_account: selectedAccount.value
-    })
-    toast.success(response.data.data.message || t('templates.syncSuccess'))
-    await fetchTemplates()
+    const response = await api.post("/templates/sync", {
+      whatsapp_account: selectedAccount.value,
+    });
+    toast.success(response.data.data.message || t("templates.syncSuccess"));
+    await fetchTemplates();
   } catch (error) {
-    toast.error(getErrorMessage(error, t('templates.syncFailed')))
+    toast.error(getErrorMessage(error, t("templates.syncFailed")));
   } finally {
-    isSyncing.value = false
+    isSyncing.value = false;
   }
 }
 
 async function confirmDeleteTemplate() {
-  if (!templateToDelete.value) return
+  if (!templateToDelete.value) return;
 
-  isDeleting.value = true
+  isDeleting.value = true;
   try {
-    await api.delete(`/templates/${templateToDelete.value.id}`)
-    toast.success(t('common.deletedSuccess', { resource: t('resources.Template') }))
-    closeDeleteDialog()
-    await fetchTemplates()
+    await api.delete(`/templates/${templateToDelete.value.id}`);
+    toast.success(
+      t("common.deletedSuccess", { resource: t("resources.Template") }),
+    );
+    closeDeleteDialog();
+    await fetchTemplates();
   } catch (error) {
-    toast.error(getErrorMessage(error, t('common.failedDelete', { resource: t('resources.template') })))
+    toast.error(
+      getErrorMessage(
+        error,
+        t("common.failedDelete", { resource: t("resources.template") }),
+      ),
+    );
   } finally {
-    isDeleting.value = false
+    isDeleting.value = false;
   }
 }
 
 function getStatusBadgeClass(status: string) {
   switch (status) {
-    case 'APPROVED':
-      return 'bg-success text-success'
-    case 'PENDING':
-      return 'bg-yellow-100 text-yellow-300 dark:bg-yellow-900 dark:text-yellow-800'
-    case 'REJECTED':
-      return 'bg-destructive text-destructive'
-    case 'DRAFT':
-      return 'bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800'
+    case "APPROVED":
+      return "bg-success text-success";
+    case "PENDING":
+      return "bg-yellow-100 text-yellow-300 dark:bg-yellow-900 dark:text-yellow-800";
+    case "REJECTED":
+      return "bg-destructive text-destructive";
+    case "DRAFT":
+      return "bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800";
     default:
-      return 'bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800'
+      return "bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800";
   }
 }
 
 function getCategoryBadgeClass(category: string) {
   switch (category) {
-    case 'UTILITY':
-      return 'bg-info text-info'
-    case 'MARKETING':
-      return 'bg-purple-100 text-purple-300 dark:bg-purple-900 dark:text-purple-800'
-    case 'AUTHENTICATION':
-      return 'bg-orange-100 text-orange-300 dark:bg-orange-900 dark:text-orange-800'
+    case "UTILITY":
+      return "bg-info text-info";
+    case "MARKETING":
+      return "bg-purple-100 text-purple-300 dark:bg-purple-900 dark:text-purple-800";
+    case "AUTHENTICATION":
+      return "bg-orange-100 text-orange-300 dark:bg-orange-900 dark:text-orange-800";
     default:
-      return 'bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800'
+      return "bg-gray-800 text-gray-300 dark:bg-gray-100 dark:text-gray-800";
   }
 }
 
 function getHeaderIcon(type: string) {
   switch (type) {
-    case 'IMAGE':
-      return Image
-    case 'VIDEO':
-      return Video
-    case 'DOCUMENT':
-      return FileIcon
+    case "IMAGE":
+      return Image;
+    case "VIDEO":
+      return Video;
+    case "DOCUMENT":
+      return FileIcon;
     default:
-      return MessageSquare
+      return MessageSquare;
   }
 }
 </script>
 
 <template>
   <div class="flex flex-col h-full bg-background">
-    <PageHeader :title="$t('templates.title')" :subtitle="$t('templates.subtitle')" :icon="FileText" icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20">
+    <PageHeader
+      :title="$t('templates.title')"
+      :subtitle="$t('templates.subtitle')"
+      :icon="FileText"
+      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
+    >
       <template #actions>
-        <Button variant="outline" size="sm" @click="syncTemplates" :disabled="isSyncing || !selectedAccount || selectedAccount === 'all'">
+        <Button
+          variant="outline"
+          size="sm"
+          @click="syncTemplates"
+          :disabled="isSyncing || !selectedAccount || selectedAccount === 'all'"
+        >
           <Spinner v-if="isSyncing" class="size-4 mr-2" />
           <RefreshCw v-else class="size-4 mr-2" />
-          {{ $t('templates.syncFromMeta') }}
+          {{ $t("templates.syncFromMeta") }}
         </Button>
         <RouterLink to="/templates/new">
           <Button variant="outline" size="sm">
             <Plus class="size-4 mr-2" />
-            {{ $t('templates.createTemplate') }}
+            {{ $t("templates.createTemplate") }}
           </Button>
         </RouterLink>
       </template>
@@ -319,25 +388,44 @@ function getHeaderIcon(type: string) {
             <CardHeader>
               <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle>{{ $t('templates.yourTemplates') }}</CardTitle>
-                  <CardDescription>{{ $t('templates.yourTemplatesDesc') }}</CardDescription>
+                  <CardTitle>{{ $t("templates.yourTemplates") }}</CardTitle>
+                  <CardDescription>{{
+                    $t("templates.yourTemplatesDesc")
+                  }}</CardDescription>
                 </div>
                 <div class="flex items-center gap-4 flex-wrap">
                   <div class="flex items-center gap-2">
-                    <Label class="text-muted-foreground">{{ $t('templates.account') }}:</Label>
-                    <Select v-model="selectedAccount" @update:model-value="onAccountChange">
+                    <Label class="text-muted-foreground"
+                      >{{ $t("templates.account") }}:</Label
+                    >
+                    <Select
+                      v-model="selectedAccount"
+                      @update:model-value="onAccountChange"
+                    >
                       <SelectTrigger class="w-[180px]">
-                        <SelectValue :placeholder="$t('templates.allAccounts')" />
+                        <SelectValue
+                          :placeholder="$t('templates.allAccounts')"
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">{{ $t('templates.allAccounts') }}</SelectItem>
-                        <SelectItem v-for="account in accounts" :key="account.id" :value="account.name">
+                        <SelectItem value="all">{{
+                          $t("templates.allAccounts")
+                        }}</SelectItem>
+                        <SelectItem
+                          v-for="account in accounts"
+                          :key="account.id"
+                          :value="account.name"
+                        >
                           {{ account.name }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <SearchInput v-model="searchQuery" :placeholder="$t('templates.searchTemplates') + '...'" class="w-64" />
+                  <SearchInput
+                    v-model="searchQuery"
+                    :placeholder="$t('templates.searchTemplates') + '...'"
+                    class="w-64"
+                  />
                 </div>
               </div>
             </CardHeader>
@@ -359,9 +447,16 @@ function getHeaderIcon(type: string) {
                 v-model:sort-direction="sortDirection"
               >
                 <template #cell-name="{ item: template }">
-                  <RouterLink :to="`/templates/${template.id}`" class="text-inherit no-underline hover:opacity-80">
-                    <span class="font-medium">{{ template.display_name || template.name }}</span>
-                    <p class="font-mono text-muted-foreground">{{ template.name }}</p>
+                  <RouterLink
+                    :to="`/templates/${template.id}`"
+                    class="text-inherit no-underline hover:opacity-80"
+                  >
+                    <span class="font-medium">{{
+                      template.display_name || template.name
+                    }}</span>
+                    <p class="font-mono text-muted-foreground">
+                      {{ template.name }}
+                    </p>
                   </RouterLink>
                 </template>
                 <template #cell-category="{ item: template }">
@@ -375,18 +470,28 @@ function getHeaderIcon(type: string) {
                   </Badge>
                 </template>
                 <template #cell-quality_rating="{ item: template }">
-                  <Badge v-if="template.quality_rating" :class="getQualityBadgeClass(template.quality_rating)">
+                  <Badge
+                    v-if="template.quality_rating"
+                    :class="getQualityBadgeClass(template.quality_rating)"
+                  >
                     {{ getQualityRatingLabel(template.quality_rating, t) }}
                   </Badge>
                   <span v-else class="text-muted-foreground">—</span>
                 </template>
                 <template #cell-language="{ item: template }">
-                  <span class="text-muted-foreground">{{ getLanguageName(template.language) }}</span>
+                  <span class="text-muted-foreground">{{
+                    getLanguageName(template.language)
+                  }}</span>
                 </template>
                 <template #cell-header_type="{ item: template }">
                   <div class="flex items-center gap-1">
-                    <component :is="getHeaderIcon(template.header_type)" class="size-4 text-muted-foreground" />
-                    <span class="text-muted-foreground">{{ template.header_type || 'NONE' }}</span>
+                    <component
+                      :is="getHeaderIcon(template.header_type)"
+                      class="size-4 text-muted-foreground"
+                    />
+                    <span class="text-muted-foreground">{{
+                      template.header_type || "NONE"
+                    }}</span>
                   </div>
                 </template>
                 <template #cell-actions="{ item: template }">
@@ -408,14 +513,19 @@ function getHeaderIcon(type: string) {
                 </template>
                 <template #empty-action>
                   <div class="flex items-center justify-center gap-2">
-                    <Button variant="outline" size="sm" @click="syncTemplates" :disabled="!selectedAccount || selectedAccount === 'all'">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      @click="syncTemplates"
+                      :disabled="!selectedAccount || selectedAccount === 'all'"
+                    >
                       <RefreshCw class="size-4 mr-2" />
-                      {{ $t('templates.syncFromMeta') }}
+                      {{ $t("templates.syncFromMeta") }}
                     </Button>
                     <RouterLink to="/templates/new">
                       <Button variant="outline" size="sm">
                         <Plus class="size-4 mr-2" />
-                        {{ $t('templates.createTemplate') }}
+                        {{ $t("templates.createTemplate") }}
                       </Button>
                     </RouterLink>
                   </div>

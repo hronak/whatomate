@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { FlowStep, FlowData } from '@/types/flow-preview'
-import type { ChatFlowGraph } from '@/services/api'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import InteractivePreview from './InteractivePreview.vue'
+import { ref, computed, watch } from "vue";
+import type { FlowStep, FlowData } from "@/types/flow-preview";
+import type { ChatFlowGraph } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import InteractivePreview from "./InteractivePreview.vue";
 import {
   MessageSquare,
   Users,
@@ -16,87 +16,102 @@ import {
   Clock,
   StopCircle,
   Variable,
-} from '@lucide/vue'
+} from "@lucide/vue";
 
 const props = defineProps<{
-  steps: FlowStep[]
-  flowData: Partial<FlowData>
-  selectedStep: FlowStep | null
-  selectedStepIndex: number | null
-  listPickerOpen: boolean
-  teams: Array<{ id: string; name: string }>
-  initialMode?: 'edit' | 'preview'
+  steps: FlowStep[];
+  flowData: Partial<FlowData>;
+  selectedStep: FlowStep | null;
+  selectedStepIndex: number | null;
+  listPickerOpen: boolean;
+  teams: Array<{ id: string; name: string }>;
+  initialMode?: "edit" | "preview";
   // v2 graph used by the interactive simulator. Edit-mode static preview
   // continues to read selectedStep for the per-step WhatsApp render.
-  graph?: ChatFlowGraph | null
-}>()
+  graph?: ChatFlowGraph | null;
+}>();
 
 const emit = defineEmits<{
-  'update:listPickerOpen': [value: boolean]
-}>()
+  "update:listPickerOpen": [value: boolean];
+}>();
 
-const mode = ref<'edit' | 'preview'>(props.initialMode || 'edit')
+const mode = ref<"edit" | "preview">(props.initialMode || "edit");
 
-watch(() => props.initialMode, (newMode) => {
-  if (newMode) {
-    mode.value = newMode
-  }
-})
+watch(
+  () => props.initialMode,
+  (newMode) => {
+    if (newMode) {
+      mode.value = newMode;
+    }
+  },
+);
 
 // Step types that don't render as a WhatsApp message bubble — control-
 // flow nodes that operate on session state without sending anything.
-const controlNodeMeta: Record<string, { label: string; icon: any; description: string }> = {
+const controlNodeMeta: Record<
+  string,
+  { label: string; icon: any; description: string }
+> = {
   condition: {
-    label: 'Condition',
+    label: "Condition",
     icon: GitBranch,
-    description: 'Branches the flow based on a boolean expression. No WhatsApp message is sent.',
+    description:
+      "Branches the flow based on a boolean expression. No WhatsApp message is sent.",
   },
   timing: {
-    label: 'Timing',
+    label: "Timing",
     icon: Clock,
-    description: 'Routes between in-hours and out-of-hours based on the schedule. No WhatsApp message is sent.',
+    description:
+      "Routes between in-hours and out-of-hours based on the schedule. No WhatsApp message is sent.",
   },
   goto_flow: {
-    label: 'Go to Flow',
+    label: "Go to Flow",
     icon: ExternalLink,
-    description: 'Jumps execution to another flow. Session variables carry forward.',
+    description:
+      "Jumps execution to another flow. Session variables carry forward.",
   },
   set_variable: {
-    label: 'Set Variable',
+    label: "Set Variable",
     icon: Variable,
-    description: 'Assigns values to session variables. No WhatsApp message is sent.',
+    description:
+      "Assigns values to session variables. No WhatsApp message is sent.",
   },
   end: {
-    label: 'End',
+    label: "End",
     icon: StopCircle,
-    description: 'Terminates the flow. The optional message below renders in WhatsApp on completion.',
+    description:
+      "Terminates the flow. The optional message below renders in WhatsApp on completion.",
   },
-}
+};
 
 const controlNodeInfo = computed(() => {
-  if (!props.selectedStep) return null
-  return controlNodeMeta[props.selectedStep.message_type] || null
-})
+  if (!props.selectedStep) return null;
+  return controlNodeMeta[props.selectedStep.message_type] || null;
+});
 
 // Sync listPickerOpen with parent
 const localListPickerOpen = computed({
   get: () => props.listPickerOpen,
-  set: (val) => emit('update:listPickerOpen', val)
-})
+  set: (val) => emit("update:listPickerOpen", val),
+});
 </script>
 
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden">
     <!-- Mode Toggle Header -->
-    <div class="px-4 py-2 border-b bg-white dark:bg-[#111b21] flex items-center justify-between">
-      <div class="flex items-center gap-1 p-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+    <div
+      class="px-4 py-2 border-b bg-white dark:bg-[#111b21] flex items-center justify-between"
+    >
+      <div
+        class="flex items-center gap-1 p-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg"
+      >
         <Button
           variant="ghost"
           size="sm"
           class="h-7 px-3 rounded-md transition-colors"
           :class="{
             'bg-white dark:bg-gray-700 shadow-xs': mode === 'edit',
-            'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'edit'
+            'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'edit',
           }"
           @click="mode = 'edit'"
         >
@@ -109,7 +124,7 @@ const localListPickerOpen = computed({
           class="h-7 px-3 rounded-md transition-colors"
           :class="{
             'bg-white dark:bg-gray-700 shadow-xs': mode === 'preview',
-            'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'preview'
+            'hover:bg-gray-50 dark:hover:bg-gray-700': mode !== 'preview',
           }"
           @click="mode = 'preview'"
         >
@@ -119,7 +134,11 @@ const localListPickerOpen = computed({
       </div>
 
       <div class="text-gray-500 dark:text-gray-400">
-        {{ mode === 'edit' ? 'Read-only preview of selected step' : 'Interactive flow simulation' }}
+        {{
+          mode === "edit"
+            ? "Read-only preview of selected step"
+            : "Interactive flow simulation"
+        }}
       </div>
     </div>
 
@@ -134,9 +153,16 @@ const localListPickerOpen = computed({
             v-if="selectedStep && controlNodeInfo"
             class="flex-1 flex items-center justify-center p-6 bg-[#efeae2] dark:bg-[#0b141a]"
           >
-            <div class="max-w-sm w-full bg-white dark:bg-[#202c33] rounded-xl shadow-md p-6 text-center">
-              <div class="inline-flex items-center justify-center size-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
-                <component :is="controlNodeInfo.icon" class="size-6 text-gray-600 dark:text-gray-300" />
+            <div
+              class="max-w-sm w-full bg-white dark:bg-[#202c33] rounded-xl shadow-md p-6 text-center"
+            >
+              <div
+                class="inline-flex items-center justify-center size-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-3"
+              >
+                <component
+                  :is="controlNodeInfo.icon"
+                  class="size-6 text-gray-600 dark:text-gray-300"
+                />
               </div>
               <p class="font-medium text-gray-900 dark:text-gray-100 mb-1">
                 {{ controlNodeInfo.label }}
@@ -144,7 +170,10 @@ const localListPickerOpen = computed({
               <p class="text-gray-500 dark:text-gray-400 mb-4">
                 {{ controlNodeInfo.description }}
               </p>
-              <p v-if="selectedStep.message" class="text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 rounded px-3 py-2 text-left">
+              <p
+                v-if="selectedStep.message"
+                class="text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 rounded px-3 py-2 text-left"
+              >
                 {{ selectedStep.message }}
               </p>
               <p v-else class="text-gray-400 italic">
@@ -154,143 +183,278 @@ const localListPickerOpen = computed({
           </div>
 
           <!-- WhatsApp Static Preview (for message / buttons / api_fetch / whatsapp_flow / transfer) -->
-          <div v-else class="flex-1 flex items-center justify-center p-4 bg-[#efeae2] dark:bg-[#0b141a] overflow-auto">
+          <div
+            v-else
+            class="flex-1 flex items-center justify-center p-4 bg-[#efeae2] dark:bg-[#0b141a] overflow-auto"
+          >
             <div v-if="selectedStep" class="w-full max-w-sm">
               <!-- Phone Frame -->
-              <div class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] relative">
+              <div
+                class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] relative"
+              >
                 <!-- Chat Header -->
-                <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0">
-                  <div class="size-10 rounded-full bg-white/20 flex items-center justify-center">
+                <div
+                  class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0"
+                >
+                  <div
+                    class="size-10 rounded-full bg-white/20 flex items-center justify-center"
+                  >
                     <MessageSquare class="size-5" />
                   </div>
                   <div>
-                    <p class="font-medium">{{ flowData.name || 'WhatsApp Preview' }}</p>
-                    <p class="text-white/70">Step {{ (selectedStepIndex ?? 0) + 1 }}: {{ selectedStep.step_name }}</p>
+                    <p class="font-medium">
+                      {{ flowData.name || "WhatsApp Preview" }}
+                    </p>
+                    <p class="text-white/70">
+                      Step {{ (selectedStepIndex ?? 0) + 1 }}:
+                      {{ selectedStep.step_name }}
+                    </p>
                   </div>
                 </div>
 
                 <!-- Chat Messages -->
                 <ScrollArea class="flex-1 p-4">
                   <div class="space-y-3">
-                  <!-- Bot Message Bubble -->
-                  <div class="flex justify-start">
-                    <div class="max-w-[85%]">
-                      <div class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none shadow-xs p-3">
-                        <p v-if="selectedStep.message" class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ selectedStep.message }}</p>
-                        <p v-else class="text-gray-400 italic">No message configured</p>
-                        <p class="text-gray-400 text-right mt-1">12:00 PM</p>
-                      </div>
-
-                      <!-- Interactive Buttons (up to 3) -->
-                      <div v-if="selectedStep.message_type === 'buttons' && selectedStep.buttons.length > 0 && selectedStep.buttons.length <= 3" class="mt-1 space-y-1">
-                        <button
-                          v-for="(btn, idx) in selectedStep.buttons"
-                          :key="idx"
-                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
+                    <!-- Bot Message Bubble -->
+                    <div class="flex justify-start">
+                      <div class="max-w-[85%]">
+                        <div
+                          class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none shadow-xs p-3"
                         >
-                          <ExternalLink v-if="btn.type === 'url'" class="size-4" />
-                          {{ btn.title || `Option ${idx + 1}` }}
-                        </button>
-                      </div>
+                          <p
+                            v-if="selectedStep.message"
+                            class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap"
+                          >
+                            {{ selectedStep.message }}
+                          </p>
+                          <p v-else class="text-gray-400 italic">
+                            No message configured
+                          </p>
+                          <p class="text-gray-400 text-right mt-1">12:00 PM</p>
+                        </div>
 
-                      <!-- List Button (more than 3 options) -->
-                      <div v-if="selectedStep.message_type === 'buttons' && selectedStep.buttons.length > 3" class="mt-1">
-                        <button
-                          class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
-                          @click="localListPickerOpen = !localListPickerOpen"
+                        <!-- Interactive Buttons (up to 3) -->
+                        <div
+                          v-if="
+                            selectedStep.message_type === 'buttons' &&
+                            selectedStep.buttons.length > 0 &&
+                            selectedStep.buttons.length <= 3
+                          "
+                          class="mt-1 space-y-1"
                         >
-                          <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
-                          </svg>
-                          Select an option
-                        </button>
+                          <button
+                            v-for="(btn, idx) in selectedStep.buttons"
+                            :key="idx"
+                            class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
+                          >
+                            <ExternalLink
+                              v-if="btn.type === 'url'"
+                              class="size-4"
+                            />
+                            {{ btn.title || `Option ${idx + 1}` }}
+                          </button>
+                        </div>
+
+                        <!-- List Button (more than 3 options) -->
+                        <div
+                          v-if="
+                            selectedStep.message_type === 'buttons' &&
+                            selectedStep.buttons.length > 3
+                          "
+                          class="mt-1"
+                        >
+                          <button
+                            class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
+                            @click="localListPickerOpen = !localListPickerOpen"
+                          >
+                            <svg
+                              class="size-4"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path
+                                d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"
+                              />
+                            </svg>
+                            Select an option
+                          </button>
+                        </div>
+
+                        <!-- WhatsApp Flow Button -->
+                        <div
+                          v-if="selectedStep.message_type === 'whatsapp_flow'"
+                          class="mt-1"
+                        >
+                          <button
+                            class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0"
+                          >
+                            {{
+                              selectedStep.input_config?.flow_cta || "Open Form"
+                            }}
+                          </button>
+                        </div>
                       </div>
+                    </div>
 
-                      <!-- WhatsApp Flow Button -->
-                      <div v-if="selectedStep.message_type === 'whatsapp_flow'" class="mt-1">
-                        <button class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0">
-                          {{ selectedStep.input_config?.flow_cta || 'Open Form' }}
-                        </button>
+                    <!-- User Response Placeholder -->
+                    <div
+                      v-if="selectedStep.message_type !== 'transfer'"
+                      class="flex justify-end"
+                    >
+                      <div class="max-w-[85%]">
+                        <div
+                          class="bg-[#005c4b] dark:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3"
+                        >
+                          <p class="text-gray-800 dark:text-gray-200 italic">
+                            <template v-if="selectedStep.input_type === 'none'">
+                              (No response needed)
+                            </template>
+                            <template
+                              v-else-if="
+                                selectedStep.message_type === 'buttons'
+                              "
+                            >
+                              User taps a button...
+                            </template>
+                            <template
+                              v-else-if="
+                                selectedStep.message_type === 'whatsapp_flow'
+                              "
+                            >
+                              User completes form...
+                            </template>
+                            <template v-else>
+                              User types {{ selectedStep.input_type }}...
+                            </template>
+                          </p>
+                          <p
+                            class="text-gray-500 dark:text-gray-400 text-right mt-1 flex items-center justify-end gap-1"
+                          >
+                            12:01 PM
+                            <svg
+                              class="size-4 text-[#53bdeb]"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path
+                                d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                              />
+                            </svg>
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- User Response Placeholder -->
-                  <div v-if="selectedStep.message_type !== 'transfer'" class="flex justify-end">
-                    <div class="max-w-[85%]">
-                      <div class="bg-[#005c4b] dark:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3">
-                        <p class="text-gray-800 dark:text-gray-200 italic">
-                          <template v-if="selectedStep.input_type === 'none'">
-                            (No response needed)
-                          </template>
-                          <template v-else-if="selectedStep.message_type === 'buttons'">
-                            User taps a button...
-                          </template>
-                          <template v-else-if="selectedStep.message_type === 'whatsapp_flow'">
-                            User completes form...
-                          </template>
-                          <template v-else>
-                            User types {{ selectedStep.input_type }}...
-                          </template>
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 text-right mt-1 flex items-center justify-end gap-1">
-                          12:01 PM
-                          <svg class="size-4 text-[#53bdeb]" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                          </svg>
-                        </p>
+                    <!-- Store As Info -->
+                    <div
+                      v-if="selectedStep.store_as"
+                      class="flex justify-center"
+                    >
+                      <div
+                        class="bg-white/80 dark:bg-[#202c33]/80 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full"
+                      >
+                        Response saved as
+                        <code class="font-mono text-[#00a884]">{{
+                          selectedStep.store_as
+                        }}</code>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Store As Info -->
-                  <div v-if="selectedStep.store_as" class="flex justify-center">
-                    <div class="bg-white/80 dark:bg-[#202c33]/80 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full">
-                      Response saved as <code class="font-mono text-[#00a884]">{{ selectedStep.store_as }}</code>
+                    <!-- Transfer System Message -->
+                    <div
+                      v-if="selectedStep.message_type === 'transfer'"
+                      class="flex justify-center"
+                    >
+                      <div
+                        class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                      >
+                        <Users class="size-3" />
+                        <span
+                          >Conversation transferred to
+                          {{
+                            selectedStep?.transfer_config?.team_id ===
+                            "_general"
+                              ? "General Queue"
+                              : teams.find(
+                                  (t) =>
+                                    t.id ===
+                                    selectedStep?.transfer_config?.team_id,
+                                )?.name || "Team"
+                          }}</span
+                        >
+                      </div>
                     </div>
-                  </div>
 
-                  <!-- Transfer System Message -->
-                  <div v-if="selectedStep.message_type === 'transfer'" class="flex justify-center">
-                    <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                      <Users class="size-3" />
-                      <span>Conversation transferred to {{ selectedStep?.transfer_config?.team_id === '_general' ? 'General Queue' : teams.find(t => t.id === selectedStep?.transfer_config?.team_id)?.name || 'Team' }}</span>
+                    <!-- API Info -->
+                    <div
+                      v-if="selectedStep.message_type === 'api_fetch'"
+                      class="flex justify-center"
+                    >
+                      <div
+                        class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                      >
+                        <Globe class="size-3" />
+                        <span>Message populated from API</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <!-- API Info -->
-                  <div v-if="selectedStep.message_type === 'api_fetch'" class="flex justify-center">
-                    <div class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                      <Globe class="size-3" />
-                      <span>Message populated from API</span>
-                    </div>
-                  </div>
                   </div>
                 </ScrollArea>
 
                 <!-- Input Bar -->
-                <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0">
-                  <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
+                <div
+                  class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0"
+                >
+                  <div
+                    class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2"
+                  >
                     <p class="text-gray-400">Type a message</p>
                   </div>
-                  <div class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                    <svg class="size-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 14.5L7 10l1.4-1.4 3.6 3.6 3.6-3.6L17 10l-5 4.5z"/>
+                  <div
+                    class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
+                  >
+                    <svg
+                      class="size-5 text-white"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M12 14.5L7 10l1.4-1.4 3.6 3.6 3.6-3.6L17 10l-5 4.5z"
+                      />
                     </svg>
                   </div>
                 </div>
 
                 <!-- List Picker Overlay -->
                 <div
-                  v-if="localListPickerOpen && selectedStep.message_type === 'buttons' && selectedStep.buttons.length > 3"
+                  v-if="
+                    localListPickerOpen &&
+                    selectedStep.message_type === 'buttons' &&
+                    selectedStep.buttons.length > 3
+                  "
                   class="absolute inset-0 z-10 flex flex-col"
                 >
-                  <div class="flex-1 bg-black/50" @click="localListPickerOpen = false"></div>
-                  <div class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden">
-                    <div class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between">
-                      <button class="p-1 hover:bg-white/10 rounded" @click="localListPickerOpen = false">
-                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M6 18L18 6M6 6l12 12"/>
+                  <div
+                    class="flex-1 bg-black/50"
+                    @click="localListPickerOpen = false"
+                  ></div>
+                  <div
+                    class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden"
+                  >
+                    <div
+                      class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between"
+                    >
+                      <button
+                        class="p-1 hover:bg-white/10 rounded"
+                        @click="localListPickerOpen = false"
+                      >
+                        <svg
+                          class="size-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                       <span class="font-medium">Select an option</span>
@@ -303,14 +467,27 @@ const localListPickerOpen = computed({
                         class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer flex items-center gap-3"
                         @click="localListPickerOpen = false"
                       >
-                        <div v-if="btn.type === 'url'" class="size-5 flex items-center justify-center shrink-0 text-[#00a884]">
+                        <div
+                          v-if="btn.type === 'url'"
+                          class="size-5 flex items-center justify-center shrink-0 text-[#00a884]"
+                        >
                           <ExternalLink class="size-4" />
                         </div>
-                        <div v-else class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0">
-                          <span class="text-[#00a884] font-medium">{{ idx + 1 }}</span>
+                        <div
+                          v-else
+                          class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
+                        >
+                          <span class="text-[#00a884] font-medium">{{
+                            idx + 1
+                          }}</span>
                         </div>
-                        <span class="text-gray-800 dark:text-gray-200 flex-1">{{ btn.title || `Option ${idx + 1}` }}</span>
-                        <ExternalLink v-if="btn.type === 'url'" class="size-3 text-gray-400" />
+                        <span class="text-gray-800 dark:text-gray-200 flex-1">{{
+                          btn.title || `Option ${idx + 1}`
+                        }}</span>
+                        <ExternalLink
+                          v-if="btn.type === 'url'"
+                          class="size-3 text-gray-400"
+                        />
                       </div>
                     </div>
                   </div>
@@ -318,28 +495,53 @@ const localListPickerOpen = computed({
               </div>
             </div>
 
-            <div v-else class="w-full max-w-sm flex flex-col items-center justify-center">
+            <div
+              v-else
+              class="w-full max-w-sm flex flex-col items-center justify-center"
+            >
               <!-- Empty State Phone Frame -->
-              <div class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] w-full">
-                <div class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0">
-                  <div class="size-10 rounded-full bg-white/20 flex items-center justify-center">
+              <div
+                class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] w-full"
+              >
+                <div
+                  class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0"
+                >
+                  <div
+                    class="size-10 rounded-full bg-white/20 flex items-center justify-center"
+                  >
                     <MessageSquare class="size-5" />
                   </div>
                   <div>
-                    <p class="font-medium">{{ flowData.name || 'WhatsApp Preview' }}</p>
+                    <p class="font-medium">
+                      {{ flowData.name || "WhatsApp Preview" }}
+                    </p>
                     <p class="text-white/70">Select a step</p>
                   </div>
                 </div>
                 <div class="flex-1 flex items-center justify-center">
-                  <p class="text-gray-500 dark:text-gray-400">Select a step to view preview</p>
+                  <p class="text-gray-500 dark:text-gray-400">
+                    Select a step to view preview
+                  </p>
                 </div>
-                <div class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0">
-                  <div class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2">
+                <div
+                  class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0"
+                >
+                  <div
+                    class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2"
+                  >
                     <p class="text-gray-400">Type a message</p>
                   </div>
-                  <div class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                    <svg class="size-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 14.5L7 10l1.4-1.4 3.6 3.6 3.6-3.6L17 10l-5 4.5z"/>
+                  <div
+                    class="size-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
+                  >
+                    <svg
+                      class="size-5 text-white"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M12 14.5L7 10l1.4-1.4 3.6 3.6 3.6-3.6L17 10l-5 4.5z"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -351,10 +553,7 @@ const localListPickerOpen = computed({
 
       <!-- Preview Mode: Interactive Simulation (graph-based) -->
       <template v-else>
-        <InteractivePreview
-          :graph="graph || null"
-          :flow-data="flowData"
-        />
+        <InteractivePreview :graph="graph || null" :flow-data="flowData" />
       </template>
     </div>
   </div>

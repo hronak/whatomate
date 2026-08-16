@@ -1,112 +1,113 @@
 <script setup lang="ts">
-import { Spinner } from '@/components/shared'
-import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Spinner } from "@/components/shared";
+import { ref, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
-import { templatesService } from '@/services/api'
-import { LayoutTemplate, Search } from '@lucide/vue'
+} from "@/components/ui/popover";
+import { templatesService } from "@/services/api";
+import { LayoutTemplate, Search } from "@lucide/vue";
 
 const props = defineProps<{
-  selectedAccount?: string | null
-}>()
+  selectedAccount?: string | null;
+}>();
 
 const emit = defineEmits<{
-  (e: 'select-with-params', template: any, paramNames: string[]): void
-}>()
+  (e: "select-with-params", template: any, paramNames: string[]): void;
+}>();
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const isOpen = ref(false)
-const isLoading = ref(false)
-const searchQuery = ref('')
-const templates = ref<any[]>([])
+const isOpen = ref(false);
+const isLoading = ref(false);
+const searchQuery = ref("");
+const templates = ref<any[]>([]);
 
 // Fetch templates when popover opens
 watch(isOpen, async (open) => {
   if (open) {
-    await fetchTemplates()
+    await fetchTemplates();
   }
-})
+});
 
 async function fetchTemplates() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const params: any = { status: 'APPROVED' }
+    const params: any = { status: "APPROVED" };
     if (props.selectedAccount) {
-      params.account = props.selectedAccount
+      params.account = props.selectedAccount;
     }
-    const response = await templatesService.list(params)
-    const data = (response.data as any).data || response.data
-    templates.value = data.templates || []
+    const response = await templatesService.list(params);
+    const data = (response.data as any).data || response.data;
+    templates.value = data.templates || [];
   } catch (error) {
-    console.error('Failed to fetch templates:', error)
+    console.error("Failed to fetch templates:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 const filteredTemplates = computed(() => {
-  if (!searchQuery.value) return templates.value
-  const query = searchQuery.value.toLowerCase()
-  return templates.value.filter((tpl: any) =>
-    (tpl.display_name || '').toLowerCase().includes(query) ||
-    (tpl.name || '').toLowerCase().includes(query) ||
-    getBodyContent(tpl).toLowerCase().includes(query)
-  )
-})
+  if (!searchQuery.value) return templates.value;
+  const query = searchQuery.value.toLowerCase();
+  return templates.value.filter(
+    (tpl: any) =>
+      (tpl.display_name || "").toLowerCase().includes(query) ||
+      (tpl.name || "").toLowerCase().includes(query) ||
+      getBodyContent(tpl).toLowerCase().includes(query),
+  );
+});
 
 // Group by category
 const groupedTemplates = computed(() => {
-  const groups: Record<string, any[]> = {}
+  const groups: Record<string, any[]> = {};
   for (const tpl of filteredTemplates.value) {
-    const category = tpl.category || 'OTHER'
+    const category = tpl.category || "OTHER";
     if (!groups[category]) {
-      groups[category] = []
+      groups[category] = [];
     }
-    groups[category].push(tpl)
+    groups[category].push(tpl);
   }
-  return groups
-})
+  return groups;
+});
 
 const categoryLabels: Record<string, string> = {
-  UTILITY: 'Utility',
-  MARKETING: 'Marketing',
-  AUTHENTICATION: 'Authentication',
-  OTHER: 'Other'
-}
+  UTILITY: "Utility",
+  MARKETING: "Marketing",
+  AUTHENTICATION: "Authentication",
+  OTHER: "Other",
+};
 
 function getCategoryLabel(category: string): string {
-  return categoryLabels[category] || category
+  return categoryLabels[category] || category;
 }
 
 function getBodyContent(tpl: any): string {
-  return tpl.body_content || ''
+  return tpl.body_content || "";
 }
 
 function extractParamNames(content: string): string[] {
-  const matches = content.match(/\{\{([^}]+)\}\}/g)
-  if (!matches) return []
-  return [...new Set(matches.map(m => m.replace(/\{\{|\}\}/g, '').trim()))]
+  const matches = content.match(/\{\{([^}]+)\}\}/g);
+  if (!matches) return [];
+  return [...new Set(matches.map((m) => m.replace(/\{\{|\}\}/g, "").trim()))];
 }
 
 function selectTemplate(tpl: any) {
   // Emit body variables only — the header variable is handled separately by
   // the parent so positional {{1}} in header and body don't collapse into a
   // single input (Meta indexes positional vars per component).
-  const bodyNames = extractParamNames(getBodyContent(tpl))
+  const bodyNames = extractParamNames(getBodyContent(tpl));
 
   // Always show preview dialog before sending
-  emit('select-with-params', tpl, bodyNames)
+  emit("select-with-params", tpl, bodyNames);
 
-  isOpen.value = false
-  searchQuery.value = ''
+  isOpen.value = false;
+  searchQuery.value = "";
 }
 </script>
 
@@ -120,7 +121,9 @@ function selectTemplate(tpl: any) {
     <PopoverContent side="top" align="start" class="w-80 p-0">
       <div class="p-3 border-b">
         <div class="relative">
-          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Search
+            class="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+          />
           <Input
             v-model="searchQuery"
             :placeholder="t('chat.searchTemplates')"
@@ -135,13 +138,21 @@ function selectTemplate(tpl: any) {
           <Spinner class="size-6 text-muted-foreground" />
         </div>
 
-        <div v-else-if="filteredTemplates.length === 0" class="py-8 text-center text-muted-foreground">
-          {{ t('chat.noApprovedTemplates') }}
+        <div
+          v-else-if="filteredTemplates.length === 0"
+          class="py-8 text-center text-muted-foreground"
+        >
+          {{ t("chat.noApprovedTemplates") }}
         </div>
 
         <div v-else class="p-2">
-          <template v-for="(items, category) in groupedTemplates" :key="category">
-            <div class="px-2 py-1.5 font-medium text-muted-foreground uppercase tracking-wider">
+          <template
+            v-for="(items, category) in groupedTemplates"
+            :key="category"
+          >
+            <div
+              class="px-2 py-1.5 font-medium text-muted-foreground uppercase tracking-wider"
+            >
               {{ getCategoryLabel(category as string) }}
             </div>
             <button
@@ -151,8 +162,12 @@ function selectTemplate(tpl: any) {
               class="w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors"
             >
               <div class="flex items-center justify-between">
-                <span class="font-medium">{{ tpl.display_name || tpl.name }}</span>
-                <span class="text-muted-foreground">{{ tpl.language || '' }}</span>
+                <span class="font-medium">{{
+                  tpl.display_name || tpl.name
+                }}</span>
+                <span class="text-muted-foreground">{{
+                  tpl.language || ""
+                }}</span>
               </div>
               <p class="text-muted-foreground mt-0.5 line-clamp-2">
                 {{ getBodyContent(tpl) }}

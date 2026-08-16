@@ -1,21 +1,21 @@
-import { ref, type Ref } from 'vue'
+import { ref, type Ref } from "vue";
 
 export interface CrudState<T, F> {
-  items: Ref<T[]>
-  isLoading: Ref<boolean>
-  isSubmitting: Ref<boolean>
-  isDialogOpen: Ref<boolean>
-  editingItem: Ref<T | null>
-  deleteDialogOpen: Ref<boolean>
-  itemToDelete: Ref<T | null>
-  formData: Ref<F>
-  searchQuery: Ref<string>
-  openCreateDialog: () => void
-  openEditDialog: (item: T, mapToForm: (item: T) => F) => void
-  openDeleteDialog: (item: T) => void
-  closeDialog: () => void
-  closeDeleteDialog: () => void
-  resetForm: () => void
+  items: Ref<T[]>;
+  isLoading: Ref<boolean>;
+  isSubmitting: Ref<boolean>;
+  isDialogOpen: Ref<boolean>;
+  editingItem: Ref<T | null>;
+  deleteDialogOpen: Ref<boolean>;
+  itemToDelete: Ref<T | null>;
+  formData: Ref<F>;
+  searchQuery: Ref<string>;
+  openCreateDialog: () => void;
+  openEditDialog: (item: T, mapToForm: (item: T) => F) => void;
+  openDeleteDialog: (item: T) => void;
+  closeDialog: () => void;
+  closeDeleteDialog: () => void;
+  resetForm: () => void;
 }
 
 /**
@@ -35,34 +35,34 @@ export interface CrudState<T, F> {
  * ```
  */
 export function useCrudState<T, F extends Record<string, any>>(
-  defaultFormData: F
+  defaultFormData: F,
 ): CrudState<T, F> {
   // Core state
-  const items = ref<T[]>([]) as Ref<T[]>
-  const isLoading = ref(true)
-  const isSubmitting = ref(false)
+  const items = ref<T[]>([]) as Ref<T[]>;
+  const isLoading = ref(true);
+  const isSubmitting = ref(false);
 
   // Dialog state
-  const isDialogOpen = ref(false)
-  const editingItem = ref<T | null>(null) as Ref<T | null>
+  const isDialogOpen = ref(false);
+  const editingItem = ref<T | null>(null) as Ref<T | null>;
 
   // Delete dialog state
-  const deleteDialogOpen = ref(false)
-  const itemToDelete = ref<T | null>(null) as Ref<T | null>
+  const deleteDialogOpen = ref(false);
+  const itemToDelete = ref<T | null>(null) as Ref<T | null>;
 
   // Form state
-  const formData = ref<F>({ ...defaultFormData }) as Ref<F>
+  const formData = ref<F>({ ...defaultFormData }) as Ref<F>;
 
   // Search state
-  const searchQuery = ref('')
+  const searchQuery = ref("");
 
   /**
    * Opens the create dialog with default form values
    */
   function openCreateDialog(): void {
-    editingItem.value = null
-    formData.value = { ...defaultFormData } as F
-    isDialogOpen.value = true
+    editingItem.value = null;
+    formData.value = { ...defaultFormData } as F;
+    isDialogOpen.value = true;
   }
 
   /**
@@ -71,9 +71,9 @@ export function useCrudState<T, F extends Record<string, any>>(
    * @param mapToForm - Function to map item properties to form data
    */
   function openEditDialog(item: T, mapToForm: (item: T) => F): void {
-    editingItem.value = item
-    formData.value = { ...mapToForm(item) } as F
-    isDialogOpen.value = true
+    editingItem.value = item;
+    formData.value = { ...mapToForm(item) } as F;
+    isDialogOpen.value = true;
   }
 
   /**
@@ -81,32 +81,32 @@ export function useCrudState<T, F extends Record<string, any>>(
    * @param item - The item to potentially delete
    */
   function openDeleteDialog(item: T): void {
-    itemToDelete.value = item
-    deleteDialogOpen.value = true
+    itemToDelete.value = item;
+    deleteDialogOpen.value = true;
   }
 
   /**
    * Closes the create/edit dialog, resets the editing item and form data
    */
   function closeDialog(): void {
-    isDialogOpen.value = false
-    editingItem.value = null
-    formData.value = { ...defaultFormData } as F
+    isDialogOpen.value = false;
+    editingItem.value = null;
+    formData.value = { ...defaultFormData } as F;
   }
 
   /**
    * Closes the delete confirmation dialog
    */
   function closeDeleteDialog(): void {
-    deleteDialogOpen.value = false
-    itemToDelete.value = null
+    deleteDialogOpen.value = false;
+    itemToDelete.value = null;
   }
 
   /**
    * Resets the form to default values
    */
   function resetForm(): void {
-    formData.value = { ...defaultFormData } as F
+    formData.value = { ...defaultFormData } as F;
   }
 
   return {
@@ -127,5 +127,5 @@ export function useCrudState<T, F extends Record<string, any>>(
     closeDialog,
     closeDeleteDialog,
     resetForm,
-  }
+  };
 }

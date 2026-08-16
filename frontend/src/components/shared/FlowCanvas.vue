@@ -1,37 +1,43 @@
 <script setup lang="ts">
-import { VueFlow, MarkerType } from '@vue-flow/core'
-import type { Node, Edge, NodeMouseEvent, Connection, EdgeMouseEvent } from '@vue-flow/core'
-import { Background } from '@vue-flow/background'
-import { Controls } from '@vue-flow/controls'
-import { MiniMap } from '@vue-flow/minimap'
+import { VueFlow, MarkerType } from "@vue-flow/core";
+import type {
+  Node,
+  Edge,
+  NodeMouseEvent,
+  Connection,
+  EdgeMouseEvent,
+} from "@vue-flow/core";
+import { Background } from "@vue-flow/background";
+import { Controls } from "@vue-flow/controls";
+import { MiniMap } from "@vue-flow/minimap";
 
 withDefaults(
   defineProps<{
-    nodes?: Node[]
-    edges?: Edge[]
-    nodeTypes: Record<string, any>
-    edgeType?: string
-    fitViewOnInit?: boolean
-    controlsPosition?: string
+    nodes?: Node[];
+    edges?: Edge[];
+    nodeTypes: Record<string, any>;
+    edgeType?: string;
+    fitViewOnInit?: boolean;
+    controlsPosition?: string;
   }>(),
   {
-    edgeType: 'smoothstep',
+    edgeType: "smoothstep",
     fitViewOnInit: false,
-    controlsPosition: 'bottom-left',
+    controlsPosition: "bottom-left",
   },
-)
+);
 
 defineEmits<{
-  'update:nodes': [nodes: Node[]]
-  'update:edges': [edges: Edge[]]
-  'node-click': [event: NodeMouseEvent]
-  'pane-click': []
-  'connect': [connection: Connection]
-  'edge-click': [event: EdgeMouseEvent]
-  'edge-update': [payload: { edge: Edge; connection: Connection }]
-  'node-drag-stop': []
-  'edges-change': [changes: any[]]
-}>()
+  "update:nodes": [nodes: Node[]];
+  "update:edges": [edges: Edge[]];
+  "node-click": [event: NodeMouseEvent];
+  "pane-click": [];
+  connect: [connection: Connection];
+  "edge-click": [event: EdgeMouseEvent];
+  "edge-update": [payload: { edge: Edge; connection: Connection }];
+  "node-drag-stop": [];
+  "edges-change": [changes: any[]];
+}>();
 </script>
 
 <template>
@@ -52,7 +58,11 @@ defineEmits<{
       :min-zoom="0.2"
       :max-zoom="2"
       :delete-key-code="['Backspace', 'Delete']"
-      :default-edge-options="{ type: edgeType, animated: false, markerEnd: MarkerType.ArrowClosed }"
+      :default-edge-options="{
+        type: edgeType,
+        animated: false,
+        markerEnd: MarkerType.ArrowClosed,
+      }"
       :fit-view-on-init="fitViewOnInit"
       class="h-full"
       @update:nodes="$emit('update:nodes', $event)"
@@ -79,10 +89,10 @@ defineEmits<{
 </template>
 
 <style>
-@import '@vue-flow/core/dist/style.css';
-@import '@vue-flow/core/dist/theme-default.css';
-@import '@vue-flow/controls/dist/style.css';
-@import '@vue-flow/minimap/dist/style.css';
+@import "@vue-flow/core/dist/style.css";
+@import "@vue-flow/core/dist/theme-default.css";
+@import "@vue-flow/controls/dist/style.css";
+@import "@vue-flow/minimap/dist/style.css";
 
 .vue-flow__edge-textbg {
   fill: transparent;

@@ -1,107 +1,179 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PageHeader, SearchInput, ConfirmDialog, DataTable, IconButton, ErrorState, type Column } from '@/components/shared'
-import { cannedResponsesService, type CannedResponse } from '@/services/api'
-import { useCrudState } from '@/composables/useCrudState'
-import { toast } from 'vue-sonner'
-import { Plus, MessageSquareText, Pencil, Trash2, Copy } from '@lucide/vue'
-import { getErrorMessage } from '@/lib/api-utils'
-import { CANNED_RESPONSE_CATEGORIES, getLabelFromValue } from '@/lib/constants'
-import { useSearchPagination } from '@/composables/useSearchPagination'
+import { ref, onMounted, watch, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  PageHeader,
+  SearchInput,
+  ConfirmDialog,
+  DataTable,
+  IconButton,
+  ErrorState,
+  type Column,
+} from "@/components/shared";
+import { cannedResponsesService, type CannedResponse } from "@/services/api";
+import { useCrudState } from "@/composables/useCrudState";
+import { toast } from "vue-sonner";
+import { Plus, MessageSquareText, Pencil, Trash2, Copy } from "@lucide/vue";
+import { getErrorMessage } from "@/lib/api-utils";
+import { CANNED_RESPONSE_CATEGORIES, getLabelFromValue } from "@/lib/constants";
+import { useSearchPagination } from "@/composables/useSearchPagination";
 
-const { t } = useI18n()
-const router = useRouter()
+const { t } = useI18n();
+const router = useRouter();
 
-const cannedResponses = ref<CannedResponse[]>([])
-const isLoading = ref(false)
-const error = ref<string | null>(null)
+const cannedResponses = ref<CannedResponse[]>([]);
+const isLoading = ref(false);
+const error = ref<string | null>(null);
 const {
-  deleteDialogOpen, itemToDelete: responseToDelete,
-  openDeleteDialog, closeDeleteDialog,
-} = useCrudState<CannedResponse, Record<string, never>>({})
-const selectedCategory = ref('all')
+  deleteDialogOpen,
+  itemToDelete: responseToDelete,
+  openDeleteDialog,
+  closeDeleteDialog,
+} = useCrudState<CannedResponse, Record<string, never>>({});
+const selectedCategory = ref("all");
 
-const breadcrumbs = computed(() => [{ label: t('nav.settings'), href: '/settings' }, { label: t('cannedResponses.title') }])
+const breadcrumbs = computed(() => [
+  { label: t("nav.settings"), href: "/settings" },
+  { label: t("cannedResponses.title") },
+]);
 
 const columns = computed<Column<CannedResponse>[]>(() => [
-  { key: 'name', label: t('cannedResponses.name'), sortable: true },
-  { key: 'category', label: t('cannedResponses.category'), sortable: true },
-  { key: 'content', label: t('cannedResponses.content') },
-  { key: 'usage_count', label: t('cannedResponses.used'), sortable: true },
-  { key: 'status', label: t('cannedResponses.status'), sortable: true, sortKey: 'is_active' },
-  { key: 'actions', label: t('common.actions'), align: 'right' },
-])
+  { key: "name", label: t("cannedResponses.name"), sortable: true },
+  { key: "category", label: t("cannedResponses.category"), sortable: true },
+  { key: "content", label: t("cannedResponses.content") },
+  { key: "usage_count", label: t("cannedResponses.used"), sortable: true },
+  {
+    key: "status",
+    label: t("cannedResponses.status"),
+    sortable: true,
+    sortKey: "is_active",
+  },
+  { key: "actions", label: t("common.actions"), align: "right" },
+]);
 
-const sortKey = ref('name')
-const sortDirection = ref<'asc' | 'desc'>('asc')
+const sortKey = ref("name");
+const sortDirection = ref<"asc" | "desc">("asc");
 
 async function fetchItems() {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true;
+  error.value = null;
   try {
     const response = await cannedResponsesService.list({
       search: searchQuery.value || undefined,
-      category: selectedCategory.value !== 'all' ? selectedCategory.value : undefined,
+      category:
+        selectedCategory.value !== "all" ? selectedCategory.value : undefined,
       page: currentPage.value,
-      limit: pageSize
-    })
-    const data = (response.data as any).data || response.data
-    cannedResponses.value = data.canned_responses || []
-    totalItems.value = data.total ?? cannedResponses.value.length
+      limit: pageSize,
+    });
+    const data = (response.data as any).data || response.data;
+    cannedResponses.value = data.canned_responses || [];
+    totalItems.value = data.total ?? cannedResponses.value.length;
   } catch (err) {
-    toast.error(getErrorMessage(err, t('common.failedLoad', { resource: t('resources.cannedResponses') })))
-    error.value = t('cannedResponses.errorLoadingResponses')
+    toast.error(
+      getErrorMessage(
+        err,
+        t("common.failedLoad", { resource: t("resources.cannedResponses") }),
+      ),
+    );
+    error.value = t("cannedResponses.errorLoadingResponses");
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
-const { searchQuery, currentPage, totalItems, pageSize, handlePageChange, resetAndFetch } = useSearchPagination({
+const {
+  searchQuery,
+  currentPage,
+  totalItems,
+  pageSize,
+  handlePageChange,
+  resetAndFetch,
+} = useSearchPagination({
   fetchFn: () => fetchItems(),
-})
+});
 
 watch(selectedCategory, () => {
-  resetAndFetch()
-})
+  resetAndFetch();
+});
 
-function openCreate() { router.push('/settings/canned-responses/new') }
-function openEdit(response: CannedResponse) { router.push(`/settings/canned-responses/${response.id}`) }
+function openCreate() {
+  router.push("/settings/canned-responses/new");
+}
+function openEdit(response: CannedResponse) {
+  router.push(`/settings/canned-responses/${response.id}`);
+}
 
-onMounted(() => fetchItems())
+onMounted(() => fetchItems());
 
-const isDeleting = ref(false)
+const isDeleting = ref(false);
 
 async function confirmDelete() {
-  if (!responseToDelete.value) return
-  isDeleting.value = true
+  if (!responseToDelete.value) return;
+  isDeleting.value = true;
   try {
-    await cannedResponsesService.delete(responseToDelete.value.id)
-    toast.success(t('common.deletedSuccess', { resource: t('resources.CannedResponse') }))
-    closeDeleteDialog()
-    await fetchItems()
+    await cannedResponsesService.delete(responseToDelete.value.id);
+    toast.success(
+      t("common.deletedSuccess", { resource: t("resources.CannedResponse") }),
+    );
+    closeDeleteDialog();
+    await fetchItems();
   } catch (err) {
-    toast.error(getErrorMessage(err, t('common.failedDelete', { resource: t('resources.cannedResponse') })))
+    toast.error(
+      getErrorMessage(
+        err,
+        t("common.failedDelete", { resource: t("resources.cannedResponse") }),
+      ),
+    );
   } finally {
-    isDeleting.value = false
+    isDeleting.value = false;
   }
 }
 
-function copyToClipboard(content: string) { navigator.clipboard.writeText(content); toast.success(t('common.copiedToClipboard')) }
-function getCategoryLabel(category: string): string { return getLabelFromValue(CANNED_RESPONSE_CATEGORIES, category) || t('cannedResponses.uncategorized') }
+function copyToClipboard(content: string) {
+  navigator.clipboard.writeText(content);
+  toast.success(t("common.copiedToClipboard"));
+}
+function getCategoryLabel(category: string): string {
+  return (
+    getLabelFromValue(CANNED_RESPONSE_CATEGORIES, category) ||
+    t("cannedResponses.uncategorized")
+  );
+}
 </script>
 
 <template>
   <div class="flex flex-col h-full bg-background">
-    <PageHeader :title="$t('cannedResponses.title')" :icon="MessageSquareText" icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20" back-link="/settings" :breadcrumbs="breadcrumbs">
+    <PageHeader
+      :title="$t('cannedResponses.title')"
+      :icon="MessageSquareText"
+      icon-gradient="bg-linear-to-br from-teal-500 to-emerald-600 shadow-teal-500/20"
+      back-link="/settings"
+      :breadcrumbs="breadcrumbs"
+    >
       <template #actions>
-        <Button variant="outline" size="sm" @click="openCreate"><Plus class="size-4 mr-2" />{{ $t('cannedResponses.addResponse') }}</Button>
+        <Button variant="outline" size="sm" @click="openCreate"
+          ><Plus class="size-4 mr-2" />{{
+            $t("cannedResponses.addResponse")
+          }}</Button
+        >
       </template>
     </PageHeader>
 
@@ -121,18 +193,35 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
             <CardHeader>
               <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle>{{ $t('cannedResponses.yourResponses') }}</CardTitle>
-                  <CardDescription>{{ $t('cannedResponses.yourResponsesDesc') }}</CardDescription>
+                  <CardTitle>{{
+                    $t("cannedResponses.yourResponses")
+                  }}</CardTitle>
+                  <CardDescription>{{
+                    $t("cannedResponses.yourResponsesDesc")
+                  }}</CardDescription>
                 </div>
                 <div class="flex items-center gap-2">
                   <Select v-model="selectedCategory">
-                    <SelectTrigger class="w-[150px]"><SelectValue :placeholder="$t('common.all')" /></SelectTrigger>
+                    <SelectTrigger class="w-[150px]"
+                      ><SelectValue :placeholder="$t('common.all')"
+                    /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{{ $t('cannedResponses.allCategories') }}</SelectItem>
-                      <SelectItem v-for="cat in CANNED_RESPONSE_CATEGORIES" :key="cat.value" :value="cat.value">{{ cat.label }}</SelectItem>
+                      <SelectItem value="all">{{
+                        $t("cannedResponses.allCategories")
+                      }}</SelectItem>
+                      <SelectItem
+                        v-for="cat in CANNED_RESPONSE_CATEGORIES"
+                        :key="cat.value"
+                        :value="cat.value"
+                        >{{ cat.label }}</SelectItem
+                      >
                     </SelectContent>
                   </Select>
-                  <SearchInput v-model="searchQuery" :placeholder="$t('cannedResponses.searchResponses') + '...'" class="w-64" />
+                  <SearchInput
+                    v-model="searchQuery"
+                    :placeholder="$t('cannedResponses.searchResponses') + '...'"
+                    class="w-64"
+                  />
                 </div>
               </div>
             </CardHeader>
@@ -154,25 +243,45 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
                 @page-change="handlePageChange"
               >
                 <template #cell-name="{ item: response }">
-                  <RouterLink :to="`/settings/canned-responses/${response.id}`" class="text-inherit no-underline hover:opacity-80">
+                  <RouterLink
+                    :to="`/settings/canned-responses/${response.id}`"
+                    class="text-inherit no-underline hover:opacity-80"
+                  >
                     <div>
                       <span class="font-medium">{{ response.name }}</span>
-                      <p v-if="response.shortcut" class="font-mono text-muted-foreground">/{{ response.shortcut }}</p>
+                      <p
+                        v-if="response.shortcut"
+                        class="font-mono text-muted-foreground"
+                      >
+                        /{{ response.shortcut }}
+                      </p>
                     </div>
                   </RouterLink>
                 </template>
                 <template #cell-category="{ item: response }">
-                  <Badge variant="outline">{{ getCategoryLabel(response.category) }}</Badge>
+                  <Badge variant="outline">{{
+                    getCategoryLabel(response.category)
+                  }}</Badge>
                 </template>
                 <template #cell-content="{ item: response }">
-                  <p class="text-muted-foreground max-w-[300px] truncate">{{ response.content }}</p>
+                  <p class="text-muted-foreground max-w-[300px] truncate">
+                    {{ response.content }}
+                  </p>
                 </template>
                 <template #cell-usage_count="{ item: response }">
-                  <span class="text-muted-foreground">{{ response.usage_count }}</span>
+                  <span class="text-muted-foreground">{{
+                    response.usage_count
+                  }}</span>
                 </template>
                 <template #cell-status="{ item: response }">
-                  <Badge v-if="response.is_active" class="bg-emerald-500/20 text-emerald-400 border-transparent">{{ $t('common.active') }}</Badge>
-                  <Badge v-else variant="secondary">{{ $t('common.inactive') }}</Badge>
+                  <Badge
+                    v-if="response.is_active"
+                    class="bg-emerald-500/20 text-emerald-400 border-transparent"
+                    >{{ $t("common.active") }}</Badge
+                  >
+                  <Badge v-else variant="secondary">{{
+                    $t("common.inactive")
+                  }}</Badge>
                 </template>
                 <template #cell-actions="{ item: response }">
                   <div class="flex items-center justify-end gap-1">
@@ -199,7 +308,9 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
                 </template>
                 <template #empty-action>
                   <Button variant="outline" size="sm" @click="openCreate">
-                    <Plus class="size-4 mr-2" />{{ $t('cannedResponses.addResponse') }}
+                    <Plus class="size-4 mr-2" />{{
+                      $t("cannedResponses.addResponse")
+                    }}
                   </Button>
                 </template>
               </DataTable>
@@ -209,6 +320,13 @@ function getCategoryLabel(category: string): string { return getLabelFromValue(C
       </div>
     </ScrollArea>
 
-    <ConfirmDialog v-model:open="deleteDialogOpen" variant="destructive" :title="$t('cannedResponses.deleteTitle')" :item-name="responseToDelete?.name" :is-submitting="isDeleting" @confirm="confirmDelete" />
+    <ConfirmDialog
+      v-model:open="deleteDialogOpen"
+      variant="destructive"
+      :title="$t('cannedResponses.deleteTitle')"
+      :item-name="responseToDelete?.name"
+      :is-submitting="isDeleting"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>

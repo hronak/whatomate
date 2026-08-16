@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { ButtonConfig } from '@/types/flow-preview'
-import { ExternalLink, X, List } from '@lucide/vue'
+import { ref } from "vue";
+import type { ButtonConfig } from "@/types/flow-preview";
+import { ExternalLink, X, List } from "@lucide/vue";
 
 defineProps<{
-  buttons: ButtonConfig[]
-  disabled?: boolean
-}>()
+  buttons: ButtonConfig[];
+  disabled?: boolean;
+}>();
 
 const emit = defineEmits<{
-  select: [button: ButtonConfig]
-}>()
+  select: [button: ButtonConfig];
+}>();
 
-const isOpen = ref(false)
+const isOpen = ref(false);
 
 function handleSelect(button: ButtonConfig) {
-  emit('select', button)
-  isOpen.value = false
+  emit("select", button);
+  isOpen.value = false;
 }
 </script>
 
@@ -27,7 +27,7 @@ function handleSelect(button: ButtonConfig) {
       class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2 transition-colors"
       :class="{
         'hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer': !disabled,
-        'opacity-50 cursor-not-allowed': disabled
+        'opacity-50 cursor-not-allowed': disabled,
       }"
       :disabled="disabled"
       @click="isOpen = !isOpen"
@@ -38,20 +38,16 @@ function handleSelect(button: ButtonConfig) {
 
     <!-- List Picker Overlay - renders via slot in parent -->
     <Teleport to="#preview-phone-frame" :disabled="!isOpen">
-      <div
-        v-if="isOpen"
-        class="absolute inset-0 z-10 flex flex-col"
-      >
+      <div v-if="isOpen" class="absolute inset-0 z-10 flex flex-col">
         <!-- Backdrop -->
-        <div
-          class="flex-1 bg-black/50"
-          @click="isOpen = false"
-        />
+        <div class="flex-1 bg-black/50" @click="isOpen = false" />
 
         <!-- Panel -->
         <div class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden">
           <!-- Header -->
-          <div class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between">
+          <div
+            class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between"
+          >
             <button
               class="p-1 hover:bg-white/10 rounded transition-colors"
               @click="isOpen = false"
@@ -85,7 +81,10 @@ function handleSelect(button: ButtonConfig) {
               <span class="text-gray-800 dark:text-gray-200 flex-1">
                 {{ btn.title || `Option ${idx + 1}` }}
               </span>
-              <ExternalLink v-if="btn.type === 'url'" class="size-3 text-gray-400" />
+              <ExternalLink
+                v-if="btn.type === 'url'"
+                class="size-3 text-gray-400"
+              />
             </div>
           </div>
         </div>
@@ -93,4 +92,3 @@ function handleSelect(button: ButtonConfig) {
     </Teleport>
   </div>
 </template>
-

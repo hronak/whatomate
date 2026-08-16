@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { getTagColorClass } from '@/lib/constants'
+import { getTagColorClass } from "@/lib/constants";
 
 const props = defineProps<{
-  color?: string
-}>()
+  color?: string;
+}>();
 </script>
 
 <template>
-  <span :class="['inline-flex items-center rounded-full border border-transparent px-2.5 py-0.5 font-medium', getTagColorClass(props.color || 'gray')]">
+  <span
+    :class="[
+      'inline-flex items-center rounded-full border border-transparent px-2.5 py-0.5 font-medium',
+      getTagColorClass(props.color || 'gray'),
+    ]"
+  >
     <slot />
   </span>
 </template>

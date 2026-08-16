@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import Spinner from './Spinner.vue'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import PageHeader from './PageHeader.vue'
-import ErrorState from './ErrorState.vue'
+import Spinner from "./Spinner.vue";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import PageHeader from "./PageHeader.vue";
+import ErrorState from "./ErrorState.vue";
 
-import type { Component } from 'vue'
+import type { Component } from "vue";
 
 defineProps<{
-  title: string
-  description?: string
-  icon?: Component
-  iconGradient?: string
-  backLink: string
-  breadcrumbs?: Array<{ label: string; href?: string }>
-  isLoading?: boolean
-  isNotFound?: boolean
-  notFoundTitle?: string
-  notFoundDescription?: string
-}>()
+  title: string;
+  description?: string;
+  icon?: Component;
+  iconGradient?: string;
+  backLink: string;
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+  isLoading?: boolean;
+  isNotFound?: boolean;
+  notFoundTitle?: string;
+  notFoundDescription?: string;
+}>();
 </script>
 
 <template>
@@ -44,7 +44,10 @@ defineProps<{
     <ErrorState
       v-else-if="isNotFound"
       :title="notFoundTitle || 'Not found'"
-      :description="notFoundDescription || 'The resource you are looking for does not exist.'"
+      :description="
+        notFoundDescription ||
+        'The resource you are looking for does not exist.'
+      "
       class="flex-1"
     />
 

@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { AvatarFallback as AvatarFallbackPrimitive } from 'reka-ui'
-import { cn } from '@/lib/utils'
+import { AvatarFallback as AvatarFallbackPrimitive } from "reka-ui";
+import { cn } from "@/lib/utils";
 
 const props = defineProps<{
-  class?: string
-}>()
+  class?: string;
+}>();
 </script>
 
 <template>
   <AvatarFallbackPrimitive
-    :class="cn(
-      'flex size-full items-center justify-center rounded-full bg-muted',
-      props.class
-    )"
+    :class="
+      cn(
+        'flex size-full items-center justify-center rounded-full bg-muted',
+        props.class,
+      )
+    "
   >
     <slot />
   </AvatarFallbackPrimitive>

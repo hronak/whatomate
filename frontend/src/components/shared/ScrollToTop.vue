@@ -1,38 +1,41 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { ArrowUp } from '@lucide/vue'
-import { Button } from '@/components/ui/button'
+import { ref, onMounted, onUnmounted } from "vue";
+import { ArrowUp } from "@lucide/vue";
+import { Button } from "@/components/ui/button";
 
-const props = withDefaults(defineProps<{
-  target?: string
-  threshold?: number
-}>(), {
-  threshold: 300,
-})
+const props = withDefaults(
+  defineProps<{
+    target?: string;
+    threshold?: number;
+  }>(),
+  {
+    threshold: 300,
+  },
+);
 
-const isVisible = ref(false)
-let scrollEl: HTMLElement | null = null
+const isVisible = ref(false);
+let scrollEl: HTMLElement | null = null;
 
 function onScroll() {
   if (scrollEl) {
-    isVisible.value = scrollEl.scrollTop > props.threshold
+    isVisible.value = scrollEl.scrollTop > props.threshold;
   }
 }
 
 function scrollToTop() {
-  scrollEl?.scrollTo({ top: 0 })
+  scrollEl?.scrollTo({ top: 0 });
 }
 
 onMounted(() => {
   scrollEl = props.target
     ? document.querySelector(props.target)
-    : document.querySelector('main')
-  scrollEl?.addEventListener('scroll', onScroll, { passive: true })
-})
+    : document.querySelector("main");
+  scrollEl?.addEventListener("scroll", onScroll, { passive: true });
+});
 
 onUnmounted(() => {
-  scrollEl?.removeEventListener('scroll', onScroll)
-})
+  scrollEl?.removeEventListener("scroll", onScroll);
+});
 </script>
 
 <template>

@@ -1,76 +1,95 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useCallingStore } from '@/stores/calling'
-import { Button } from '@/components/ui/button'
-import { Phone, PhoneOff, PhoneIncoming, Mic, MicOff, ArrowRightLeft, Pause, Play } from '@lucide/vue'
-import CallTransferPicker from '@/components/calling/CallTransferPicker.vue'
-import { toast } from 'vue-sonner'
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { useCallingStore } from "@/stores/calling";
+import { Button } from "@/components/ui/button";
+import {
+  Phone,
+  PhoneOff,
+  PhoneIncoming,
+  Mic,
+  MicOff,
+  ArrowRightLeft,
+  Pause,
+  Play,
+} from "@lucide/vue";
+import CallTransferPicker from "@/components/calling/CallTransferPicker.vue";
+import { toast } from "vue-sonner";
 
-const { t } = useI18n()
-const store = useCallingStore()
-const acceptingId = ref<string | null>(null)
-const showTransferPicker = ref(false)
+const { t } = useI18n();
+const store = useCallingStore();
+const acceptingId = ref<string | null>(null);
+const showTransferPicker = ref(false);
 
 const formattedDuration = computed(() => {
-  const m = Math.floor(store.callDuration / 60)
-  const s = store.callDuration % 60
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-})
+  const m = Math.floor(store.callDuration / 60);
+  const s = store.callDuration % 60;
+  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+});
 
 const displayName = computed(() => {
   if (store.isOutgoingCall) {
-    return store.outgoingContactName || store.outgoingContactPhone || 'Unknown'
+    return store.outgoingContactName || store.outgoingContactPhone || "Unknown";
   }
   if (store.activeTransfer) {
-    return store.activeTransfer.contact?.profile_name || store.activeTransfer.caller_phone || 'Unknown'
+    return (
+      store.activeTransfer.contact?.profile_name ||
+      store.activeTransfer.caller_phone ||
+      "Unknown"
+    );
   }
   // Show first waiting transfer if not on call yet
   if (store.waitingTransfers.length > 0) {
-    const t = store.waitingTransfers[0]
-    return t.contact?.profile_name || t.caller_phone || 'Unknown'
+    const t = store.waitingTransfers[0];
+    return t.contact?.profile_name || t.caller_phone || "Unknown";
   }
-  return 'Unknown'
-})
+  return "Unknown";
+});
 
 const statusText = computed(() => {
   if (store.isOutgoingCall) {
     switch (store.outgoingCallStatus) {
-      case 'initiating': return `${t('outgoingCalls.initiating')}...`
-      case 'ringing': return `${t('outgoingCalls.ringing')}...`
-      case 'answered': return t('outgoingCalls.answered')
-      default: return ''
+      case "initiating":
+        return `${t("outgoingCalls.initiating")}...`;
+      case "ringing":
+        return `${t("outgoingCalls.ringing")}...`;
+      case "answered":
+        return t("outgoingCalls.answered");
+      default:
+        return "";
     }
   }
   if (store.isOnCall && store.isOnHold) {
-    return t('calling.onHold')
+    return t("calling.onHold");
   }
   if (store.isOnCall) {
-    return t('callTransfers.callConnected')
+    return t("callTransfers.callConnected");
   }
   if (store.waitingTransfers.length > 0) {
-    return t('callTransfers.incomingTransfer')
+    return t("callTransfers.incomingTransfer");
   }
-  return ''
-})
+  return "";
+});
 
-const showPanel = computed(() => store.isOnCall || store.waitingTransfers.length > 0)
+const showPanel = computed(
+  () => store.isOnCall || store.waitingTransfers.length > 0,
+);
 
 // The first waiting transfer (for single-panel accept button)
-const firstWaiting = computed(() => store.waitingTransfers[0] ?? null)
+const firstWaiting = computed(() => store.waitingTransfers[0] ?? null);
 
 async function handleAccept(id: string) {
-  acceptingId.value = id
+  acceptingId.value = id;
   try {
-    await store.acceptTransfer(id)
-    toast.success(t('callTransfers.callConnected'))
+    await store.acceptTransfer(id);
+    toast.success(t("callTransfers.callConnected"));
   } catch (err: any) {
-    const serverMsg = err.response?.data?.message || err.message || ''
-    toast.error(t('callTransfers.acceptFailed'), {
-      description: serverMsg
-    })
+    const serverMsg = err.response?.data?.message || err.message || "";
+    toast.error(t("callTransfers.acceptFailed"), {
+      description: serverMsg,
+    });
   } finally {
-    acceptingId.value = null
+    acceptingId.value = null;
   }
 }
 </script>
@@ -83,10 +102,14 @@ async function handleAccept(id: string) {
     >
       <!-- Caller info -->
       <div class="flex items-center gap-3 mb-3">
-        <div class="size-8 rounded-full flex items-center justify-center"
+        <div
+          class="size-8 rounded-full flex items-center justify-center"
           :class="store.isOnCall ? 'bg-green-600/20' : 'bg-green-600/20'"
         >
-          <PhoneIncoming v-if="!store.isOnCall && firstWaiting" class="size-4 text-green-400 animate-pulse" />
+          <PhoneIncoming
+            v-if="!store.isOnCall && firstWaiting"
+            class="size-4 text-green-400 animate-pulse"
+          />
           <Phone v-else class="size-4 text-green-400" />
         </div>
         <div>
@@ -99,7 +122,9 @@ async function handleAccept(id: string) {
 
       <!-- Timer (only when on active call) -->
       <div v-if="store.isOnCall" class="text-center mb-3">
-        <span class="text-2xl font-mono text-zinc-200">{{ formattedDuration }}</span>
+        <span class="text-2xl font-mono text-zinc-200">{{
+          formattedDuration
+        }}</span>
       </div>
 
       <!-- Call controls -->
@@ -110,7 +135,11 @@ async function handleAccept(id: string) {
           size="sm"
           variant="ghost"
           class="size-10 rounded-full p-0 border text-zinc-300!"
-          :class="store.isMuted ? 'bg-red-900/30! border-red-700! hover:bg-red-900/50!' : 'bg-zinc-800! border-zinc-600! hover:bg-zinc-700!'"
+          :class="
+            store.isMuted
+              ? 'bg-red-900/30! border-red-700! hover:bg-red-900/50!'
+              : 'bg-zinc-800! border-zinc-600! hover:bg-zinc-700!'
+          "
           @click="store.toggleMute()"
         >
           <MicOff v-if="store.isMuted" class="size-4 text-red-400!" />
@@ -123,7 +152,11 @@ async function handleAccept(id: string) {
           size="sm"
           variant="ghost"
           class="size-10 rounded-full p-0 border text-zinc-300!"
-          :class="store.isOnHold ? 'bg-amber-900/30! border-amber-700! hover:bg-amber-900/50!' : 'bg-zinc-800! border-zinc-600! hover:bg-zinc-700!'"
+          :class="
+            store.isOnHold
+              ? 'bg-amber-900/30! border-amber-700! hover:bg-amber-900/50!'
+              : 'bg-zinc-800! border-zinc-600! hover:bg-zinc-700!'
+          "
           :title="store.isOnHold ? t('calling.resume') : t('calling.hold')"
           @click="store.isOnHold ? store.resumeCall() : store.holdCall()"
         >
@@ -168,6 +201,9 @@ async function handleAccept(id: string) {
       </div>
     </div>
 
-    <CallTransferPicker v-if="showTransferPicker" @close="showTransferPicker = false" />
+    <CallTransferPicker
+      v-if="showTransferPicker"
+      @close="showTransferPicker = false"
+    />
   </Teleport>
 </template>

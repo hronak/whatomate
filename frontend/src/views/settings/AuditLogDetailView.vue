@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import DetailPageLayout from '@/components/shared/DetailPageLayout.vue'
-import { auditLogsService, type AuditLogEntry } from '@/services/api'
-import { formatDateTime, formatLabel } from '@/lib/utils'
-import { ScrollText, Info, ExternalLink, ArrowRight } from '@lucide/vue'
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import DetailPageLayout from "@/components/shared/DetailPageLayout.vue";
+import { auditLogsService, type AuditLogEntry } from "@/services/api";
+import { formatDateTime, formatLabel } from "@/lib/utils";
+import { ScrollText, Info, ExternalLink, ArrowRight } from "@lucide/vue";
 
-const route = useRoute()
-const { t } = useI18n()
+const route = useRoute();
+const { t } = useI18n();
 
-const logId = computed(() => route.params.id as string)
-const log = ref<AuditLogEntry | null>(null)
-const isLoading = ref(true)
+const logId = computed(() => route.params.id as string);
+const log = ref<AuditLogEntry | null>(null);
+const isLoading = ref(true);
 
 const resourceRouteMap: Record<string, (id: string) => string> = {
   template: (id) => `/templates/${id}`,
@@ -36,61 +36,70 @@ const resourceRouteMap: Record<string, (id: string) => string> = {
   ai_context: () => `/chatbot/ai`,
   contact: (id) => `/chat?contact=${id}`,
   tag: () => `/settings/tags`,
-}
+};
 
 const resourceLink = computed(() => {
-  if (!log.value) return null
-  const fn = resourceRouteMap[log.value.resource_type]
-  return fn ? fn(log.value.resource_id) : null
-})
+  if (!log.value) return null;
+  const fn = resourceRouteMap[log.value.resource_type];
+  return fn ? fn(log.value.resource_id) : null;
+});
 
 const title = computed(() => {
-  if (!log.value) return t('auditLogs.title')
-  return `${formatLabel(log.value.resource_type)} ${log.value.action}`
-})
+  if (!log.value) return t("auditLogs.title");
+  return `${formatLabel(log.value.resource_type)} ${log.value.action}`;
+});
 
 const breadcrumbs = computed(() => [
-  { label: t('nav.settings'), href: '/settings' },
-  { label: t('auditLogs.title'), href: '/settings/audit-logs' },
+  { label: t("nav.settings"), href: "/settings" },
+  { label: t("auditLogs.title"), href: "/settings/audit-logs" },
   { label: title.value },
-])
+]);
 
 function formatValue(val: any): string {
-  if (val === null || val === undefined || val === '') return '—'
-  if (typeof val === 'boolean') return val ? 'Yes' : 'No'
+  if (val === null || val === undefined || val === "") return "—";
+  if (typeof val === "boolean") return val ? "Yes" : "No";
   if (Array.isArray(val)) {
-    if (val.length === 0) return '—'
-    if (typeof val[0] === 'object' && val[0] !== null) {
-      return val.map(item => item.text || item.name || item.title || JSON.stringify(item)).join(', ')
+    if (val.length === 0) return "—";
+    if (typeof val[0] === "object" && val[0] !== null) {
+      return val
+        .map(
+          (item) =>
+            item.text || item.name || item.title || JSON.stringify(item),
+        )
+        .join(", ");
     }
-    return val.join(', ') || '—'
+    return val.join(", ") || "—";
   }
-  if (typeof val === 'object') {
-    if (val.body) return String(val.body)
-    return JSON.stringify(val)
+  if (typeof val === "object") {
+    if (val.body) return String(val.body);
+    return JSON.stringify(val);
   }
-  return String(val)
+  return String(val);
 }
 
 function actionVariant(action: string): string {
   switch (action) {
-    case 'created': return 'bg-green-500/10 text-green-500 border-green-500/20'
-    case 'updated': return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-    case 'deleted': return 'bg-red-500/10 text-red-500 border-red-500/20'
-    default: return ''
+    case "created":
+      return "bg-green-500/10 text-green-500 border-green-500/20";
+    case "updated":
+      return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+    case "deleted":
+      return "bg-red-500/10 text-red-500 border-red-500/20";
+    default:
+      return "";
   }
 }
 
 onMounted(async () => {
   try {
-    const response = await auditLogsService.get(logId.value)
-    log.value = (response.data as any).data || response.data
+    const response = await auditLogsService.get(logId.value);
+    log.value = (response.data as any).data || response.data;
   } catch {
     // handled by isNotFound
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 </script>
 
 <template>
@@ -105,7 +114,7 @@ onMounted(async () => {
   >
     <Card v-if="log">
       <CardHeader class="pb-3">
-        <CardTitle class="font-medium">{{ t('auditLogs.changes') }}</CardTitle>
+        <CardTitle class="font-medium">{{ t("auditLogs.changes") }}</CardTitle>
       </CardHeader>
       <CardContent>
         <div v-if="log.changes && log.changes.length > 0" class="space-y-3">
@@ -118,21 +127,31 @@ onMounted(async () => {
             <div class="mt-1">
               <template v-if="log.action === 'updated'">
                 <div class="flex items-start gap-2 text-muted-foreground">
-                  <span class="text-red-400 line-through wrap-break-word">{{ formatValue(change.old_value) }}</span>
+                  <span class="text-red-400 line-through wrap-break-word">{{
+                    formatValue(change.old_value)
+                  }}</span>
                   <ArrowRight class="size-4 shrink-0 mt-0.5" />
-                  <span class="text-green-400 wrap-break-word">{{ formatValue(change.new_value) }}</span>
+                  <span class="text-green-400 wrap-break-word">{{
+                    formatValue(change.new_value)
+                  }}</span>
                 </div>
               </template>
               <template v-else-if="log.action === 'created'">
-                <span class="text-muted-foreground wrap-break-word">{{ formatValue(change.new_value) }}</span>
+                <span class="text-muted-foreground wrap-break-word">{{
+                  formatValue(change.new_value)
+                }}</span>
               </template>
               <template v-else>
-                <span class="text-red-400 wrap-break-word">{{ formatValue(change.old_value) }}</span>
+                <span class="text-red-400 wrap-break-word">{{
+                  formatValue(change.old_value)
+                }}</span>
               </template>
             </div>
           </div>
         </div>
-        <p v-else class="text-muted-foreground">{{ t('auditLogs.noChanges') }}</p>
+        <p v-else class="text-muted-foreground">
+          {{ t("auditLogs.noChanges") }}
+        </p>
       </CardContent>
     </Card>
 
@@ -141,16 +160,20 @@ onMounted(async () => {
         <CardHeader class="pb-3">
           <div class="flex items-center gap-2">
             <Info class="size-4 text-muted-foreground" />
-            <CardTitle class="font-medium">{{ t('common.details', 'Details') }}</CardTitle>
+            <CardTitle class="font-medium">{{
+              t("common.details", "Details")
+            }}</CardTitle>
           </div>
         </CardHeader>
         <CardContent class="space-y-3">
           <div>
-            <span class="text-muted-foreground">{{ t('auditLogs.user') }}</span>
+            <span class="text-muted-foreground">{{ t("auditLogs.user") }}</span>
             <p class="font-medium">{{ log.user_name }}</p>
           </div>
           <div>
-            <span class="text-muted-foreground">{{ t('auditLogs.action') }}</span>
+            <span class="text-muted-foreground">{{
+              t("auditLogs.action")
+            }}</span>
             <div class="mt-0.5">
               <Badge variant="outline" :class="[actionVariant(log.action), '']">
                 {{ t(`auditLogs.${log.action}`) }}
@@ -158,17 +181,19 @@ onMounted(async () => {
             </div>
           </div>
           <div>
-            <span class="text-muted-foreground">{{ t('auditLogs.resource') }}</span>
+            <span class="text-muted-foreground">{{
+              t("auditLogs.resource")
+            }}</span>
             <p class="font-medium">{{ formatLabel(log.resource_type) }}</p>
           </div>
           <div>
-            <span class="text-muted-foreground">{{ t('auditLogs.date') }}</span>
+            <span class="text-muted-foreground">{{ t("auditLogs.date") }}</span>
             <p>{{ formatDateTime(log.created_at) }}</p>
           </div>
           <RouterLink v-if="resourceLink" :to="resourceLink">
             <Button variant="outline" size="sm" class="w-full mt-2">
               <ExternalLink class="size-3.5 mr-1.5" />
-              {{ t('auditLogs.viewResource') }}
+              {{ t("auditLogs.viewResource") }}
             </Button>
           </RouterLink>
         </CardContent>

@@ -1,126 +1,137 @@
 <script setup lang="ts">
-import { Spinner } from '@/components/shared'
-import { ref, computed, watch } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Spinner } from "@/components/shared";
+import { ref, computed, watch } from "vue";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
-import { cannedResponsesService, type CannedResponse } from '@/services/api'
-import { MessageSquareText, Search } from '@lucide/vue'
+} from "@/components/ui/popover";
+import { cannedResponsesService, type CannedResponse } from "@/services/api";
+import { MessageSquareText, Search } from "@lucide/vue";
 
 const props = defineProps<{
-  externalOpen?: boolean
-  externalSearch?: string
-}>()
+  externalOpen?: boolean;
+  externalSearch?: string;
+}>();
 
 const emit = defineEmits<{
-  (e: 'select', response: CannedResponse): void
-  (e: 'close'): void
-}>()
+  (e: "select", response: CannedResponse): void;
+  (e: "close"): void;
+}>();
 
-const internalOpen = ref(false)
-const isLoading = ref(false)
-const searchQuery = ref('')
-const responses = ref<CannedResponse[]>([])
+const internalOpen = ref(false);
+const isLoading = ref(false);
+const searchQuery = ref("");
+const responses = ref<CannedResponse[]>([]);
 
 // Sync external open state - use external if true, otherwise use internal
 const isOpen = computed({
   get: () => props.externalOpen || internalOpen.value,
   set: (val) => {
-    internalOpen.value = val
+    internalOpen.value = val;
     if (!val) {
-      emit('close')
+      emit("close");
     }
-  }
-})
+  },
+});
 
 // Sync external search
-watch(() => props.externalSearch, (val) => {
-  if (val !== undefined) {
-    searchQuery.value = val
-  }
-})
+watch(
+  () => props.externalSearch,
+  (val) => {
+    if (val !== undefined) {
+      searchQuery.value = val;
+    }
+  },
+);
 
 // Fetch responses when popover opens
 watch(isOpen, async (open) => {
   if (open && responses.value.length === 0) {
-    await fetchResponses()
+    await fetchResponses();
   }
-})
+});
 
 async function fetchResponses() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const response = await cannedResponsesService.list({ active_only: 'true' })
-    const data = (response.data as any).data || response.data
-    responses.value = data.canned_responses || []
+    const response = await cannedResponsesService.list({ active_only: "true" });
+    const data = (response.data as any).data || response.data;
+    responses.value = data.canned_responses || [];
   } catch (error) {
-    console.error('Failed to fetch canned responses:', error)
+    console.error("Failed to fetch canned responses:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // Expose fetchResponses for preloading
-defineExpose({ fetchResponses })
+defineExpose({ fetchResponses });
 
 const filteredResponses = computed(() => {
-  if (!searchQuery.value) return responses.value
-  const query = searchQuery.value.toLowerCase()
-  return responses.value.filter(r =>
-    r.name.toLowerCase().includes(query) ||
-    r.content.toLowerCase().includes(query) ||
-    (r.shortcut && r.shortcut.toLowerCase().includes(query))
-  )
-})
+  if (!searchQuery.value) return responses.value;
+  const query = searchQuery.value.toLowerCase();
+  return responses.value.filter(
+    (r) =>
+      r.name.toLowerCase().includes(query) ||
+      r.content.toLowerCase().includes(query) ||
+      (r.shortcut && r.shortcut.toLowerCase().includes(query)),
+  );
+});
 
 // Group by category
 const groupedResponses = computed(() => {
-  const groups: Record<string, CannedResponse[]> = {}
+  const groups: Record<string, CannedResponse[]> = {};
   for (const response of filteredResponses.value) {
-    const category = response.category || 'general'
+    const category = response.category || "general";
     if (!groups[category]) {
-      groups[category] = []
+      groups[category] = [];
     }
-    groups[category].push(response)
+    groups[category].push(response);
   }
-  return groups
-})
+  return groups;
+});
 
 const categoryLabels: Record<string, string> = {
-  greeting: 'Greetings',
-  support: 'Support',
-  sales: 'Sales',
-  closing: 'Closing',
-  general: 'General'
-}
+  greeting: "Greetings",
+  support: "Support",
+  sales: "Sales",
+  closing: "Closing",
+  general: "General",
+};
 
 function getCategoryLabel(category: string): string {
-  return categoryLabels[category] || category
+  return categoryLabels[category] || category;
 }
 
 function selectResponse(response: CannedResponse) {
-  emit('select', response)
-  isOpen.value = false
-  searchQuery.value = ''
+  emit("select", response);
+  isOpen.value = false;
+  searchQuery.value = "";
 }
 </script>
 
 <template>
   <Popover v-model:open="isOpen">
     <PopoverTrigger as-child>
-      <Button id="canned-response-picker-button" type="button" variant="ghost" size="icon">
+      <Button
+        id="canned-response-picker-button"
+        type="button"
+        variant="ghost"
+        size="icon"
+      >
         <MessageSquareText class="size-5" />
       </Button>
     </PopoverTrigger>
     <PopoverContent side="top" align="start" class="w-80 p-0">
       <div class="p-3 border-b">
         <div class="relative">
-          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Search
+            class="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+          />
           <Input
             v-model="searchQuery"
             placeholder="Search responses..."
@@ -135,13 +146,21 @@ function selectResponse(response: CannedResponse) {
           <Spinner class="size-6 text-muted-foreground" />
         </div>
 
-        <div v-else-if="filteredResponses.length === 0" class="py-8 text-center text-muted-foreground">
+        <div
+          v-else-if="filteredResponses.length === 0"
+          class="py-8 text-center text-muted-foreground"
+        >
           No canned responses found
         </div>
 
         <div v-else class="p-2">
-          <template v-for="(items, category) in groupedResponses" :key="category">
-            <div class="px-2 py-1.5 font-medium text-muted-foreground uppercase tracking-wider">
+          <template
+            v-for="(items, category) in groupedResponses"
+            :key="category"
+          >
+            <div
+              class="px-2 py-1.5 font-medium text-muted-foreground uppercase tracking-wider"
+            >
               {{ getCategoryLabel(category) }}
             </div>
             <button
@@ -152,7 +171,10 @@ function selectResponse(response: CannedResponse) {
             >
               <div class="flex items-center justify-between">
                 <span class="font-medium">{{ response.name }}</span>
-                <span v-if="response.shortcut" class="font-mono text-muted-foreground">
+                <span
+                  v-if="response.shortcut"
+                  class="font-mono text-muted-foreground"
+                >
                   /{{ response.shortcut }}
                 </span>
               </div>

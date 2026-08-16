@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { GitBranch } from '@lucide/vue'
-import BaseNode from '@/components/calling/nodes/BaseNode.vue'
+import { computed } from "vue";
+import { GitBranch } from "@lucide/vue";
+import BaseNode from "@/components/calling/nodes/BaseNode.vue";
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ inheritAttrs: false });
 
-const props = defineProps<{ data: any }>()
+const props = defineProps<{ data: any }>();
 
 const summary = computed(() => {
-  const cfg = props.data?.config || {}
-  const expression = (cfg.expression || cfg.input_config?.expression) as string | undefined
-  if (!expression) return 'No expression'
-  return expression.length > 60 ? expression.slice(0, 60) + '…' : expression
-})
+  const cfg = props.data?.config || {};
+  const expression = (cfg.expression || cfg.input_config?.expression) as
+    string | undefined;
+  if (!expression) return "No expression";
+  return expression.length > 60 ? expression.slice(0, 60) + "…" : expression;
+});
 
 const outputHandles = [
-  { id: 'true', label: 'True' },
-  { id: 'false', label: 'False' },
-]
+  { id: "true", label: "True" },
+  { id: "false", label: "False" },
+];
 </script>
 
 <template>

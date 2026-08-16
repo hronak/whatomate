@@ -1,80 +1,88 @@
 <script setup lang="ts">
-import Spinner from './Spinner.vue'
-import { ref, onMounted } from 'vue'
-import { auditLogsService, type AuditLogEntry } from '@/services/api'
-import { formatDateTime, formatLabel } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { History, Plus, Pencil, Trash2, ChevronDown } from '@lucide/vue'
+import Spinner from "./Spinner.vue";
+import { ref, onMounted } from "vue";
+import { auditLogsService, type AuditLogEntry } from "@/services/api";
+import { formatDateTime, formatLabel } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { History, Plus, Pencil, Trash2, ChevronDown } from "@lucide/vue";
 
 const props = defineProps<{
-  resourceType: string
-  resourceId: string
-}>()
+  resourceType: string;
+  resourceId: string;
+}>();
 
-const logs = ref<AuditLogEntry[]>([])
-const isLoading = ref(false)
-const total = ref(0)
-const page = ref(1)
-const limit = 10
+const logs = ref<AuditLogEntry[]>([]);
+const isLoading = ref(false);
+const total = ref(0);
+const page = ref(1);
+const limit = 10;
 
-const actionConfig: Record<string, { icon: any; color: string; label: string }> = {
-  created: { icon: Plus, color: 'bg-green-500', label: 'Created' },
-  updated: { icon: Pencil, color: 'bg-blue-500', label: 'Updated' },
-  deleted: { icon: Trash2, color: 'bg-red-500', label: 'Deleted' },
-}
+const actionConfig: Record<
+  string,
+  { icon: any; color: string; label: string }
+> = {
+  created: { icon: Plus, color: "bg-green-500", label: "Created" },
+  updated: { icon: Pencil, color: "bg-blue-500", label: "Updated" },
+  deleted: { icon: Trash2, color: "bg-red-500", label: "Deleted" },
+};
 
 function formatValue(val: any): string {
-  if (val === null || val === undefined || val === '') return '—'
-  if (typeof val === 'boolean') return val ? 'Yes' : 'No'
+  if (val === null || val === undefined || val === "") return "—";
+  if (typeof val === "boolean") return val ? "Yes" : "No";
   if (Array.isArray(val)) {
-    if (val.length === 0) return '—'
+    if (val.length === 0) return "—";
     // Format array of objects (e.g. buttons) as readable text
-    if (typeof val[0] === 'object' && val[0] !== null) {
-      return val.map(item => item.text || item.name || item.title || JSON.stringify(item)).join(', ')
+    if (typeof val[0] === "object" && val[0] !== null) {
+      return val
+        .map(
+          (item) =>
+            item.text || item.name || item.title || JSON.stringify(item),
+        )
+        .join(", ");
     }
-    return val.join(', ') || '—'
+    return val.join(", ") || "—";
   }
-  if (typeof val === 'object') {
+  if (typeof val === "object") {
     // For simple objects with a "body" key (like response_content), show the body
-    if (val.body) return String(val.body)
-    const s = JSON.stringify(val)
-    return s.length > 120 ? s.slice(0, 120) + '…' : s
+    if (val.body) return String(val.body);
+    const s = JSON.stringify(val);
+    return s.length > 120 ? s.slice(0, 120) + "…" : s;
   }
-  return String(val)
+  return String(val);
 }
 
 async function loadLogs(append = false) {
-  isLoading.value = true
+  isLoading.value = true;
   try {
     const response = await auditLogsService.list({
       resource_type: props.resourceType,
       resource_id: props.resourceId,
       page: page.value,
       limit,
-    })
-    const data = (response.data as any).data || response.data
-    const entries = data.audit_logs || []
+    });
+    const data = (response.data as any).data || response.data;
+    const entries = data.audit_logs || [];
     if (append) {
-      logs.value.push(...entries)
+      logs.value.push(...entries);
     } else {
-      logs.value = entries
+      logs.value = entries;
     }
-    total.value = data.total || 0
+    total.value = data.total || 0;
   } catch {
     // silently fail — audit logs are not critical
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 function loadMore() {
-  page.value++
-  loadLogs(true)
+  page.value++;
+  loadLogs(true);
 }
 
-onMounted(() => loadLogs())
+onMounted(() => loadLogs());
 </script>
 
 <template>
@@ -82,18 +90,26 @@ onMounted(() => loadLogs())
     <CardHeader class="pb-3">
       <div class="flex items-center gap-2">
         <History class="size-4 text-muted-foreground" />
-        <CardTitle class="font-medium">{{ $t('common.activityLog', 'Activity Log') }}</CardTitle>
+        <CardTitle class="font-medium">{{
+          $t("common.activityLog", "Activity Log")
+        }}</CardTitle>
       </div>
     </CardHeader>
     <CardContent>
       <!-- Loading state -->
-      <div v-if="isLoading && logs.length === 0" class="flex items-center justify-center py-8">
+      <div
+        v-if="isLoading && logs.length === 0"
+        class="flex items-center justify-center py-8"
+      >
         <Spinner class="size-5 text-muted-foreground" />
       </div>
 
       <!-- Empty state -->
-      <p v-else-if="logs.length === 0" class="text-muted-foreground text-center py-6">
-        {{ $t('common.noActivity', 'No activity recorded yet') }}
+      <p
+        v-else-if="logs.length === 0"
+        class="text-muted-foreground text-center py-6"
+      >
+        {{ $t("common.noActivity", "No activity recorded yet") }}
       </p>
 
       <!-- Timeline -->
@@ -101,12 +117,16 @@ onMounted(() => loadLogs())
         <!-- Vertical line -->
         <div class="absolute left-3 top-3 bottom-3 w-px bg-border" />
 
-        <div v-for="log in logs" :key="log.id" class="relative pl-9 pb-6 last:pb-0">
+        <div
+          v-for="log in logs"
+          :key="log.id"
+          class="relative pl-9 pb-6 last:pb-0"
+        >
           <!-- Dot -->
           <div
             :class="[
               'absolute left-1.5 top-1 size-3 rounded-full border-2 border-background',
-              actionConfig[log.action]?.color || 'bg-muted-foreground'
+              actionConfig[log.action]?.color || 'bg-muted-foreground',
             ]"
           />
 
@@ -117,29 +137,44 @@ onMounted(() => loadLogs())
               <Badge variant="outline" class="px-1.5 py-0">
                 {{ actionConfig[log.action]?.label || log.action }}
               </Badge>
-              <span class="text-muted-foreground">{{ formatDateTime(log.created_at) }}</span>
+              <span class="text-muted-foreground">{{
+                formatDateTime(log.created_at)
+              }}</span>
             </div>
 
             <!-- Changes -->
-            <div v-if="log.action === 'updated' && log.changes?.length > 0" class="mt-2 space-y-1">
+            <div
+              v-if="log.action === 'updated' && log.changes?.length > 0"
+              class="mt-2 space-y-1"
+            >
               <div
                 v-for="(change, idx) in log.changes"
                 :key="idx"
                 class="rounded-md bg-muted/50 px-2.5 py-1.5 overflow-hidden min-w-0"
               >
-                <span class="font-medium text-foreground">{{ formatLabel(change.field) }}:</span>
+                <span class="font-medium text-foreground"
+                  >{{ formatLabel(change.field) }}:</span
+                >
                 <div class="mt-0.5 text-muted-foreground break-all">
                   <span>{{ formatValue(change.old_value) }}</span>
                   <span class="mx-1">→</span>
-                  <span class="text-foreground">{{ formatValue(change.new_value) }}</span>
+                  <span class="text-foreground">{{
+                    formatValue(change.new_value)
+                  }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Created fields summary -->
-            <div v-else-if="log.action === 'created' && log.changes?.length > 0" class="mt-1">
+            <div
+              v-else-if="log.action === 'created' && log.changes?.length > 0"
+              class="mt-1"
+            >
               <span class="text-muted-foreground">
-                {{ log.changes.length }} field{{ log.changes.length !== 1 ? 's' : '' }} set
+                {{ log.changes.length }} field{{
+                  log.changes.length !== 1 ? "s" : ""
+                }}
+                set
               </span>
             </div>
           </div>
@@ -148,9 +183,18 @@ onMounted(() => loadLogs())
 
       <!-- Load more -->
       <div v-if="logs.length < total" class="mt-4 flex justify-center">
-        <Button variant="ghost" size="sm" :disabled="isLoading" @click="loadMore">
+        <Button
+          variant="ghost"
+          size="sm"
+          :disabled="isLoading"
+          @click="loadMore"
+        >
           <ChevronDown class="size-3.5 mr-1" />
-          {{ isLoading ? $t('common.loading') + '...' : $t('common.loadMore', 'Load more') }}
+          {{
+            isLoading
+              ? $t("common.loading") + "..."
+              : $t("common.loadMore", "Load more")
+          }}
         </Button>
       </div>
     </CardContent>

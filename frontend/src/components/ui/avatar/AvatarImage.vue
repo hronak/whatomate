@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { AvatarImage as AvatarImagePrimitive } from 'reka-ui'
-import { cn } from '@/lib/utils'
+import { AvatarImage as AvatarImagePrimitive } from "reka-ui";
+import { cn } from "@/lib/utils";
 
 const props = defineProps<{
-  src?: string
-  alt?: string
-  class?: string
-}>()
+  src?: string;
+  alt?: string;
+  class?: string;
+}>();
 </script>
 
 <template>

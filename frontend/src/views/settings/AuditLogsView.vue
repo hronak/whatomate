@@ -1,117 +1,144 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ref, onMounted, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { PageHeader, DataTable, DateRangePicker, type Column } from '@/components/shared'
-import { auditLogsService, type AuditLogEntry } from '@/services/api'
-import { useUsersStore } from '@/stores/users'
-import { useDateRange } from '@/composables/useDateRange'
-import { ScrollText } from '@lucide/vue'
-import { formatDate, formatLabel } from '@/lib/utils'
+} from "@/components/ui/select";
+import {
+  PageHeader,
+  DataTable,
+  DateRangePicker,
+  type Column,
+} from "@/components/shared";
+import { auditLogsService, type AuditLogEntry } from "@/services/api";
+import { useUsersStore } from "@/stores/users";
+import { useDateRange } from "@/composables/useDateRange";
+import { ScrollText } from "@lucide/vue";
+import { formatDate, formatLabel } from "@/lib/utils";
 
-const { t } = useI18n()
-const usersStore = useUsersStore()
+const { t } = useI18n();
+const usersStore = useUsersStore();
 
-const logs = ref<AuditLogEntry[]>([])
-const isLoading = ref(true)
+const logs = ref<AuditLogEntry[]>([]);
+const isLoading = ref(true);
 
 // Pagination
-const currentPage = ref(1)
-const totalItems = ref(0)
-const pageSize = 25
+const currentPage = ref(1);
+const totalItems = ref(0);
+const pageSize = 25;
 
 // Sort
-const sortKey = ref('created_at')
-const sortDirection = ref<'asc' | 'desc'>('desc')
+const sortKey = ref("created_at");
+const sortDirection = ref<"asc" | "desc">("desc");
 
 // Filters
-const filterUser = ref('all')
-const filterAction = ref('all')
-const filterResourceType = ref('all')
+const filterUser = ref("all");
+const filterAction = ref("all");
+const filterResourceType = ref("all");
 
 // Date range
 const {
-  selectedRange, customDateRange, isDatePickerOpen,
-  dateRange, formatDateRangeDisplay, applyCustomRange: baseApplyCustomRange,
-} = useDateRange()
+  selectedRange,
+  customDateRange,
+  isDatePickerOpen,
+  dateRange,
+  formatDateRangeDisplay,
+  applyCustomRange: baseApplyCustomRange,
+} = useDateRange();
 
 function applyCustomRange() {
-  baseApplyCustomRange()
-  applyFilter()
+  baseApplyCustomRange();
+  applyFilter();
 }
 
 watch(selectedRange, (val) => {
-  if (val !== 'custom') applyFilter()
-})
+  if (val !== "custom") applyFilter();
+});
 
 const columns = computed<Column<AuditLogEntry>[]>(() => [
-  { key: 'user_name', label: t('auditLogs.user'), sortable: true },
-  { key: 'action', label: t('auditLogs.action') },
-  { key: 'resource_type', label: t('auditLogs.resource') },
-  { key: 'changes', label: t('auditLogs.changes') },
-  { key: 'created_at', label: t('auditLogs.date'), sortable: true },
-])
+  { key: "user_name", label: t("auditLogs.user"), sortable: true },
+  { key: "action", label: t("auditLogs.action") },
+  { key: "resource_type", label: t("auditLogs.resource") },
+  { key: "changes", label: t("auditLogs.changes") },
+  { key: "created_at", label: t("auditLogs.date"), sortable: true },
+]);
 
 function handlePageChange(page: number) {
-  currentPage.value = page
-  fetchLogs()
+  currentPage.value = page;
+  fetchLogs();
 }
 
 async function fetchLogs() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const { from, to } = dateRange.value
-    const params: Record<string, any> = { page: currentPage.value, limit: pageSize, from, to }
-    if (filterUser.value && filterUser.value !== 'all') params.user_id = filterUser.value
-    if (filterAction.value && filterAction.value !== 'all') params.action = filterAction.value
-    if (filterResourceType.value && filterResourceType.value !== 'all') params.resource_type = filterResourceType.value
+    const { from, to } = dateRange.value;
+    const params: Record<string, any> = {
+      page: currentPage.value,
+      limit: pageSize,
+      from,
+      to,
+    };
+    if (filterUser.value && filterUser.value !== "all")
+      params.user_id = filterUser.value;
+    if (filterAction.value && filterAction.value !== "all")
+      params.action = filterAction.value;
+    if (filterResourceType.value && filterResourceType.value !== "all")
+      params.resource_type = filterResourceType.value;
 
-    const response = await auditLogsService.list(params)
-    const data = (response.data as any).data || response.data
-    logs.value = data.audit_logs || []
-    totalItems.value = data.total || 0
+    const response = await auditLogsService.list(params);
+    const data = (response.data as any).data || response.data;
+    logs.value = data.audit_logs || [];
+    totalItems.value = data.total || 0;
   } catch {
-    logs.value = []
-    totalItems.value = 0
+    logs.value = [];
+    totalItems.value = 0;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 function applyFilter() {
-  currentPage.value = 1
-  fetchLogs()
+  currentPage.value = 1;
+  fetchLogs();
 }
 
 function actionVariant(action: string): string {
   switch (action) {
-    case 'created': return 'bg-green-500/10 text-green-500 border-green-500/20'
-    case 'updated': return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-    case 'deleted': return 'bg-red-500/10 text-red-500 border-red-500/20'
-    default: return ''
+    case "created":
+      return "bg-green-500/10 text-green-500 border-green-500/20";
+    case "updated":
+      return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+    case "deleted":
+      return "bg-red-500/10 text-red-500 border-red-500/20";
+    default:
+      return "";
   }
 }
 
 function changeSummary(log: AuditLogEntry): string {
-  if (!log.changes || log.changes.length === 0) return '—'
-  if (log.action === 'created') return `${log.changes.length} fields set`
-  if (log.action === 'deleted') return `${log.changes.length} fields`
-  return log.changes.map(c => formatLabel(c.field)).join(', ')
+  if (!log.changes || log.changes.length === 0) return "—";
+  if (log.action === "created") return `${log.changes.length} fields set`;
+  if (log.action === "deleted") return `${log.changes.length} fields`;
+  return log.changes.map((c) => formatLabel(c.field)).join(", ");
 }
 
 onMounted(async () => {
-  await usersStore.fetchUsers()
-  fetchLogs()
-})
+  await usersStore.fetchUsers();
+  fetchLogs();
+});
 </script>
 
 <template>
@@ -130,42 +157,71 @@ onMounted(async () => {
             <CardHeader>
               <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle>{{ t('auditLogs.allActivity') }}</CardTitle>
-                  <CardDescription>{{ t('auditLogs.allActivityDesc') }}</CardDescription>
+                  <CardTitle>{{ t("auditLogs.allActivity") }}</CardTitle>
+                  <CardDescription>{{
+                    t("auditLogs.allActivityDesc")
+                  }}</CardDescription>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                  <Select v-model="filterUser" @update:model-value="applyFilter">
+                  <Select
+                    v-model="filterUser"
+                    @update:model-value="applyFilter"
+                  >
                     <SelectTrigger class="w-[180px]">
                       <SelectValue :placeholder="t('auditLogs.allUsers')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{{ t('auditLogs.allUsers') }}</SelectItem>
-                      <SelectItem v-for="user in usersStore.users" :key="user.id" :value="user.id">
+                      <SelectItem value="all">{{
+                        t("auditLogs.allUsers")
+                      }}</SelectItem>
+                      <SelectItem
+                        v-for="user in usersStore.users"
+                        :key="user.id"
+                        :value="user.id"
+                      >
                         {{ user.full_name || user.email }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select v-model="filterAction" @update:model-value="applyFilter">
+                  <Select
+                    v-model="filterAction"
+                    @update:model-value="applyFilter"
+                  >
                     <SelectTrigger class="w-[140px]">
                       <SelectValue :placeholder="t('auditLogs.allActions')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{{ t('auditLogs.allActions') }}</SelectItem>
-                      <SelectItem value="created">{{ t('auditLogs.created') }}</SelectItem>
-                      <SelectItem value="updated">{{ t('auditLogs.updated') }}</SelectItem>
-                      <SelectItem value="deleted">{{ t('auditLogs.deleted') }}</SelectItem>
+                      <SelectItem value="all">{{
+                        t("auditLogs.allActions")
+                      }}</SelectItem>
+                      <SelectItem value="created">{{
+                        t("auditLogs.created")
+                      }}</SelectItem>
+                      <SelectItem value="updated">{{
+                        t("auditLogs.updated")
+                      }}</SelectItem>
+                      <SelectItem value="deleted">{{
+                        t("auditLogs.deleted")
+                      }}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select v-model="filterResourceType" @update:model-value="applyFilter">
+                  <Select
+                    v-model="filterResourceType"
+                    @update:model-value="applyFilter"
+                  >
                     <SelectTrigger class="w-[180px]">
                       <SelectValue :placeholder="t('auditLogs.allResources')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{{ t('auditLogs.allResources') }}</SelectItem>
+                      <SelectItem value="all">{{
+                        t("auditLogs.allResources")
+                      }}</SelectItem>
                       <SelectItem value="account">Account</SelectItem>
                       <SelectItem value="ai_context">AI Context</SelectItem>
                       <SelectItem value="campaign">Campaign</SelectItem>
-                      <SelectItem value="chatbot_settings">Chatbot Settings</SelectItem>
+                      <SelectItem value="chatbot_settings"
+                        >Chatbot Settings</SelectItem
+                      >
                       <SelectItem value="chatbot_flow">Chatbot Flow</SelectItem>
                       <SelectItem value="ivr_flow">IVR Flow</SelectItem>
                       <SelectItem value="keyword_rule">Keyword Rule</SelectItem>
@@ -213,7 +269,10 @@ onMounted(async () => {
 
                 <template #cell-action="{ item: log }">
                   <div class="py-1">
-                    <Badge variant="outline" :class="[actionVariant(log.action), '']">
+                    <Badge
+                      variant="outline"
+                      :class="[actionVariant(log.action), '']"
+                    >
                       {{ t(`auditLogs.${log.action}`) }}
                     </Badge>
                   </div>
@@ -221,19 +280,25 @@ onMounted(async () => {
 
                 <template #cell-resource_type="{ item: log }">
                   <div class="py-1">
-                    <span class="text-muted-foreground">{{ formatLabel(log.resource_type) }}</span>
+                    <span class="text-muted-foreground">{{
+                      formatLabel(log.resource_type)
+                    }}</span>
                   </div>
                 </template>
 
                 <template #cell-changes="{ item: log }">
                   <div class="py-1">
-                    <span class="text-muted-foreground">{{ changeSummary(log) }}</span>
+                    <span class="text-muted-foreground">{{
+                      changeSummary(log)
+                    }}</span>
                   </div>
                 </template>
 
                 <template #cell-created_at="{ item: log }">
                   <div class="py-1">
-                    <span class="text-muted-foreground">{{ formatDate(log.created_at) }}</span>
+                    <span class="text-muted-foreground">{{
+                      formatDate(log.created_at)
+                    }}</span>
                   </div>
                 </template>
               </DataTable>

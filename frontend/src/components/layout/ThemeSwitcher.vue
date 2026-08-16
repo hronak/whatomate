@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { Sun, Moon, Monitor } from '@lucide/vue'
-import { useColorMode } from '@/composables/useColorMode'
+import { Button } from "@/components/ui/button";
+import { Sun, Moon, Monitor } from "@lucide/vue";
+import { useColorMode } from "@/composables/useColorMode";
 
-const { colorMode, setColorMode } = useColorMode()
+const { colorMode, setColorMode } = useColorMode();
 </script>
 
 <template>
-  <div class="flex gap-0.5 px-1.5 py-1" role="radiogroup" aria-label="Color theme">
+  <div
+    class="flex gap-0.5 px-1.5 py-1"
+    role="radiogroup"
+    aria-label="Color theme"
+  >
     <Button
       variant="ghost"
       size="icon"

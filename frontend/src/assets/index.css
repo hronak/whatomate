@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -21,7 +21,9 @@
 }
 
 @theme inline {
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -65,15 +67,15 @@
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
 
-  --color-whatsapp-green: #25D366;
-  --color-whatsapp-teal: #128C7E;
-  --color-whatsapp-teal-dark: #075E54;
-  --color-whatsapp-light: #DCF8C6;
+  --color-whatsapp-green: #25d366;
+  --color-whatsapp-teal: #128c7e;
+  --color-whatsapp-teal-dark: #075e54;
+  --color-whatsapp-light: #dcf8c6;
 
-  --color-facebook: #1877F2;
-  --color-facebook-dark: #0C5DC7;
-  --color-facebook-hover: #166FE5;
-  --color-facebook-hoverDark: #0A4DAD;
+  --color-facebook: #1877f2;
+  --color-facebook-dark: #0c5dc7;
+  --color-facebook-hover: #166fe5;
+  --color-facebook-hoverDark: #0a4dad;
 
   --color-violet-50: #f5f3ff;
   --color-violet-100: #ede9fe;
@@ -208,12 +210,25 @@
     line-height: 1.65;
     font-weight: 400;
     /* Subtle gradient for depth like Linear/Vercel */
-    background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.05), transparent);
+    background-image: radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgba(16, 185, 129, 0.05),
+      transparent
+    );
   }
   .dark body {
-    background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.08), transparent);
+    background-image: radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgba(16, 185, 129, 0.08),
+      transparent
+    );
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-medium;
     margin-top: 0;
     /* Positive tracking is a small-text remedy — headings still want the
@@ -232,7 +247,9 @@
     @apply text-lg;
     line-height: 1.5;
   }
-  h4, h5, h6 {
+  h4,
+  h5,
+  h6 {
     @apply text-base;
   }
   a {
@@ -316,7 +333,7 @@
 
 /* Bottom accent line, shown on hover (no sweep — motion is removed app-wide) */
 .card-depth::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -633,7 +650,7 @@
 }
 
 .nav-active-indicator::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 25%;

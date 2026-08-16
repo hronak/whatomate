@@ -1,61 +1,67 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { toast } from 'vue-sonner'
-import { User, Eye, EyeOff } from '@lucide/vue'
-import { usersService } from '@/services/api'
-import { useAuthStore } from '@/stores/auth'
-import { PageHeader, Spinner } from '@/components/shared'
-import { getErrorMessage } from '@/lib/api-utils'
+import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "vue-sonner";
+import { User, Eye, EyeOff } from "@lucide/vue";
+import { usersService } from "@/services/api";
+import { useAuthStore } from "@/stores/auth";
+import { PageHeader, Spinner } from "@/components/shared";
+import { getErrorMessage } from "@/lib/api-utils";
 
-const { t } = useI18n()
-const authStore = useAuthStore()
-const isChangingPassword = ref(false)
-const showCurrentPassword = ref(false)
-const showNewPassword = ref(false)
-const showConfirmPassword = ref(false)
+const { t } = useI18n();
+const authStore = useAuthStore();
+const isChangingPassword = ref(false);
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const passwordForm = ref({
-  current_password: '',
-  new_password: '',
-  confirm_password: ''
-})
+  current_password: "",
+  new_password: "",
+  confirm_password: "",
+});
 
 async function changePassword() {
   // Validate passwords match
   if (passwordForm.value.new_password !== passwordForm.value.confirm_password) {
-    toast.error(t('profile.passwordMismatch'))
-    return
+    toast.error(t("profile.passwordMismatch"));
+    return;
   }
 
   // Validate password length
   if (passwordForm.value.new_password.length < 6) {
-    toast.error(t('profile.passwordTooShort'))
-    return
+    toast.error(t("profile.passwordTooShort"));
+    return;
   }
 
-  isChangingPassword.value = true
+  isChangingPassword.value = true;
   try {
     await usersService.changePassword({
       current_password: passwordForm.value.current_password,
-      new_password: passwordForm.value.new_password
-    })
-    toast.success(t('profile.passwordChanged'))
+      new_password: passwordForm.value.new_password,
+    });
+    toast.success(t("profile.passwordChanged"));
     // Clear the form
     passwordForm.value = {
-      current_password: '',
-      new_password: '',
-      confirm_password: ''
-    }
+      current_password: "",
+      new_password: "",
+      confirm_password: "",
+    };
   } catch (error: any) {
-    toast.error(getErrorMessage(error, t('profile.passwordChangeFailed')))
+    toast.error(getErrorMessage(error, t("profile.passwordChangeFailed")));
   } finally {
-    isChangingPassword.value = false
+    isChangingPassword.value = false;
   }
 }
 </script>
@@ -75,22 +81,32 @@ async function changePassword() {
         <!-- User Info -->
         <Card>
           <CardHeader>
-            <CardTitle>{{ $t('profile.accountInfo') }}</CardTitle>
-            <CardDescription>{{ $t('profile.accountInfoDesc') }}</CardDescription>
+            <CardTitle>{{ $t("profile.accountInfo") }}</CardTitle>
+            <CardDescription>{{
+              $t("profile.accountInfoDesc")
+            }}</CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <Label class="text-muted-foreground">{{ $t('common.name') }}</Label>
+                <Label class="text-muted-foreground">{{
+                  $t("common.name")
+                }}</Label>
                 <p class="font-medium">{{ authStore.user?.full_name }}</p>
               </div>
               <div>
-                <Label class="text-muted-foreground">{{ $t('common.email') }}</Label>
+                <Label class="text-muted-foreground">{{
+                  $t("common.email")
+                }}</Label>
                 <p class="font-medium">{{ authStore.user?.email }}</p>
               </div>
               <div>
-                <Label class="text-muted-foreground">{{ $t('users.role') }}</Label>
-                <p class="font-medium capitalize">{{ authStore.user?.role?.name }}</p>
+                <Label class="text-muted-foreground">{{
+                  $t("users.role")
+                }}</Label>
+                <p class="font-medium capitalize">
+                  {{ authStore.user?.role?.name }}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -99,12 +115,16 @@ async function changePassword() {
         <!-- Change Password -->
         <Card>
           <CardHeader>
-            <CardTitle>{{ $t('profile.changePassword') }}</CardTitle>
-            <CardDescription>{{ $t('profile.changePasswordDesc') }}</CardDescription>
+            <CardTitle>{{ $t("profile.changePassword") }}</CardTitle>
+            <CardDescription>{{
+              $t("profile.changePasswordDesc")
+            }}</CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="space-y-2">
-              <Label for="current_password">{{ $t('profile.currentPassword') }}</Label>
+              <Label for="current_password">{{
+                $t("profile.currentPassword")
+              }}</Label>
               <div class="relative">
                 <Input
                   id="current_password"
@@ -123,7 +143,7 @@ async function changePassword() {
               </div>
             </div>
             <div class="space-y-2">
-              <Label for="new_password">{{ $t('profile.newPassword') }}</Label>
+              <Label for="new_password">{{ $t("profile.newPassword") }}</Label>
               <div class="relative">
                 <Input
                   id="new_password"
@@ -140,10 +160,14 @@ async function changePassword() {
                   <EyeOff v-else class="size-4" />
                 </button>
               </div>
-              <p class="text-muted-foreground">{{ $t('profile.passwordMinLength') }}</p>
+              <p class="text-muted-foreground">
+                {{ $t("profile.passwordMinLength") }}
+              </p>
             </div>
             <div class="space-y-2">
-              <Label for="confirm_password">{{ $t('profile.confirmNewPassword') }}</Label>
+              <Label for="confirm_password">{{
+                $t("profile.confirmNewPassword")
+              }}</Label>
               <div class="relative">
                 <Input
                   id="confirm_password"
@@ -162,9 +186,14 @@ async function changePassword() {
               </div>
             </div>
             <div class="flex justify-end">
-              <Button variant="outline" size="sm" @click="changePassword" :disabled="isChangingPassword">
+              <Button
+                variant="outline"
+                size="sm"
+                @click="changePassword"
+                :disabled="isChangingPassword"
+              >
                 <Spinner v-if="isChangingPassword" class="mr-2 size-4" />
-                {{ $t('profile.changePassword') }}
+                {{ $t("profile.changePassword") }}
               </Button>
             </div>
           </CardContent>

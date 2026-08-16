@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { ButtonConfig } from '@/types/flow-preview'
-import { ExternalLink, Phone, PhoneCall } from '@lucide/vue'
+import type { ButtonConfig } from "@/types/flow-preview";
+import { ExternalLink, Phone, PhoneCall } from "@lucide/vue";
 
 defineProps<{
-  buttons: ButtonConfig[]
-  disabled?: boolean
-}>()
+  buttons: ButtonConfig[];
+  disabled?: boolean;
+}>();
 
 const emit = defineEmits<{
-  select: [button: ButtonConfig]
-}>()
+  select: [button: ButtonConfig];
+}>();
 
 function handleClick(button: ButtonConfig) {
-  emit('select', button)
+  emit("select", button);
 }
 </script>
 
@@ -24,7 +24,7 @@ function handleClick(button: ButtonConfig) {
       class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5 transition-colors"
       :class="{
         'hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer': !disabled,
-        'opacity-50 cursor-not-allowed': disabled
+        'opacity-50 cursor-not-allowed': disabled,
       }"
       :disabled="disabled"
       @click="handleClick(btn)"
@@ -32,7 +32,7 @@ function handleClick(button: ButtonConfig) {
       <ExternalLink v-if="btn.type === 'url'" class="size-4" />
       <Phone v-else-if="btn.type === 'phone'" class="size-4" />
       <PhoneCall v-else-if="btn.type === 'voice_call'" class="size-4" />
-      {{ btn.title || 'Option' }}
+      {{ btn.title || "Option" }}
     </button>
   </div>
 </template>

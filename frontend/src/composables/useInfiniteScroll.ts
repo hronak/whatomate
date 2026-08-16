@@ -1,32 +1,32 @@
-import { ref, onUnmounted, type Ref } from 'vue'
-import type { ScrollArea } from '@/components/ui/scroll-area'
+import { ref, onUnmounted, type Ref } from "vue";
+import type { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface InfiniteScrollOptions {
   /** Direction to trigger loading: 'top' for older items, 'bottom' for newer items */
-  direction?: 'top' | 'bottom'
+  direction?: "top" | "bottom";
   /** Distance from edge (in pixels) to trigger loading (default: 100) */
-  threshold?: number
+  threshold?: number;
   /** Callback when loading is triggered */
-  onLoadMore: () => void | Promise<void>
+  onLoadMore: () => void | Promise<void>;
   /** Ref to check if more items are available */
-  hasMore: Ref<boolean>
+  hasMore: Ref<boolean>;
   /** Ref to check if currently loading */
-  isLoading: Ref<boolean>
+  isLoading: Ref<boolean>;
   /** Optional callback on every scroll event (e.g., for sticky headers) */
-  onScroll?: (event: Event) => void
+  onScroll?: (event: Event) => void;
 }
 
 export interface InfiniteScrollResult {
   /** Ref to attach to ScrollArea component */
-  scrollAreaRef: Ref<InstanceType<typeof ScrollArea> | null>
+  scrollAreaRef: Ref<InstanceType<typeof ScrollArea> | null>;
   /** Setup the scroll listener (call after component mounts and ScrollArea renders) */
-  setup: () => void
+  setup: () => void;
   /** Cleanup the scroll listener */
-  cleanup: () => void
+  cleanup: () => void;
   /** Get the scroll viewport element (useful for scroll position manipulation) */
-  getViewport: () => HTMLElement | null
+  getViewport: () => HTMLElement | null;
   /** Preserve scroll position after prepending items (for 'top' direction) */
-  preserveScrollPosition: (callback: () => Promise<void>) => Promise<void>
+  preserveScrollPosition: (callback: () => Promise<void>) => Promise<void>;
 }
 
 /**
@@ -52,80 +52,84 @@ export interface InfiniteScrollResult {
  * })
  * ```
  */
-export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrollResult {
+export function useInfiniteScroll(
+  options: InfiniteScrollOptions,
+): InfiniteScrollResult {
   const {
-    direction = 'bottom',
+    direction = "bottom",
     threshold = 100,
     onLoadMore,
     hasMore,
     isLoading,
-    onScroll: onScrollCallback
-  } = options
+    onScroll: onScrollCallback,
+  } = options;
 
-  const scrollAreaRef = ref<InstanceType<typeof ScrollArea> | null>(null)
-  let scrollViewport: HTMLElement | null = null
+  const scrollAreaRef = ref<InstanceType<typeof ScrollArea> | null>(null);
+  let scrollViewport: HTMLElement | null = null;
 
   function findScrollViewport(scrollArea: HTMLElement): HTMLElement | null {
     // Try data attributes first (Reka/Radix UI)
-    let viewport = scrollArea.querySelector('[data-reka-scroll-area-viewport]') ||
-                   scrollArea.querySelector('[data-radix-scroll-area-viewport]')
+    let viewport =
+      scrollArea.querySelector("[data-reka-scroll-area-viewport]") ||
+      scrollArea.querySelector("[data-radix-scroll-area-viewport]");
 
     if (!viewport) {
       // Fallback: find child element with overflow scroll/auto
-      const children = scrollArea.querySelectorAll('*')
+      const children = scrollArea.querySelectorAll("*");
       for (const child of children) {
-        const style = window.getComputedStyle(child)
-        if (style.overflowY === 'scroll' || style.overflowY === 'auto') {
-          viewport = child as HTMLElement
-          break
+        const style = window.getComputedStyle(child);
+        if (style.overflowY === "scroll" || style.overflowY === "auto") {
+          viewport = child as HTMLElement;
+          break;
         }
       }
     }
 
-    return viewport as HTMLElement | null
+    return viewport as HTMLElement | null;
   }
 
   function handleScroll(event: Event) {
-    const target = event.target as HTMLElement
+    const target = event.target as HTMLElement;
 
     // Call optional scroll callback (e.g., for sticky headers)
-    onScrollCallback?.(event)
+    onScrollCallback?.(event);
 
-    if (!hasMore.value || isLoading.value) return
+    if (!hasMore.value || isLoading.value) return;
 
-    if (direction === 'top') {
+    if (direction === "top") {
       // Trigger when scrolled near top
       if (target.scrollTop < threshold) {
-        onLoadMore()
+        onLoadMore();
       }
     } else {
       // Trigger when scrolled near bottom
-      const scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight
+      const scrollBottom =
+        target.scrollHeight - target.scrollTop - target.clientHeight;
       if (scrollBottom < threshold) {
-        onLoadMore()
+        onLoadMore();
       }
     }
   }
 
   function setup() {
-    const scrollArea = scrollAreaRef.value?.$el
-    if (!scrollArea) return
+    const scrollArea = scrollAreaRef.value?.$el;
+    if (!scrollArea) return;
 
-    scrollViewport = findScrollViewport(scrollArea)
+    scrollViewport = findScrollViewport(scrollArea);
     if (scrollViewport) {
-      scrollViewport.addEventListener('scroll', handleScroll)
+      scrollViewport.addEventListener("scroll", handleScroll);
     }
   }
 
   function cleanup() {
     if (scrollViewport) {
-      scrollViewport.removeEventListener('scroll', handleScroll)
-      scrollViewport = null
+      scrollViewport.removeEventListener("scroll", handleScroll);
+      scrollViewport = null;
     }
   }
 
   function getViewport(): HTMLElement | null {
-    return scrollViewport
+    return scrollViewport;
   }
 
   /**
@@ -133,28 +137,29 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
    * Useful for 'top' direction where new items are added above.
    */
   async function preserveScrollPosition(callback: () => Promise<void>) {
-    if (!scrollViewport) return
+    if (!scrollViewport) return;
 
-    const currentScrollHeight = scrollViewport.scrollHeight
-    const currentScrollTop = scrollViewport.scrollTop
+    const currentScrollHeight = scrollViewport.scrollHeight;
+    const currentScrollTop = scrollViewport.scrollTop;
 
-    await callback()
+    await callback();
 
     // Wait for DOM update
-    await new Promise(resolve => requestAnimationFrame(resolve))
+    await new Promise((resolve) => requestAnimationFrame(resolve));
 
-    const newScrollHeight = scrollViewport.scrollHeight
-    scrollViewport.scrollTop = newScrollHeight - currentScrollHeight + currentScrollTop
+    const newScrollHeight = scrollViewport.scrollHeight;
+    scrollViewport.scrollTop =
+      newScrollHeight - currentScrollHeight + currentScrollTop;
   }
 
   // Auto cleanup on unmount
-  onUnmounted(cleanup)
+  onUnmounted(cleanup);
 
   return {
     scrollAreaRef,
     setup,
     cleanup,
     getViewport,
-    preserveScrollPosition
-  }
+    preserveScrollPosition,
+  };
 }

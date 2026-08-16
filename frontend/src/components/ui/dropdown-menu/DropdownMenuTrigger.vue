@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { DropdownMenuTrigger as DropdownMenuTriggerPrimitive } from 'reka-ui'
+import { DropdownMenuTrigger as DropdownMenuTriggerPrimitive } from "reka-ui";
 
 defineProps<{
-  asChild?: boolean
-}>()
+  asChild?: boolean;
+}>();
 </script>
 
 <template>

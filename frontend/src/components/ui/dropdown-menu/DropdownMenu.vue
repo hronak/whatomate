@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { DropdownMenuRoot } from 'reka-ui'
+import { DropdownMenuRoot } from "reka-ui";
 
 const props = defineProps<{
-  open?: boolean
-}>()
+  open?: boolean;
+}>();
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-}>()
+  "update:open": [value: boolean];
+}>();
 </script>
 
 <template>

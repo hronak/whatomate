@@ -1,167 +1,241 @@
 <script setup lang="ts">
-import { computed, defineComponent, h, type PropType } from 'vue'
-import { Phone, ArrowRight } from '@lucide/vue'
+import { computed, defineComponent, h, type PropType } from "vue";
+import { Phone, ArrowRight } from "@lucide/vue";
 
 interface Step {
-  node?: string
-  type?: string
-  label?: string
-  digit?: string
-  option_label?: string
-  outcome?: string
-  action?: string // flow_start
-  flow?: string
+  node?: string;
+  type?: string;
+  label?: string;
+  digit?: string;
+  option_label?: string;
+  outcome?: string;
+  action?: string; // flow_start
+  flow?: string;
 }
 
 interface TreeNode {
-  step: Step
-  children: TreeNode[]
+  step: Step;
+  children: TreeNode[];
 }
 
 const props = defineProps<{
-  steps: Step[]
-}>()
+  steps: Step[];
+}>();
 
 // Build a tree: flow_start and goto_flow nest subsequent steps as children.
 const tree = computed(() => {
-  const root: TreeNode[] = []
-  const stack: TreeNode[][] = [root]
+  const root: TreeNode[] = [];
+  const stack: TreeNode[][] = [root];
 
   for (const step of props.steps) {
-    const current = stack[stack.length - 1]
+    const current = stack[stack.length - 1];
 
-    if (step.action === 'flow_start' || step.type === 'goto_flow') {
-      const node: TreeNode = { step, children: [] }
-      current.push(node)
-      stack.push(node.children)
+    if (step.action === "flow_start" || step.type === "goto_flow") {
+      const node: TreeNode = { step, children: [] };
+      current.push(node);
+      stack.push(node.children);
     } else {
-      current.push({ step, children: [] })
+      current.push({ step, children: [] });
     }
   }
 
-  return root
-})
+  return root;
+});
 
 interface TNode {
   step: {
-    node?: string; type?: string; label?: string; digit?: string
-    option_label?: string; outcome?: string; action?: string; flow?: string
-  }
-  children: TNode[]
+    node?: string;
+    type?: string;
+    label?: string;
+    digit?: string;
+    option_label?: string;
+    outcome?: string;
+    action?: string;
+    flow?: string;
+  };
+  children: TNode[];
 }
 
 const TreeNodes = defineComponent({
-  name: 'TreeNodes',
+  name: "TreeNodes",
   props: {
     nodes: { type: Array as PropType<TNode[]>, required: true },
-    depth: { type: Number, default: 0 }
+    depth: { type: Number, default: 0 },
   },
   setup(props) {
     return () => {
-      if (!props.nodes.length) return null
+      if (!props.nodes.length) return null;
 
-      return h('div', { class: 'flex flex-col gap-1' },
+      return h(
+        "div",
+        { class: "flex flex-col gap-1" },
         props.nodes.map((node, idx) => {
-          const step = node.step
-          const isFlow = step.action === 'flow_start' || step.type === 'goto_flow'
-          const hasChildren = node.children.length > 0
+          const step = node.step;
+          const isFlow =
+            step.action === "flow_start" || step.type === "goto_flow";
+          const hasChildren = node.children.length > 0;
 
-          let rowContent
+          let rowContent;
 
           if (isFlow) {
-            const flowParts = []
+            const flowParts = [];
 
             if (step.digit) {
               flowParts.push(
-                h('div', {
-                  class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0'
-                }, step.digit)
-              )
+                h(
+                  "div",
+                  {
+                    class:
+                      "flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0",
+                  },
+                  step.digit,
+                ),
+              );
               flowParts.push(
-                h(ArrowRight, { class: 'h-3.5 w-3.5 text-muted-foreground shrink-0' })
-              )
+                h(ArrowRight, {
+                  class: "h-3.5 w-3.5 text-muted-foreground shrink-0",
+                }),
+              );
             }
 
             flowParts.push(
-              h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded-full bg-primary shrink-0'
-              }, [h(Phone, { class: 'h-3 w-3 text-primary-foreground' })])
-            )
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 w-6 rounded-full bg-primary shrink-0",
+                },
+                [h(Phone, { class: "h-3 w-3 text-primary-foreground" })],
+              ),
+            );
             flowParts.push(
-              h('span', { class: 'font-semibold' }, step.flow || step.label || '?')
-            )
+              h(
+                "span",
+                { class: "font-semibold" },
+                step.flow || step.label || "?",
+              ),
+            );
 
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, flowParts)
-          } else if (step.type === 'menu' && step.digit) {
+            rowContent = h(
+              "div",
+              { class: "flex items-center gap-2 py-1" },
+              flowParts,
+            );
+          } else if (step.type === "menu" && step.digit) {
             // Menu with digit: digit badge + option label + node label
             const displayLabel = step.option_label
-              ? step.label ? `${step.option_label} (${step.label})` : step.option_label
-              : step.label || '-'
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
-              h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0'
-              }, step.digit),
-              h('span', { class: 'font-medium' }, displayLabel),
-            ])
-          } else if (step.type === 'menu') {
+              ? step.label
+                ? `${step.option_label} (${step.label})`
+                : step.option_label
+              : step.label || "-";
+            rowContent = h("div", { class: "flex items-center gap-2 py-1" }, [
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0",
+                },
+                step.digit,
+              ),
+              h("span", { class: "font-medium" }, displayLabel),
+            ]);
+          } else if (step.type === "menu") {
             // Menu without digit (timeout/max_retries)
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
-              h('div', {
-                class: 'flex items-center justify-center h-6 px-1.5 rounded bg-muted font-medium shrink-0'
-              }, 'menu'),
-              h('span', { class: '' }, step.label || '-'),
-              step.outcome ? h('span', { class: 'text-muted-foreground' }, `(${step.outcome})`) : null,
-            ])
-          } else if (step.type === 'transfer') {
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
-              h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded-full bg-amber-600 shrink-0'
-              }, [h(ArrowRight, { class: 'h-3 w-3 text-white' })]),
-              h('span', { class: '' }, step.label || 'Transfer'),
-            ])
-          } else if (step.type === 'hangup') {
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
-              h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded-full bg-red-600 shrink-0 text-white'
-              }, 'x'),
-              h('span', { class: '' }, step.label || 'Hangup'),
-            ])
+            rowContent = h("div", { class: "flex items-center gap-2 py-1" }, [
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 px-1.5 rounded bg-muted font-medium shrink-0",
+                },
+                "menu",
+              ),
+              h("span", { class: "" }, step.label || "-"),
+              step.outcome
+                ? h(
+                    "span",
+                    { class: "text-muted-foreground" },
+                    `(${step.outcome})`,
+                  )
+                : null,
+            ]);
+          } else if (step.type === "transfer") {
+            rowContent = h("div", { class: "flex items-center gap-2 py-1" }, [
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 w-6 rounded-full bg-amber-600 shrink-0",
+                },
+                [h(ArrowRight, { class: "h-3 w-3 text-white" })],
+              ),
+              h("span", { class: "" }, step.label || "Transfer"),
+            ]);
+          } else if (step.type === "hangup") {
+            rowContent = h("div", { class: "flex items-center gap-2 py-1" }, [
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 w-6 rounded-full bg-red-600 shrink-0 text-white",
+                },
+                "x",
+              ),
+              h("span", { class: "" }, step.label || "Hangup"),
+            ]);
           } else if (step.type) {
             // greeting, timing, http_callback, gather, etc.
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
-              h('div', {
-                class: 'flex items-center justify-center h-6 px-1.5 rounded bg-muted font-medium shrink-0 capitalize'
-              }, step.type.replace('_', ' ')),
-              h('span', { class: '' }, step.label || '-'),
-            ])
+            rowContent = h("div", { class: "flex items-center gap-2 py-1" }, [
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 px-1.5 rounded bg-muted font-medium shrink-0 capitalize",
+                },
+                step.type.replace("_", " "),
+              ),
+              h("span", { class: "" }, step.label || "-"),
+            ]);
           } else {
             // Fallback
-            rowContent = h('div', { class: 'flex items-center gap-2 py-1' }, [
-              h('div', {
-                class: 'flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0'
-              }, step.digit || '?'),
-              h('span', { class: '' }, step.label || '-'),
-            ])
+            rowContent = h("div", { class: "flex items-center gap-2 py-1" }, [
+              h(
+                "div",
+                {
+                  class:
+                    "flex items-center justify-center h-6 w-6 rounded border bg-muted font-mono font-bold shrink-0",
+                },
+                step.digit || "?",
+              ),
+              h("span", { class: "" }, step.label || "-"),
+            ]);
           }
 
-          const elements = [rowContent]
+          const elements = [rowContent];
 
           if (hasChildren) {
             elements.push(
-              h('div', {
-                class: 'ml-3 pl-4 border-l-2 border-muted-foreground/30'
-              }, [
-                h(TreeNodes, { nodes: node.children, depth: props.depth + 1 })
-              ])
-            )
+              h(
+                "div",
+                {
+                  class: "ml-3 pl-4 border-l-2 border-muted-foreground/30",
+                },
+                [
+                  h(TreeNodes, {
+                    nodes: node.children,
+                    depth: props.depth + 1,
+                  }),
+                ],
+              ),
+            );
           }
 
-          return h('div', { key: idx }, elements)
-        })
-      )
-    }
-  }
-})
+          return h("div", { key: idx }, elements);
+        }),
+      );
+    };
+  },
+});
 </script>
 
 <template>

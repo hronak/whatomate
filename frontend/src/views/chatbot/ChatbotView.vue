@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { chatbotService } from '@/services/api'
-import { toast } from 'vue-sonner'
-import { PageHeader, ConfirmDialog, ErrorState } from '@/components/shared'
-import { getErrorMessage } from '@/lib/api-utils'
+import { ref, onMounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { chatbotService } from "@/services/api";
+import { toast } from "vue-sonner";
+import { PageHeader, ConfirmDialog, ErrorState } from "@/components/shared";
+import { getErrorMessage } from "@/lib/api-utils";
 import {
   Bot,
   Key,
@@ -19,39 +19,39 @@ import {
   TrendingUp,
   Users,
   MessageSquare,
-  Clock
-} from '@lucide/vue'
+  Clock,
+} from "@lucide/vue";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 interface ChatbotSettings {
-  enabled: boolean
-  greeting_message: string
-  fallback_message: string
-  session_timeout_minutes: number
-  ai_enabled: boolean
-  ai_provider: string
+  enabled: boolean;
+  greeting_message: string;
+  fallback_message: string;
+  session_timeout_minutes: number;
+  ai_enabled: boolean;
+  ai_provider: string;
 }
 
 interface Stats {
-  total_sessions: number
-  active_sessions: number
-  messages_handled: number
-  ai_responses: number
-  agent_transfers: number
-  keywords_count: number
-  flows_count: number
-  ai_contexts_count: number
+  total_sessions: number;
+  active_sessions: number;
+  messages_handled: number;
+  ai_responses: number;
+  agent_transfers: number;
+  keywords_count: number;
+  flows_count: number;
+  ai_contexts_count: number;
 }
 
 const settings = ref<ChatbotSettings>({
   enabled: false,
-  greeting_message: '',
-  fallback_message: '',
+  greeting_message: "",
+  fallback_message: "",
   session_timeout_minutes: 30,
   ai_enabled: false,
-  ai_provider: ''
-})
+  ai_provider: "",
+});
 
 const stats = ref<Stats>({
   total_sessions: 0,
@@ -61,66 +61,95 @@ const stats = ref<Stats>({
   agent_transfers: 0,
   keywords_count: 0,
   flows_count: 0,
-  ai_contexts_count: 0
-})
+  ai_contexts_count: 0,
+});
 
-const isLoading = ref(true)
-const isToggling = ref(false)
-const error = ref(false)
-const showToggleConfirm = ref(false)
+const isLoading = ref(true);
+const isToggling = ref(false);
+const error = ref(false);
+const showToggleConfirm = ref(false);
 
 onMounted(async () => {
   try {
-    const response = await chatbotService.getSettings()
+    const response = await chatbotService.getSettings();
     // API response is wrapped in { status: "success", data: { settings: {...}, stats: {...} } }
-    const data = response.data.data || response.data
-    settings.value = data.settings || settings.value
-    stats.value = data.stats || stats.value
+    const data = response.data.data || response.data;
+    settings.value = data.settings || settings.value;
+    stats.value = data.stats || stats.value;
   } catch (err) {
-    console.error('Failed to load chatbot settings:', err)
-    error.value = true
+    console.error("Failed to load chatbot settings:", err);
+    error.value = true;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 
 async function toggleChatbot() {
-  isToggling.value = true
+  isToggling.value = true;
   try {
-    const newState = !settings.value.enabled
-    await chatbotService.updateSettings({ enabled: newState })
-    settings.value.enabled = newState
-    toast.success(newState ? t('common.enabledSuccess', { resource: t('resources.Chatbot') }) : t('common.disabledSuccess', { resource: t('resources.Chatbot') }))
+    const newState = !settings.value.enabled;
+    await chatbotService.updateSettings({ enabled: newState });
+    settings.value.enabled = newState;
+    toast.success(
+      newState
+        ? t("common.enabledSuccess", { resource: t("resources.Chatbot") })
+        : t("common.disabledSuccess", { resource: t("resources.Chatbot") }),
+    );
   } catch (err: any) {
-    toast.error(getErrorMessage(err, t('common.failedToggle', { resource: t('resources.chatbot') })))
+    toast.error(
+      getErrorMessage(
+        err,
+        t("common.failedToggle", { resource: t("resources.chatbot") }),
+      ),
+    );
   } finally {
-    isToggling.value = false
-    showToggleConfirm.value = false
+    isToggling.value = false;
+    showToggleConfirm.value = false;
   }
 }
 
 async function retryFetch() {
-  isLoading.value = true
-  error.value = false
+  isLoading.value = true;
+  error.value = false;
   try {
-    const response = await chatbotService.getSettings()
-    const data = response.data.data || response.data
-    settings.value = data.settings || settings.value
-    stats.value = data.stats || stats.value
+    const response = await chatbotService.getSettings();
+    const data = response.data.data || response.data;
+    settings.value = data.settings || settings.value;
+    stats.value = data.stats || stats.value;
   } catch (err) {
-    console.error('Failed to load chatbot settings:', err)
-    error.value = true
+    console.error("Failed to load chatbot settings:", err);
+    error.value = true;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 const statCards = computed(() => [
-  { title: t('chatbot.totalSessions'), key: 'total_sessions', icon: Users, color: 'text-blue-500' },
-  { title: t('chatbot.activeSessions'), key: 'active_sessions', icon: MessageSquare, color: 'text-green-500' },
-  { title: t('chatbot.messagesHandled'), key: 'messages_handled', icon: TrendingUp, color: 'text-purple-500' },
-  { title: t('chatbot.aiResponses'), key: 'ai_responses', icon: Sparkles, color: 'text-orange-500' }
-])
+  {
+    title: t("chatbot.totalSessions"),
+    key: "total_sessions",
+    icon: Users,
+    color: "text-blue-500",
+  },
+  {
+    title: t("chatbot.activeSessions"),
+    key: "active_sessions",
+    icon: MessageSquare,
+    color: "text-green-500",
+  },
+  {
+    title: t("chatbot.messagesHandled"),
+    key: "messages_handled",
+    icon: TrendingUp,
+    color: "text-purple-500",
+  },
+  {
+    title: t("chatbot.aiResponses"),
+    key: "ai_responses",
+    icon: Sparkles,
+    color: "text-orange-500",
+  },
+]);
 </script>
 
 <template>
@@ -134,19 +163,31 @@ const statCards = computed(() => [
       <template #actions>
         <div class="flex items-center gap-3">
           <Badge
-            :class="settings.enabled ? 'bg-success/20 text-success' : 'bg-muted text-foreground/50'"
+            :class="
+              settings.enabled
+                ? 'bg-success/20 text-success'
+                : 'bg-muted text-foreground/50'
+            "
           >
-            {{ settings.enabled ? $t('chatbot.active') : $t('chatbot.inactive') }}
+            {{
+              settings.enabled ? $t("chatbot.active") : $t("chatbot.inactive")
+            }}
           </Badge>
           <Button
             variant="outline"
             size="sm"
             @click="showToggleConfirm = true"
             :disabled="isToggling"
-            :class="settings.enabled ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'"
+            :class="
+              settings.enabled
+                ? 'border-red-500/50 text-red-400 hover:bg-red-500/10'
+                : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'
+            "
           >
             <Power class="size-4 mr-2" />
-            {{ settings.enabled ? $t('chatbot.disable') : $t('chatbot.enable') }}
+            {{
+              settings.enabled ? $t("chatbot.disable") : $t("chatbot.enable")
+            }}
           </Button>
         </div>
       </template>
@@ -155,9 +196,19 @@ const statCards = computed(() => [
     <!-- Confirm Toggle Dialog -->
     <ConfirmDialog
       v-model:open="showToggleConfirm"
-      :title="settings.enabled ? $t('chatbot.confirmDisableTitle') : $t('chatbot.confirmEnableTitle')"
-      :description="settings.enabled ? $t('chatbot.confirmDisableDescription') : $t('chatbot.confirmEnableDescription')"
-      :confirm-label="settings.enabled ? $t('chatbot.disable') : $t('chatbot.enable')"
+      :title="
+        settings.enabled
+          ? $t('chatbot.confirmDisableTitle')
+          : $t('chatbot.confirmEnableTitle')
+      "
+      :description="
+        settings.enabled
+          ? $t('chatbot.confirmDisableDescription')
+          : $t('chatbot.confirmEnableDescription')
+      "
+      :confirm-label="
+        settings.enabled ? $t('chatbot.disable') : $t('chatbot.enable')
+      "
       :variant="settings.enabled ? 'destructive' : 'default'"
       :is-submitting="isToggling"
       @confirm="toggleChatbot"
@@ -180,8 +231,14 @@ const statCards = computed(() => [
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <!-- Skeleton Loading State -->
           <template v-if="isLoading">
-            <div v-for="i in 4" :key="i" class="rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div
+              v-for="i in 4"
+              :key="i"
+              class="rounded-xl border border-border bg-card p-6"
+            >
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
                 <Skeleton class="h-4 w-24 bg-muted" />
                 <Skeleton class="size-10 rounded-lg bg-muted" />
               </div>
@@ -192,23 +249,37 @@ const statCards = computed(() => [
           </template>
           <!-- Actual Stats -->
           <template v-else>
-            <div v-for="card in statCards" :key="card.key" data-testid="stat-card" class="card-depth rounded-xl border border-border bg-card p-6">
-              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span class="font-medium text-foreground/50">{{ card.title }}</span>
-                <div :class="[
-                  'size-10 rounded-lg flex items-center justify-center',
-                  card.key === 'total_sessions' ? 'bg-blue-500/20' : '',
-                  card.key === 'active_sessions' ? 'bg-emerald-500/20' : '',
-                  card.key === 'messages_handled' ? 'bg-purple-500/20' : '',
-                  card.key === 'ai_responses' ? 'bg-orange-500/20' : ''
-                ]">
-                  <component :is="card.icon" :class="[
-                    'size-5',
-                    card.key === 'total_sessions' ? 'text-blue-400' : '',
-                    card.key === 'active_sessions' ? 'text-emerald-400' : '',
-                    card.key === 'messages_handled' ? 'text-purple-400' : '',
-                    card.key === 'ai_responses' ? 'text-orange-400' : ''
-                  ]" />
+            <div
+              v-for="card in statCards"
+              :key="card.key"
+              data-testid="stat-card"
+              class="card-depth rounded-xl border border-border bg-card p-6"
+            >
+              <div
+                class="flex flex-row items-center justify-between space-y-0 pb-2"
+              >
+                <span class="font-medium text-foreground/50">{{
+                  card.title
+                }}</span>
+                <div
+                  :class="[
+                    'size-10 rounded-lg flex items-center justify-center',
+                    card.key === 'total_sessions' ? 'bg-blue-500/20' : '',
+                    card.key === 'active_sessions' ? 'bg-emerald-500/20' : '',
+                    card.key === 'messages_handled' ? 'bg-purple-500/20' : '',
+                    card.key === 'ai_responses' ? 'bg-orange-500/20' : '',
+                  ]"
+                >
+                  <component
+                    :is="card.icon"
+                    :class="[
+                      'size-5',
+                      card.key === 'total_sessions' ? 'text-blue-400' : '',
+                      card.key === 'active_sessions' ? 'text-emerald-400' : '',
+                      card.key === 'messages_handled' ? 'text-purple-400' : '',
+                      card.key === 'ai_responses' ? 'text-orange-400' : '',
+                    ]"
+                  />
                 </div>
               </div>
               <div class="pt-2">
@@ -222,59 +293,96 @@ const statCards = computed(() => [
 
         <!-- Quick Actions -->
         <div class="grid gap-4 md:grid-cols-3">
-          <RouterLink to="/chatbot/keywords" class="card-interactive rounded-xl border border-border bg-card h-full">
+          <RouterLink
+            to="/chatbot/keywords"
+            class="card-interactive rounded-xl border border-border bg-card h-full"
+          >
             <div class="p-6">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <div
+                  class="size-10 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/20"
+                >
                   <Key class="size-5 text-white" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.keywordRules') }}</h3>
-                  <p class="text-foreground/40">{{ $t('chatbot.rulesConfigured', { count: stats.keywords_count }) }}</p>
+                  <h3 class="text-lg font-semibold text-foreground">
+                    {{ $t("chatbot.keywordRules") }}
+                  </h3>
+                  <p class="text-foreground/40">
+                    {{
+                      $t("chatbot.rulesConfigured", {
+                        count: stats.keywords_count,
+                      })
+                    }}
+                  </p>
                 </div>
               </div>
             </div>
             <div class="px-6 pb-6">
               <p class="text-foreground/50">
-                {{ $t('chatbot.keywordRulesDesc') }}
+                {{ $t("chatbot.keywordRulesDesc") }}
               </p>
             </div>
           </RouterLink>
 
-          <RouterLink to="/chatbot/flows" class="card-interactive rounded-xl border border-border bg-card h-full">
+          <RouterLink
+            to="/chatbot/flows"
+            class="card-interactive rounded-xl border border-border bg-card h-full"
+          >
             <div class="p-6">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-lg bg-linear-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <div
+                  class="size-10 rounded-lg bg-linear-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20"
+                >
                   <Workflow class="size-5 text-white" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.conversationFlows') }}</h3>
-                  <p class="text-foreground/40">{{ $t('chatbot.flowsCreated', { count: stats.flows_count }) }}</p>
+                  <h3 class="text-lg font-semibold text-foreground">
+                    {{ $t("chatbot.conversationFlows") }}
+                  </h3>
+                  <p class="text-foreground/40">
+                    {{
+                      $t("chatbot.flowsCreated", { count: stats.flows_count })
+                    }}
+                  </p>
                 </div>
               </div>
             </div>
             <div class="px-6 pb-6">
               <p class="text-foreground/50">
-                {{ $t('chatbot.flowsDesc') }}
+                {{ $t("chatbot.flowsDesc") }}
               </p>
             </div>
           </RouterLink>
 
-          <RouterLink to="/chatbot/ai" class="card-interactive rounded-xl border border-border bg-card h-full">
+          <RouterLink
+            to="/chatbot/ai"
+            class="card-interactive rounded-xl border border-border bg-card h-full"
+          >
             <div class="p-6">
               <div class="flex items-center gap-3">
-                <div class="size-10 rounded-lg bg-linear-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <div
+                  class="size-10 rounded-lg bg-linear-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20"
+                >
                   <Sparkles class="size-5 text-white" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.aiContexts') }}</h3>
-                  <p class="text-foreground/40">{{ $t('chatbot.contextsActive', { count: stats.ai_contexts_count }) }}</p>
+                  <h3 class="text-lg font-semibold text-foreground">
+                    {{ $t("chatbot.aiContexts") }}
+                  </h3>
+                  <p class="text-foreground/40">
+                    {{
+                      $t("chatbot.contextsActive", {
+                        count: stats.ai_contexts_count,
+                      })
+                    }}
+                  </p>
                 </div>
               </div>
             </div>
             <div class="px-6 pb-6">
               <p class="text-foreground/50">
-                {{ $t('chatbot.aiContextsDesc') }}
+                {{ $t("chatbot.aiContextsDesc") }}
               </p>
             </div>
           </RouterLink>
@@ -285,13 +393,17 @@ const statCards = computed(() => [
           <div class="p-6">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-lg font-semibold text-foreground">{{ $t('chatbot.currentConfiguration') }}</h3>
-                <p class="text-foreground/40">{{ $t('chatbot.configOverview') }}</p>
+                <h3 class="text-lg font-semibold text-foreground">
+                  {{ $t("chatbot.currentConfiguration") }}
+                </h3>
+                <p class="text-foreground/40">
+                  {{ $t("chatbot.configOverview") }}
+                </p>
               </div>
               <RouterLink to="/settings/chatbot">
                 <Button variant="outline" size="sm">
                   <Settings class="size-4 mr-2" />
-                  {{ $t('chatbot.editSettings') }}
+                  {{ $t("chatbot.editSettings") }}
                 </Button>
               </RouterLink>
             </div>
@@ -299,31 +411,48 @@ const statCards = computed(() => [
           <div class="px-6 pb-6">
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
-                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.greetingMessage') }}</h4>
+                <h4 class="font-medium text-foreground/70">
+                  {{ $t("chatbot.greetingMessage") }}
+                </h4>
                 <p class="text-foreground/50 bg-muted p-3 rounded-lg">
-                  {{ settings.greeting_message || $t('chatbot.notConfigured') }}
+                  {{ settings.greeting_message || $t("chatbot.notConfigured") }}
                 </p>
               </div>
               <div class="space-y-2">
-                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.fallbackMessage') }}</h4>
+                <h4 class="font-medium text-foreground/70">
+                  {{ $t("chatbot.fallbackMessage") }}
+                </h4>
                 <p class="text-foreground/50 bg-muted p-3 rounded-lg">
-                  {{ settings.fallback_message || $t('chatbot.notConfigured') }}
+                  {{ settings.fallback_message || $t("chatbot.notConfigured") }}
                 </p>
               </div>
               <div class="space-y-2">
-                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.sessionTimeout') }}</h4>
+                <h4 class="font-medium text-foreground/70">
+                  {{ $t("chatbot.sessionTimeout") }}
+                </h4>
                 <div class="flex items-center gap-2 text-foreground/50">
                   <Clock class="size-4" />
-                  {{ $t('chatbot.minutes', { count: settings.session_timeout_minutes }) }}
+                  {{
+                    $t("chatbot.minutes", {
+                      count: settings.session_timeout_minutes,
+                    })
+                  }}
                 </div>
               </div>
               <div class="space-y-2">
-                <h4 class="font-medium text-foreground/70">{{ $t('chatbot.aiProvider') }}</h4>
+                <h4 class="font-medium text-foreground/70">
+                  {{ $t("chatbot.aiProvider") }}
+                </h4>
                 <div class="flex items-center gap-2">
-                  <Badge v-if="settings.ai_enabled" class="bg-success/20 text-success">
-                    {{ settings.ai_provider || $t('chatbot.notConfigured') }}
+                  <Badge
+                    v-if="settings.ai_enabled"
+                    class="bg-success/20 text-success"
+                  >
+                    {{ settings.ai_provider || $t("chatbot.notConfigured") }}
                   </Badge>
-                  <Badge v-else class="bg-muted text-foreground/50">{{ $t('chatbot.disabled') }}</Badge>
+                  <Badge v-else class="bg-muted text-foreground/50">{{
+                    $t("chatbot.disabled")
+                  }}</Badge>
                 </div>
               </div>
             </div>

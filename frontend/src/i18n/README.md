@@ -15,17 +15,17 @@ Languages are **auto-discovered** from the `locales/` folder. To add a new langu
 
 ```vue
 <script setup>
-import { useI18n } from 'vue-i18n'
+import { useI18n } from "vue-i18n";
 
-const { t } = useI18n()
+const { t } = useI18n();
 </script>
 
 <template>
   <!-- Simple translation -->
-  <p>{{ $t('common.save') }}</p>
+  <p>{{ $t("common.save") }}</p>
 
   <!-- With interpolation -->
-  <p>{{ $t('contacts.total', { count: 42 }) }}</p>
+  <p>{{ $t("contacts.total", { count: 42 }) }}</p>
 
   <!-- In script -->
   <button @click="alert(t('common.success'))">Click</button>
@@ -67,16 +67,16 @@ time.*        - Relative time strings
 ### Changing Locale Programmatically
 
 ```typescript
-import { setLocale, getLocale, SUPPORTED_LOCALES } from '@/i18n'
+import { setLocale, getLocale, SUPPORTED_LOCALES } from "@/i18n";
 
 // Get current locale
-const current = getLocale()
+const current = getLocale();
 
 // Change locale
-setLocale('es')
+setLocale("es");
 
 // List available locales
-console.log(SUPPORTED_LOCALES)
+console.log(SUPPORTED_LOCALES);
 ```
 
 ## File Structure
@@ -116,6 +116,7 @@ npx crowdin download
 ### GitHub Integration
 
 Crowdin can be configured to:
+
 - Auto-sync when `en.json` changes
 - Create PRs with new translations
 - See: https://support.crowdin.com/github-integration/

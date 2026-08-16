@@ -1,69 +1,74 @@
 <script setup lang="ts">
-import { Spinner } from '@/components/shared'
-import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useCallingStore } from '@/stores/calling'
-import { teamsService, type Team, type TeamMember } from '@/services/api'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Users } from '@lucide/vue'
-import { toast } from 'vue-sonner'
+import { Spinner } from "@/components/shared";
+import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
+import { useCallingStore } from "@/stores/calling";
+import { teamsService, type Team, type TeamMember } from "@/services/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Users } from "@lucide/vue";
+import { toast } from "vue-sonner";
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: [] }>();
 
-const { t } = useI18n()
-const store = useCallingStore()
+const { t } = useI18n();
+const store = useCallingStore();
 
-const step = ref<'teams' | 'members'>('teams')
-const teams = ref<Team[]>([])
-const members = ref<TeamMember[]>([])
-const selectedTeam = ref<Team | null>(null)
-const loading = ref(false)
-const membersLoading = ref(false)
+const step = ref<"teams" | "members">("teams");
+const teams = ref<Team[]>([]);
+const members = ref<TeamMember[]>([]);
+const selectedTeam = ref<Team | null>(null);
+const loading = ref(false);
+const membersLoading = ref(false);
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await teamsService.list()
-    const data = response.data as any
-    teams.value = data.data?.teams ?? data.teams ?? []
+    const response = await teamsService.list();
+    const data = response.data as any;
+    teams.value = data.data?.teams ?? data.teams ?? [];
   } catch {
     // ignore
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 async function selectTeam(team: Team) {
-  selectedTeam.value = team
-  step.value = 'members'
-  membersLoading.value = true
+  selectedTeam.value = team;
+  step.value = "members";
+  membersLoading.value = true;
   try {
-    const response = await teamsService.listMembers(team.id)
-    const data = response.data as any
-    members.value = data.data?.members ?? data.members ?? []
+    const response = await teamsService.listMembers(team.id);
+    const data = response.data as any;
+    members.value = data.data?.members ?? data.members ?? [];
   } catch {
     // ignore
   } finally {
-    membersLoading.value = false
+    membersLoading.value = false;
   }
 }
 
 function goBack() {
-  step.value = 'teams'
-  selectedTeam.value = null
-  members.value = []
+  step.value = "teams";
+  selectedTeam.value = null;
+  members.value = [];
 }
 
 async function doTransfer(agentId?: string) {
-  if (!selectedTeam.value) return
+  if (!selectedTeam.value) return;
   try {
-    await store.initiateTransfer(selectedTeam.value.id, agentId)
-    emit('close')
+    await store.initiateTransfer(selectedTeam.value.id, agentId);
+    emit("close");
   } catch (err: any) {
-    toast.error(t('callTransfers.transferFailed'), {
-      description: err.message || '',
-    })
+    toast.error(t("callTransfers.transferFailed"), {
+      description: err.message || "",
+    });
   }
 }
 </script>
@@ -72,17 +77,22 @@ async function doTransfer(agentId?: string) {
   <Dialog :open="true" @update:open="emit('close')">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>{{ t('callTransfers.transferCall') }}</DialogTitle>
+        <DialogTitle>{{ t("callTransfers.transferCall") }}</DialogTitle>
       </DialogHeader>
 
       <!-- Step 1: Team list -->
       <div v-if="step === 'teams'">
-        <p class="text-muted-foreground mb-3">{{ t('callTransfers.selectTeam') }}</p>
+        <p class="text-muted-foreground mb-3">
+          {{ t("callTransfers.selectTeam") }}
+        </p>
         <div v-if="loading" class="flex justify-center py-8">
           <Spinner class="size-5 text-muted-foreground" />
         </div>
-        <div v-else-if="teams.length === 0" class="text-center py-8 text-muted-foreground">
-          {{ t('callTransfers.noTeams') }}
+        <div
+          v-else-if="teams.length === 0"
+          class="text-center py-8 text-muted-foreground"
+        >
+          {{ t("callTransfers.noTeams") }}
         </div>
         <div v-else class="space-y-1 max-h-64 overflow-y-auto">
           <button
@@ -91,12 +101,16 @@ async function doTransfer(agentId?: string) {
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent text-left transition-colors"
             @click="selectTeam(team)"
           >
-            <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <div
+              class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
+            >
               <Users class="size-4 text-primary" />
             </div>
             <div class="min-w-0">
               <p class="font-medium truncate">{{ team.name }}</p>
-              <p class="text-muted-foreground">{{ team.member_count }} members</p>
+              <p class="text-muted-foreground">
+                {{ team.member_count }} members
+              </p>
             </div>
           </button>
         </div>
@@ -118,10 +132,12 @@ async function doTransfer(agentId?: string) {
           @click="doTransfer()"
         >
           <Spinner v-if="store.isTransferring" class="size-4 mr-2" />
-          {{ t('callTransfers.transferToTeam') }}
+          {{ t("callTransfers.transferToTeam") }}
         </Button>
 
-        <p class="text-muted-foreground mb-2">{{ t('callTransfers.selectAgent') }}</p>
+        <p class="text-muted-foreground mb-2">
+          {{ t("callTransfers.selectAgent") }}
+        </p>
 
         <div v-if="membersLoading" class="flex justify-center py-6">
           <Spinner class="size-5 text-muted-foreground" />

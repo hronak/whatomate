@@ -1,155 +1,225 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { TagBadge, PageHeader, SearchInput, DataTable, ConfirmDialog, CreateContactDialog, ImportExportDialog, IconButton, ErrorState, type Column } from '@/components/shared'
-import { useCrudState } from '@/composables/useCrudState'
-import { contactsService, accountsService, type ImportResult } from '@/services/api'
-import { toast } from 'vue-sonner'
-import { Plus, Users, Pencil, Trash2, MessageSquare, Download } from '@lucide/vue'
-import { getErrorMessage } from '@/lib/api-utils'
-import { formatDate } from '@/lib/utils'
-import { useSearchPagination } from '@/composables/useSearchPagination'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref, onMounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  TagBadge,
+  PageHeader,
+  SearchInput,
+  DataTable,
+  ConfirmDialog,
+  CreateContactDialog,
+  ImportExportDialog,
+  IconButton,
+  ErrorState,
+  type Column,
+} from "@/components/shared";
+import { useCrudState } from "@/composables/useCrudState";
+import {
+  contactsService,
+  accountsService,
+  type ImportResult,
+} from "@/services/api";
+import { toast } from "vue-sonner";
+import {
+  Plus,
+  Users,
+  Pencil,
+  Trash2,
+  MessageSquare,
+  Download,
+} from "@lucide/vue";
+import { getErrorMessage } from "@/lib/api-utils";
+import { formatDate } from "@/lib/utils";
+import { useSearchPagination } from "@/composables/useSearchPagination";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
-const { t } = useI18n()
-const router = useRouter()
-const authStore = useAuthStore()
-const canWriteContacts = authStore.hasPermission('contacts', 'write')
-const canImportContacts = authStore.hasPermission('contacts', 'import')
-const canExportContacts = authStore.hasPermission('contacts', 'export')
+const { t } = useI18n();
+const router = useRouter();
+const authStore = useAuthStore();
+const canWriteContacts = authStore.hasPermission("contacts", "write");
+const canImportContacts = authStore.hasPermission("contacts", "import");
+const canExportContacts = authStore.hasPermission("contacts", "export");
 
 // Import/Export dialog state
-const isImportExportOpen = ref(false)
+const isImportExportOpen = ref(false);
 
 interface Contact {
-  id: string
-  phone_number: string
-  profile_name: string
-  name: string
-  whatsapp_account: string
-  tags: string[]
-  metadata: Record<string, any>
-  assigned_user_id: string | null
-  last_message_at: string | null
-  last_message_preview: string
-  unread_count: number
-  created_at: string
-  updated_at: string
+  id: string;
+  phone_number: string;
+  profile_name: string;
+  name: string;
+  whatsapp_account: string;
+  tags: string[];
+  metadata: Record<string, any>;
+  assigned_user_id: string | null;
+  last_message_at: string | null;
+  last_message_preview: string;
+  unread_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
-const contacts = ref<Contact[]>([])
-const availableAccounts = ref<{ id: string; name: string; phone_number: string }[]>([])
-const isLoading = ref(false)
-const isDeleting = ref(false)
-const error = ref(false)
-const isCreateDialogOpen = ref(false)
-const { deleteDialogOpen, itemToDelete: contactToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Contact, Record<string, never>>({})
+const contacts = ref<Contact[]>([]);
+const availableAccounts = ref<
+  { id: string; name: string; phone_number: string }[]
+>([]);
+const isLoading = ref(false);
+const isDeleting = ref(false);
+const error = ref(false);
+const isCreateDialogOpen = ref(false);
+const {
+  deleteDialogOpen,
+  itemToDelete: contactToDelete,
+  openDeleteDialog,
+  closeDeleteDialog,
+} = useCrudState<Contact, Record<string, never>>({});
 
 // Sorting state
-const sortKey = ref('last_message_at')
-const sortDirection = ref<'asc' | 'desc'>('desc')
+const sortKey = ref("last_message_at");
+const sortDirection = ref<"asc" | "desc">("desc");
 
 const columns = computed<Column<Contact>[]>(() => [
-  { key: 'profile_name', label: t('contacts.name'), sortable: true },
-  { key: 'phone_number', label: t('contacts.phoneNumber'), sortable: true },
-  { key: 'tags', label: t('contacts.tags') },
-  { key: 'last_message_at', label: t('contacts.lastMessage'), sortable: true },
-  { key: 'created_at', label: t('contacts.created'), sortable: true },
-  { key: 'actions', label: t('common.actions'), align: 'right' },
-])
+  { key: "profile_name", label: t("contacts.name"), sortable: true },
+  { key: "phone_number", label: t("contacts.phoneNumber"), sortable: true },
+  { key: "tags", label: t("contacts.tags") },
+  { key: "last_message_at", label: t("contacts.lastMessage"), sortable: true },
+  { key: "created_at", label: t("contacts.created"), sortable: true },
+  { key: "actions", label: t("common.actions"), align: "right" },
+]);
 
 function openCreateDialog() {
-  isCreateDialogOpen.value = true
+  isCreateDialogOpen.value = true;
 }
 
 function onContactCreated() {
-  fetchContacts()
+  fetchContacts();
 }
 
 function onImported(_result: ImportResult) {
   // Refresh the contacts list but keep dialog open to show import results
-  fetchContacts()
+  fetchContacts();
   // Dialog stays open so user can see import results
 }
 
 async function fetchContacts() {
-  isLoading.value = true
-  error.value = false
+  isLoading.value = true;
+  error.value = false;
   try {
     const response = await contactsService.list({
       search: searchQuery.value || undefined,
       page: currentPage.value,
-      limit: pageSize
-    })
-    const data = response.data as any
-    const responseData = data.data || data
-    contacts.value = responseData.contacts || []
-    totalItems.value = responseData.total ?? contacts.value.length
+      limit: pageSize,
+    });
+    const data = response.data as any;
+    const responseData = data.data || data;
+    contacts.value = responseData.contacts || [];
+    totalItems.value = responseData.total ?? contacts.value.length;
   } catch (e) {
-    toast.error(getErrorMessage(e, t('common.failedLoad', { resource: t('resources.contacts') })))
-    error.value = true
+    toast.error(
+      getErrorMessage(
+        e,
+        t("common.failedLoad", { resource: t("resources.contacts") }),
+      ),
+    );
+    error.value = true;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 async function fetchAccounts() {
   try {
-    const response = await accountsService.list()
-    const data = response.data as any
-    const responseData = data.data || data
-    availableAccounts.value = responseData.accounts || []
+    const response = await accountsService.list();
+    const data = response.data as any;
+    const responseData = data.data || data;
+    availableAccounts.value = responseData.accounts || [];
   } catch (error) {
     // Silently fail - accounts are optional
   }
 }
 
-const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } = useSearchPagination({
-  fetchFn: () => fetchContacts(),
-})
+const { searchQuery, currentPage, totalItems, pageSize, handlePageChange } =
+  useSearchPagination({
+    fetchFn: () => fetchContacts(),
+  });
 
 onMounted(() => {
-  fetchContacts()
-  fetchAccounts()
-})
+  fetchContacts();
+  fetchAccounts();
+});
 
 async function confirmDelete() {
-  if (!contactToDelete.value) return
-  isDeleting.value = true
+  if (!contactToDelete.value) return;
+  isDeleting.value = true;
   try {
-    await contactsService.delete(contactToDelete.value.id)
-    toast.success(t('common.deletedSuccess', { resource: t('resources.Contact') }))
-    closeDeleteDialog()
-    await fetchContacts()
+    await contactsService.delete(contactToDelete.value.id);
+    toast.success(
+      t("common.deletedSuccess", { resource: t("resources.Contact") }),
+    );
+    closeDeleteDialog();
+    await fetchContacts();
   } catch (e) {
-    toast.error(getErrorMessage(e, t('common.failedDelete', { resource: t('resources.contact') })))
+    toast.error(
+      getErrorMessage(
+        e,
+        t("common.failedDelete", { resource: t("resources.contact") }),
+      ),
+    );
   } finally {
-    isDeleting.value = false
+    isDeleting.value = false;
   }
 }
 
 function openChat(contact: Contact) {
-  router.push({ name: 'chat-conversation', params: { contactId: contact.id } })
+  router.push({ name: "chat-conversation", params: { contactId: contact.id } });
 }
 
 function getDisplayName(contact: Contact): string {
-  return contact.profile_name || contact.name || contact.phone_number
+  return contact.profile_name || contact.name || contact.phone_number;
 }
 </script>
 
 <template>
   <div class="flex flex-col h-full bg-background">
-    <PageHeader :title="$t('contacts.title')" :subtitle="$t('contacts.subtitle')" :icon="Users" icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20" back-link="/settings">
-      <template v-if="canWriteContacts || canImportContacts || canExportContacts" #actions>
-        <Button v-if="canImportContacts || canExportContacts" variant="outline" size="sm" @click="isImportExportOpen = true">
-          <Download class="size-4 mr-2" />{{ $t('common.import') }}/{{ $t('common.export') }}
+    <PageHeader
+      :title="$t('contacts.title')"
+      :subtitle="$t('contacts.subtitle')"
+      :icon="Users"
+      icon-gradient="bg-linear-to-br from-blue-500 to-cyan-600 shadow-blue-500/20"
+      back-link="/settings"
+    >
+      <template
+        v-if="canWriteContacts || canImportContacts || canExportContacts"
+        #actions
+      >
+        <Button
+          v-if="canImportContacts || canExportContacts"
+          variant="outline"
+          size="sm"
+          @click="isImportExportOpen = true"
+        >
+          <Download class="size-4 mr-2" />{{ $t("common.import") }}/{{
+            $t("common.export")
+          }}
         </Button>
-        <Button v-if="canWriteContacts" variant="outline" size="sm" @click="openCreateDialog"><Plus class="size-4 mr-2" />{{ $t('contacts.addContact') }}</Button>
+        <Button
+          v-if="canWriteContacts"
+          variant="outline"
+          size="sm"
+          @click="openCreateDialog"
+          ><Plus class="size-4 mr-2" />{{ $t("contacts.addContact") }}</Button
+        >
       </template>
     </PageHeader>
 
@@ -170,10 +240,16 @@ function getDisplayName(contact: Contact): string {
             <CardHeader>
               <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle>{{ $t('contacts.allContacts') }}</CardTitle>
-                  <CardDescription>{{ $t('contacts.allContactsDesc') }}</CardDescription>
+                  <CardTitle>{{ $t("contacts.allContacts") }}</CardTitle>
+                  <CardDescription>{{
+                    $t("contacts.allContactsDesc")
+                  }}</CardDescription>
                 </div>
-                <SearchInput v-model="searchQuery" :placeholder="$t('contacts.searchContacts') + '...'" class="w-64" />
+                <SearchInput
+                  v-model="searchQuery"
+                  :placeholder="$t('contacts.searchContacts') + '...'"
+                  class="w-64"
+                />
               </div>
             </CardHeader>
             <CardContent>
@@ -182,8 +258,16 @@ function getDisplayName(contact: Contact): string {
                 :columns="columns"
                 :is-loading="isLoading"
                 :empty-icon="Users"
-                :empty-title="searchQuery ? $t('contacts.noMatchingContacts') : $t('contacts.noContactsYet')"
-                :empty-description="searchQuery ? $t('contacts.noMatchingContactsDesc') : $t('contacts.noContactsYetDesc')"
+                :empty-title="
+                  searchQuery
+                    ? $t('contacts.noMatchingContacts')
+                    : $t('contacts.noContactsYet')
+                "
+                :empty-description="
+                  searchQuery
+                    ? $t('contacts.noMatchingContactsDesc')
+                    : $t('contacts.noContactsYetDesc')
+                "
                 v-model:sort-key="sortKey"
                 v-model:sort-direction="sortDirection"
                 server-pagination
@@ -195,8 +279,16 @@ function getDisplayName(contact: Contact): string {
               >
                 <template #cell-profile_name="{ item: contact }">
                   <div class="flex flex-col">
-                    <RouterLink :to="`/settings/contacts/${contact.id}`" class="font-medium text-inherit no-underline hover:opacity-80">{{ getDisplayName(contact) }}</RouterLink>
-                    <span v-if="contact.last_message_preview" class="text-muted-foreground truncate max-w-[200px]">{{ contact.last_message_preview }}</span>
+                    <RouterLink
+                      :to="`/settings/contacts/${contact.id}`"
+                      class="font-medium text-inherit no-underline hover:opacity-80"
+                      >{{ getDisplayName(contact) }}</RouterLink
+                    >
+                    <span
+                      v-if="contact.last_message_preview"
+                      class="text-muted-foreground truncate max-w-[200px]"
+                      >{{ contact.last_message_preview }}</span
+                    >
                   </div>
                 </template>
                 <template #cell-phone_number="{ item: contact }">
@@ -204,23 +296,51 @@ function getDisplayName(contact: Contact): string {
                 </template>
                 <template #cell-tags="{ item: contact }">
                   <div class="flex flex-wrap gap-1">
-                    <TagBadge v-for="tag in (contact.tags || []).slice(0, 3)" :key="tag" color="gray">{{ tag }}</TagBadge>
-                    <Badge v-if="(contact.tags || []).length > 3" variant="outline">+{{ contact.tags.length - 3 }}</Badge>
+                    <TagBadge
+                      v-for="tag in (contact.tags || []).slice(0, 3)"
+                      :key="tag"
+                      color="gray"
+                      >{{ tag }}</TagBadge
+                    >
+                    <Badge
+                      v-if="(contact.tags || []).length > 3"
+                      variant="outline"
+                      >+{{ contact.tags.length - 3 }}</Badge
+                    >
                   </div>
                 </template>
                 <template #cell-last_message_at="{ item: contact }">
-                  <span class="text-muted-foreground">{{ contact.last_message_at ? formatDate(contact.last_message_at) : $t('contacts.never') }}</span>
+                  <span class="text-muted-foreground">{{
+                    contact.last_message_at
+                      ? formatDate(contact.last_message_at)
+                      : $t("contacts.never")
+                  }}</span>
                 </template>
                 <template #cell-created_at="{ item: contact }">
-                  <span class="text-muted-foreground">{{ formatDate(contact.created_at) }}</span>
+                  <span class="text-muted-foreground">{{
+                    formatDate(contact.created_at)
+                  }}</span>
                 </template>
                 <template #cell-actions="{ item: contact }">
                   <div class="flex items-center justify-end gap-1">
-                    <IconButton :icon="MessageSquare" :label="$t('contacts.openChat')" class="size-8" @click="openChat(contact)" />
+                    <IconButton
+                      :icon="MessageSquare"
+                      :label="$t('contacts.openChat')"
+                      class="size-8"
+                      @click="openChat(contact)"
+                    />
                     <RouterLink :to="`/settings/contacts/${contact.id}`">
-                      <IconButton :icon="Pencil" :label="$t('common.edit')" class="size-8" />
+                      <IconButton
+                        :icon="Pencil"
+                        :label="$t('common.edit')"
+                        class="size-8"
+                      />
                     </RouterLink>
-                    <IconButton :label="$t('common.delete')" class="size-8" @click="openDeleteDialog(contact)">
+                    <IconButton
+                      :label="$t('common.delete')"
+                      class="size-8"
+                      @click="openDeleteDialog(contact)"
+                    >
                       <Trash2 class="size-4 text-destructive" />
                     </IconButton>
                   </div>
@@ -228,7 +348,7 @@ function getDisplayName(contact: Contact): string {
                 <template v-if="canWriteContacts" #empty-action>
                   <Button variant="outline" size="sm" @click="openCreateDialog">
                     <Plus class="size-4 mr-2" />
-                    {{ $t('contacts.addContact') }}
+                    {{ $t("contacts.addContact") }}
                   </Button>
                 </template>
               </DataTable>
@@ -239,7 +359,10 @@ function getDisplayName(contact: Contact): string {
     </ScrollArea>
 
     <!-- Create Contact Dialog (shared component) -->
-    <CreateContactDialog v-model:open="isCreateDialogOpen" @created="onContactCreated" />
+    <CreateContactDialog
+      v-model:open="isCreateDialogOpen"
+      @created="onContactCreated"
+    />
 
     <ConfirmDialog
       v-model:open="deleteDialogOpen"

@@ -1,24 +1,39 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Progress } from '@/components/ui/progress'
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { campaignsService } from '@/services/api'
-import { wsService } from '@/services/websocket'
-import { toast } from 'vue-sonner'
-import { PageHeader, DataTable, ConfirmDialog, SearchInput, IconButton, ErrorState, DateRangePicker, type Column } from '@/components/shared'
-import { useCrudState } from '@/composables/useCrudState'
-import { getErrorMessage } from '@/lib/api-utils'
+} from "@/components/ui/select";
+import { campaignsService } from "@/services/api";
+import { wsService } from "@/services/websocket";
+import { toast } from "vue-sonner";
+import {
+  PageHeader,
+  DataTable,
+  ConfirmDialog,
+  SearchInput,
+  IconButton,
+  ErrorState,
+  DateRangePicker,
+  type Column,
+} from "@/components/shared";
+import { useCrudState } from "@/composables/useCrudState";
+import { getErrorMessage } from "@/lib/api-utils";
 import {
   Plus,
   Pencil,
@@ -30,54 +45,70 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-} from '@lucide/vue'
-import { formatDate } from '@/lib/utils'
-import { useSearchPagination } from '@/composables/useSearchPagination'
-import { useDateRange } from '@/composables/useDateRange'
+} from "@lucide/vue";
+import { formatDate } from "@/lib/utils";
+import { useSearchPagination } from "@/composables/useSearchPagination";
+import { useDateRange } from "@/composables/useDateRange";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 interface Campaign {
-  id: string
-  name: string
-  template_name: string
-  template_id?: string
-  whatsapp_account?: string
-  header_media_id?: string
-  header_media_filename?: string
-  header_media_mime_type?: string
-  status: 'draft' | 'scheduled' | 'running' | 'paused' | 'completed' | 'failed' | 'queued' | 'processing' | 'cancelled'
-  total_recipients: number
-  sent_count: number
-  delivered_count: number
-  read_count: number
-  failed_count: number
-  scheduled_at?: string
-  started_at?: string
-  completed_at?: string
-  created_at: string
+  id: string;
+  name: string;
+  template_name: string;
+  template_id?: string;
+  whatsapp_account?: string;
+  header_media_id?: string;
+  header_media_filename?: string;
+  header_media_mime_type?: string;
+  status:
+    | "draft"
+    | "scheduled"
+    | "running"
+    | "paused"
+    | "completed"
+    | "failed"
+    | "queued"
+    | "processing"
+    | "cancelled";
+  total_recipients: number;
+  sent_count: number;
+  delivered_count: number;
+  read_count: number;
+  failed_count: number;
+  scheduled_at?: string;
+  started_at?: string;
+  completed_at?: string;
+  created_at: string;
 }
 
-const campaigns = ref<Campaign[]>([])
-const isLoading = ref(true)
+const campaigns = ref<Campaign[]>([]);
+const isLoading = ref(true);
 
 const columns = computed<Column<Campaign>[]>(() => [
-  { key: 'name', label: t('campaigns.campaign'), sortable: true },
-  { key: 'template', label: t('campaigns.template', 'Template') },
-  { key: 'status', label: t('campaigns.status'), sortable: true },
-  { key: 'stats', label: t('campaigns.progress') },
-  { key: 'created_at', label: t('campaigns.created'), sortable: true },
-  { key: 'actions', label: t('common.actions'), align: 'right' },
-])
+  { key: "name", label: t("campaigns.campaign"), sortable: true },
+  { key: "template", label: t("campaigns.template", "Template") },
+  { key: "status", label: t("campaigns.status"), sortable: true },
+  { key: "stats", label: t("campaigns.progress") },
+  { key: "created_at", label: t("campaigns.created"), sortable: true },
+  { key: "actions", label: t("common.actions"), align: "right" },
+]);
 
-const sortKey = ref('created_at')
-const sortDirection = ref<'asc' | 'desc'>('desc')
-const { searchQuery, currentPage, totalItems, pageSize, handlePageChange, resetAndFetch } = useSearchPagination({
+const sortKey = ref("created_at");
+const sortDirection = ref<"asc" | "desc">("desc");
+const {
+  searchQuery,
+  currentPage,
+  totalItems,
+  pageSize,
+  handlePageChange,
+  resetAndFetch,
+} = useSearchPagination({
   fetchFn: () => fetchCampaigns(),
-})
+});
 
 // Filter state
-const filterStatus = ref<string>('all')
+const filterStatus = ref<string>("all");
 const {
   selectedRange,
   customDateRange,
@@ -85,154 +116,165 @@ const {
   dateRange,
   formatDateRangeDisplay,
   applyCustomRange: applyCustomRangeBase,
-} = useDateRange()
+} = useDateRange();
 
 const statusOptions = computed(() => [
-  { value: 'all', label: t('campaigns.allStatuses') },
-  { value: 'draft', label: t('campaigns.draft') },
-  { value: 'queued', label: t('campaigns.queued') },
-  { value: 'processing', label: t('campaigns.processing') },
-  { value: 'completed', label: t('campaigns.completed') },
-  { value: 'failed', label: t('campaigns.failed') },
-  { value: 'cancelled', label: t('campaigns.cancelled') },
-  { value: 'paused', label: t('campaigns.paused') },
-])
+  { value: "all", label: t("campaigns.allStatuses") },
+  { value: "draft", label: t("campaigns.draft") },
+  { value: "queued", label: t("campaigns.queued") },
+  { value: "processing", label: t("campaigns.processing") },
+  { value: "completed", label: t("campaigns.completed") },
+  { value: "failed", label: t("campaigns.failed") },
+  { value: "cancelled", label: t("campaigns.cancelled") },
+  { value: "paused", label: t("campaigns.paused") },
+]);
 
 // AlertDialog state
-const { deleteDialogOpen, itemToDelete: campaignToDelete, openDeleteDialog, closeDeleteDialog } = useCrudState<Campaign, Record<string, never>>({})
-const isDeletingCampaign = ref(false)
+const {
+  deleteDialogOpen,
+  itemToDelete: campaignToDelete,
+  openDeleteDialog,
+  closeDeleteDialog,
+} = useCrudState<Campaign, Record<string, never>>({});
+const isDeletingCampaign = ref(false);
 
 // Error state
-const error = ref<string | null>(null)
+const error = ref<string | null>(null);
 
 // WebSocket subscription for real-time stats updates
-let unsubscribeCampaignStats: (() => void) | null = null
+let unsubscribeCampaignStats: (() => void) | null = null;
 
 onMounted(async () => {
-  await fetchCampaigns()
+  await fetchCampaigns();
 
   // Subscribe to campaign stats updates
   unsubscribeCampaignStats = wsService.onCampaignStatsUpdate((payload) => {
-    const campaign = campaigns.value.find(c => c.id === payload.campaign_id)
+    const campaign = campaigns.value.find((c) => c.id === payload.campaign_id);
     if (campaign) {
-      campaign.sent_count = payload.sent_count
-      campaign.delivered_count = payload.delivered_count
-      campaign.read_count = payload.read_count
-      campaign.failed_count = payload.failed_count
+      campaign.sent_count = payload.sent_count;
+      campaign.delivered_count = payload.delivered_count;
+      campaign.read_count = payload.read_count;
+      campaign.failed_count = payload.failed_count;
       if (payload.status) {
-        campaign.status = payload.status
+        campaign.status = payload.status;
       }
     }
-  })
-})
+  });
+});
 
 onUnmounted(() => {
   if (unsubscribeCampaignStats) {
-    unsubscribeCampaignStats()
+    unsubscribeCampaignStats();
   }
-})
+});
 
 async function fetchCampaigns() {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true;
+  error.value = null;
   try {
-    const { from, to } = dateRange.value
+    const { from, to } = dateRange.value;
     const params: Record<string, string | number> = {
       from,
       to,
       page: currentPage.value,
-      limit: pageSize
-    }
-    if (filterStatus.value && filterStatus.value !== 'all') {
-      params.status = filterStatus.value
+      limit: pageSize,
+    };
+    if (filterStatus.value && filterStatus.value !== "all") {
+      params.status = filterStatus.value;
     }
     if (searchQuery.value) {
-      params.search = searchQuery.value
+      params.search = searchQuery.value;
     }
-    const response = await campaignsService.list(params)
+    const response = await campaignsService.list(params);
     // API returns: { status: "success", data: { campaigns: [...], total: N } }
-    const data = response.data.data || response.data
-    campaigns.value = data.campaigns || []
-    totalItems.value = data.total ?? campaigns.value.length
+    const data = response.data.data || response.data;
+    campaigns.value = data.campaigns || [];
+    totalItems.value = data.total ?? campaigns.value.length;
   } catch (err: any) {
-    console.error('Failed to fetch campaigns:', err)
-    error.value = getErrorMessage(err, t('campaigns.fetchFailed'))
-    campaigns.value = []
-    totalItems.value = 0
+    console.error("Failed to fetch campaigns:", err);
+    error.value = getErrorMessage(err, t("campaigns.fetchFailed"));
+    campaigns.value = [];
+    totalItems.value = 0;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 function applyCustomRange() {
-  applyCustomRangeBase()
-  fetchCampaigns()
+  applyCustomRangeBase();
+  fetchCampaigns();
 }
 
 // Watch for filter changes
 watch([filterStatus, selectedRange], () => {
-  if (selectedRange.value !== 'custom') {
-    resetAndFetch()
+  if (selectedRange.value !== "custom") {
+    resetAndFetch();
   }
-})
+});
 
 async function confirmDeleteCampaign() {
-  if (!campaignToDelete.value) return
+  if (!campaignToDelete.value) return;
 
-  isDeletingCampaign.value = true
+  isDeletingCampaign.value = true;
   try {
-    await campaignsService.delete(campaignToDelete.value.id)
-    toast.success(t('common.deletedSuccess', { resource: t('resources.Campaign') }))
-    closeDeleteDialog()
-    await fetchCampaigns()
+    await campaignsService.delete(campaignToDelete.value.id);
+    toast.success(
+      t("common.deletedSuccess", { resource: t("resources.Campaign") }),
+    );
+    closeDeleteDialog();
+    await fetchCampaigns();
   } catch (error: any) {
-    toast.error(getErrorMessage(error, t('common.failedDelete', { resource: t('resources.campaign') })))
+    toast.error(
+      getErrorMessage(
+        error,
+        t("common.failedDelete", { resource: t("resources.campaign") }),
+      ),
+    );
   } finally {
-    isDeletingCampaign.value = false
+    isDeletingCampaign.value = false;
   }
 }
 
 function getStatusIcon(status: string) {
   switch (status) {
-    case 'completed':
-      return CheckCircle
-    case 'running':
-    case 'processing':
-    case 'queued':
-      return Play
-    case 'paused':
-      return Pause
-    case 'scheduled':
-      return Clock
-    case 'failed':
-    case 'cancelled':
-      return AlertCircle
+    case "completed":
+      return CheckCircle;
+    case "running":
+    case "processing":
+    case "queued":
+      return Play;
+    case "paused":
+      return Pause;
+    case "scheduled":
+      return Clock;
+    case "failed":
+    case "cancelled":
+      return AlertCircle;
     default:
-      return Megaphone
+      return Megaphone;
   }
 }
 
 function getStatusClass(status: string): string {
   switch (status) {
-    case 'completed':
-      return 'border-green-600 text-green-600'
-    case 'running':
-    case 'processing':
-    case 'queued':
-      return 'border-blue-600 text-blue-600'
-    case 'failed':
-    case 'cancelled':
-      return 'border-destructive text-destructive'
+    case "completed":
+      return "border-green-600 text-green-600";
+    case "running":
+    case "processing":
+    case "queued":
+      return "border-blue-600 text-blue-600";
+    case "failed":
+    case "cancelled":
+      return "border-destructive text-destructive";
     default:
-      return ''
+      return "";
   }
 }
 
 function getProgressPercentage(campaign: Campaign): number {
-  if (campaign.total_recipients === 0) return 0
-  return Math.round((campaign.sent_count / campaign.total_recipients) * 100)
+  if (campaign.total_recipients === 0) return 0;
+  return Math.round((campaign.sent_count / campaign.total_recipients) * 100);
 }
-
 </script>
 
 <template>
@@ -247,7 +289,7 @@ function getProgressPercentage(campaign: Campaign): number {
         <RouterLink to="/campaigns/new">
           <Button variant="outline" size="sm">
             <Plus class="size-4 mr-2" />
-            {{ $t('campaigns.createCampaign') }}
+            {{ $t("campaigns.createCampaign") }}
           </Button>
         </RouterLink>
       </template>
@@ -261,8 +303,10 @@ function getProgressPercentage(campaign: Campaign): number {
             <CardHeader>
               <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle>{{ $t('campaigns.yourCampaigns') }}</CardTitle>
-                  <CardDescription>{{ $t('campaigns.yourCampaignsDesc') }}</CardDescription>
+                  <CardTitle>{{ $t("campaigns.yourCampaigns") }}</CardTitle>
+                  <CardDescription>{{
+                    $t("campaigns.yourCampaignsDesc")
+                  }}</CardDescription>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                   <Select v-model="filterStatus">
@@ -270,7 +314,11 @@ function getProgressPercentage(campaign: Campaign): number {
                       <SelectValue :placeholder="$t('campaigns.allStatuses')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
+                      <SelectItem
+                        v-for="opt in statusOptions"
+                        :key="opt.value"
+                        :value="opt.value"
+                      >
                         {{ opt.label }}
                       </SelectItem>
                     </SelectContent>
@@ -282,7 +330,11 @@ function getProgressPercentage(campaign: Campaign): number {
                     :format-date-range-display="formatDateRangeDisplay"
                     @apply-custom="applyCustomRange"
                   />
-                  <SearchInput v-model="searchQuery" :placeholder="$t('campaigns.searchCampaigns') + '...'" class="w-48" />
+                  <SearchInput
+                    v-model="searchQuery"
+                    :placeholder="$t('campaigns.searchCampaigns') + '...'"
+                    class="w-48"
+                  />
                 </div>
               </div>
             </CardHeader>
@@ -300,8 +352,16 @@ function getProgressPercentage(campaign: Campaign): number {
                 :columns="columns"
                 :is-loading="isLoading"
                 :empty-icon="Megaphone"
-                :empty-title="searchQuery ? $t('campaigns.noMatchingCampaigns') : $t('campaigns.noCampaignsYet')"
-                :empty-description="searchQuery ? $t('campaigns.noMatchingCampaignsDesc') : $t('campaigns.noCampaignsYetDesc')"
+                :empty-title="
+                  searchQuery
+                    ? $t('campaigns.noMatchingCampaigns')
+                    : $t('campaigns.noCampaignsYet')
+                "
+                :empty-description="
+                  searchQuery
+                    ? $t('campaigns.noMatchingCampaignsDesc')
+                    : $t('campaigns.noCampaignsYetDesc')
+                "
                 v-model:sort-key="sortKey"
                 v-model:sort-direction="sortDirection"
                 server-pagination
@@ -312,42 +372,88 @@ function getProgressPercentage(campaign: Campaign): number {
                 @page-change="handlePageChange"
               >
                 <template #cell-name="{ item: campaign }">
-                  <RouterLink :to="`/campaigns/${campaign.id}`" class="font-medium text-inherit no-underline hover:opacity-80">{{ campaign.name }}</RouterLink>
+                  <RouterLink
+                    :to="`/campaigns/${campaign.id}`"
+                    class="font-medium text-inherit no-underline hover:opacity-80"
+                    >{{ campaign.name }}</RouterLink
+                  >
                 </template>
                 <template #cell-template="{ item: campaign }">
-                  <span class="text-muted-foreground">{{ campaign.template_name || '—' }}</span>
+                  <span class="text-muted-foreground">{{
+                    campaign.template_name || "—"
+                  }}</span>
                 </template>
                 <template #cell-status="{ item: campaign }">
-                  <Badge variant="outline" :class="[getStatusClass(campaign.status), '']">
-                    <component :is="getStatusIcon(campaign.status)" class="size-3 mr-1" />
+                  <Badge
+                    variant="outline"
+                    :class="[getStatusClass(campaign.status), '']"
+                  >
+                    <component
+                      :is="getStatusIcon(campaign.status)"
+                      class="size-3 mr-1"
+                    />
                     {{ campaign.status }}
                   </Badge>
                 </template>
                 <template #cell-stats="{ item: campaign }">
                   <div class="space-y-1">
-                    <div v-if="campaign.status === 'running' || campaign.status === 'processing'" class="w-32">
-                      <Progress :model-value="getProgressPercentage(campaign)" class="h-1.5" />
-                      <span class="text-muted-foreground">{{ getProgressPercentage(campaign) }}%</span>
+                    <div
+                      v-if="
+                        campaign.status === 'running' ||
+                        campaign.status === 'processing'
+                      "
+                      class="w-32"
+                    >
+                      <Progress
+                        :model-value="getProgressPercentage(campaign)"
+                        class="h-1.5"
+                      />
+                      <span class="text-muted-foreground"
+                        >{{ getProgressPercentage(campaign) }}%</span
+                      >
                     </div>
                     <div class="flex items-center gap-3">
-                      <span title="Recipients"><Users class="size-3 inline mr-0.5" />{{ campaign.total_recipients }}</span>
-                      <span class="text-green-600" title="Delivered">{{ campaign.delivered_count }}</span>
-                      <span class="text-blue-600" title="Read">{{ campaign.read_count }}</span>
-                      <span v-if="campaign.failed_count > 0" class="text-destructive" title="Failed">{{ campaign.failed_count }}</span>
+                      <span title="Recipients"
+                        ><Users class="size-3 inline mr-0.5" />{{
+                          campaign.total_recipients
+                        }}</span
+                      >
+                      <span class="text-green-600" title="Delivered">{{
+                        campaign.delivered_count
+                      }}</span>
+                      <span class="text-blue-600" title="Read">{{
+                        campaign.read_count
+                      }}</span>
+                      <span
+                        v-if="campaign.failed_count > 0"
+                        class="text-destructive"
+                        title="Failed"
+                        >{{ campaign.failed_count }}</span
+                      >
                     </div>
                   </div>
                 </template>
                 <template #cell-created_at="{ item: campaign }">
-                  <span class="text-muted-foreground">{{ formatDate(campaign.created_at) }}</span>
+                  <span class="text-muted-foreground">{{
+                    formatDate(campaign.created_at)
+                  }}</span>
                 </template>
                 <template #cell-actions="{ item: campaign }">
                   <div class="flex items-center justify-end gap-1">
-                    <RouterLink :to="`/campaigns/${campaign.id}`"><IconButton :icon="Pencil" :label="$t('campaigns.editCampaign')" class="size-8" /></RouterLink>
+                    <RouterLink :to="`/campaigns/${campaign.id}`"
+                      ><IconButton
+                        :icon="Pencil"
+                        :label="$t('campaigns.editCampaign')"
+                        class="size-8"
+                    /></RouterLink>
                     <IconButton
                       :icon="Trash2"
                       :label="$t('campaigns.deleteCampaign')"
                       class="size-8 text-destructive"
-                      :disabled="campaign.status === 'running' || campaign.status === 'processing'"
+                      :disabled="
+                        campaign.status === 'running' ||
+                        campaign.status === 'processing'
+                      "
                       @click="openDeleteDialog(campaign)"
                     />
                   </div>
@@ -356,7 +462,7 @@ function getProgressPercentage(campaign: Campaign): number {
                   <RouterLink v-if="!searchQuery" to="/campaigns/new">
                     <Button variant="outline" size="sm">
                       <Plus class="size-4 mr-2" />
-                      {{ $t('campaigns.createCampaign') }}
+                      {{ $t("campaigns.createCampaign") }}
                     </Button>
                   </RouterLink>
                 </template>

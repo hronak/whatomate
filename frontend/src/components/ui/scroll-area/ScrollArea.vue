@@ -4,14 +4,14 @@ import {
   ScrollAreaViewport,
   ScrollAreaScrollbar,
   ScrollAreaThumb,
-  ScrollAreaCorner
-} from 'reka-ui'
-import { cn } from '@/lib/utils'
+  ScrollAreaCorner,
+} from "reka-ui";
+import { cn } from "@/lib/utils";
 
 const props = defineProps<{
-  class?: string
-  orientation?: 'vertical' | 'horizontal' | 'both'
-}>()
+  class?: string;
+  orientation?: "vertical" | "horizontal" | "both";
+}>();
 </script>
 
 <template>

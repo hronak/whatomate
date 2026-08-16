@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Spinner from './Spinner.vue'
+import Spinner from "./Spinner.vue";
 import {
   Dialog,
   DialogContent,
@@ -7,73 +7,76 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-const open = defineModel<boolean>('open', { default: false })
+const open = defineModel<boolean>("open", { default: false });
 
-const props = withDefaults(defineProps<{
-  title?: string
-  editTitle?: string
-  createTitle?: string
-  description?: string
-  editDescription?: string
-  createDescription?: string
-  isEditing?: boolean
-  isSubmitting?: boolean
-  submitLabel?: string
-  editSubmitLabel?: string
-  createSubmitLabel?: string
-  cancelLabel?: string
-  maxWidth?: string
-}>(), {
-  title: '',
-  editTitle: 'Edit Item',
-  createTitle: 'Create Item',
-  description: '',
-  editDescription: 'Update the item details.',
-  createDescription: 'Fill in the details to create a new item.',
-  isEditing: false,
-  isSubmitting: false,
-  submitLabel: '',
-  editSubmitLabel: 'Update',
-  createSubmitLabel: 'Create',
-  cancelLabel: 'Cancel',
-  maxWidth: 'max-w-md',
-})
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    editTitle?: string;
+    createTitle?: string;
+    description?: string;
+    editDescription?: string;
+    createDescription?: string;
+    isEditing?: boolean;
+    isSubmitting?: boolean;
+    submitLabel?: string;
+    editSubmitLabel?: string;
+    createSubmitLabel?: string;
+    cancelLabel?: string;
+    maxWidth?: string;
+  }>(),
+  {
+    title: "",
+    editTitle: "Edit Item",
+    createTitle: "Create Item",
+    description: "",
+    editDescription: "Update the item details.",
+    createDescription: "Fill in the details to create a new item.",
+    isEditing: false,
+    isSubmitting: false,
+    submitLabel: "",
+    editSubmitLabel: "Update",
+    createSubmitLabel: "Create",
+    cancelLabel: "Cancel",
+    maxWidth: "max-w-md",
+  },
+);
 
 const emit = defineEmits<{
-  submit: []
-  cancel: []
-}>()
+  submit: [];
+  cancel: [];
+}>();
 
 function handleSubmit() {
-  emit('submit')
+  emit("submit");
 }
 
 function handleCancel() {
-  open.value = false
-  emit('cancel')
+  open.value = false;
+  emit("cancel");
 }
 
 const computedTitle = computed(() => {
-  if (props.title) return props.title
-  return props.isEditing ? props.editTitle : props.createTitle
-})
+  if (props.title) return props.title;
+  return props.isEditing ? props.editTitle : props.createTitle;
+});
 
 const computedDescription = computed(() => {
-  if (props.description) return props.description
-  return props.isEditing ? props.editDescription : props.createDescription
-})
+  if (props.description) return props.description;
+  return props.isEditing ? props.editDescription : props.createDescription;
+});
 
 const computedSubmitLabel = computed(() => {
-  if (props.submitLabel) return props.submitLabel
-  return props.isEditing ? props.editSubmitLabel : props.createSubmitLabel
-})
+  if (props.submitLabel) return props.submitLabel;
+  return props.isEditing ? props.editSubmitLabel : props.createSubmitLabel;
+});
 </script>
 
 <script lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue";
 </script>
 
 <template>

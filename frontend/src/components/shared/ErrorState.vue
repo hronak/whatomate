@@ -1,31 +1,41 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { AlertCircle } from '@lucide/vue'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from "vue";
+import { AlertCircle } from "@lucide/vue";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-withDefaults(defineProps<{
-  title?: string
-  description?: string
-  class?: HTMLAttributes['class']
-  retryLabel?: string
-}>(), {
-  title: 'Something went wrong',
-  description: 'Failed to load data. Please try again.',
-  retryLabel: 'Retry',
-})
+withDefaults(
+  defineProps<{
+    title?: string;
+    description?: string;
+    class?: HTMLAttributes["class"];
+    retryLabel?: string;
+  }>(),
+  {
+    title: "Something went wrong",
+    description: "Failed to load data. Please try again.",
+    retryLabel: "Retry",
+  },
+);
 
 defineEmits<{
-  retry: []
-}>()
+  retry: [];
+}>();
 </script>
 
 <template>
   <div
-    :class="cn('flex flex-col items-center justify-center py-12 px-4 text-center', $props.class)"
+    :class="
+      cn(
+        'flex flex-col items-center justify-center py-12 px-4 text-center',
+        $props.class,
+      )
+    "
     role="alert"
   >
-    <div class="mb-4 flex size-14 items-center justify-center rounded-full bg-linear-to-br from-destructive/15 to-destructive/5 ring-1 ring-destructive/10">
+    <div
+      class="mb-4 flex size-14 items-center justify-center rounded-full bg-linear-to-br from-destructive/15 to-destructive/5 ring-1 ring-destructive/10"
+    >
       <AlertCircle class="size-7 text-destructive" />
     </div>
     <h3 class="text-lg font-semibold text-foreground">

@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import ConfirmDialog from './ConfirmDialog.vue'
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import ConfirmDialog from "./ConfirmDialog.vue";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 const props = defineProps<{
-  open: boolean
-}>()
+  open: boolean;
+}>();
 
 const emit = defineEmits<{
-  stay: []
-  leave: []
-}>()
+  stay: [];
+  leave: [];
+}>();
 
 const isOpen = computed({
   get: () => props.open,
   set: (value: boolean) => {
-    if (!value) emit('stay')
+    if (!value) emit("stay");
   },
-})
+});
 </script>
 
 <template>

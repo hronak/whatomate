@@ -1,38 +1,38 @@
-import { ref, watch } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
+import { ref, watch } from "vue";
+import { useDebounceFn } from "@vueuse/core";
 
 interface UseSearchPaginationOptions {
   /** Items per page (default: 20) */
-  pageSize?: number
+  pageSize?: number;
   /** Debounce delay in ms (default: 300) */
-  debounceMs?: number
+  debounceMs?: number;
   /** Function to call when search/page changes */
-  fetchFn: () => void | Promise<void>
+  fetchFn: () => void | Promise<void>;
 }
 
 export function useSearchPagination(options: UseSearchPaginationOptions) {
-  const { pageSize = 20, debounceMs = 300, fetchFn } = options
+  const { pageSize = 20, debounceMs = 300, fetchFn } = options;
 
-  const searchQuery = ref('')
-  const currentPage = ref(1)
-  const totalItems = ref(0)
+  const searchQuery = ref("");
+  const currentPage = ref(1);
+  const totalItems = ref(0);
 
   const debouncedSearch = useDebounceFn(() => {
-    currentPage.value = 1
-    fetchFn()
-  }, debounceMs)
+    currentPage.value = 1;
+    fetchFn();
+  }, debounceMs);
 
-  watch(searchQuery, () => debouncedSearch())
+  watch(searchQuery, () => debouncedSearch());
 
   function handlePageChange(page: number) {
-    currentPage.value = page
-    fetchFn()
+    currentPage.value = page;
+    fetchFn();
   }
 
   /** Reset to page 1 and fetch (useful for filter changes) */
   function resetAndFetch() {
-    currentPage.value = 1
-    fetchFn()
+    currentPage.value = 1;
+    fetchFn();
   }
 
   return {
@@ -42,5 +42,5 @@ export function useSearchPagination(options: UseSearchPaginationOptions) {
     pageSize,
     handlePageChange,
     resetAndFetch,
-  }
+  };
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,22 +7,24 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { ArrowLeft } from '@lucide/vue'
-import type { Component } from 'vue'
+} from "@/components/ui/breadcrumb";
+import { ArrowLeft } from "@lucide/vue";
+import type { Component } from "vue";
 
 defineProps<{
-  title: string
-  description?: string
-  icon?: Component
-  iconGradient?: string
-  backLink?: string
-  breadcrumbs?: Array<{ label: string; href?: string }>
-}>()
+  title: string;
+  description?: string;
+  icon?: Component;
+  iconGradient?: string;
+  backLink?: string;
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+}>();
 </script>
 
 <template>
-  <header class="border-b border-border bg-white/95 dark:bg-[#0a0a0b]/95 backdrop-blur-sm">
+  <header
+    class="border-b border-border bg-white/95 dark:bg-[#0a0a0b]/95 backdrop-blur-sm"
+  >
     <div class="flex h-16 items-center px-6">
       <RouterLink v-if="backLink" :to="backLink">
         <Button variant="ghost" size="icon" class="mr-3">
@@ -32,7 +34,10 @@ defineProps<{
       <div
         v-if="icon"
         class="size-8 rounded-lg flex items-center justify-center mr-3 shadow-lg"
-        :class="iconGradient || 'bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20'"
+        :class="
+          iconGradient ||
+          'bg-linear-to-br from-blue-500 to-indigo-600 shadow-blue-500/20'
+        "
       >
         <component :is="icon" class="size-4 text-white" />
       </div>

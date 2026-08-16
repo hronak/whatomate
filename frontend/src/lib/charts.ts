@@ -13,8 +13,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
-} from 'chart.js'
+  Filler,
+} from "chart.js";
 
 // Register Chart.js components once
 ChartJS.register(
@@ -27,14 +27,14 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
-)
+  Filler,
+);
 
 // Set default options for better tooltip behavior
 // This makes tooltips show when hovering near data points, not just exactly on them
-ChartJS.defaults.interaction.mode = 'index'
-ChartJS.defaults.interaction.intersect = false
+ChartJS.defaults.interaction.mode = "index";
+ChartJS.defaults.interaction.intersect = false;
 
 // Re-export chart components for convenience
-export { Line, Bar, Pie, Doughnut } from 'vue-chartjs'
-export { ChartJS }
+export { Line, Bar, Pie, Doughnut } from "vue-chartjs";
+export { ChartJS };

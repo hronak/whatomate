@@ -1,135 +1,152 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Reply, ExternalLink, Phone, PhoneCall, Workflow, Trash2 } from '@lucide/vue'
-import type { ButtonConfig } from '@/types/flow-preview'
-import { flowsService } from '@/services/api'
+import { computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Reply,
+  ExternalLink,
+  Phone,
+  PhoneCall,
+  Workflow,
+  Trash2,
+} from "@lucide/vue";
+import type { ButtonConfig } from "@/types/flow-preview";
+import { flowsService } from "@/services/api";
 
-type ButtonType = 'reply' | 'url' | 'phone' | 'voice_call' | 'flow'
+type ButtonType = "reply" | "url" | "phone" | "voice_call" | "flow";
 
 const props = withDefaults(
   defineProps<{
-    buttons: ButtonConfig[]
-    allowedTypes?: ButtonType[]
+    buttons: ButtonConfig[];
+    allowedTypes?: ButtonType[];
     /** Cap when no CTA buttons are present. WhatsApp allows up to 10 reply buttons. */
-    maxButtons?: number
-    disabled?: boolean
-    showIdField?: boolean
+    maxButtons?: number;
+    disabled?: boolean;
+    showIdField?: boolean;
   }>(),
   {
-    allowedTypes: () => ['reply', 'url', 'phone'],
+    allowedTypes: () => ["reply", "url", "phone"],
     maxButtons: 10,
     disabled: false,
     showIdField: false,
   },
-)
+);
 
 const emit = defineEmits<{
-  'update:buttons': [buttons: ButtonConfig[]]
+  "update:buttons": [buttons: ButtonConfig[]];
   /** Per-button title edit — host views (e.g. chatbot select input) listen to keep state in sync. */
-  'change': [buttons: ButtonConfig[]]
-}>()
+  change: [buttons: ButtonConfig[]];
+}>();
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 // WhatsApp rules: reply buttons (1-3) and CTA buttons (url/phone, max 2) can't mix.
 // voice_call (interactive.type:"voice_call") is exclusive — it can't coexist with
 // any other button type and only one is allowed per message.
 const hasReplyButtons = computed(() =>
-  props.buttons.some((b) => !b.type || b.type === 'reply'),
-)
-const ctaCount = computed(() =>
-  props.buttons.filter((b) => b.type === 'url' || b.type === 'phone').length,
-)
-const hasCtaButtons = computed(() => ctaCount.value > 0)
-const ctaLimitReached = computed(() => ctaCount.value >= 2)
-const hasVoiceCallButton = computed(() => props.buttons.some((b) => b.type === 'voice_call'))
+  props.buttons.some((b) => !b.type || b.type === "reply"),
+);
+const ctaCount = computed(
+  () =>
+    props.buttons.filter((b) => b.type === "url" || b.type === "phone").length,
+);
+const hasCtaButtons = computed(() => ctaCount.value > 0);
+const ctaLimitReached = computed(() => ctaCount.value >= 2);
+const hasVoiceCallButton = computed(() =>
+  props.buttons.some((b) => b.type === "voice_call"),
+);
 // flow, like voice_call, renders as the whole interactive message — exclusive.
-const hasFlowButton = computed(() => props.buttons.some((b) => b.type === 'flow'))
-const isExclusive = computed(() => hasVoiceCallButton.value || hasFlowButton.value)
+const hasFlowButton = computed(() =>
+  props.buttons.some((b) => b.type === "flow"),
+);
+const isExclusive = computed(
+  () => hasVoiceCallButton.value || hasFlowButton.value,
+);
 
 // Published flows for the picker. Loaded once when the flow type is allowed.
-const publishedFlows = ref<{ meta_flow_id: string; name: string }[]>([])
+const publishedFlows = ref<{ meta_flow_id: string; name: string }[]>([]);
 onMounted(async () => {
-  if (!props.allowedTypes.includes('flow')) return
+  if (!props.allowedTypes.includes("flow")) return;
   try {
-    const res = await flowsService.list({ limit: 100 })
+    const res = await flowsService.list({ limit: 100 });
     publishedFlows.value = (res.data?.flows || [])
-      .filter((f: any) => f.status === 'PUBLISHED' && f.meta_flow_id)
-      .map((f: any) => ({ meta_flow_id: f.meta_flow_id, name: f.name }))
+      .filter((f: any) => f.status === "PUBLISHED" && f.meta_flow_id)
+      .map((f: any) => ({ meta_flow_id: f.meta_flow_id, name: f.name }));
   } catch {
-    publishedFlows.value = []
+    publishedFlows.value = [];
   }
-})
+});
 
 const effectiveMax = computed(() => {
-  if (isExclusive.value) return 1
-  if (hasCtaButtons.value) return 2
-  return props.maxButtons
-})
+  if (isExclusive.value) return 1;
+  if (hasCtaButtons.value) return 2;
+  return props.maxButtons;
+});
 
 function emitButtons(next: ButtonConfig[]) {
-  emit('update:buttons', next)
-  emit('change', next)
+  emit("update:buttons", next);
+  emit("change", next);
 }
 
 function addButton(type: ButtonType) {
-  if (props.buttons.length >= effectiveMax.value) return
+  if (props.buttons.length >= effectiveMax.value) return;
   const newButton: ButtonConfig = {
     id: `btn_${props.buttons.length + 1}`,
-    title: '',
+    title: "",
     type,
+  };
+  if (type === "url") newButton.url = "";
+  else if (type === "phone") newButton.phone_number = "";
+  else if (type === "voice_call") newButton.ttl_minutes = 15;
+  else if (type === "flow") {
+    newButton.flow_id = "";
+    if (!newButton.title) newButton.title = "Open";
   }
-  if (type === 'url') newButton.url = ''
-  else if (type === 'phone') newButton.phone_number = ''
-  else if (type === 'voice_call') newButton.ttl_minutes = 15
-  else if (type === 'flow') {
-    newButton.flow_id = ''
-    if (!newButton.title) newButton.title = 'Open'
-  }
-  emitButtons([...props.buttons, newButton])
+  emitButtons([...props.buttons, newButton]);
 }
 
 function removeButton(index: number) {
-  const next = [...props.buttons]
-  next.splice(index, 1)
-  emitButtons(next)
+  const next = [...props.buttons];
+  next.splice(index, 1);
+  emitButtons(next);
 }
 
 function updateButton(index: number, patch: Partial<ButtonConfig>) {
-  const next = props.buttons.map((b, i) => (i === index ? { ...b, ...patch } : b))
-  emitButtons(next)
+  const next = props.buttons.map((b, i) =>
+    i === index ? { ...b, ...patch } : b,
+  );
+  emitButtons(next);
 }
 
 function canAdd(type: ButtonType): boolean {
-  if (props.disabled) return false
-  if (isExclusive.value) return false
+  if (props.disabled) return false;
+  if (isExclusive.value) return false;
   // Exclusive types can only be the sole button on the message.
-  if (type === 'voice_call' || type === 'flow') return props.buttons.length === 0
-  if (props.buttons.length >= effectiveMax.value) return false
-  if (type === 'reply') return !hasCtaButtons.value
+  if (type === "voice_call" || type === "flow")
+    return props.buttons.length === 0;
+  if (props.buttons.length >= effectiveMax.value) return false;
+  if (type === "reply") return !hasCtaButtons.value;
   // url / phone
-  return !hasReplyButtons.value && !ctaLimitReached.value
+  return !hasReplyButtons.value && !ctaLimitReached.value;
 }
 
 function typeLabel(type?: string): string {
-  if (type === 'url') return 'URL'
-  if (type === 'phone') return t('flowBuilder.phoneButton', 'Phone')
-  if (type === 'voice_call') return t('flowBuilder.voiceCallButton', 'Call')
-  if (type === 'flow') return t('flowBuilder.flowButton', 'Flow')
-  return t('flowBuilder.replyButton', 'Reply')
+  if (type === "url") return "URL";
+  if (type === "phone") return t("flowBuilder.phoneButton", "Phone");
+  if (type === "voice_call") return t("flowBuilder.voiceCallButton", "Call");
+  if (type === "flow") return t("flowBuilder.flowButton", "Flow");
+  return t("flowBuilder.replyButton", "Reply");
 }
 
 function typeIcon(type?: string) {
-  if (type === 'url') return ExternalLink
-  if (type === 'phone') return Phone
-  if (type === 'voice_call') return PhoneCall
-  if (type === 'flow') return Workflow
-  return Reply
+  if (type === "url") return ExternalLink;
+  if (type === "phone") return Phone;
+  if (type === "voice_call") return PhoneCall;
+  if (type === "flow") return Workflow;
+  return Reply;
 }
 </script>
 
@@ -137,7 +154,9 @@ function typeIcon(type?: string) {
   <div class="space-y-3">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <Label>
-        {{ $t('flowBuilder.buttonOptions', 'Buttons') }} ({{ buttons.length }}/{{ effectiveMax }})
+        {{ $t("flowBuilder.buttonOptions", "Buttons") }} ({{
+          buttons.length
+        }}/{{ effectiveMax }})
       </Label>
       <div class="flex gap-1">
         <Button
@@ -149,7 +168,7 @@ function typeIcon(type?: string) {
           @click="addButton('reply')"
         >
           <Reply class="size-3 mr-1" />
-          {{ $t('flowBuilder.replyButton', 'Reply') }}
+          {{ $t("flowBuilder.replyButton", "Reply") }}
         </Button>
         <Button
           v-if="allowedTypes.includes('url')"
@@ -160,7 +179,7 @@ function typeIcon(type?: string) {
           @click="addButton('url')"
         >
           <ExternalLink class="size-3 mr-1" />
-          {{ $t('flowBuilder.urlButton', 'URL') }}
+          {{ $t("flowBuilder.urlButton", "URL") }}
         </Button>
         <Button
           v-if="allowedTypes.includes('phone')"
@@ -171,7 +190,7 @@ function typeIcon(type?: string) {
           @click="addButton('phone')"
         >
           <Phone class="size-3 mr-1" />
-          {{ $t('flowBuilder.phoneButton', 'Phone') }}
+          {{ $t("flowBuilder.phoneButton", "Phone") }}
         </Button>
         <Button
           v-if="allowedTypes.includes('voice_call')"
@@ -182,7 +201,7 @@ function typeIcon(type?: string) {
           @click="addButton('voice_call')"
         >
           <PhoneCall class="size-3 mr-1" />
-          {{ $t('flowBuilder.voiceCallButton', 'Call') }}
+          {{ $t("flowBuilder.voiceCallButton", "Call") }}
         </Button>
         <Button
           v-if="allowedTypes.includes('flow')"
@@ -193,7 +212,7 @@ function typeIcon(type?: string) {
           @click="addButton('flow')"
         >
           <Workflow class="size-3 mr-1" />
-          {{ $t('flowBuilder.flowButton', 'Flow') }}
+          {{ $t("flowBuilder.flowButton", "Flow") }}
         </Button>
       </div>
     </div>
@@ -230,7 +249,9 @@ function typeIcon(type?: string) {
         <div v-if="btn.type === 'url'">
           <Input
             :model-value="btn.url"
-            :placeholder="$t('flowBuilder.exampleUrlPlaceholder', 'https://example.com')"
+            :placeholder="
+              $t('flowBuilder.exampleUrlPlaceholder', 'https://example.com')
+            "
             class="h-7"
             :disabled="disabled"
             @update:model-value="updateButton(idx, { url: String($event) })"
@@ -239,15 +260,22 @@ function typeIcon(type?: string) {
         <div v-else-if="btn.type === 'phone'">
           <Input
             :model-value="btn.phone_number"
-            :placeholder="$t('flowBuilder.phoneNumberPlaceholder', '+1234567890')"
+            :placeholder="
+              $t('flowBuilder.phoneNumberPlaceholder', '+1234567890')
+            "
             class="h-7"
             :disabled="disabled"
-            @update:model-value="updateButton(idx, { phone_number: String($event) })"
+            @update:model-value="
+              updateButton(idx, { phone_number: String($event) })
+            "
           />
         </div>
-        <div v-else-if="btn.type === 'voice_call'" class="flex items-center gap-2">
+        <div
+          v-else-if="btn.type === 'voice_call'"
+          class="flex items-center gap-2"
+        >
           <Label class="text-muted-foreground shrink-0">
-            {{ $t('flowBuilder.voiceCallTtl', 'Expires after') }}
+            {{ $t("flowBuilder.voiceCallTtl", "Expires after") }}
           </Label>
           <Input
             type="number"
@@ -256,10 +284,12 @@ function typeIcon(type?: string) {
             :model-value="btn.ttl_minutes ?? 15"
             class="h-7 w-16"
             :disabled="disabled"
-            @update:model-value="updateButton(idx, { ttl_minutes: Number($event) || 0 })"
+            @update:model-value="
+              updateButton(idx, { ttl_minutes: Number($event) || 0 })
+            "
           />
           <span class="text-muted-foreground">
-            {{ $t('flowBuilder.voiceCallTtlSuffix', 'minutes (1–60)') }}
+            {{ $t("flowBuilder.voiceCallTtlSuffix", "minutes (1–60)") }}
           </span>
         </div>
         <div v-else-if="btn.type === 'flow'" class="space-y-1">
@@ -267,16 +297,38 @@ function typeIcon(type?: string) {
             :value="btn.flow_id || ''"
             class="h-7 w-full rounded-md border bg-background px-2"
             :disabled="disabled"
-            @change="updateButton(idx, { flow_id: ($event.target as HTMLSelectElement).value })"
+            @change="
+              updateButton(idx, {
+                flow_id: ($event.target as HTMLSelectElement).value,
+              })
+            "
           >
-            <option value="" disabled>{{ $t('flowBuilder.selectFlow', 'Select a published flow…') }}</option>
-            <option v-for="f in publishedFlows" :key="f.meta_flow_id" :value="f.meta_flow_id">{{ f.name }}</option>
+            <option value="" disabled>
+              {{ $t("flowBuilder.selectFlow", "Select a published flow…") }}
+            </option>
+            <option
+              v-for="f in publishedFlows"
+              :key="f.meta_flow_id"
+              :value="f.meta_flow_id"
+            >
+              {{ f.name }}
+            </option>
           </select>
           <p v-if="publishedFlows.length === 0" class="text-muted-foreground">
-            {{ $t('flowBuilder.noPublishedFlows', 'No published flows available. Publish a flow first.') }}
+            {{
+              $t(
+                "flowBuilder.noPublishedFlows",
+                "No published flows available. Publish a flow first.",
+              )
+            }}
           </p>
           <p v-else class="text-muted-foreground">
-            {{ $t('flowBuilder.flowCtaHint', 'The title above is the button label shown to the customer.') }}
+            {{
+              $t(
+                "flowBuilder.flowCtaHint",
+                "The title above is the button label shown to the customer.",
+              )
+            }}
           </p>
         </div>
         <div v-else-if="showIdField">

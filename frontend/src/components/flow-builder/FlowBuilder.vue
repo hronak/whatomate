@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+import { ref, computed, watch } from "vue";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Plus,
   Trash2,
@@ -28,324 +28,348 @@ import {
   Image,
   ArrowRight,
   Settings2,
-  Layers
-} from '@lucide/vue'
+  Layers,
+} from "@lucide/vue";
 
 // Component types available in WhatsApp Flows
 const componentTypes = [
-  { type: 'TextHeading', label: 'Heading', icon: Type },
-  { type: 'TextSubheading', label: 'Subheading', icon: Type },
-  { type: 'TextBody', label: 'Text', icon: Type },
-  { type: 'TextInput', label: 'Text Input', icon: TextCursorInput },
-  { type: 'TextArea', label: 'Text Area', icon: TextCursorInput },
-  { type: 'Dropdown', label: 'Dropdown', icon: ChevronDown },
-  { type: 'RadioButtonsGroup', label: 'Radio Buttons', icon: CircleDot },
-  { type: 'CheckboxGroup', label: 'Checkboxes', icon: CheckSquare },
-  { type: 'DatePicker', label: 'Date Picker', icon: Calendar },
-  { type: 'Image', label: 'Image', icon: Image },
-  { type: 'Footer', label: 'Footer Button', icon: ArrowRight },
-]
+  { type: "TextHeading", label: "Heading", icon: Type },
+  { type: "TextSubheading", label: "Subheading", icon: Type },
+  { type: "TextBody", label: "Text", icon: Type },
+  { type: "TextInput", label: "Text Input", icon: TextCursorInput },
+  { type: "TextArea", label: "Text Area", icon: TextCursorInput },
+  { type: "Dropdown", label: "Dropdown", icon: ChevronDown },
+  { type: "RadioButtonsGroup", label: "Radio Buttons", icon: CircleDot },
+  { type: "CheckboxGroup", label: "Checkboxes", icon: CheckSquare },
+  { type: "DatePicker", label: "Date Picker", icon: Calendar },
+  { type: "Image", label: "Image", icon: Image },
+  { type: "Footer", label: "Footer Button", icon: ArrowRight },
+];
 
 interface FlowComponent {
-  id: string
-  type: string
-  name?: string
-  label?: string
-  text?: string
-  required?: boolean
-  'data-source'?: any[]
-  'on-click-action'?: any
-  [key: string]: any
+  id: string;
+  type: string;
+  name?: string;
+  label?: string;
+  text?: string;
+  required?: boolean;
+  "data-source"?: any[];
+  "on-click-action"?: any;
+  [key: string]: any;
 }
 
 interface FlowScreen {
-  id: string
-  title: string
-  data: Record<string, any>
+  id: string;
+  title: string;
+  data: Record<string, any>;
   layout: {
-    type: string
-    children: FlowComponent[]
-  }
+    type: string;
+    children: FlowComponent[];
+  };
 }
 
 interface Props {
-  modelValue?: { screens: FlowScreen[] }
+  modelValue?: { screens: FlowScreen[] };
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: () => ({ screens: [] })
-})
+  modelValue: () => ({ screens: [] }),
+});
 
 const emit = defineEmits<{
-  'update:modelValue': [value: { screens: FlowScreen[] }]
-}>()
+  "update:modelValue": [value: { screens: FlowScreen[] }];
+}>();
 
-const screens = ref<FlowScreen[]>(props.modelValue?.screens || [])
-const selectedScreenIndex = ref<number>(0)
-const selectedComponentIndex = ref<number | null>(null)
+const screens = ref<FlowScreen[]>(props.modelValue?.screens || []);
+const selectedScreenIndex = ref<number>(0);
+const selectedComponentIndex = ref<number | null>(null);
 
 // Watch for external changes
-watch(() => props.modelValue, (newVal) => {
-  if (newVal?.screens) {
-    screens.value = newVal.screens
-  }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal?.screens) {
+      screens.value = newVal.screens;
+    }
+  },
+  { deep: true },
+);
 
 // Emit changes
-watch(screens, (newScreens) => {
-  emit('update:modelValue', { screens: newScreens })
-}, { deep: true })
+watch(
+  screens,
+  (newScreens) => {
+    emit("update:modelValue", { screens: newScreens });
+  },
+  { deep: true },
+);
 
-const selectedScreen = computed(() => screens.value[selectedScreenIndex.value])
+const selectedScreen = computed(() => screens.value[selectedScreenIndex.value]);
 const selectedComponent = computed(() => {
-  if (selectedComponentIndex.value === null || !selectedScreen.value) return null
-  return selectedScreen.value.layout.children[selectedComponentIndex.value]
-})
+  if (selectedComponentIndex.value === null || !selectedScreen.value)
+    return null;
+  return selectedScreen.value.layout.children[selectedComponentIndex.value];
+});
 
 // Generate a unique ID using only alphabets and underscores (Meta requirement)
 function generateId() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz'
-  let result = 'id_'
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  let result = "id_";
   for (let i = 0; i < 12; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return result
+  return result;
 }
 
 // Generate a user-friendly field name based on component type
 function generateFieldName(type: string): string {
   // Count existing fields of this type across all screens
-  let count = 1
-  const prefix = type === 'TextInput' ? 'text_input' :
-                 type === 'TextArea' ? 'text_area' :
-                 type === 'Dropdown' ? 'dropdown' :
-                 type === 'RadioButtonsGroup' ? 'radio' :
-                 type === 'CheckboxGroup' ? 'checkbox' :
-                 type === 'DatePicker' ? 'date' : 'field'
+  let count = 1;
+  const prefix =
+    type === "TextInput"
+      ? "text_input"
+      : type === "TextArea"
+        ? "text_area"
+        : type === "Dropdown"
+          ? "dropdown"
+          : type === "RadioButtonsGroup"
+            ? "radio"
+            : type === "CheckboxGroup"
+              ? "checkbox"
+              : type === "DatePicker"
+                ? "date"
+                : "field";
 
   for (const screen of screens.value) {
     for (const comp of screen.layout.children) {
       if (comp.name?.startsWith(prefix)) {
-        count++
+        count++;
       }
     }
   }
 
-  return `${prefix}_${count}`
+  return `${prefix}_${count}`;
 }
 
 // Convert number to letter sequence (1=A, 2=B, ..., 27=AA, etc.)
 function numberToLetters(num: number): string {
-  let result = ''
+  let result = "";
   while (num > 0) {
-    num--
-    result = String.fromCharCode(65 + (num % 26)) + result
-    num = Math.floor(num / 26)
+    num--;
+    result = String.fromCharCode(65 + (num % 26)) + result;
+    num = Math.floor(num / 26);
   }
-  return result
+  return result;
 }
 
 function addScreen() {
-  const screenNum = screens.value.length + 1
+  const screenNum = screens.value.length + 1;
   screens.value.push({
     id: `SCREEN_${numberToLetters(screenNum)}`,
     title: `Screen ${screenNum}`,
     data: {},
     layout: {
-      type: 'SingleColumnLayout',
-      children: []
-    }
-  })
-  selectedScreenIndex.value = screens.value.length - 1
-  selectedComponentIndex.value = null
+      type: "SingleColumnLayout",
+      children: [],
+    },
+  });
+  selectedScreenIndex.value = screens.value.length - 1;
+  selectedComponentIndex.value = null;
 }
 
 function removeScreen(index: number) {
-  screens.value.splice(index, 1)
+  screens.value.splice(index, 1);
   if (selectedScreenIndex.value >= screens.value.length) {
-    selectedScreenIndex.value = Math.max(0, screens.value.length - 1)
+    selectedScreenIndex.value = Math.max(0, screens.value.length - 1);
   }
-  selectedComponentIndex.value = null
+  selectedComponentIndex.value = null;
 }
 
 function selectScreen(index: number) {
-  selectedScreenIndex.value = index
-  selectedComponentIndex.value = null
+  selectedScreenIndex.value = index;
+  selectedComponentIndex.value = null;
 }
 
 function addComponent(type: string) {
-  if (!selectedScreen.value) return
+  if (!selectedScreen.value) return;
 
   const component: FlowComponent = {
     id: generateId(),
-    type
-  }
+    type,
+  };
 
   // Set default properties based on type
   switch (type) {
-    case 'TextHeading':
-    case 'TextSubheading':
-    case 'TextBody':
-      component.text = 'Enter text here'
-      break
-    case 'TextInput':
-      component.name = generateFieldName(type)
-      component.label = 'Label'
-      component.required = false
-      component['input-type'] = 'text'
-      break
-    case 'TextArea':
-      component.name = generateFieldName(type)
-      component.label = 'Label'
-      component.required = false
-      break
-    case 'Dropdown':
-      component.name = generateFieldName(type)
-      component.label = 'Select an option'
-      component.required = false
-      component['data-source'] = [
-        { id: 'option_a', title: 'Option 1' },
-        { id: 'option_b', title: 'Option 2' }
-      ]
-      break
-    case 'RadioButtonsGroup':
-      component.name = generateFieldName(type)
-      component.label = 'Choose one'
-      component.required = false
-      component['data-source'] = [
-        { id: 'option_a', title: 'Option 1' },
-        { id: 'option_b', title: 'Option 2' }
-      ]
-      break
-    case 'CheckboxGroup':
-      component.name = generateFieldName(type)
-      component.label = 'Select options'
-      component.required = false
-      component['data-source'] = [
-        { id: 'option_a', title: 'Option 1' },
-        { id: 'option_b', title: 'Option 2' }
-      ]
-      break
-    case 'DatePicker':
-      component.name = generateFieldName(type)
-      component.label = 'Select date'
-      component.required = false
-      break
-    case 'Image':
-      component.src = ''
-      component['aspect-ratio'] = 1
-      break
-    case 'Footer':
-      component.label = 'Continue'
-      component['on-click-action'] = {
-        name: 'complete',
-        payload: {}
-      }
-      break
+    case "TextHeading":
+    case "TextSubheading":
+    case "TextBody":
+      component.text = "Enter text here";
+      break;
+    case "TextInput":
+      component.name = generateFieldName(type);
+      component.label = "Label";
+      component.required = false;
+      component["input-type"] = "text";
+      break;
+    case "TextArea":
+      component.name = generateFieldName(type);
+      component.label = "Label";
+      component.required = false;
+      break;
+    case "Dropdown":
+      component.name = generateFieldName(type);
+      component.label = "Select an option";
+      component.required = false;
+      component["data-source"] = [
+        { id: "option_a", title: "Option 1" },
+        { id: "option_b", title: "Option 2" },
+      ];
+      break;
+    case "RadioButtonsGroup":
+      component.name = generateFieldName(type);
+      component.label = "Choose one";
+      component.required = false;
+      component["data-source"] = [
+        { id: "option_a", title: "Option 1" },
+        { id: "option_b", title: "Option 2" },
+      ];
+      break;
+    case "CheckboxGroup":
+      component.name = generateFieldName(type);
+      component.label = "Select options";
+      component.required = false;
+      component["data-source"] = [
+        { id: "option_a", title: "Option 1" },
+        { id: "option_b", title: "Option 2" },
+      ];
+      break;
+    case "DatePicker":
+      component.name = generateFieldName(type);
+      component.label = "Select date";
+      component.required = false;
+      break;
+    case "Image":
+      component.src = "";
+      component["aspect-ratio"] = 1;
+      break;
+    case "Footer":
+      component.label = "Continue";
+      component["on-click-action"] = {
+        name: "complete",
+        payload: {},
+      };
+      break;
   }
 
-  selectedScreen.value.layout.children.push(component)
-  selectedComponentIndex.value = selectedScreen.value.layout.children.length - 1
+  selectedScreen.value.layout.children.push(component);
+  selectedComponentIndex.value =
+    selectedScreen.value.layout.children.length - 1;
 }
 
 function removeComponent(index: number) {
-  if (!selectedScreen.value) return
-  selectedScreen.value.layout.children.splice(index, 1)
-  selectedComponentIndex.value = null
+  if (!selectedScreen.value) return;
+  selectedScreen.value.layout.children.splice(index, 1);
+  selectedComponentIndex.value = null;
 }
 
 function selectComponent(index: number) {
-  selectedComponentIndex.value = index
+  selectedComponentIndex.value = index;
 }
 
-function moveComponent(index: number, direction: 'up' | 'down') {
-  if (!selectedScreen.value) return
-  const children = selectedScreen.value.layout.children
-  const newIndex = direction === 'up' ? index - 1 : index + 1
+function moveComponent(index: number, direction: "up" | "down") {
+  if (!selectedScreen.value) return;
+  const children = selectedScreen.value.layout.children;
+  const newIndex = direction === "up" ? index - 1 : index + 1;
 
-  if (newIndex < 0 || newIndex >= children.length) return
+  if (newIndex < 0 || newIndex >= children.length) return;
 
-  const temp = children[index]
-  children[index] = children[newIndex]
-  children[newIndex] = temp
+  const temp = children[index];
+  children[index] = children[newIndex];
+  children[newIndex] = temp;
 
-  selectedComponentIndex.value = newIndex
+  selectedComponentIndex.value = newIndex;
 }
 
 function updateComponentProperty(key: string, value: any) {
-  if (selectedComponentIndex.value === null || !selectedScreen.value) return
-  selectedScreen.value.layout.children[selectedComponentIndex.value][key] = value
+  if (selectedComponentIndex.value === null || !selectedScreen.value) return;
+  selectedScreen.value.layout.children[selectedComponentIndex.value][key] =
+    value;
 }
 
 function addOption() {
-  if (!selectedComponent.value || !selectedComponent.value['data-source']) return
-  selectedComponent.value['data-source'].push({
+  if (!selectedComponent.value || !selectedComponent.value["data-source"])
+    return;
+  selectedComponent.value["data-source"].push({
     id: generateId(),
-    title: 'New Option'
-  })
+    title: "New Option",
+  });
 }
 
 function removeOption(index: number) {
-  if (!selectedComponent.value || !selectedComponent.value['data-source']) return
-  selectedComponent.value['data-source'].splice(index, 1)
+  if (!selectedComponent.value || !selectedComponent.value["data-source"])
+    return;
+  selectedComponent.value["data-source"].splice(index, 1);
 }
 
 function updateOption(index: number, key: string, value: string | number) {
-  value = String(value)
-  if (!selectedComponent.value || !selectedComponent.value['data-source']) return
-  selectedComponent.value['data-source'][index][key] = value
+  value = String(value);
+  if (!selectedComponent.value || !selectedComponent.value["data-source"])
+    return;
+  selectedComponent.value["data-source"][index][key] = value;
 }
 
 function getComponentLabel(comp: FlowComponent): string {
-  const typeInfo = componentTypes.find(t => t.type === comp.type)
-  return typeInfo?.label || comp.type
+  const typeInfo = componentTypes.find((t) => t.type === comp.type);
+  return typeInfo?.label || comp.type;
 }
 
 function getComponentIcon(type: string) {
-  return componentTypes.find(t => t.type === type)?.icon || Type
+  return componentTypes.find((t) => t.type === type)?.icon || Type;
 }
 
 // Components that should NOT have an 'id' property when sent to Meta API
 const componentsWithoutId = [
-  'TextHeading',
-  'TextSubheading',
-  'TextBody',
-  'TextInput',
-  'TextArea',
-  'Dropdown',
-  'RadioButtonsGroup',
-  'CheckboxGroup',
-  'DatePicker',
-  'Image',
-  'Footer'
-]
+  "TextHeading",
+  "TextSubheading",
+  "TextBody",
+  "TextInput",
+  "TextArea",
+  "Dropdown",
+  "RadioButtonsGroup",
+  "CheckboxGroup",
+  "DatePicker",
+  "Image",
+  "Footer",
+];
 
 // Sanitize flow JSON for Meta API by removing 'id' from components that don't support it
-function sanitizeFlowForMeta(flowData: { screens: FlowScreen[] }): { screens: any[] } {
+function sanitizeFlowForMeta(flowData: { screens: FlowScreen[] }): {
+  screens: any[];
+} {
   return {
-    screens: flowData.screens.map(screen => ({
+    screens: flowData.screens.map((screen) => ({
       id: screen.id,
       title: screen.title,
       data: screen.data,
       layout: {
         type: screen.layout.type,
-        children: screen.layout.children.map(comp => {
+        children: screen.layout.children.map((comp) => {
           // Create a copy without the 'id' if component type doesn't support it
-          const { id, ...rest } = comp
+          const { id, ...rest } = comp;
           if (componentsWithoutId.includes(comp.type)) {
-            return rest
+            return rest;
           }
-          return comp
-        })
-      }
-    }))
-  }
+          return comp;
+        }),
+      },
+    })),
+  };
 }
 
 // Expose sanitize function for parent components
 defineExpose({
-  sanitizeFlowForMeta
-})
+  sanitizeFlowForMeta,
+});
 </script>
 
 <template>
@@ -371,7 +395,9 @@ defineExpose({
             :key="screen.id"
             :class="[
               'flex items-center gap-2 p-2 rounded-md cursor-pointer',
-              selectedScreenIndex === index ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground' : 'hover:bg-muted'
+              selectedScreenIndex === index
+                ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground'
+                : 'hover:bg-muted',
             ]"
             @click="selectScreen(index)"
           >
@@ -439,145 +465,173 @@ defineExpose({
         <ScrollArea class="flex-1">
           <div class="p-4">
             <div class="max-w-sm mx-auto bg-muted/30 rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-4">{{ selectedScreen.title }}</h3>
-            <div class="space-y-3">
-              <div
-                v-for="(comp, index) in selectedScreen.layout.children"
-                :key="comp.id"
-                :class="[
-                  'p-3 rounded-md border-2 cursor-pointer transition-colors',
-                  selectedComponentIndex === index
-                    ? 'border-primary bg-primary/5'
-                    : 'border-transparent hover:border-muted-foreground/20'
-                ]"
-                @click="selectComponent(index)"
-              >
-                <!-- Text Components -->
-                <template v-if="comp.type === 'TextHeading'">
-                  <h2 class="text-xl font-bold">{{ comp.text }}</h2>
-                </template>
-                <template v-else-if="comp.type === 'TextSubheading'">
-                  <h3 class="text-lg font-semibold">{{ comp.text }}</h3>
-                </template>
-                <template v-else-if="comp.type === 'TextBody'">
-                  <p>{{ comp.text }}</p>
-                </template>
+              <h3 class="text-lg font-semibold mb-4">
+                {{ selectedScreen.title }}
+              </h3>
+              <div class="space-y-3">
+                <div
+                  v-for="(comp, index) in selectedScreen.layout.children"
+                  :key="comp.id"
+                  :class="[
+                    'p-3 rounded-md border-2 cursor-pointer transition-colors',
+                    selectedComponentIndex === index
+                      ? 'border-primary bg-primary/5'
+                      : 'border-transparent hover:border-muted-foreground/20',
+                  ]"
+                  @click="selectComponent(index)"
+                >
+                  <!-- Text Components -->
+                  <template v-if="comp.type === 'TextHeading'">
+                    <h2 class="text-xl font-bold">{{ comp.text }}</h2>
+                  </template>
+                  <template v-else-if="comp.type === 'TextSubheading'">
+                    <h3 class="text-lg font-semibold">{{ comp.text }}</h3>
+                  </template>
+                  <template v-else-if="comp.type === 'TextBody'">
+                    <p>{{ comp.text }}</p>
+                  </template>
 
-                <!-- Input Components -->
-                <template v-else-if="comp.type === 'TextInput' || comp.type === 'TextArea'">
-                  <Label>
-                    {{ comp.label }}
-                    <span v-if="comp.required" class="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    v-if="comp.type === 'TextInput'"
-                    disabled
-                    :placeholder="comp.label"
-                    class="mt-1"
-                  />
-                  <textarea
-                    v-else
-                    disabled
-                    :placeholder="comp.label"
-                    class="mt-1 w-full p-2 rounded-md border bg-background"
-                    rows="3"
-                  />
-                </template>
+                  <!-- Input Components -->
+                  <template
+                    v-else-if="
+                      comp.type === 'TextInput' || comp.type === 'TextArea'
+                    "
+                  >
+                    <Label>
+                      {{ comp.label }}
+                      <span v-if="comp.required" class="text-destructive"
+                        >*</span
+                      >
+                    </Label>
+                    <Input
+                      v-if="comp.type === 'TextInput'"
+                      disabled
+                      :placeholder="comp.label"
+                      class="mt-1"
+                    />
+                    <textarea
+                      v-else
+                      disabled
+                      :placeholder="comp.label"
+                      class="mt-1 w-full p-2 rounded-md border bg-background"
+                      rows="3"
+                    />
+                  </template>
 
-                <!-- Dropdown -->
-                <template v-else-if="comp.type === 'Dropdown'">
-                  <Label>
-                    {{ comp.label }}
-                    <span v-if="comp.required" class="text-destructive">*</span>
-                  </Label>
-                  <div class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between">
-                    <span class="text-muted-foreground">Select...</span>
-                    <ChevronDown class="size-4" />
-                  </div>
-                </template>
-
-                <!-- Radio Buttons -->
-                <template v-else-if="comp.type === 'RadioButtonsGroup'">
-                  <Label class="mb-2 block">
-                    {{ comp.label }}
-                    <span v-if="comp.required" class="text-destructive">*</span>
-                  </Label>
-                  <div class="space-y-2">
+                  <!-- Dropdown -->
+                  <template v-else-if="comp.type === 'Dropdown'">
+                    <Label>
+                      {{ comp.label }}
+                      <span v-if="comp.required" class="text-destructive"
+                        >*</span
+                      >
+                    </Label>
                     <div
-                      v-for="opt in comp['data-source']"
-                      :key="opt.id"
-                      class="flex items-center gap-2"
+                      class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between"
                     >
-                      <div class="size-4 rounded-full border-2" />
-                      <span>{{ opt.title }}</span>
+                      <span class="text-muted-foreground">Select...</span>
+                      <ChevronDown class="size-4" />
                     </div>
-                  </div>
-                </template>
+                  </template>
 
-                <!-- Checkboxes -->
-                <template v-else-if="comp.type === 'CheckboxGroup'">
-                  <Label class="mb-2 block">
-                    {{ comp.label }}
-                    <span v-if="comp.required" class="text-destructive">*</span>
-                  </Label>
-                  <div class="space-y-2">
+                  <!-- Radio Buttons -->
+                  <template v-else-if="comp.type === 'RadioButtonsGroup'">
+                    <Label class="mb-2 block">
+                      {{ comp.label }}
+                      <span v-if="comp.required" class="text-destructive"
+                        >*</span
+                      >
+                    </Label>
+                    <div class="space-y-2">
+                      <div
+                        v-for="opt in comp['data-source']"
+                        :key="opt.id"
+                        class="flex items-center gap-2"
+                      >
+                        <div class="size-4 rounded-full border-2" />
+                        <span>{{ opt.title }}</span>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- Checkboxes -->
+                  <template v-else-if="comp.type === 'CheckboxGroup'">
+                    <Label class="mb-2 block">
+                      {{ comp.label }}
+                      <span v-if="comp.required" class="text-destructive"
+                        >*</span
+                      >
+                    </Label>
+                    <div class="space-y-2">
+                      <div
+                        v-for="opt in comp['data-source']"
+                        :key="opt.id"
+                        class="flex items-center gap-2"
+                      >
+                        <div class="size-4 rounded border" />
+                        <span>{{ opt.title }}</span>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- Date Picker -->
+                  <template v-else-if="comp.type === 'DatePicker'">
+                    <Label>
+                      {{ comp.label }}
+                      <span v-if="comp.required" class="text-destructive"
+                        >*</span
+                      >
+                    </Label>
                     <div
-                      v-for="opt in comp['data-source']"
-                      :key="opt.id"
-                      class="flex items-center gap-2"
+                      class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between"
                     >
-                      <div class="size-4 rounded border" />
-                      <span>{{ opt.title }}</span>
+                      <span class="text-muted-foreground">Select date...</span>
+                      <Calendar class="size-4" />
                     </div>
-                  </div>
-                </template>
+                  </template>
 
-                <!-- Date Picker -->
-                <template v-else-if="comp.type === 'DatePicker'">
-                  <Label>
-                    {{ comp.label }}
-                    <span v-if="comp.required" class="text-destructive">*</span>
-                  </Label>
-                  <div class="mt-1 p-2 rounded-md border bg-background flex items-center justify-between">
-                    <span class="text-muted-foreground">Select date...</span>
-                    <Calendar class="size-4" />
-                  </div>
-                </template>
+                  <!-- Image -->
+                  <template v-else-if="comp.type === 'Image'">
+                    <div
+                      class="bg-muted rounded-md p-8 flex items-center justify-center"
+                    >
+                      <Image class="size-8 text-muted-foreground" />
+                    </div>
+                  </template>
 
-                <!-- Image -->
-                <template v-else-if="comp.type === 'Image'">
-                  <div class="bg-muted rounded-md p-8 flex items-center justify-center">
-                    <Image class="size-8 text-muted-foreground" />
-                  </div>
-                </template>
+                  <!-- Footer -->
+                  <template v-else-if="comp.type === 'Footer'">
+                    <Button class="w-full">{{ comp.label }}</Button>
+                  </template>
 
-                <!-- Footer -->
-                <template v-else-if="comp.type === 'Footer'">
-                  <Button class="w-full">{{ comp.label }}</Button>
-                </template>
+                  <!-- Generic fallback -->
+                  <template v-else>
+                    <div class="flex items-center gap-2 text-muted-foreground">
+                      <component
+                        :is="getComponentIcon(comp.type)"
+                        class="size-4"
+                      />
+                      {{ getComponentLabel(comp) }}
+                    </div>
+                  </template>
+                </div>
 
-                <!-- Generic fallback -->
-                <template v-else>
-                  <div class="flex items-center gap-2 text-muted-foreground">
-                    <component :is="getComponentIcon(comp.type)" class="size-4" />
-                    {{ getComponentLabel(comp) }}
-                  </div>
-                </template>
+                <div
+                  v-if="selectedScreen.layout.children.length === 0"
+                  class="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg"
+                >
+                  Add components from the palette
+                </div>
               </div>
-
-              <div
-                v-if="selectedScreen.layout.children.length === 0"
-                class="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg"
-              >
-                Add components from the palette
-              </div>
-            </div>
             </div>
           </div>
         </ScrollArea>
       </div>
 
-      <div v-else class="flex-1 flex items-center justify-center text-muted-foreground">
+      <div
+        v-else
+        class="flex-1 flex items-center justify-center text-muted-foreground"
+      >
         <div class="text-center">
           <Layers class="size-12 mx-auto mb-4 opacity-50" />
           <p>Add a screen to get started</p>
@@ -616,7 +670,10 @@ defineExpose({
                 variant="ghost"
                 size="icon"
                 class="size-7"
-                :disabled="selectedComponentIndex === selectedScreen!.layout.children.length - 1"
+                :disabled="
+                  selectedComponentIndex ===
+                  selectedScreen!.layout.children.length - 1
+                "
                 @click="moveComponent(selectedComponentIndex!, 'down')"
               >
                 ▼
@@ -642,7 +699,13 @@ defineExpose({
           </div>
 
           <!-- Label property -->
-          <div v-if="'label' in selectedComponent && selectedComponent.type !== 'Footer'" class="space-y-2">
+          <div
+            v-if="
+              'label' in selectedComponent &&
+              selectedComponent.type !== 'Footer'
+            "
+            class="space-y-2"
+          >
             <Label>Label</Label>
             <Input
               :model-value="selectedComponent.label"
@@ -660,12 +723,16 @@ defineExpose({
               placeholder="e.g. email, phone, message"
             />
             <p class="text-muted-foreground">
-              This key is used in the response data. Use lowercase with underscores (e.g. customer_name).
+              This key is used in the response data. Use lowercase with
+              underscores (e.g. customer_name).
             </p>
           </div>
 
           <!-- Required property -->
-          <div v-if="'required' in selectedComponent" class="flex items-center justify-between">
+          <div
+            v-if="'required' in selectedComponent"
+            class="flex items-center justify-between"
+          >
             <Label>Required</Label>
             <Switch
               :checked="selectedComponent.required"
@@ -717,8 +784,15 @@ defineExpose({
             <div class="space-y-2">
               <Label>Action</Label>
               <Select
-                :model-value="selectedComponent['on-click-action']?.name || 'complete'"
-                @update:model-value="updateComponentProperty('on-click-action', { name: $event, payload: {} })"
+                :model-value="
+                  selectedComponent['on-click-action']?.name || 'complete'
+                "
+                @update:model-value="
+                  updateComponentProperty('on-click-action', {
+                    name: $event,
+                    payload: {},
+                  })
+                "
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -735,18 +809,24 @@ defineExpose({
             >
               <Label>Target Screen</Label>
               <Select
-                :model-value="selectedComponent['on-click-action']?.next?.name || ''"
-                @update:model-value="updateComponentProperty('on-click-action', {
-                  name: 'navigate',
-                  next: { type: 'screen', name: $event }
-                })"
+                :model-value="
+                  selectedComponent['on-click-action']?.next?.name || ''
+                "
+                @update:model-value="
+                  updateComponentProperty('on-click-action', {
+                    name: 'navigate',
+                    next: { type: 'screen', name: $event },
+                  })
+                "
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select screen" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem
-                    v-for="screen in screens.filter(s => s.id !== selectedScreen?.id)"
+                    v-for="screen in screens.filter(
+                      (s) => s.id !== selectedScreen?.id,
+                    )"
                     :key="screen.id"
                     :value="screen.id"
                   >
