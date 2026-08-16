@@ -24,8 +24,10 @@
 export const FRONTEND_PORT = Number(process.env.FRONTEND_PORT ?? 3000)
 export const BACKEND_PORT = Number(process.env.BACKEND_PORT ?? 8080)
 
+export const BACKEND_HOST = process.env.BACKEND_HOST ?? 'localhost'
+
 /** Live frontend + proxied API. The default target for `npm run dev` and e2e. */
-export const DEV_URL = `http://localhost:${FRONTEND_PORT}`
+export const DEV_URL = `http://${BACKEND_HOST}:${FRONTEND_PORT}`
 
 /** Backend API, and the embedded frontend snapshot. What CI tests against. */
-export const BACKEND_URL = `http://localhost:${BACKEND_PORT}`
+export const BACKEND_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`
