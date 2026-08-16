@@ -2,12 +2,10 @@
 import { computed } from 'vue'
 import { VisXYContainer, VisGroupedBar, VisAxis } from '@unovis/vue'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import type { ChartData } from '@/components/ui/chart'
 
 const props = defineProps<{
-  data: {
-    labels: string[],
-    datasets: { label: string, data: number[], backgroundColor?: string | string[] }[]
-  }
+  data: ChartData
   options?: any
 }>()
 
@@ -36,7 +34,10 @@ const unovisData = computed(() => {
   })
 })
 
-const xAccessor = (d: any, i: number) => i
+// Unovis passes (datum, index); these charts are ordinal, so only the index
+// matters. The underscore keeps noUnusedParameters quiet without dropping the
+// parameter, which would change the accessor's arity.
+const xAccessor = (_d: unknown, i: number) => i
 const tickFormat = (i: number) => props.data.labels[i]
 const yAccessors = computed(() => {
   if (!props.data?.datasets) return []
@@ -44,11 +45,13 @@ const yAccessors = computed(() => {
 })
 const colors = computed(() => {
   if (!props.data?.datasets) return []
-  // If the first dataset has an array of colors (e.g. Bar chart with one dataset but many colors)
-  // we can use a color accessor function for Unovis.
-  const firstDs = props.data.datasets[0]
-  if (props.data.datasets.length === 1 && Array.isArray(firstDs.backgroundColor)) {
-     return (d: any, i: number) => firstDs.backgroundColor[d.index]
+  // A single dataset carrying an array of colours means one colour per bar
+  // (the group_by case), which Unovis wants as an accessor rather than a list.
+  // Bind the array to a const first: the closure below would otherwise lose the
+  // Array.isArray narrowing and backgroundColor is optional.
+  const palette = props.data.datasets[0]?.backgroundColor
+  if (props.data.datasets.length === 1 && Array.isArray(palette)) {
+    return (d: { index: number }) => palette[d.index]
   }
   return props.data.datasets.map((_, i) => chartConfig.value[`dataset_${i}`].color)
 })

@@ -2,12 +2,10 @@
 import { computed } from 'vue'
 import { VisXYContainer, VisLine, VisAxis } from '@unovis/vue'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import type { ChartData } from '@/components/ui/chart'
 
 const props = defineProps<{
-  data: {
-    labels: string[],
-    datasets: { label: string, data: number[], borderColor?: string, backgroundColor?: string }[]
-  }
+  data: ChartData
   options?: any
 }>()
 
@@ -16,9 +14,13 @@ const chartConfig = computed(() => {
   if (!props.data?.datasets) return config
   
   props.data.datasets.forEach((ds, i) => {
+    // A line has one colour, but backgroundColor may arrive as a per-slice
+    // array from a shared data builder; take the first rather than handing
+    // Unovis an array it would render as garbage.
+    const fill = Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor
     config[`dataset_${i}`] = {
       label: ds.label || `Dataset ${i}`,
-      color: ds.borderColor || ds.backgroundColor || `hsl(var(--primary))`
+      color: ds.borderColor || fill || `hsl(var(--primary))`
     }
   })
   return config
@@ -35,7 +37,10 @@ const unovisData = computed(() => {
   })
 })
 
-const xAccessor = (d: any, i: number) => i
+// Unovis passes (datum, index); these charts are ordinal, so only the index
+// matters. The underscore keeps noUnusedParameters quiet without dropping the
+// parameter, which would change the accessor's arity.
+const xAccessor = (_d: unknown, i: number) => i
 const tickFormat = (i: number) => props.data.labels[i]
 const yAccessors = computed(() => {
   if (!props.data?.datasets) return []

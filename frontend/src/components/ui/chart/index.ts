@@ -19,6 +19,33 @@ export type ChartConfig = {
   )
 }
 
+/**
+ * The chart.js-shaped dataset the Line/Bar/Pie/Doughnut wrappers accept.
+ *
+ * `label` is optional and `backgroundColor` takes either form deliberately,
+ * because chart.js is permissive in exactly those two places and callers rely
+ * on it: a pie/doughnut dataset omits the per-dataset label (slice names come
+ * from `labels`) and carries one colour per slice, while line/bar datasets name
+ * themselves and usually carry a single colour. A builder that returns a
+ * different shape per chart type produces a union of all of them, so requiring
+ * `label` here would reject the union at every call site even though the
+ * wrappers already fall back with `ds.label || \`Dataset ${i}\``.
+ */
+export interface ChartDataset {
+  label?: string
+  data: number[]
+  backgroundColor?: string | string[]
+  borderColor?: string
+  borderWidth?: number
+  fill?: boolean
+  tension?: number
+}
+
+export interface ChartData {
+  labels: string[]
+  datasets: ChartDataset[]
+}
+
 interface ChartContextProps {
   id: string
   config: Ref<ChartConfig>
