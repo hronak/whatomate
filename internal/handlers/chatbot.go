@@ -270,6 +270,10 @@ func (a *App) UpdateChatbotSettings(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceSettingsChatbot, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to edit chatbot settings"))
+	}
+
 	var req struct {
 		Enabled                      *bool              `json:"enabled"`
 		GreetingMessage              *string            `json:"greeting_message"`
@@ -598,6 +602,10 @@ func (a *App) CreateKeywordRule(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceChatbotKeywords, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to create keyword rules"))
+	}
+
 	var req struct {
 		Name            string              `json:"name"`
 		Keywords        []string            `json:"keywords"`
@@ -706,6 +714,10 @@ func (a *App) UpdateKeywordRule(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceChatbotKeywords, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to update keyword rules"))
+	}
+
 	id, err := parsePathUUID(r, "id", "rule")
 	if err != nil {
 		return nil
@@ -777,6 +789,10 @@ func (a *App) DeleteKeywordRule(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceChatbotKeywords, models.ActionDelete, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to delete keyword rules"))
 	}
 
 	id, err := parsePathUUID(r, "id", "rule")
