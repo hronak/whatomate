@@ -73,3 +73,7 @@ postman/
 
 # Scratch files
 scratch_*
+
+# AI Assistants
+.agents/
+.claude/
