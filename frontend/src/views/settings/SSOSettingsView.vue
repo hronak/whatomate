@@ -159,7 +159,7 @@ async function fetchProviders() {
   fetchError.value = false;
   try {
     const response = await api.get("/settings/sso");
-    providers.value = response.data.data || [];
+    providers.value = response.data || [];
   } catch (error) {
     fetchError.value = true;
     toast.error(

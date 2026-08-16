@@ -26,7 +26,7 @@ onMounted(async () => {
   try {
     // Cookies were set by the SSO redirect — call /me to get the user object
     const response = await api.get("/me");
-    const user = response.data.data;
+    const user = response.data;
 
     // Set auth in store (only user — tokens are in httpOnly cookies)
     authStore.setAuth({ user });

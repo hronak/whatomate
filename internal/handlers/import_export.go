@@ -622,7 +622,7 @@ func (a *App) ImportData(r *fastglue.Request) error {
 		created++
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"created":  created,
 		"updated":  updated,
 		"skipped":  skipped,
@@ -663,7 +663,7 @@ func (a *App) GetExportConfig(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"table":           tableName,
 		"columns":         columns,
 		"default_columns": config.DefaultColumns,
@@ -724,7 +724,7 @@ func (a *App) GetImportConfig(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"table":            tableName,
 		"required_columns": requiredCols,
 		"optional_columns": optionalCols,

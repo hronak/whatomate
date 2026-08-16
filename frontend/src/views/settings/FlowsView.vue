@@ -154,7 +154,7 @@ onMounted(async () => {
 async function fetchAccounts() {
   try {
     const response = await accountsService.list();
-    accounts.value = response.data.data?.accounts || [];
+    accounts.value = response.data?.accounts || [];
     if (
       selectedAccount.value !== "all" &&
       !accounts.value.some((a) => a.name === selectedAccount.value)
@@ -187,7 +187,7 @@ async function fetchFlows() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     flows.value = data.flows || [];
     totalItems.value = data.total ?? flows.value.length;
   } catch {
@@ -394,7 +394,7 @@ async function syncFlows() {
   isSyncing.value = true;
   try {
     const response = await flowsService.sync(selectedAccount.value);
-    const data = response.data.data;
+    const data = response.data;
     toast.success(
       t("flows.syncSuccess", {
         synced: data.synced,

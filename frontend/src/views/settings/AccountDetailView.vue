@@ -156,7 +156,7 @@ async function loadAccount() {
   isNotFound.value = false;
   try {
     const response = await api.get(`/accounts/${accountId.value}`);
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     account.value = data;
     syncForm();
     nextTick(() => {
@@ -214,7 +214,7 @@ async function save() {
 
     if (isNew.value) {
       const response = await api.post("/accounts", payload);
-      const created = response.data.data || response.data;
+      const created = response.data || response.data;
       hasChanges.value = false;
       toast.success(
         t("common.createdSuccess", { resource: t("resources.Account") }),
@@ -264,7 +264,7 @@ async function testConnection() {
   testingConnection.value = true;
   try {
     const response = await api.post(`/accounts/${account.value.id}/test`);
-    testResult.value = response.data.data;
+    testResult.value = response.data;
     if (testResult.value?.success) {
       toast.success(t("accounts.connectionSuccess", "Connection successful"));
     } else {
@@ -293,7 +293,7 @@ async function subscribeApp() {
   subscribing.value = true;
   try {
     const response = await api.post(`/accounts/${account.value.id}/subscribe`);
-    if (response.data.data?.success) {
+    if (response.data?.success) {
       toast.success(t("accounts.subscribeSuccess", "Subscribed successfully"));
     } else {
       toast.error(t("accounts.subscribeFailed", "Subscribe failed"));

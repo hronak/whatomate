@@ -154,7 +154,7 @@ const fetchAnalytics = async () => {
       params.agent_id = selectedAgentId.value;
     }
     const response = await agentAnalyticsService.getSummary(params);
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     analytics.value = data;
   } catch (err) {
     console.error("Failed to load agent analytics:", err);

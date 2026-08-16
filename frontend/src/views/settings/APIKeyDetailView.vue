@@ -104,7 +104,7 @@ async function loadApiKey() {
   isNotFound.value = false;
   try {
     const response = await apiKeysService.get(keyId.value);
-    apiKey.value = (response.data as any).data || response.data;
+    apiKey.value = response.data;
   } catch {
     isNotFound.value = true;
   } finally {
@@ -125,7 +125,7 @@ async function create() {
     if (form.value.expires_at)
       payload.expires_at = new Date(form.value.expires_at).toISOString();
     const response = await apiKeysService.create(payload);
-    const created = response.data.data;
+    const created = response.data;
     newlyCreatedKey.value = created;
     createdKeyId.value = created.id;
     isKeyDisplayOpen.value = true;

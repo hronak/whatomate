@@ -95,7 +95,7 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(listEnvelope("call_logs", callLogs, total, pg))
+	return a.sendJSON(r, listEnvelope("call_logs", callLogs, total, pg))
 }
 
 // GetCallLog returns a single call log by ID.
@@ -138,7 +138,7 @@ func (a *App) GetCallLog(r *fastglue.Request) error {
 		Order("created_at ASC").
 		Find(&transfers)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"call_log":  callLog,
 		"transfers": transfers,
 	})
@@ -181,7 +181,7 @@ func (a *App) GetCallRecording(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to generate recording URL", err))
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"url":      url,
 		"duration": callLog.RecordingDuration,
 	})

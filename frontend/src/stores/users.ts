@@ -68,7 +68,7 @@ export const useUsersStore = defineStore("users", () => {
     error.value = null;
     try {
       const response = await usersService.list(params);
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       users.value = data.users || [];
       return {
         users: data.users || [],
@@ -90,7 +90,7 @@ export const useUsersStore = defineStore("users", () => {
     error.value = null;
     try {
       const response = await usersService.get(id);
-      return response.data.data || response.data;
+      return response.data || response.data;
     } catch (err: any) {
       error.value = err.response?.data?.message || "Failed to fetch user";
       throw err;
@@ -104,7 +104,7 @@ export const useUsersStore = defineStore("users", () => {
     error.value = null;
     try {
       const response = await usersService.create(data);
-      const newUser = response.data.data;
+      const newUser = response.data;
       users.value.unshift(newUser);
       return newUser;
     } catch (err: any) {
@@ -120,7 +120,7 @@ export const useUsersStore = defineStore("users", () => {
     error.value = null;
     try {
       const response = await usersService.update(id, data);
-      const updatedUser = response.data.data;
+      const updatedUser = response.data;
       const index = users.value.findIndex((u) => u.id === id);
       if (index !== -1) {
         users.value[index] = updatedUser;

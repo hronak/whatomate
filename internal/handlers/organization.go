@@ -124,7 +124,7 @@ func (a *App) GetOrganizationSettings(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"settings": settings,
 		"name":     org.Name,
 	})
@@ -246,7 +246,7 @@ func (a *App) UpdateOrganizationSettings(r *fastglue.Request) error {
 			models.ResourceSettingsCalling, orgID, models.AuditActionUpdated, oldCalling, newCalling)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Settings updated successfully",
 	})
 }
@@ -366,7 +366,7 @@ func (a *App) ListOrganizations(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"organizations": response,
 	})
 }
@@ -383,7 +383,7 @@ func (a *App) GetCurrentOrganization(r *fastglue.Request) error {
 		return a.sendError(r, notFound("Organization"))
 	}
 
-	return r.SendEnvelope(OrganizationResponse{
+	return a.sendJSON(r, OrganizationResponse{
 		ID:        org.ID,
 		Name:      org.Name,
 		Slug:      org.Slug,
@@ -484,7 +484,7 @@ func (a *App) CreateOrganization(r *fastglue.Request) error {
 
 	a.Log.Info("Created organization", "org_id", org.ID, "org_name", org.Name, "created_by", userID)
 
-	return r.SendEnvelope(OrganizationResponse{
+	return a.sendJSON(r, OrganizationResponse{
 		ID:        org.ID,
 		Name:      org.Name,
 		Slug:      org.Slug,
@@ -540,7 +540,7 @@ func (a *App) ListOrganizationMembers(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to list members", err))
 	}
 
-	return r.SendEnvelope(listEnvelope("members", response, total, pg))
+	return a.sendJSON(r, listEnvelope("members", response, total, pg))
 }
 
 // AddMemberRequest represents the request body for adding a member to an organization
@@ -614,7 +614,7 @@ func (a *App) AddOrganizationMember(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to add member", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Member added successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Member added successfully"})
 }
 
 // RemoveOrganizationMember removes a user from the current organization
@@ -647,7 +647,7 @@ func (a *App) RemoveOrganizationMember(r *fastglue.Request) error {
 	// Invalidate removed user's permission cache
 	a.InvalidateUserPermissionsCache(targetUserID)
 
-	return r.SendEnvelope(map[string]string{"message": "Member removed successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Member removed successfully"})
 }
 
 // UpdateMemberRoleRequest represents the request body for updating a member's role
@@ -697,5 +697,5 @@ func (a *App) UpdateOrganizationMemberRole(r *fastglue.Request) error {
 	// Invalidate permission cache
 	a.InvalidateUserPermissionsCache(targetUserID)
 
-	return r.SendEnvelope(map[string]string{"message": "Member role updated successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Member role updated successfully"})
 }

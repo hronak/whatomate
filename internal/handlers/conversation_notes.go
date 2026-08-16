@@ -78,7 +78,7 @@ func (a *App) ListConversationNotes(r *fastglue.Request) error {
 		result[i] = noteToResponse(n)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"notes":    result,
 		"total":    total,
 		"has_more": len(notes) == limit,
@@ -133,7 +133,7 @@ func (a *App) CreateConversationNote(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(resp)
+	return a.sendJSON(r, resp)
 }
 
 // UpdateConversationNote updates an existing note (creator only).
@@ -193,7 +193,7 @@ func (a *App) UpdateConversationNote(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(resp)
+	return a.sendJSON(r, resp)
 }
 
 // DeleteConversationNote deletes a note (creator only).
@@ -241,7 +241,7 @@ func (a *App) DeleteConversationNote(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Note deleted"})
+	return a.sendJSON(r, map[string]string{"message": "Note deleted"})
 }
 
 func noteToResponse(n models.ConversationNote) ConversationNoteResponse {

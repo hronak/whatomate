@@ -214,7 +214,7 @@ onMounted(async () => {
 async function fetchAccounts() {
   try {
     const response = await api.get("/accounts");
-    accounts.value = response.data.data?.accounts || [];
+    accounts.value = response.data?.accounts || [];
     // Validate stored account still exists, fallback to 'all' if not
     if (
       selectedAccount.value !== "all" &&
@@ -248,7 +248,7 @@ async function fetchTemplates() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     templates.value = data.templates || [];
     totalItems.value = data.total ?? templates.value.length;
   } catch (err: any) {
@@ -272,7 +272,7 @@ async function syncTemplates() {
     const response = await api.post("/templates/sync", {
       whatsapp_account: selectedAccount.value,
     });
-    toast.success(response.data.data.message || t("templates.syncSuccess"));
+    toast.success(response.data.message || t("templates.syncSuccess"));
     await fetchTemplates();
   } catch (error) {
     toast.error(getErrorMessage(error, t("templates.syncFailed")));

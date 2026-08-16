@@ -82,7 +82,7 @@ func (a *App) ListFlows(r *fastglue.Request) error {
 		response[i] = flowToResponse(f)
 	}
 
-	return r.SendEnvelope(listEnvelope("flows", response, total, pg))
+	return a.sendJSON(r, listEnvelope("flows", response, total, pg))
 }
 
 // CreateFlow creates a new WhatsApp flow
@@ -134,7 +134,7 @@ func (a *App) CreateFlow(r *fastglue.Request) error {
 
 	a.Log.Info("Flow created", "flow_id", flow.ID, "name", flow.Name)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow": flowToResponse(flow),
 	})
 }
@@ -156,7 +156,7 @@ func (a *App) GetFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow": flowToResponse(*flow),
 	})
 }
@@ -215,7 +215,7 @@ func (a *App) UpdateFlow(r *fastglue.Request) error {
 
 	a.Log.Info("Flow updated", "flow_id", flow.ID)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow": flowToResponse(*flow),
 	})
 }
@@ -245,7 +245,7 @@ func (a *App) DeleteFlow(r *fastglue.Request) error {
 
 	a.Log.Info("Flow deleted", "flow_id", id)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Flow deleted successfully",
 	})
 }
@@ -350,7 +350,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 
 	a.Log.Info("Flow saved to Meta", "flow_id", flow.ID, "meta_flow_id", metaFlowID)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow":    flowToResponse(*flow),
 		"message": "Flow saved to Meta successfully",
 	})
@@ -421,7 +421,7 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 
 	a.Log.Info("Flow published to Meta", "flow_id", flow.ID, "meta_flow_id", flow.MetaFlowID)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow":    flowToResponse(*flow),
 		"message": "Flow published successfully",
 	})
@@ -478,7 +478,7 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 
 	a.Log.Info("Flow deprecated", "flow_id", flow.ID)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow":    flowToResponse(*flow),
 		"message": "Flow deprecated successfully",
 	})
@@ -522,7 +522,7 @@ func (a *App) DuplicateFlow(r *fastglue.Request) error {
 
 	a.Log.Info("Flow duplicated", "original_flow_id", id, "new_flow_id", newFlow.ID)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"flow":    flowToResponse(newFlow),
 		"message": "Flow duplicated successfully. You can now edit and publish the new flow.",
 	})
@@ -644,7 +644,7 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 
 	a.Log.Info("Flows synced from Meta", "total", synced, "created", created, "updated", updated)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Flows synced successfully",
 		"synced":  synced,
 		"created": created,

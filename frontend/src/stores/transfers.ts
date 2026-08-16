@@ -130,7 +130,7 @@ export const useTransfersStore = defineStore("transfers", () => {
     isLoading.value = true;
     try {
       const response = await chatbotService.listTransfers(params);
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
 
       if (params?.append && params.offset) {
         // Append for pagination
@@ -163,7 +163,7 @@ export const useTransfersStore = defineStore("transfers", () => {
         offset: params?.offset ?? 0,
         include: "contact,agent,team,resumed_by", // Skip transferred_by for history
       });
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
 
       if (params?.append && params.offset) {
         historyTransfers.value = [

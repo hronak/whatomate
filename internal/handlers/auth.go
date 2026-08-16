@@ -100,7 +100,7 @@ func (a *App) Login(r *fastglue.Request) error {
 
 	a.setAuthCookies(r, accessToken, refreshToken)
 
-	return r.SendEnvelope(CookieAuthResponse{
+	return a.sendJSON(r, CookieAuthResponse{
 		ExpiresIn: a.Config.JWT.AccessExpiryMins * 60,
 		User:      user,
 	})
@@ -186,7 +186,7 @@ func (a *App) Register(r *fastglue.Request) error {
 
 		a.setAuthCookies(r, accessToken, refreshToken)
 
-		return r.SendEnvelope(CookieAuthResponse{
+		return a.sendJSON(r, CookieAuthResponse{
 			ExpiresIn: a.Config.JWT.AccessExpiryMins * 60,
 			User:      existingUser,
 		})
@@ -257,7 +257,7 @@ func (a *App) Register(r *fastglue.Request) error {
 
 	a.setAuthCookies(r, accessToken, refreshToken)
 
-	return r.SendEnvelope(CookieAuthResponse{
+	return a.sendJSON(r, CookieAuthResponse{
 		ExpiresIn: a.Config.JWT.AccessExpiryMins * 60,
 		User:      user,
 	})
@@ -330,7 +330,7 @@ func (a *App) RefreshToken(r *fastglue.Request) error {
 
 	a.setAuthCookies(r, accessToken, newRefreshToken)
 
-	return r.SendEnvelope(CookieAuthResponse{
+	return a.sendJSON(r, CookieAuthResponse{
 		ExpiresIn: a.Config.JWT.AccessExpiryMins * 60,
 		User:      user,
 	})
@@ -478,7 +478,7 @@ func (a *App) SwitchOrg(r *fastglue.Request) error {
 
 	a.setAuthCookies(r, accessToken, refreshToken)
 
-	return r.SendEnvelope(CookieAuthResponse{
+	return a.sendJSON(r, CookieAuthResponse{
 		ExpiresIn: a.Config.JWT.AccessExpiryMins * 60,
 		User:      user,
 	})
@@ -521,7 +521,7 @@ func (a *App) Logout(r *fastglue.Request) error {
 
 	a.clearAuthCookies(r)
 
-	return r.SendEnvelope(map[string]string{"status": "logged_out"})
+	return a.sendJSON(r, map[string]string{"status": "logged_out"})
 }
 
 func generateSlug(name string) string {
@@ -570,5 +570,5 @@ func (a *App) GetWSToken(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"token": signed})
+	return a.sendJSON(r, map[string]string{"token": signed})
 }

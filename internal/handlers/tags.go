@@ -67,7 +67,7 @@ func (a *App) ListTags(r *fastglue.Request) error {
 		result = append(result, tagToResponse(tags[i]))
 	}
 
-	return r.SendEnvelope(listEnvelope("tags", result, total, pg))
+	return a.sendJSON(r, listEnvelope("tags", result, total, pg))
 }
 
 // CreateTag creates a new tag
@@ -114,7 +114,7 @@ func (a *App) CreateTag(r *fastglue.Request) error {
 	// Invalidate cache
 	a.InvalidateTagsCache(orgID)
 
-	return r.SendEnvelope(tagToResponse(tag))
+	return a.sendJSON(r, tagToResponse(tag))
 }
 
 // UpdateTag updates an existing tag
@@ -201,7 +201,7 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 		// Invalidate cache
 		a.InvalidateTagsCache(orgID)
 
-		return r.SendEnvelope(tagToResponse(newTag))
+		return a.sendJSON(r, tagToResponse(newTag))
 	}
 
 	// Just updating color - use Updates for composite primary key
@@ -223,7 +223,7 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 		a.Log.Error("Failed to reload tag", "error", err)
 	}
 
-	return r.SendEnvelope(tagToResponse(tag))
+	return a.sendJSON(r, tagToResponse(tag))
 }
 
 // DeleteTag deletes a tag
@@ -268,7 +268,7 @@ func (a *App) DeleteTag(r *fastglue.Request) error {
 	// Invalidate cache
 	a.InvalidateTagsCache(orgID)
 
-	return r.SendEnvelope(map[string]string{"message": "Tag deleted"})
+	return a.sendJSON(r, map[string]string{"message": "Tag deleted"})
 }
 
 func tagToResponse(tag models.Tag) TagResponse {

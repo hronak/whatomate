@@ -139,7 +139,7 @@ export const useContactsStore = defineStore("contacts", () => {
         ...params,
       });
       // API returns { status: "success", data: { contacts: [...], total: number } }
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       contacts.value = data.contacts || [];
       contactsTotal.value = data.total ?? contacts.value.length;
       contactsPage.value = 1;
@@ -167,7 +167,7 @@ export const useContactsStore = defineStore("contacts", () => {
         tags: tagsParam,
         search,
       });
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       const newContacts = data.contacts || [];
 
       if (newContacts.length > 0) {
@@ -191,7 +191,7 @@ export const useContactsStore = defineStore("contacts", () => {
     try {
       const response = await contactsService.get(id);
       // API returns { status: "success", data: { ... } }
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       currentContact.value = data;
       return data;
     } catch (error) {
@@ -211,7 +211,7 @@ export const useContactsStore = defineStore("contacts", () => {
     try {
       const response = await messagesService.list(contactId, params);
       // API returns { status: "success", data: { messages: [...], has_more: boolean } }
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       messages.value = data.messages || [];
       hasMoreMessages.value = data.has_more === true;
     } catch (error) {
@@ -238,7 +238,7 @@ export const useContactsStore = defineStore("contacts", () => {
         before_id: oldestMessageId,
         account,
       });
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       const olderMessages = data.messages || [];
 
       if (olderMessages.length > 0) {
@@ -272,7 +272,7 @@ export const useContactsStore = defineStore("contacts", () => {
         ...(extra?.interactive ? { interactive: extra.interactive } : {}),
       });
       // API returns { status: "success", data: { ... } }
-      const newMessage = response.data.data || response.data;
+      const newMessage = response.data || response.data;
       // Use addMessage which has duplicate checking (WebSocket may also broadcast this)
       addMessage(newMessage);
 
@@ -304,7 +304,7 @@ export const useContactsStore = defineStore("contacts", () => {
         },
         headerFile,
       );
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       // Use addMessage which has duplicate checking (WebSocket may also broadcast this)
       addMessage(data);
       return data;

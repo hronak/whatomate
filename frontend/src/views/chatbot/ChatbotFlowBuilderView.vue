@@ -687,7 +687,7 @@ async function loadFlow() {
   loadError.value = false;
   try {
     const response = await chatbotService.getFlow(flowId.value);
-    const flow = response.data.data || response.data;
+    const flow = response.data || response.data;
 
     name.value = flow.name || flow.Name || "";
     description.value = flow.description || flow.Description || "";
@@ -773,7 +773,7 @@ async function saveFlow() {
 
     if (isNewFlow.value) {
       const response = await chatbotService.createFlow(data);
-      const newFlow = response.data.data || response.data;
+      const newFlow = response.data || response.data;
       toast.success(
         t("common.createdSuccess", { resource: t("resources.Flow") }),
       );

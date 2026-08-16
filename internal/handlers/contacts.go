@@ -192,7 +192,7 @@ func (a *App) ListContacts(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(listEnvelope("contacts", response, total, pg))
+	return a.sendJSON(r, listEnvelope("contacts", response, total, pg))
 }
 
 // scopeAssignedContact narrows a contact query for users who lack the
@@ -239,7 +239,7 @@ func (a *App) GetContact(r *fastglue.Request) error {
 
 	response := a.buildContactResponse(&contact, orgID)
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // GetMessages returns messages for a contact
@@ -324,7 +324,7 @@ func (a *App) GetMessages(r *fastglue.Request) error {
 		}
 
 		response := a.buildMessagesResponse(messages)
-		return r.SendEnvelope(map[string]any{
+		return a.sendJSON(r, map[string]any{
 			"messages": response,
 			"total":    total,
 			"has_more": len(messages) == limit,
@@ -359,7 +359,7 @@ func (a *App) GetMessages(r *fastglue.Request) error {
 	a.markMessagesAsRead(orgID, contactID, &contact)
 
 	response := a.buildMessagesResponse(messages)
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"messages": response,
 		"total":    total,
 		"page":     page,
@@ -456,7 +456,7 @@ func (a *App) MarkContactRead(r *fastglue.Request) error {
 	}
 
 	a.markMessagesAsRead(orgID, contactID, &contact)
-	return r.SendEnvelope(map[string]any{"status": "ok"})
+	return a.sendJSON(r, map[string]any{"status": "ok"})
 }
 
 // markMessagesAsRead marks messages as read and sends read receipts
@@ -695,7 +695,7 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // resolveWhatsAppAccount gets the WhatsApp account for sending messages
@@ -868,7 +868,7 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 		UpdatedAt:       message.UpdatedAt,
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // saveMediaLocally saves media data to local storage and returns the relative path
@@ -1034,7 +1034,7 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 	// Broadcast via WebSocket
 	a.broadcastReactionUpdate(orgID, message.ID, contact.ID, newReactions)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message_id": message.ID.String(),
 		"reactions":  newReactions,
 	})
@@ -1107,7 +1107,7 @@ func (a *App) AssignContact(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to assign contact", err))
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":          "Contact assigned successfully",
 		"assigned_user_id": req.UserID,
 	})
@@ -1210,7 +1210,7 @@ func (a *App) GetContactSessionData(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // UpdateContactTagsRequest represents the request body for updating contact tags
@@ -1273,7 +1273,7 @@ func (a *App) UpdateContactTags(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Contact tags updated",
 		"tags":    tags,
 	})
@@ -1346,7 +1346,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 			}
 			// Reload contact
 			a.DB.First(&existingContact, existingContact.ID)
-			return r.SendEnvelope(a.buildContactResponse(&existingContact, orgID))
+			return a.sendJSON(r, a.buildContactResponse(&existingContact, orgID))
 		}
 		return a.sendError(r, conflict("Contact with this phone number already exists"))
 	}
@@ -1380,7 +1380,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"contact", contact.ID, models.AuditActionCreated, nil, &contact)
 
-	return r.SendEnvelope(a.buildContactResponse(&contact, orgID))
+	return a.sendJSON(r, a.buildContactResponse(&contact, orgID))
 }
 
 // UpdateContactRequest represents the request body for updating a contact.
@@ -1468,7 +1468,7 @@ func (a *App) UpdateContact(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"contact", contact.ID, models.AuditActionUpdated, &oldContact, contact)
 
-	return r.SendEnvelope(a.buildContactResponse(contact, orgID))
+	return a.sendJSON(r, a.buildContactResponse(contact, orgID))
 }
 
 // DeleteContact soft-deletes a contact
@@ -1503,7 +1503,7 @@ func (a *App) DeleteContact(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"contact", contactID, models.AuditActionDeleted, contact, nil)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Contact deleted successfully",
 	})
 }

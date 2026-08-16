@@ -89,7 +89,7 @@ async function fetchFlows() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     flows.value = data.flows || [];
     totalItems.value = data.total ?? flows.value.length;
   } catch (err) {

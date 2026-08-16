@@ -187,7 +187,7 @@ async function fetchCampaigns() {
     }
     const response = await campaignsService.list(params);
     // API returns: { status: "success", data: { campaigns: [...], total: N } }
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     campaigns.value = data.campaigns || [];
     totalItems.value = data.total ?? campaigns.value.length;
   } catch (err: any) {

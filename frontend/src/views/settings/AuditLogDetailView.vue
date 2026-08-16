@@ -93,7 +93,7 @@ function actionVariant(action: string): string {
 onMounted(async () => {
   try {
     const response = await auditLogsService.get(logId.value);
-    log.value = (response.data as any).data || response.data;
+    log.value = response.data;
   } catch {
     // handled by isNotFound
   } finally {

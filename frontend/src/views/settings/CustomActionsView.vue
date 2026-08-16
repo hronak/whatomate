@@ -171,7 +171,7 @@ async function fetchActions() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     actions.value = data.custom_actions || [];
     totalItems.value = data.total ?? actions.value.length;
   } catch (e) {

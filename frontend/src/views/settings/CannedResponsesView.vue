@@ -83,7 +83,7 @@ async function fetchItems() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     cannedResponses.value = data.canned_responses || [];
     totalItems.value = data.total ?? cannedResponses.value.length;
   } catch (err) {

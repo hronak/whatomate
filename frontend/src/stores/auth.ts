@@ -116,7 +116,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function refreshUserData(): Promise<boolean> {
     try {
       const response = await api.get("/me");
-      const freshUser = response.data.data;
+      const freshUser = response.data;
       user.value = freshUser;
       localStorage.setItem("user", JSON.stringify(freshUser));
       return true;
@@ -129,7 +129,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(email: string, password: string): Promise<void> {
     const response = await api.post("/auth/login", { email, password });
     // Server sets cookies; response body has { user, expires_in }
-    setAuth({ user: response.data.data.user });
+    setAuth({ user: response.data.user });
   }
 
   async function register(data: {
@@ -139,14 +139,14 @@ export const useAuthStore = defineStore("auth", () => {
     organization_id: string;
   }): Promise<void> {
     const response = await api.post("/auth/register", data);
-    setAuth({ user: response.data.data.user });
+    setAuth({ user: response.data.user });
   }
 
   async function switchOrg(organizationId: string): Promise<void> {
     const response = await api.post("/auth/switch-org", {
       organization_id: organizationId,
     });
-    setAuth({ user: response.data.data.user });
+    setAuth({ user: response.data.user });
     // Update localStorage org override
     localStorage.setItem("selected_organization_id", organizationId);
   }

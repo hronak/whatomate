@@ -40,7 +40,7 @@ func (a *App) GetBusinessProfile(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to get business profile", err))
 	}
 
-	return r.SendEnvelope(profile)
+	return a.sendJSON(r, profile)
 }
 
 // UpdateBusinessProfile updates the business profile for a WhatsApp account
@@ -78,10 +78,10 @@ func (a *App) UpdateBusinessProfile(r *fastglue.Request) error {
 	profile, err := a.WhatsApp.GetBusinessProfile(ctx, waAccount)
 	if err != nil {
 		// If re-fetch fails, just return success message
-		return r.SendEnvelope(map[string]string{"message": "Profile updated successfully"})
+		return a.sendJSON(r, map[string]string{"message": "Profile updated successfully"})
 	}
 
-	return r.SendEnvelope(profile)
+	return a.sendJSON(r, profile)
 }
 
 // UpdateProfilePicture handles the profile picture upload
@@ -148,7 +148,7 @@ func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Uploaded but failed to set profile picture", err))
 	}
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"message": "Profile picture updated successfully",
 		"handle":  handle,
 	})

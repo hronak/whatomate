@@ -79,7 +79,7 @@ func (a *App) ListAccounts(r *fastglue.Request) error {
 		response[i] = accountToResponse(acc)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"accounts": response,
 	})
 }
@@ -158,7 +158,7 @@ func (a *App) CreateAccount(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"account", account.ID, models.AuditActionCreated, nil, &account)
 
-	return r.SendEnvelope(accountToResponse(account))
+	return a.sendJSON(r, accountToResponse(account))
 }
 
 // GetAccount returns a single WhatsApp account
@@ -179,7 +179,7 @@ func (a *App) GetAccount(r *fastglue.Request) error {
 		return nil
 	}
 
-	return r.SendEnvelope(accountToResponse(*account))
+	return a.sendJSON(r, accountToResponse(*account))
 }
 
 // UpdateAccount updates a WhatsApp account
@@ -287,7 +287,7 @@ func (a *App) UpdateAccount(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"account", account.ID, models.AuditActionUpdated, &oldAccount, account, sensitiveChanges...)
 
-	return r.SendEnvelope(accountToResponse(*account))
+	return a.sendJSON(r, accountToResponse(*account))
 }
 
 // DeleteAccount deletes a WhatsApp account
@@ -319,7 +319,7 @@ func (a *App) DeleteAccount(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"account", id, models.AuditActionDeleted, account, nil)
 
-	return r.SendEnvelope(map[string]string{"message": "Account deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Account deleted successfully"})
 }
 
 // TestAccountConnection tests the WhatsApp API connection
@@ -343,7 +343,7 @@ func (a *App) TestAccountConnection(r *fastglue.Request) error {
 	// Use the comprehensive validation function
 	if err := a.validateAccountCredentials(account.PhoneID, account.BusinessID, account.AccessToken, account.APIVersion); err != nil {
 		a.Log.Error("Account test failed", "error", err, "account", account.Name)
-		return r.SendEnvelope(map[string]any{
+		return a.sendJSON(r, map[string]any{
 			"success": false,
 			"error":   fmt.Sprintf("Account credential validation failed: %s", err.Error()),
 		})
@@ -358,7 +358,7 @@ func (a *App) TestAccountConnection(r *fastglue.Request) error {
 	details, err := a.WhatsApp.GetPhoneNumberDetails(ctx, waAccount)
 	if err != nil {
 		a.Log.Error("Failed to fetch phone number details", "error", err, "account", account.Name)
-		return r.SendEnvelope(map[string]any{
+		return a.sendJSON(r, map[string]any{
 			"success": false,
 			"error":   "Failed to connect to WhatsApp API",
 		})
@@ -399,7 +399,7 @@ func (a *App) TestAccountConnection(r *fastglue.Request) error {
 		response["warning"] = "Phone verification has expired. Consider re-verifying at: https://business.facebook.com/wa/manage/phone-numbers/"
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // Helper functions
@@ -473,14 +473,14 @@ func (a *App) SubscribeApp(r *fastglue.Request) error {
 	ctx := context.Background()
 	if err := a.WhatsApp.SubscribeApp(ctx, a.toWhatsAppAccount(account)); err != nil {
 		a.Log.Error("Failed to subscribe app to webhooks", "error", err, "account", account.Name)
-		return r.SendEnvelope(map[string]any{
+		return a.sendJSON(r, map[string]any{
 			"success": false,
 			"error":   "Failed to subscribe app to webhooks. Check your credentials.",
 		})
 	}
 
 	a.Log.Info("App subscribed to webhooks successfully", "account", account.Name, "business_id", account.BusinessID)
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"success": true,
 		"message": "App subscribed to webhooks successfully. You should now receive incoming messages.",
 	})
@@ -628,7 +628,7 @@ func (a *App) ExchangeToken(r *fastglue.Request) error {
 		out["warning"] = "Registration failed: " + regErr.Error()
 	}
 
-	return r.SendEnvelope(out)
+	return a.sendJSON(r, out)
 }
 
 func (a *App) discoverWABAAndPhone(ctx context.Context, orgID uuid.UUID, accessToken, phoneID, wabaID, name string) (string, string, string, error) {
@@ -892,7 +892,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"account", account.ID, models.AuditActionUpdated, &oldAccount, account)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"success": true,
 		"message": "Phone number registered successfully",
 		"pin":     pin,

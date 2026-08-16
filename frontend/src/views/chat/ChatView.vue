@@ -365,7 +365,7 @@ function getActionIcon(iconName: string) {
 async function fetchCustomActions() {
   try {
     const response = await customActionsService.list();
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     customActions.value = (data.custom_actions || []).filter(
       (a: CustomAction) => a.is_active,
     );
@@ -400,7 +400,7 @@ async function executeCustomAction(action: CustomAction) {
       action.id,
       contactsStore.currentContact.id,
     );
-    const result: ActionResult = (response.data as any).data || response.data;
+    const result: ActionResult = response.data;
 
     // JavaScript actions are now executed server-side via goja.
     // The response already contains structured result fields (toast, clipboard, redirect_url, message).
@@ -1267,7 +1267,7 @@ async function sendReaction(messageId: string, emoji: string) {
       emoji,
     );
     // Update will come via WebSocket, but we can update locally for immediate feedback
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     contactsStore.updateMessageReactions(messageId, data.reactions);
   } catch (error) {
     toast.error(t("chat.reactionFailed"));

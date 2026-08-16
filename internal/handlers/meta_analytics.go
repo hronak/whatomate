@@ -140,7 +140,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 	}
 
 	if len(accounts) == 0 {
-		return r.SendEnvelope(map[string]any{
+		return a.sendJSON(r, map[string]any{
 			"accounts": []MetaAnalyticsResponse{},
 			"message":  "No WhatsApp accounts found",
 		})
@@ -156,7 +156,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 		var cachedResponse []MetaAnalyticsResponse
 		if err := json.Unmarshal([]byte(cached), &cachedResponse); err == nil {
 			a.Log.Debug("Meta analytics cache hit", "cache_key", cacheKey)
-			return r.SendEnvelope(map[string]any{
+			return a.sendJSON(r, map[string]any{
 				"accounts": cachedResponse,
 				"cached":   true,
 			})
@@ -336,7 +336,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 		response["original_granularity"] = originalGranularity
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // ListMetaAccountsForAnalytics lists WhatsApp accounts available for analytics
@@ -372,7 +372,7 @@ func (a *App) ListMetaAccountsForAnalytics(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"accounts": result,
 	})
 }
@@ -394,7 +394,7 @@ func (a *App) RefreshMetaAnalyticsCache(r *fastglue.Request) error {
 	pattern := fmt.Sprintf("%s%s:*", metaAnalyticsCachePrefix, orgID.String())
 	a.deleteKeysByPattern(ctx, pattern)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Analytics cache cleared successfully",
 	})
 }

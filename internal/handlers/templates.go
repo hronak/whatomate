@@ -101,7 +101,7 @@ func (a *App) ListTemplates(r *fastglue.Request) error {
 		response[i] = templateToResponse(t)
 	}
 
-	return r.SendEnvelope(listEnvelope("templates", response, total, pg))
+	return a.sendJSON(r, listEnvelope("templates", response, total, pg))
 }
 
 // CreateTemplate creates a new message template
@@ -191,7 +191,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"template", template.ID, models.AuditActionCreated, nil, &template)
 
-	return r.SendEnvelope(templateToResponse(template))
+	return a.sendJSON(r, templateToResponse(template))
 }
 
 // GetTemplate returns a single template
@@ -220,7 +220,7 @@ func (a *App) GetTemplate(r *fastglue.Request) error {
 		resp.UpdatedByName = template.UpdatedBy.FullName
 	}
 
-	return r.SendEnvelope(resp)
+	return a.sendJSON(r, resp)
 }
 
 // UpdateTemplate updates a message template
@@ -316,7 +316,7 @@ func (a *App) UpdateTemplate(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"template", template.ID, models.AuditActionUpdated, &oldTemplate, template, extraChanges...)
 
-	return r.SendEnvelope(templateToResponse(*template))
+	return a.sendJSON(r, templateToResponse(*template))
 }
 
 // DeleteTemplate deletes a message template
@@ -355,7 +355,7 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"template", id, models.AuditActionDeleted, template, nil)
 
-	return r.SendEnvelope(map[string]string{"message": "Template deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Template deleted successfully"})
 }
 
 // SubmitTemplate submits a template to Meta for approval
@@ -423,7 +423,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 		map[string]any{"field": "published", "old_value": oldStatus, "new_value": "PENDING"},
 	)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":          message,
 		"meta_template_id": metaTemplateID,
 		"status":           template.Status,
@@ -568,7 +568,7 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 		synced++
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": fmt.Sprintf("Synced %d templates", synced),
 		"count":   synced,
 	})
@@ -723,7 +723,7 @@ func (a *App) UploadTemplateMedia(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to upload media to Meta", err))
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"handle":    handle,
 		"filename":  fileHeader.Filename,
 		"mime_type": mimeType,

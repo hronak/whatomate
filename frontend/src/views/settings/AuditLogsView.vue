@@ -99,7 +99,7 @@ async function fetchLogs() {
       params.resource_type = filterResourceType.value;
 
     const response = await auditLogsService.list(params);
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     logs.value = data.audit_logs || [];
     totalItems.value = data.total || 0;
   } catch {

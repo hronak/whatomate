@@ -62,7 +62,7 @@ async function loadLogs(append = false) {
       page: page.value,
       limit,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     const entries = data.audit_logs || [];
     if (append) {
       logs.value.push(...entries);

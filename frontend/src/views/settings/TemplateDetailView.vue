@@ -410,7 +410,7 @@ async function loadTemplate() {
   isNotFound.value = false;
   try {
     const response = await templatesService.get(templateId.value);
-    const data = (response.data as any).data;
+    const data = response.data;
     template.value = data;
     syncForm();
     isDetailsOpen.value = false;
@@ -427,7 +427,7 @@ async function loadTemplate() {
 async function loadAccounts() {
   try {
     const response = await api.get("/accounts");
-    accounts.value = (response.data as any).data?.accounts || [];
+    accounts.value = response.data?.accounts || [];
   } catch (err) {
     console.error("Failed to load accounts:", err);
   }
@@ -621,7 +621,7 @@ async function save() {
 
     if (isNew.value) {
       const response = await api.post("/templates", payload);
-      const created = (response.data as any).data;
+      const created = response.data;
       hasChanges.value = false;
       toast.success(t("templates.created", "Template created"));
       router.replace(`/templates/${created.id}`);
@@ -678,7 +678,7 @@ async function uploadHeaderMedia() {
       form.value.whatsapp_account,
       headerMediaFile.value,
     );
-    const data = (response.data as any).data;
+    const data = response.data;
     headerMediaHandle.value = data.handle;
     form.value.header_content = data.handle;
     toast.success(
@@ -717,7 +717,7 @@ async function confirmPublish() {
   try {
     const response = await api.post(`/templates/${template.value.id}/publish`);
     toast.success(
-      (response.data as any).data?.message ||
+      response.data?.message ||
         t("templates.publishSuccess", "Template published"),
     );
     publishDialogOpen.value = false;
@@ -761,7 +761,7 @@ const previewHeader = computed(() =>
 async function loadFlows() {
   try {
     const response = await flowsService.list({ limit: 100 });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     whatsappFlows.value = (data.flows || []).filter(
       (f: any) => f.status === "PUBLISHED",
     );

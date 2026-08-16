@@ -61,7 +61,7 @@ onMounted(async () => {
   // Fetch enabled SSO providers
   try {
     const response = await api.get("/auth/sso/providers");
-    ssoProviders.value = response.data.data || [];
+    ssoProviders.value = response.data || [];
   } catch {
     ssoProviders.value = [];
   }

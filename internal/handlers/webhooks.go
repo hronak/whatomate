@@ -149,7 +149,7 @@ func (a *App) ListWebhooks(r *fastglue.Request) error {
 		result[i] = webhookToResponse(wh)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"webhooks":         result,
 		"available_events": AvailableWebhookEvents,
 		"total":            total,
@@ -175,7 +175,7 @@ func (a *App) GetWebhook(r *fastglue.Request) error {
 		return nil
 	}
 
-	return r.SendEnvelope(webhookToResponse(*webhook))
+	return a.sendJSON(r, webhookToResponse(*webhook))
 }
 
 // CreateWebhook creates a new webhook
@@ -235,7 +235,7 @@ func (a *App) CreateWebhook(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"webhook", webhook.ID, models.AuditActionCreated, nil, webhookAuditSnapshot(&webhook))
 
-	return r.SendEnvelope(webhookToResponse(webhook))
+	return a.sendJSON(r, webhookToResponse(webhook))
 }
 
 // UpdateWebhook updates an existing webhook
@@ -302,7 +302,7 @@ func (a *App) UpdateWebhook(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"webhook", webhook.ID, models.AuditActionUpdated, oldSnap, webhookAuditSnapshot(webhook))
 
-	return r.SendEnvelope(webhookToResponse(*webhook))
+	return a.sendJSON(r, webhookToResponse(*webhook))
 }
 
 // DeleteWebhook deletes a webhook
@@ -333,7 +333,7 @@ func (a *App) DeleteWebhook(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"webhook", webhookID, models.AuditActionDeleted, webhookAuditSnapshot(&webhook), nil)
 
-	return r.SendEnvelope(map[string]string{"message": "Webhook deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Webhook deleted successfully"})
 }
 
 // TestWebhook sends a test event to a webhook
@@ -381,7 +381,7 @@ func (a *App) TestWebhook(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Webhook test failed", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Test webhook sent successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Test webhook sent successfully"})
 }
 
 func webhookAuditSnapshot(wh *models.Webhook) map[string]any {

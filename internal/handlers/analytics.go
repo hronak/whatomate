@@ -153,7 +153,7 @@ func (a *App) GetDashboardStats(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"stats":           stats,
 		"recent_messages": recentMessages,
 	})

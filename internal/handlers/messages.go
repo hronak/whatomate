@@ -1001,5 +1001,5 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		CreatedAt:       message.CreatedAt,
 		UpdatedAt:       message.UpdatedAt,
 	}
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }

@@ -387,7 +387,7 @@ func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 		response[i] = resp
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"transfers":           response,
 		"general_queue_count": generalQueueCount,
 		"team_queue_counts":   teamCounts,
@@ -619,7 +619,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 		resp.ExpiresAt = &expiresAt
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"transfer": resp,
 		"message":  "Transfer created successfully",
 	})
@@ -677,7 +677,7 @@ func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 		WhatsAppAccount: transfer.WhatsAppAccount,
 	})
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Transfer resumed, chatbot is now active for this contact",
 	})
 }
@@ -843,7 +843,7 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 		WhatsAppAccount: transfer.WhatsAppAccount,
 	})
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":  "Transfer assigned successfully",
 		"agent_id": targetAgentID,
 	})
@@ -944,7 +944,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 
 	if result.Error != nil {
 		tx.Rollback()
-		return r.SendEnvelope(map[string]any{
+		return a.sendJSON(r, map[string]any{
 			"message":  "No transfers in queue",
 			"transfer": nil,
 		})
@@ -1072,7 +1072,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 		resp.ExpiresAt = &expiresAt
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":  "Transfer picked successfully",
 		"transfer": resp,
 	})

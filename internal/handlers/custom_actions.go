@@ -133,7 +133,7 @@ func (a *App) ListCustomActions(r *fastglue.Request) error {
 		result[i] = customActionToResponse(action)
 	}
 
-	return r.SendEnvelope(listEnvelope("custom_actions", result, total, pg))
+	return a.sendJSON(r, listEnvelope("custom_actions", result, total, pg))
 }
 
 // GetCustomAction returns a single custom action by ID
@@ -153,7 +153,7 @@ func (a *App) GetCustomAction(r *fastglue.Request) error {
 		return nil
 	}
 
-	return r.SendEnvelope(customActionToResponse(*action))
+	return a.sendJSON(r, customActionToResponse(*action))
 }
 
 // CreateCustomAction creates a new custom action
@@ -200,7 +200,7 @@ func (a *App) CreateCustomAction(r *fastglue.Request) error {
 	}
 
 	a.Log.Info("Custom action created", "action_id", action.ID, "name", action.Name, "type", action.ActionType)
-	return r.SendEnvelope(customActionToResponse(action))
+	return a.sendJSON(r, customActionToResponse(action))
 }
 
 // UpdateCustomAction updates an existing custom action
@@ -262,7 +262,7 @@ func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 	a.DB.First(action, actionID)
 
 	a.Log.Info("Custom action updated", "action_id", action.ID)
-	return r.SendEnvelope(customActionToResponse(*action))
+	return a.sendJSON(r, customActionToResponse(*action))
 }
 
 // DeleteCustomAction deletes a custom action
@@ -287,7 +287,7 @@ func (a *App) DeleteCustomAction(r *fastglue.Request) error {
 	}
 
 	a.Log.Info("Custom action deleted", "action_id", actionID)
-	return r.SendEnvelope(map[string]string{"status": "deleted"})
+	return a.sendJSON(r, map[string]string{"status": "deleted"})
 }
 
 // ExecuteCustomAction executes a custom action with the given context
@@ -354,7 +354,7 @@ func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 
 	if err != nil {
 		a.Log.Error("Failed to execute custom action", "error", err, "action_id", actionID)
-		return r.SendEnvelope(ActionResult{
+		return a.sendJSON(r, ActionResult{
 			Success: false,
 			Message: "Action execution failed",
 			Toast:   &ToastConfig{Message: "Action failed", Type: "error"},
@@ -362,7 +362,7 @@ func (a *App) ExecuteCustomAction(r *fastglue.Request) error {
 	}
 
 	a.Log.Info("Custom action executed", "action_id", actionID, "contact_id", contactID)
-	return r.SendEnvelope(result)
+	return a.sendJSON(r, result)
 }
 
 // CustomActionRedirect handles redirect tokens for URL actions

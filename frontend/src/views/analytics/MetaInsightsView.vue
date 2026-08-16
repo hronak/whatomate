@@ -119,7 +119,7 @@ const selectedAccountName = computed(() => {
 const fetchAccounts = async () => {
   try {
     const response = await metaAnalyticsService.getAccounts()
-    const data = (response.data as any).data || response.data
+    const data = response.data
     accounts.value = data.accounts || []
   } catch (error) {
     console.error('Failed to load accounts:', error)

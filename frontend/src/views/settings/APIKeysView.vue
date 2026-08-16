@@ -98,7 +98,7 @@ async function fetchItems() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     apiKeys.value = data.api_keys || [];
     totalItems.value = data.total ?? apiKeys.value.length;
   } catch (err) {

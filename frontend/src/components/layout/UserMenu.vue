@@ -52,7 +52,7 @@ const handleAvailabilityChange = async (checked: boolean) => {
     isCheckingTransfers.value = true;
     try {
       const response = await chatbotService.listTransfers({ status: "active" });
-      const data = response.data.data || response.data;
+      const data = response.data || response.data;
       const transfers = data.transfers || [];
       const userId = authStore.user?.id;
       const myActiveTransfers = transfers.filter(
@@ -83,7 +83,7 @@ const setAvailability = async (checked: boolean) => {
   isUpdatingAvailability.value = true;
   try {
     const response = await usersService.updateAvailability(checked);
-    const data = response.data.data;
+    const data = response.data;
     authStore.setAvailability(checked, data.break_started_at);
 
     if (checked) {

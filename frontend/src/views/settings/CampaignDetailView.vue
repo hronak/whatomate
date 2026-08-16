@@ -357,7 +357,7 @@ function getRecipientStatusClass(status: string): string {
 async function loadAccounts() {
   try {
     const response = await api.get("/accounts");
-    accounts.value = (response.data as any).data?.accounts || [];
+    accounts.value = response.data?.accounts || [];
   } catch {
     accounts.value = [];
   }
@@ -372,7 +372,7 @@ async function loadTemplates() {
     const response = await api.get("/templates", {
       params: { whatsapp_account: form.value.whatsapp_account },
     });
-    templates.value = (response.data as any).data?.templates || [];
+    templates.value = response.data?.templates || [];
   } catch {
     templates.value = [];
   }
@@ -383,7 +383,7 @@ async function loadCampaign() {
   isNotFound.value = false;
   try {
     const response = await campaignsService.get(campaignId.value);
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     campaign.value = data;
     syncForm();
     nextTick(() => {
@@ -439,7 +439,7 @@ watch(
     if (newId) {
       try {
         const response = await templatesService.get(newId);
-        selectedTemplate.value = (response.data as any).data || response.data;
+        selectedTemplate.value = response.data;
       } catch {
         selectedTemplate.value = null;
       }
@@ -464,7 +464,7 @@ async function save() {
     };
     if (isNew.value) {
       const response = await campaignsService.create(payload);
-      const created = (response.data as any).data || response.data;
+      const created = response.data;
       // Upload media if selected
       if (mediaFile.value && created?.id) {
         try {
@@ -586,7 +586,7 @@ async function retryFailed() {
   if (!campaign.value) return;
   try {
     const response = await campaignsService.retryFailed(campaign.value.id);
-    const result = (response.data as any).data;
+    const result = response.data;
     toast.success(
       t(
         "campaigns.retryingFailed",
@@ -622,7 +622,7 @@ async function loadRecipients() {
   isLoadingRecipients.value = true;
   try {
     const response = await campaignsService.getRecipients(campaign.value.id);
-    recipients.value = (response.data as any).data?.recipients || [];
+    recipients.value = response.data?.recipients || [];
   } catch {
     recipients.value = [];
   } finally {
@@ -669,7 +669,7 @@ async function openAddRecipientsDialog() {
   if (campaign.value?.template_id && !selectedTemplate.value) {
     try {
       const response = await templatesService.get(campaign.value.template_id);
-      selectedTemplate.value = (response.data as any).data || response.data;
+      selectedTemplate.value = response.data;
     } catch {
       selectedTemplate.value = null;
     }
@@ -810,7 +810,7 @@ async function addRecipients() {
       campaign.value.id,
       recipientsList,
     );
-    const result = (response.data as any).data;
+    const result = response.data;
     toast.success(
       t(
         "campaigns.addedRecipients",
@@ -1017,7 +1017,7 @@ async function addRecipientsFromCSV() {
       campaign.value.id,
       recipientsList,
     );
-    const result = (response.data as any).data;
+    const result = response.data;
     toast.success(
       t(
         "campaigns.addedFromCsv",
@@ -1056,7 +1056,7 @@ onMounted(async () => {
     if (form.value.template_id) {
       try {
         const response = await templatesService.get(form.value.template_id);
-        selectedTemplate.value = (response.data as any).data || response.data;
+        selectedTemplate.value = response.data;
       } catch {
         selectedTemplate.value = null;
       }

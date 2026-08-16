@@ -207,7 +207,7 @@ const toggleGroup = (item: FilteredNavItem) => {
       <ScrollArea class="flex-1">
         <div class="flex flex-col min-h-full py-4">
           <nav class="px-3" role="menubar">
-            <template v-for="(section, sIdx) in mainSections" :key="section.label">
+            <template v-for="section in mainSections" :key="section.label">
               <div
                 v-if="section.label && !isCollapsed"
                 class="px-3 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60"

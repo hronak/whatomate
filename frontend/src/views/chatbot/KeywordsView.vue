@@ -88,7 +88,7 @@ async function fetchRules() {
       limit: pageSize,
     });
     // API response is wrapped in { status: "success", data: { rules: [...] } }
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     rules.value = data.rules || [];
     totalItems.value = data.total ?? rules.value.length;
   } catch (err) {

@@ -100,7 +100,7 @@ func (a *App) ListTeams(r *fastglue.Request) error {
 		response[i] = buildTeamResponse(&t, false)
 	}
 
-	return r.SendEnvelope(listEnvelope("teams", response, total, pg))
+	return a.sendJSON(r, listEnvelope("teams", response, total, pg))
 }
 
 // GetTeam returns a single team with members
@@ -137,7 +137,7 @@ func (a *App) GetTeam(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{"team": buildTeamResponse(&team, true)})
+	return a.sendJSON(r, map[string]any{"team": buildTeamResponse(&team, true)})
 }
 
 // CreateTeam creates a new team
@@ -187,7 +187,7 @@ func (a *App) CreateTeam(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"team", team.ID, models.AuditActionCreated, nil, &team)
 
-	return r.SendEnvelope(map[string]any{"team": buildTeamResponse(&team, false)})
+	return a.sendJSON(r, map[string]any{"team": buildTeamResponse(&team, false)})
 }
 
 // UpdateTeam updates a team
@@ -260,7 +260,7 @@ func (a *App) UpdateTeam(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"team", team.ID, models.AuditActionUpdated, &oldTeam, &team)
 
-	return r.SendEnvelope(map[string]any{"team": buildTeamResponse(&team, false)})
+	return a.sendJSON(r, map[string]any{"team": buildTeamResponse(&team, false)})
 }
 
 // DeleteTeam deletes a team
@@ -303,7 +303,7 @@ func (a *App) DeleteTeam(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"team", teamID, models.AuditActionDeleted, &teamForAudit, nil)
 
-	return r.SendEnvelope(map[string]string{"message": "Team deleted"})
+	return a.sendJSON(r, map[string]string{"message": "Team deleted"})
 }
 
 // ListTeamMembers lists members of a team
@@ -353,7 +353,7 @@ func (a *App) ListTeamMembers(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{"members": members})
+	return a.sendJSON(r, map[string]any{"members": members})
 }
 
 // AddTeamMember adds a member to a team
@@ -442,7 +442,7 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 		a.Assigner.InvalidateTeamCache(teamID)
 	}
 
-	return r.SendEnvelope(map[string]any{"member": TeamMemberResponse{
+	return a.sendJSON(r, map[string]any{"member": TeamMemberResponse{
 		ID:          member.ID,
 		UserID:      member.UserID,
 		FullName:    user.FullName,
@@ -513,7 +513,7 @@ func (a *App) RemoveTeamMember(r *fastglue.Request) error {
 		a.Assigner.InvalidateTeamCache(teamID)
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Member removed from team"})
+	return a.sendJSON(r, map[string]string{"message": "Member removed from team"})
 }
 
 // Helper function to build team response

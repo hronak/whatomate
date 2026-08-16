@@ -43,7 +43,7 @@ async function fetchTemplates() {
       params.account = props.selectedAccount;
     }
     const response = await templatesService.list(params);
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     templates.value = data.templates || [];
   } catch (error) {
     console.error("Failed to fetch templates:", error);

@@ -81,7 +81,7 @@ const breadcrumbs = computed(() => [
 async function fetchAvailableEvents() {
   try {
     const response = await webhooksService.list({ limit: 1 });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     availableEvents.value = data.available_events || [];
   } catch {
     // Events will remain empty; form can still be used
@@ -94,8 +94,7 @@ async function loadWebhook() {
   try {
     const response = await webhooksService.get(webhookId.value);
     const data =
-      (response.data as any).data?.webhook ||
-      (response.data as any).data ||
+      (response.data as any).webhook ||
       response.data;
     webhook.value = data;
     syncForm();
@@ -178,8 +177,7 @@ async function save() {
     if (isNew.value) {
       const response = await webhooksService.create(payload);
       const created =
-        (response.data as any).data?.webhook ||
-        (response.data as any).data ||
+        (response.data as any).webhook ||
         response.data;
       hasChanges.value = false;
       toast.success(

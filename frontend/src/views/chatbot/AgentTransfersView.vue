@@ -235,7 +235,7 @@ async function pickNextTransfer() {
   isPicking.value = true;
   try {
     const response = await chatbotService.pickNextTransfer();
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
 
     if (data.transfer) {
       toast.success(t("agentTransfers.transferPicked"), {

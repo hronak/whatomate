@@ -148,7 +148,7 @@ async function fetchAccounts() {
   fetchError.value = false;
   try {
     const response = await api.get("/accounts");
-    accounts.value = response.data.data?.accounts || [];
+    accounts.value = response.data?.accounts || [];
   } catch {
     fetchError.value = true;
     toast.error(t("common.failedLoad", { resource: t("resources.accounts") }));
@@ -161,9 +161,9 @@ async function fetchWhatsAppConfig() {
   try {
     const response = await api.get("/embedded-signup/config");
     whatsappConfig.value = {
-      app_id: response.data.data.whatsapp_app_id,
-      config_id: response.data.data.whatsapp_config_id,
-      api_version: response.data.data.whatsapp_api_version || "v26.0",
+      app_id: response.data.whatsapp_app_id,
+      config_id: response.data.whatsapp_config_id,
+      api_version: response.data.whatsapp_api_version || "v26.0",
     };
     if (whatsappConfig.value.app_id && whatsappConfig.value.config_id) {
       loadFacebookSDK();
@@ -265,8 +265,8 @@ async function exchangeCodeForToken(
       waba_id: wabaId,
     });
 
-    const account = response.data.data.account;
-    const pin = response.data.data.pin;
+    const account = response.data.account;
+    const pin = response.data.pin;
 
     if (account.status === "pending_registration") {
       toast.warning("Account created. Phone registration required.");

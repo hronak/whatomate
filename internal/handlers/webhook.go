@@ -361,7 +361,7 @@ func (a *App) WebhookHandler(r *fastglue.Request) error {
 	}
 
 	// Always respond with 200 to acknowledge receipt
-	return r.SendEnvelope(map[string]string{"status": "ok"})
+	return a.sendJSON(r, map[string]string{"status": "ok"})
 }
 
 func (a *App) processIncomingMessage(phoneNumberID string, msg IncomingTextMessage, profileName string) {

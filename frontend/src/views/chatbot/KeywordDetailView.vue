@@ -93,8 +93,7 @@ async function loadKeyword() {
   try {
     const response = await chatbotService.getKeyword(keywordId.value);
     const data =
-      (response.data as any).data?.rule ||
-      (response.data as any).data ||
+      response.data?.rule ||
       response.data;
     keyword.value = data;
     syncForm();
@@ -183,8 +182,7 @@ async function save() {
     if (isNew.value) {
       const response = await chatbotService.createKeyword(data);
       const created =
-        (response.data as any).data?.rule ||
-        (response.data as any).data ||
+        response.data?.rule ||
         response.data;
       hasChanges.value = false;
       toast.success(

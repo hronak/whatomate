@@ -121,7 +121,7 @@ func (a *App) GetAgentAnalytics(r *fastglue.Request) error {
 		response.MyStats = &myStats
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // GetAgentDetails returns detailed analytics for a specific agent
@@ -169,7 +169,7 @@ func (a *App) GetAgentDetails(r *fastglue.Request) error {
 	stats := a.calculateAgentStats(orgID, agentID, periodStart, periodEnd)
 	trendData := a.calculateTrendData(orgID, periodStart, periodEnd, groupBy, &agentID)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"agent":      stats,
 		"trend_data": trendData,
 	})
@@ -208,7 +208,7 @@ func (a *App) GetAgentComparison(r *fastglue.Request) error {
 
 	agentStats := a.calculateAllAgentStats(orgID, periodStart, periodEnd)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"agents": agentStats,
 	})
 }

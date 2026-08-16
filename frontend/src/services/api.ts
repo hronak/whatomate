@@ -951,7 +951,7 @@ export interface TeamMember {
 
 export const teamsService = {
   list: (params?: { search?: string; page?: number; limit?: number }) =>
-    api.get<{ teams: Team[] }>("/teams", { params }),
+    api.get<{ teams: Team[], total: number, page: number, limit: number }>("/teams", { params }),
   get: (id: string) => api.get<{ team: Team }>(`/teams/${id}`),
   create: (data: {
     name: string;
@@ -1133,7 +1133,7 @@ export interface Role {
 
 export const rolesService = {
   list: (params?: { search?: string; page?: number; limit?: number }) =>
-    api.get<{ roles: Role[] }>("/roles", { params }),
+    api.get<{ roles: Role[], total: number, page: number, limit: number }>("/roles", { params }),
   get: (id: string) => api.get<Role>(`/roles/${id}`),
   create: (data: {
     name: string;

@@ -104,7 +104,7 @@ async function fetchWebhooks() {
       page: currentPage.value,
       limit: pageSize,
     });
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     webhooks.value = data.webhooks || [];
     availableEvents.value = data.available_events || [];
     totalItems.value = data.total ?? webhooks.value.length;

@@ -37,7 +37,7 @@ export const useTagsStore = defineStore("tags", () => {
     error.value = null;
     try {
       const response = await tagsService.list(params);
-      const data = (response.data as any).data || response.data;
+      const data = response.data;
       tags.value = data.tags || [];
       return {
         tags: data.tags || [],
@@ -58,7 +58,7 @@ export const useTagsStore = defineStore("tags", () => {
     error.value = null;
     try {
       const response = await tagsService.create(data);
-      const newTag = (response.data as any).data || response.data;
+      const newTag = response.data;
       tags.value.push(newTag);
       // Sort by name
       tags.value.sort((a, b) => a.name.localeCompare(b.name));
@@ -76,7 +76,7 @@ export const useTagsStore = defineStore("tags", () => {
     error.value = null;
     try {
       const response = await tagsService.update(name, data);
-      const updatedTag = (response.data as any).data || response.data;
+      const updatedTag = response.data;
       const index = tags.value.findIndex((t) => t.name === name);
       if (index !== -1) {
         tags.value[index] = updatedTag;

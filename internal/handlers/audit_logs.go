@@ -96,7 +96,7 @@ func (a *App) ListAuditLogs(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(listEnvelope("audit_logs", response, total, pg))
+	return a.sendJSON(r, listEnvelope("audit_logs", response, total, pg))
 }
 
 // GetAuditLog returns a single audit log entry by ID
@@ -116,7 +116,7 @@ func (a *App) GetAuditLog(r *fastglue.Request) error {
 		return a.sendError(r, notFound("Audit log"))
 	}
 
-	return r.SendEnvelope(AuditLogResponse{
+	return a.sendJSON(r, AuditLogResponse{
 		ID:           log.ID,
 		ResourceType: log.ResourceType,
 		ResourceID:   log.ResourceID,

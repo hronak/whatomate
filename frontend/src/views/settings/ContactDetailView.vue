@@ -121,7 +121,7 @@ async function loadContact() {
   isNotFound.value = false;
   try {
     const response = await contactsService.get(contactId.value);
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     contact.value = data;
     syncForm();
     nextTick(() => {
@@ -242,7 +242,7 @@ function selectAgent(userId: string | null) {
 async function fetchAccounts() {
   try {
     const response = await accountsService.list();
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     accounts.value = data.accounts || [];
   } catch {
     // accounts are optional

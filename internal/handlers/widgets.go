@@ -165,7 +165,7 @@ func (a *App) ListWidgets(r *fastglue.Request) error {
 		response[i] = widgetToResponse(w, userID)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"widgets": response,
 	})
 }
@@ -195,7 +195,7 @@ func (a *App) GetWidget(r *fastglue.Request) error {
 		return a.sendError(r, notFound("Widget"))
 	}
 
-	return r.SendEnvelope(widgetToResponse(widget, userID))
+	return a.sendJSON(r, widgetToResponse(widget, userID))
 }
 
 // CreateWidget creates a new widget
@@ -353,7 +353,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to create widget", err))
 	}
 
-	return r.SendEnvelope(widgetToResponse(widget, userID))
+	return a.sendJSON(r, widgetToResponse(widget, userID))
 }
 
 // UpdateWidget updates a widget
@@ -476,7 +476,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to update widget", err))
 	}
 
-	return r.SendEnvelope(widgetToResponse(*widget, userID))
+	return a.sendJSON(r, widgetToResponse(*widget, userID))
 }
 
 // DeleteWidget deletes a widget
@@ -512,7 +512,7 @@ func (a *App) DeleteWidget(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to delete widget", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Widget deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Widget deleted successfully"})
 }
 
 // SaveWidgetLayout bulk saves grid positions for all widgets
@@ -563,7 +563,7 @@ func (a *App) SaveWidgetLayout(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to save layout", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Layout saved successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Layout saved successfully"})
 }
 
 // GetWidgetDataSources returns available data sources and their filterable fields
@@ -577,7 +577,7 @@ func (a *App) GetWidgetDataSources(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"data_sources":  sources,
 		"metrics":       widgetMetrics,
 		"display_types": widgetDisplayTypes,
@@ -691,7 +691,7 @@ func (a *App) GetWidgetData(r *fastglue.Request) error {
 	}
 
 	data.WidgetID = widget.ID
-	return r.SendEnvelope(data)
+	return a.sendJSON(r, data)
 }
 
 // GetAllWidgetsData returns data for all user's widgets in a single request
@@ -727,7 +727,7 @@ func (a *App) GetAllWidgetsData(r *fastglue.Request) error {
 		results[widget.ID.String()] = data
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"data": results,
 	})
 }

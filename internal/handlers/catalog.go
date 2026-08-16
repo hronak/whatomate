@@ -88,7 +88,7 @@ func (a *App) ListCatalogs(r *fastglue.Request) error {
 		result[i] = catalogToResponse(c, int(productCount))
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"catalogs": result,
 	})
 }
@@ -139,7 +139,7 @@ func (a *App) CreateCatalog(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to save catalog", err))
 	}
 
-	return r.SendEnvelope(catalogToResponse(catalog, 0))
+	return a.sendJSON(r, catalogToResponse(catalog, 0))
 }
 
 // GetCatalog returns a single catalog with its products
@@ -166,7 +166,7 @@ func (a *App) GetCatalog(r *fastglue.Request) error {
 		resp.Products[i] = productToResponse(p)
 	}
 
-	return r.SendEnvelope(resp)
+	return a.sendJSON(r, resp)
 }
 
 // DeleteCatalog deletes a catalog from Meta and locally
@@ -210,7 +210,7 @@ func (a *App) DeleteCatalog(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to delete catalog", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Catalog deleted"})
+	return a.sendJSON(r, map[string]string{"message": "Catalog deleted"})
 }
 
 // SyncCatalogs syncs catalogs from Meta API
@@ -272,7 +272,7 @@ func (a *App) SyncCatalogs(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Catalogs synced",
 		"synced":  synced,
 		"total":   len(metaCatalogs),
@@ -309,7 +309,7 @@ func (a *App) ListCatalogProducts(r *fastglue.Request) error {
 		result[i] = productToResponse(p)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"products": result,
 	})
 }
@@ -392,7 +392,7 @@ func (a *App) CreateCatalogProduct(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to save product", err))
 	}
 
-	return r.SendEnvelope(productToResponse(product))
+	return a.sendJSON(r, productToResponse(product))
 }
 
 // GetCatalogProduct returns a single product
@@ -412,7 +412,7 @@ func (a *App) GetCatalogProduct(r *fastglue.Request) error {
 		return nil
 	}
 
-	return r.SendEnvelope(productToResponse(*product))
+	return a.sendJSON(r, productToResponse(*product))
 }
 
 // UpdateCatalogProduct updates a product
@@ -495,7 +495,7 @@ func (a *App) UpdateCatalogProduct(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to save product", err))
 	}
 
-	return r.SendEnvelope(productToResponse(*product))
+	return a.sendJSON(r, productToResponse(*product))
 }
 
 // DeleteCatalogProduct deletes a product
@@ -541,7 +541,7 @@ func (a *App) DeleteCatalogProduct(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to delete product", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Product deleted"})
+	return a.sendJSON(r, map[string]string{"message": "Product deleted"})
 }
 
 // Helper functions

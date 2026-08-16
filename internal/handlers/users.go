@@ -122,7 +122,7 @@ func (a *App) ListUsers(r *fastglue.Request) error {
 	}
 	if onlineOnly {
 		if len(onlineIDs) == 0 {
-			return r.SendEnvelope(map[string]any{
+			return a.sendJSON(r, map[string]any{
 				"users":        []UserResponse{},
 				"total":        0,
 				"page":         pg.Page,
@@ -181,7 +181,7 @@ func (a *App) ListUsers(r *fastglue.Request) error {
 		response[i] = resp
 	}
 
-	return r.SendEnvelope(listEnvelopeWith("users", response, total, pg, map[string]any{
+	return a.sendJSON(r, listEnvelopeWith("users", response, total, pg, map[string]any{
 		"online_count": len(onlineIDs),
 	}))
 }
@@ -220,7 +220,7 @@ func (a *App) GetUser(r *fastglue.Request) error {
 
 	resp := userToResponse(user)
 	resp.IsMember = user.OrganizationID != orgID
-	return r.SendEnvelope(resp)
+	return a.sendJSON(r, resp)
 }
 
 // CreateUser creates a new user (admin only)
@@ -334,7 +334,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 		a.logAudit(orgID, userID,
 			"user", softDeleted.ID, models.AuditActionCreated, nil, userAuditSnapshot(&softDeleted))
 
-		return r.SendEnvelope(userToResponse(softDeleted))
+		return a.sendJSON(r, userToResponse(softDeleted))
 	}
 
 	user := models.User{
@@ -375,7 +375,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"user", user.ID, models.AuditActionCreated, nil, userAuditSnapshot(&user))
 
-	return r.SendEnvelope(userToResponse(user))
+	return a.sendJSON(r, userToResponse(user))
 }
 
 // UpdateUser updates a user
@@ -461,7 +461,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 
 		resp := userToResponse(user)
 		resp.IsMember = true
-		return r.SendEnvelope(resp)
+		return a.sendJSON(r, resp)
 	}
 
 	// Native user: full update
@@ -546,7 +546,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 	a.logAudit(orgID, currentUserID,
 		"user", user.ID, models.AuditActionUpdated, oldSnap, userAuditSnapshot(&user))
 
-	return r.SendEnvelope(userToResponse(user))
+	return a.sendJSON(r, userToResponse(user))
 }
 
 // DeleteUser deletes a user or removes a member from the organization
@@ -597,7 +597,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 		a.logAudit(orgID, currentUserID,
 			"user", id, models.AuditActionDeleted, userAuditSnapshot(&user), nil)
 
-		return r.SendEnvelope(map[string]string{"message": "Member removed from organization"})
+		return a.sendJSON(r, map[string]string{"message": "Member removed from organization"})
 	}
 
 	// Native user: check last admin constraint, then delete user account
@@ -632,7 +632,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 	a.logAudit(orgID, currentUserID,
 		"user", id, models.AuditActionDeleted, userAuditSnapshot(&user), nil)
 
-	return r.SendEnvelope(map[string]string{"message": "User deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "User deleted successfully"})
 }
 
 // GetCurrentUser returns the current authenticated user's details
@@ -684,7 +684,7 @@ func (a *App) GetCurrentUser(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(userToResponse(user))
+	return a.sendJSON(r, userToResponse(user))
 }
 
 // splitPermission splits a "resource:action" string
@@ -735,7 +735,7 @@ func (a *App) UpdateCurrentUserSettings(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		models.ResourceSettingsNotification, userID, models.AuditActionUpdated, oldNotif, newNotif)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":  "Settings updated successfully",
 		"settings": user.Settings,
 	})
@@ -796,7 +796,7 @@ func (a *App) ChangePassword(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to change password", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Password changed successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Password changed successfully"})
 }
 
 // Helper function to convert User to UserResponse
@@ -905,7 +905,7 @@ func (a *App) ListMyOrganizations(r *fastglue.Request) error {
 		response = append(response, item)
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"organizations": response,
 	})
 }
@@ -979,7 +979,7 @@ func (a *App) UpdateAvailability(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":            "Availability updated successfully",
 		"is_available":       user.IsAvailable,
 		"status":             status,

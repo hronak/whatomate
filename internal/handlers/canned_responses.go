@@ -101,7 +101,7 @@ func (a *App) ListCannedResponses(r *fastglue.Request) error {
 		result[i] = cannedResponseToResponse(cr)
 	}
 
-	return r.SendEnvelope(listEnvelope("canned_responses", result, total, pg))
+	return a.sendJSON(r, listEnvelope("canned_responses", result, total, pg))
 }
 
 // CreateCannedResponse creates a new canned response
@@ -151,7 +151,7 @@ func (a *App) CreateCannedResponse(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"canned_response", cannedResponse.ID, models.AuditActionCreated, nil, cannedResponseAuditSnapshot(&cannedResponse))
 
-	return r.SendEnvelope(cannedResponseToResponse(cannedResponse))
+	return a.sendJSON(r, cannedResponseToResponse(cannedResponse))
 }
 
 // GetCannedResponse returns a single canned response
@@ -173,7 +173,7 @@ func (a *App) GetCannedResponse(r *fastglue.Request) error {
 			"Canned response not found", nil, "")
 	}
 
-	return r.SendEnvelope(cannedResponseToResponse(cannedResponse))
+	return a.sendJSON(r, cannedResponseToResponse(cannedResponse))
 }
 
 // UpdateCannedResponse updates an existing canned response
@@ -226,7 +226,7 @@ func (a *App) UpdateCannedResponse(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"canned_response", cannedResponse.ID, models.AuditActionUpdated, oldSnap, cannedResponseAuditSnapshot(&cannedResponse))
 
-	return r.SendEnvelope(cannedResponseToResponse(cannedResponse))
+	return a.sendJSON(r, cannedResponseToResponse(cannedResponse))
 }
 
 // DeleteCannedResponse deletes a canned response
@@ -256,7 +256,7 @@ func (a *App) DeleteCannedResponse(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"canned_response", cannedResponse.ID, models.AuditActionDeleted, cannedResponseAuditSnapshot(&cannedResponse), nil)
 
-	return r.SendEnvelope(map[string]string{"message": "Canned response deleted"})
+	return a.sendJSON(r, map[string]string{"message": "Canned response deleted"})
 }
 
 // IncrementCannedResponseUsage increments the usage counter
@@ -278,7 +278,7 @@ func (a *App) IncrementCannedResponseUsage(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to update usage", err))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "Usage incremented"})
+	return a.sendJSON(r, map[string]string{"message": "Usage incremented"})
 }
 
 // cannedResponseAuditSnapshot returns a diff-friendly representation of a

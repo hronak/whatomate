@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"runtime/debug"
@@ -206,7 +207,7 @@ func (a *App) getOrgID(r *fastglue.Request) (uuid.UUID, error) {
 
 // HealthCheck returns server health status
 func (a *App) HealthCheck(r *fastglue.Request) error {
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"status":  "ok",
 		"service": "whatomate",
 	})
@@ -231,7 +232,7 @@ func (a *App) ReadyCheck(r *fastglue.Request) error {
 		return r.SendErrorEnvelope(500, "Redis connection error", nil, "")
 	}
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"status": "ready",
 	})
 }
@@ -260,7 +261,7 @@ func (a *App) GetEmbeddedSignupConfig(r *fastglue.Request) error {
 		WhatsAppAPIVersion: a.Config.WhatsApp.APIVersion,
 	}
 
-	return r.SendEnvelope(config)
+	return a.sendJSON(r, config)
 }
 
 // StartCampaignStatsSubscriber starts listening for campaign stats updates from Redis pub/sub
@@ -391,5 +392,17 @@ func (a *App) decodeRequest(r *fastglue.Request, v any) error {
 		_ = a.sendError(r, invalidRequest("Invalid request body"))
 		return errEnvelopeSent
 	}
+	return nil
+}
+
+// sendJSON sends a JSON response without the data wrapper.
+func (a *App) sendJSON(r *fastglue.Request, data any) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		a.Log.Error("Failed to encode response", "error", err)
+		return a.sendError(r, internalError("Failed to encode response", err))
+	}
+	r.RequestCtx.SetContentType("application/json")
+	r.RequestCtx.SetBody(b)
 	return nil
 }

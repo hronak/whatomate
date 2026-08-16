@@ -229,7 +229,7 @@ async function uploadAudio(type: "hold_music" | "ringback", event: Event) {
 
   try {
     const response = await organizationService.uploadOrgAudio(file, type);
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     if (isHold) callingSettings.value.hold_music_file = data.filename;
     else callingSettings.value.ringback_file = data.filename;
     toast.success(t("settings.audioUploaded"));

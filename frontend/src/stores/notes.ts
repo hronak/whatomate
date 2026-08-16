@@ -21,7 +21,7 @@ export const useNotesStore = defineStore("notes", () => {
     currentContactId.value = contactId;
     try {
       const response = await notesService.list(contactId, { limit: 30 });
-      const data = (response.data as any).data || response.data;
+      const data = response.data;
       notes.value = data.notes || [];
       hasMore.value = data.has_more ?? false;
     } catch {
@@ -42,7 +42,7 @@ export const useNotesStore = defineStore("notes", () => {
         limit: 30,
         before: oldestNote.id,
       });
-      const data = (response.data as any).data || response.data;
+      const data = response.data;
       const olderNotes: ConversationNote[] = data.notes || [];
       if (olderNotes.length > 0) {
         notes.value = [...olderNotes, ...notes.value];
@@ -57,7 +57,7 @@ export const useNotesStore = defineStore("notes", () => {
 
   async function createNote(contactId: string, content: string) {
     const response = await notesService.create(contactId, { content });
-    const note: ConversationNote = (response.data as any).data || response.data;
+    const note: ConversationNote = response.data;
     pushIfNew(note);
     return note;
   }
@@ -69,7 +69,7 @@ export const useNotesStore = defineStore("notes", () => {
   ) {
     const response = await notesService.update(contactId, noteId, { content });
     const updated: ConversationNote =
-      (response.data as any).data || response.data;
+      response.data;
     const index = notes.value.findIndex((n) => n.id === noteId);
     if (index !== -1) {
       notes.value[index] = updated;

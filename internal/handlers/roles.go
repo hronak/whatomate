@@ -105,7 +105,7 @@ func (a *App) ListRoles(r *fastglue.Request) error {
 		response[i] = roleToResponse(role, userCount)
 	}
 
-	return r.SendEnvelope(listEnvelope("roles", response, total, pg))
+	return a.sendJSON(r, listEnvelope("roles", response, total, pg))
 }
 
 // GetRole returns a single role
@@ -134,7 +134,7 @@ func (a *App) GetRole(r *fastglue.Request) error {
 	var userCount int64
 	a.DB.Model(&models.User{}).Where("role_id = ?", role.ID).Count(&userCount)
 
-	return r.SendEnvelope(roleToResponse(role, userCount))
+	return a.sendJSON(r, roleToResponse(role, userCount))
 }
 
 // CreateRole creates a new custom role
@@ -190,7 +190,7 @@ func (a *App) CreateRole(r *fastglue.Request) error {
 		}
 		a.logAudit(orgID, userID,
 			"role", role.ID, models.AuditActionCreated, nil, roleAuditSnapshot(&role))
-		return r.SendEnvelope(roleToResponse(role, 0))
+		return a.sendJSON(r, roleToResponse(role, 0))
 	}
 
 	if err := a.DB.Create(&role).Error; err != nil {
@@ -201,7 +201,7 @@ func (a *App) CreateRole(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"role", role.ID, models.AuditActionCreated, nil, roleAuditSnapshot(&role))
 
-	return r.SendEnvelope(roleToResponse(role, 0))
+	return a.sendJSON(r, roleToResponse(role, 0))
 }
 
 // UpdateRole updates a custom role
@@ -271,7 +271,7 @@ func (a *App) UpdateRole(r *fastglue.Request) error {
 
 		var userCount int64
 		a.DB.Model(&models.User{}).Where("role_id = ?", role.ID).Count(&userCount)
-		return r.SendEnvelope(roleToResponse(role, userCount))
+		return a.sendJSON(r, roleToResponse(role, userCount))
 	}
 
 	// For custom roles, allow full updates
@@ -332,7 +332,7 @@ func (a *App) UpdateRole(r *fastglue.Request) error {
 
 	var userCount int64
 	a.DB.Model(&models.User{}).Where("role_id = ?", role.ID).Count(&userCount)
-	return r.SendEnvelope(roleToResponse(role, userCount))
+	return a.sendJSON(r, roleToResponse(role, userCount))
 }
 
 // DeleteRole deletes a custom role
@@ -377,7 +377,7 @@ func (a *App) DeleteRole(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"role", id, models.AuditActionDeleted, oldSnap, nil)
 
-	return r.SendEnvelope(map[string]string{"message": "Role deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "Role deleted successfully"})
 }
 
 // ListPermissions returns all available permissions
@@ -399,7 +399,7 @@ func (a *App) ListPermissions(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"permissions": response,
 	})
 }

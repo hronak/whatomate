@@ -135,7 +135,7 @@ func (a *App) GetPublicSSOProviders(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(result)
+	return a.sendJSON(r, result)
 }
 
 // InitSSO initiates OAuth flow for a provider
@@ -408,7 +408,7 @@ func (a *App) GetSSOSettings(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(result)
+	return a.sendJSON(r, result)
 }
 
 // UpdateSSOProvider creates or updates an SSO provider config (admin only)
@@ -477,7 +477,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to save SSO settings", err))
 	}
 
-	return r.SendEnvelope(SSOProviderResponse{
+	return a.sendJSON(r, SSOProviderResponse{
 		Provider:        ssoConfig.Provider,
 		ClientID:        ssoConfig.ClientID,
 		HasSecret:       ssoConfig.ClientSecret != "",
@@ -513,7 +513,7 @@ func (a *App) DeleteSSOProvider(r *fastglue.Request) error {
 		return a.sendError(r, notFound("SSO provider"))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "SSO provider deleted"})
+	return a.sendJSON(r, map[string]string{"message": "SSO provider deleted"})
 }
 
 // Helper functions

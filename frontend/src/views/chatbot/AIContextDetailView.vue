@@ -72,8 +72,7 @@ async function loadContext() {
   try {
     const response = await chatbotService.getAIContext(contextId.value);
     const data =
-      (response.data as any).data?.context ||
-      (response.data as any).data ||
+      response.data?.context ||
       response.data;
     contextData.value = data;
     syncForm(data);
@@ -167,8 +166,7 @@ async function save() {
     if (isNew.value) {
       const response = await chatbotService.createAIContext(payload);
       const created =
-        (response.data as any).data?.context ||
-        (response.data as any).data ||
+        response.data?.context ||
         response.data;
       hasChanges.value = false;
       toast.success(

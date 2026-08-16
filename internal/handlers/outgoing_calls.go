@@ -65,7 +65,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to initiate call", err))
 	}
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"call_log_id": callLogID.String(),
 		"sdp_answer":  sdpAnswer,
 	})
@@ -96,7 +96,7 @@ func (a *App) HangupOutgoingCall(r *fastglue.Request) error {
 		Where("id = ?", callLogID).
 		Update("disconnected_by", models.DisconnectedByAgent)
 
-	return r.SendEnvelope(map[string]string{"status": "ok"})
+	return a.sendJSON(r, map[string]string{"status": "ok"})
 }
 
 // SendCallPermissionRequest handles POST /api/calls/permission-request
@@ -166,7 +166,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to save permission", err))
 	}
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"permission_id": permission.ID.String(),
 	})
 }
@@ -196,7 +196,7 @@ func (a *App) GetICEServers(r *fastglue.Request) error {
 		})
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"ice_servers": servers,
 	})
 }
@@ -243,7 +243,7 @@ func (a *App) GetCallPermission(r *fastglue.Request) error {
 
 	a.Log.Info("Call permission check result", "contact_id", contactID, "phone", contact.PhoneNumber, "status", status)
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"status": status,
 	})
 }

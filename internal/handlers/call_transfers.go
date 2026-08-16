@@ -53,7 +53,7 @@ func (a *App) ListCallTransfers(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(listEnvelope("call_transfers", transfers, total, pg))
+	return a.sendJSON(r, listEnvelope("call_transfers", transfers, total, pg))
 }
 
 // GetCallTransfer returns a single call transfer by ID
@@ -87,7 +87,7 @@ func (a *App) GetCallTransfer(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(transfer)
+	return a.sendJSON(r, transfer)
 }
 
 // ConnectCallTransfer handles an agent accepting a call transfer via WebRTC SDP exchange
@@ -168,7 +168,7 @@ func (a *App) ConnectCallTransfer(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to connect to the call", err))
 	}
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"sdp_answer": sdpAnswer,
 	})
 }
@@ -203,7 +203,7 @@ func (a *App) HangupCallTransfer(r *fastglue.Request) error {
 		Where("id = ?", transfer.CallLogID).
 		Update("disconnected_by", models.DisconnectedByAgent)
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"status": "completed",
 	})
 }
@@ -228,7 +228,7 @@ func (a *App) HoldCall(r *fastglue.Request) error {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}
 
-	return r.SendEnvelope(map[string]string{"status": "on_hold"})
+	return a.sendJSON(r, map[string]string{"status": "on_hold"})
 }
 
 // ResumeCall takes an active call off hold and restores the audio bridge.
@@ -251,7 +251,7 @@ func (a *App) ResumeCall(r *fastglue.Request) error {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}
 
-	return r.SendEnvelope(map[string]string{"status": "connected"})
+	return a.sendJSON(r, map[string]string{"status": "connected"})
 }
 
 // InitiateAgentTransfer allows a connected agent to transfer their active call to another team/agent
@@ -319,7 +319,7 @@ func (a *App) InitiateAgentTransfer(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to initiate transfer", err))
 	}
 
-	return r.SendEnvelope(map[string]string{
+	return a.sendJSON(r, map[string]string{
 		"status": "transferring",
 	})
 }

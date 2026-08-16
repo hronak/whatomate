@@ -110,7 +110,7 @@ async function fetchProfile() {
     const response = await api.get(
       `/accounts/${props.accountId}/business_profile`,
     );
-    const data = response.data.data;
+    const data = response.data;
 
     // Fill the form, ensure arrays have data
     profile.value = {

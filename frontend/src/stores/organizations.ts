@@ -46,7 +46,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     try {
       const response = await organizationsService.list();
       organizations.value =
-        (response.data as any).data?.organizations ||
+        response.data?.organizations ||
         response.data?.organizations ||
         [];
     } catch (err: any) {
@@ -61,7 +61,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   async function fetchMyOrganizations(): Promise<void> {
     try {
       const response = await usersService.listMyOrganizations();
-      myOrganizations.value = (response.data as any).data?.organizations || [];
+      myOrganizations.value = response.data?.organizations || [];
     } catch {
       myOrganizations.value = [];
     }

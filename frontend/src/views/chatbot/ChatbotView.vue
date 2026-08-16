@@ -73,7 +73,7 @@ onMounted(async () => {
   try {
     const response = await chatbotService.getSettings();
     // API response is wrapped in { status: "success", data: { settings: {...}, stats: {...} } }
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     settings.value = data.settings || settings.value;
     stats.value = data.stats || stats.value;
   } catch (err) {
@@ -113,7 +113,7 @@ async function retryFetch() {
   error.value = false;
   try {
     const response = await chatbotService.getSettings();
-    const data = response.data.data || response.data;
+    const data = response.data || response.data;
     settings.value = data.settings || settings.value;
     stats.value = data.stats || stats.value;
   } catch (err) {

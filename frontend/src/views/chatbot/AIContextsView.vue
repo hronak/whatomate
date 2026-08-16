@@ -96,7 +96,7 @@ async function fetchContexts() {
       limit: pageSize,
     });
     // API response is wrapped in { status: "success", data: { contexts: [...] } }
-    const data = (response.data as any).data || response.data;
+    const data = response.data;
     contexts.value = data.contexts || [];
     totalItems.value = data.total ?? contexts.value.length;
   } catch (err) {

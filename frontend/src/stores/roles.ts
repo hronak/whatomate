@@ -77,7 +77,7 @@ export const useRolesStore = defineStore("roles", () => {
     error.value = null;
     try {
       const response = await rolesService.list(params);
-      const data = (response.data as any).data || response.data;
+      const data = response.data;
       roles.value = data.roles || [];
       return {
         roles: data.roles || [],
@@ -98,7 +98,7 @@ export const useRolesStore = defineStore("roles", () => {
     error.value = null;
     try {
       const response = await rolesService.get(id);
-      const data = (response.data as any).data || response.data;
+      const data = response.data;
       return data;
     } catch (err: any) {
       error.value = err.response?.data?.message || "Failed to fetch role";
@@ -112,7 +112,7 @@ export const useRolesStore = defineStore("roles", () => {
     try {
       const response = await permissionsService.list();
       permissions.value =
-        (response.data as any).data?.permissions ||
+        response.data?.permissions ||
         response.data?.permissions ||
         [];
     } catch (err: any) {
@@ -127,7 +127,7 @@ export const useRolesStore = defineStore("roles", () => {
     error.value = null;
     try {
       const response = await rolesService.create(data);
-      const newRole = (response.data as any).data || response.data;
+      const newRole = response.data;
       roles.value.unshift(newRole);
       return newRole;
     } catch (err: any) {
@@ -143,7 +143,7 @@ export const useRolesStore = defineStore("roles", () => {
     error.value = null;
     try {
       const response = await rolesService.update(id, data);
-      const updatedRole = (response.data as any).data || response.data;
+      const updatedRole = response.data;
       const index = roles.value.findIndex((r) => r.id === id);
       if (index !== -1) {
         roles.value[index] = updatedRole;

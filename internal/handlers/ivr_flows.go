@@ -53,7 +53,7 @@ func (a *App) ListIVRFlows(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to fetch IVR flows", err))
 	}
 
-	return r.SendEnvelope(listEnvelope("ivr_flows", flows, total, pg))
+	return a.sendJSON(r, listEnvelope("ivr_flows", flows, total, pg))
 }
 
 // GetIVRFlow returns a single IVR flow by ID
@@ -73,7 +73,7 @@ func (a *App) GetIVRFlow(r *fastglue.Request) error {
 		return nil
 	}
 
-	return r.SendEnvelope(flow)
+	return a.sendJSON(r, flow)
 }
 
 // CreateIVRFlow creates a new IVR flow
@@ -153,7 +153,7 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"ivr_flow", flow.ID, models.AuditActionCreated, nil, &flow)
 
-	return r.SendEnvelope(flow)
+	return a.sendJSON(r, flow)
 }
 
 // UpdateIVRFlow updates an existing IVR flow
@@ -259,7 +259,7 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"ivr_flow", flow.ID, models.AuditActionUpdated, &oldFlow, flow, extraChanges...)
 
-	return r.SendEnvelope(flow)
+	return a.sendJSON(r, flow)
 }
 
 // diffIVRMenuNodes compares old and new IVR menu JSONB to find node-level changes
@@ -439,7 +439,7 @@ func (a *App) DeleteIVRFlow(r *fastglue.Request) error {
 	a.logAudit(orgID, userID,
 		"ivr_flow", flow.ID, models.AuditActionDeleted, flow, nil)
 
-	return r.SendEnvelope(map[string]string{"message": "IVR flow deleted"})
+	return a.sendJSON(r, map[string]string{"message": "IVR flow deleted"})
 }
 
 // getAudioDir returns the configured audio directory path.
@@ -551,7 +551,7 @@ func (a *App) UploadIVRAudio(r *fastglue.Request) error {
 
 	a.Log.Info("IVR audio uploaded", "filename", filename, "original_mime", mimeType, "size", len(data))
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"filename":  filename,
 		"mime_type": mimeType,
 		"size":      len(data),
@@ -711,7 +711,7 @@ func (a *App) UploadOrgAudio(r *fastglue.Request) error {
 
 	a.Log.Info("Org audio uploaded", "org_id", orgID, "type", audioType, "filename", filename, "size", len(data))
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"filename":  filename,
 		"type":      audioType,
 		"mime_type": mimeType,

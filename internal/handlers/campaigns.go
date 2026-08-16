@@ -143,7 +143,7 @@ func (a *App) ListCampaigns(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(listEnvelope("campaigns", response, total, pg))
+	return a.sendJSON(r, listEnvelope("campaigns", response, total, pg))
 }
 
 // CreateCampaign implements campaign creation
@@ -200,7 +200,7 @@ func (a *App) CreateCampaign(r *fastglue.Request) error {
 
 	a.Log.Info("Campaign created", "campaign_id", campaign.ID, "name", campaign.Name)
 
-	return r.SendEnvelope(CampaignResponse{
+	return a.sendJSON(r, CampaignResponse{
 		ID:                  campaign.ID,
 		Name:                campaign.Name,
 		WhatsAppAccount:     campaign.WhatsAppAccount,
@@ -276,7 +276,7 @@ func (a *App) GetCampaign(r *fastglue.Request) error {
 		response.UpdatedByName = campaign.UpdatedBy.FullName
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // UpdateCampaign implements campaign update
@@ -370,7 +370,7 @@ func (a *App) UpdateCampaign(r *fastglue.Request) error {
 		response.UpdatedByName = campaign.UpdatedBy.FullName
 	}
 
-	return r.SendEnvelope(response)
+	return a.sendJSON(r, response)
 }
 
 // DeleteCampaign implements campaign deletion
@@ -416,7 +416,7 @@ func (a *App) DeleteCampaign(r *fastglue.Request) error {
 
 	a.Log.Info("Campaign deleted", "campaign_id", id)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Campaign deleted successfully",
 	})
 }
@@ -503,7 +503,7 @@ func (a *App) StartCampaign(r *fastglue.Request) error {
 
 	a.Log.Info("Recipients enqueued for processing", "campaign_id", id, "count", len(jobs))
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Campaign started",
 		"status":  models.CampaignStatusProcessing,
 	})
@@ -541,7 +541,7 @@ func (a *App) PauseCampaign(r *fastglue.Request) error {
 
 	a.Log.Info("Campaign paused", "campaign_id", id)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Campaign paused",
 		"status":  models.CampaignStatusPaused,
 	})
@@ -579,7 +579,7 @@ func (a *App) CancelCampaign(r *fastglue.Request) error {
 
 	a.Log.Info("Campaign cancelled", "campaign_id", id)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Campaign cancelled",
 		"status":  models.CampaignStatusCancelled,
 	})
@@ -675,7 +675,7 @@ func (a *App) RetryFailed(r *fastglue.Request) error {
 
 	a.Log.Info("Failed recipients enqueued for retry", "campaign_id", id, "count", len(jobs))
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":     "Retrying failed messages",
 		"retry_count": len(failedRecipients),
 		"status":      models.CampaignStatusProcessing,
@@ -752,7 +752,7 @@ func (a *App) ImportRecipients(r *fastglue.Request) error {
 			"new_value": fmt.Sprintf("%d recipients added", len(req.Recipients)),
 		})
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message":          "Recipients added successfully",
 		"added_count":      len(req.Recipients),
 		"total_recipients": totalCount,
@@ -794,7 +794,7 @@ func (a *App) GetCampaignRecipients(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"recipients": recipients,
 		"total":      len(recipients),
 	})
@@ -859,7 +859,7 @@ func (a *App) DeleteCampaignRecipient(r *fastglue.Request) error {
 			"new_value": nil,
 		})
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"message": "Recipient deleted successfully",
 	})
 }
@@ -977,7 +977,7 @@ func (a *App) UploadCampaignMedia(r *fastglue.Request) error {
 
 	a.Log.Info("Campaign media uploaded", "campaign_id", campaignUUID, "media_id", mediaID, "filename", fileHeader.Filename, "local_path", localPath)
 
-	return r.SendEnvelope(map[string]any{
+	return a.sendJSON(r, map[string]any{
 		"media_id":   mediaID,
 		"filename":   fileHeader.Filename,
 		"mime_type":  mimeType,

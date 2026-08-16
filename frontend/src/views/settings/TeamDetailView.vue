@@ -99,7 +99,7 @@ async function loadTeam() {
   isNotFound.value = false;
   try {
     const response = await teamsService.get(teamId.value);
-    const data = (response.data as any).data?.team || response.data?.team;
+    const data = response.data?.team || response.data?.team;
     team.value = data;
     members.value = data.members || [];
     syncForm();

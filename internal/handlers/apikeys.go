@@ -88,7 +88,7 @@ func (a *App) ListAPIKeys(r *fastglue.Request) error {
 		}
 	}
 
-	return r.SendEnvelope(listEnvelope("api_keys", response, total, pg))
+	return a.sendJSON(r, listEnvelope("api_keys", response, total, pg))
 }
 
 // GetAPIKey returns a single API key by ID
@@ -108,7 +108,7 @@ func (a *App) GetAPIKey(r *fastglue.Request) error {
 		return a.sendError(r, notFound("API key"))
 	}
 
-	return r.SendEnvelope(APIKeyResponse{
+	return a.sendJSON(r, APIKeyResponse{
 		ID:         apiKey.ID,
 		Name:       apiKey.Name,
 		KeyPrefix:  apiKey.KeyPrefix,
@@ -152,7 +152,7 @@ func (a *App) UpdateAPIKey(r *fastglue.Request) error {
 		return a.sendError(r, internalError("Failed to update API key", err))
 	}
 
-	return r.SendEnvelope(APIKeyResponse{
+	return a.sendJSON(r, APIKeyResponse{
 		ID:         apiKey.ID,
 		Name:       apiKey.Name,
 		KeyPrefix:  apiKey.KeyPrefix,
@@ -223,7 +223,7 @@ func (a *App) CreateAPIKey(r *fastglue.Request) error {
 	}
 
 	// Return full key only on creation
-	return r.SendEnvelope(APIKeyCreateResponse{
+	return a.sendJSON(r, APIKeyCreateResponse{
 		ID:        apiKey.ID,
 		Name:      apiKey.Name,
 		Key:       fullKey, // This is the only time the full key is returned
@@ -254,5 +254,5 @@ func (a *App) DeleteAPIKey(r *fastglue.Request) error {
 		return a.sendError(r, notFound("API key"))
 	}
 
-	return r.SendEnvelope(map[string]string{"message": "API key deleted successfully"})
+	return a.sendJSON(r, map[string]string{"message": "API key deleted successfully"})
 }
