@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/assignment"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/shridarpatil/whatomate/internal/websocket"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"gorm.io/gorm/clause"
 )
@@ -257,7 +258,7 @@ func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 	var transfers []agentTransferRow
 	if err := query.Scan(&transfers).Error; err != nil {
 		a.Log.Error("Failed to fetch transfers", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch transfers", nil, "")
+		return a.sendError(r, internalError("Failed to fetch transfers", err))
 	}
 
 	// Get queue counts
@@ -516,7 +517,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&transfer).Error; err != nil {
 		a.Log.Error("Failed to create agent transfer", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create transfer", nil, "")
+		return a.sendError(r, internalError("Failed to create transfer", err))
 	}
 
 	// When AssignToSameAgent is enabled and no agent is already assigned,
@@ -653,7 +654,7 @@ func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 
 	if err := a.DB.Save(transfer).Error; err != nil {
 		a.Log.Error("Failed to resume transfer", "error", err, "transfer_id", transfer.ID)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to resume transfer", nil, "")
+		return a.sendError(r, internalError("Failed to resume transfer", err))
 	}
 
 	// Clear chatbot tracking so client inactivity SLA doesn't trigger after transfer is closed
@@ -807,7 +808,7 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 
 	if err != nil {
 		a.Log.Error("Failed to assign transfer", "error", err, "transfer_id", transfer.ID)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to assign transfer", nil, "")
+		return a.sendError(r, internalError("Failed to assign transfer", err))
 	}
 
 	// Broadcast WebSocket notification
@@ -962,7 +963,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	if err := tx.Save(&transfer).Error; err != nil {
 		tx.Rollback()
 		a.Log.Error("Failed to pick transfer", "error", err, "transfer_id", transfer.ID)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to pick transfer", nil, "")
+		return a.sendError(r, internalError("Failed to pick transfer", err))
 	}
 
 	// Pin the agent as the contact's relationship manager only when the org
@@ -978,7 +979,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 			if err := tx.Model(&models.Contact{}).Where("id = ?", transfer.ContactID).Update("assigned_user_id", userID).Error; err != nil {
 				tx.Rollback()
 				a.Log.Error("Failed to update contact assignment", "error", err, "transfer_id", transfer.ID)
-				return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update contact assignment", nil, "")
+				return a.sendError(r, internalError("Failed to update contact assignment", err))
 			}
 		}
 	}
@@ -986,7 +987,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
 		a.Log.Error("Failed to complete pickup", "error", err, "transfer_id", transfer.ID)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to complete pickup", nil, "")
+		return a.sendError(r, internalError("Failed to complete pickup", err))
 	}
 
 	// Load related data for response (outside transaction)

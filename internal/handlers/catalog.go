@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -78,7 +77,7 @@ func (a *App) ListCatalogs(r *fastglue.Request) error {
 	var catalogs []models.Catalog
 	if err := query.Order("name ASC").Find(&catalogs).Error; err != nil {
 		a.Log.Error("Failed to list catalogs", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list catalogs", nil, "")
+		return a.sendError(r, internalError("Failed to list catalogs", err))
 	}
 
 	result := make([]CatalogResponse, len(catalogs))
@@ -123,7 +122,7 @@ func (a *App) CreateCatalog(r *fastglue.Request) error {
 	metaCatalogID, err := a.WhatsApp.CreateCatalog(ctx, waAccount, req.Name)
 	if err != nil {
 		a.Log.Error("Failed to create catalog in Meta", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create catalog", nil, "")
+		return a.sendError(r, internalError("Failed to create catalog", err))
 	}
 
 	// Store catalog locally
@@ -137,7 +136,7 @@ func (a *App) CreateCatalog(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&catalog).Error; err != nil {
 		a.Log.Error("Failed to save catalog", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save catalog", nil, "")
+		return a.sendError(r, internalError("Failed to save catalog", err))
 	}
 
 	return r.SendEnvelope(catalogToResponse(catalog, 0))
@@ -208,7 +207,7 @@ func (a *App) DeleteCatalog(r *fastglue.Request) error {
 	// Delete catalog
 	if err := a.DB.Delete(catalog).Error; err != nil {
 		a.Log.Error("Failed to delete catalog", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete catalog", nil, "")
+		return a.sendError(r, internalError("Failed to delete catalog", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Catalog deleted"})
@@ -243,7 +242,7 @@ func (a *App) SyncCatalogs(r *fastglue.Request) error {
 	metaCatalogs, err := a.WhatsApp.ListCatalogs(ctx, waAccount)
 	if err != nil {
 		a.Log.Error("Failed to fetch catalogs from Meta", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch catalogs", nil, "")
+		return a.sendError(r, internalError("Failed to fetch catalogs", err))
 	}
 
 	// Sync each catalog
@@ -302,7 +301,7 @@ func (a *App) ListCatalogProducts(r *fastglue.Request) error {
 	var products []models.CatalogProduct
 	if err := a.DB.Where("catalog_id = ?", catalogID).Order("name ASC").Find(&products).Error; err != nil {
 		a.Log.Error("Failed to list products", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list products", nil, "")
+		return a.sendError(r, internalError("Failed to list products", err))
 	}
 
 	result := make([]CatalogProductResponse, len(products))
@@ -370,7 +369,7 @@ func (a *App) CreateCatalogProduct(r *fastglue.Request) error {
 	metaProductID, err := a.WhatsApp.CreateProduct(ctx, waAccount, catalog.MetaCatalogID, productInput)
 	if err != nil {
 		a.Log.Error("Failed to create product in Meta", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create product", nil, "")
+		return a.sendError(r, internalError("Failed to create product", err))
 	}
 
 	// Store product locally
@@ -390,7 +389,7 @@ func (a *App) CreateCatalogProduct(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&product).Error; err != nil {
 		a.Log.Error("Failed to save product", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save product", nil, "")
+		return a.sendError(r, internalError("Failed to save product", err))
 	}
 
 	return r.SendEnvelope(productToResponse(product))
@@ -465,7 +464,7 @@ func (a *App) UpdateCatalogProduct(r *fastglue.Request) error {
 
 	if err := a.WhatsApp.UpdateProduct(ctx, waAccount, product.MetaProductID, productInput); err != nil {
 		a.Log.Error("Failed to update product in Meta", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update product", nil, "")
+		return a.sendError(r, internalError("Failed to update product", err))
 	}
 
 	// Update locally
@@ -493,7 +492,7 @@ func (a *App) UpdateCatalogProduct(r *fastglue.Request) error {
 
 	if err := a.DB.Save(product).Error; err != nil {
 		a.Log.Error("Failed to save product", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save product", nil, "")
+		return a.sendError(r, internalError("Failed to save product", err))
 	}
 
 	return r.SendEnvelope(productToResponse(*product))
@@ -539,7 +538,7 @@ func (a *App) DeleteCatalogProduct(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(product).Error; err != nil {
 		a.Log.Error("Failed to delete product", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete product", nil, "")
+		return a.sendError(r, internalError("Failed to delete product", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Product deleted"})

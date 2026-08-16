@@ -2,8 +2,9 @@ package handlers_test
 
 import (
 	"encoding/json"
-	"github.com/shridarpatil/whatomate/internal/middleware"
 	"testing"
+
+	"github.com/shridarpatil/whatomate/internal/middleware"
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/handlers"

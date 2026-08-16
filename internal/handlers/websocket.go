@@ -47,7 +47,7 @@ func (a *App) WebSocketHandler(r *fastglue.Request) error {
 
 	if err != nil {
 		a.Log.Error("WebSocket upgrade failed", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "WebSocket upgrade failed", nil, "")
+		return a.sendError(r, internalError("WebSocket upgrade failed", err))
 	}
 
 	return nil

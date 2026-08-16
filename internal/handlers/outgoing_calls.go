@@ -148,7 +148,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 	messageID, err := a.WhatsApp.SendCallPermissionRequest(ctx, waAccount, rcpt, "")
 	if err != nil {
 		a.Log.Error("Failed to send call permission request", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to send permission request", nil, "")
+		return a.sendError(r, internalError("Failed to send permission request", err))
 	}
 
 	// Create CallPermission record
@@ -163,7 +163,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 	}
 	if err := a.DB.Create(&permission).Error; err != nil {
 		a.Log.Error("Failed to create call permission record", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save permission", nil, "")
+		return a.sendError(r, internalError("Failed to save permission", err))
 	}
 
 	return r.SendEnvelope(map[string]string{
@@ -238,7 +238,7 @@ func (a *App) GetCallPermission(r *fastglue.Request) error {
 	status, err := a.WhatsApp.GetCallPermission(ctx, waAccount, contact.PhoneNumber)
 	if err != nil {
 		a.Log.Error("Failed to check call permission via API", "error", err, "phone", contact.PhoneNumber)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to check permission", nil, "")
+		return a.sendError(r, internalError("Failed to check permission", err))
 	}
 
 	a.Log.Info("Call permission check result", "contact_id", contactID, "phone", contact.PhoneNumber, "status", status)

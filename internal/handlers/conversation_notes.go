@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/internal/websocket"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -66,8 +65,7 @@ func (a *App) ListConversationNotes(r *fastglue.Request) error {
 		Limit(limit).
 		Find(&notes).Error; err != nil {
 		a.Log.Error("Failed to list conversation notes", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to list notes", nil, "")
+		return a.sendError(r, internalError("Failed to list notes", err))
 	}
 
 	// Reverse to chronological order (oldest first)
@@ -117,8 +115,7 @@ func (a *App) CreateConversationNote(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&note).Error; err != nil {
 		a.Log.Error("Failed to create conversation note", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to create note", nil, "")
+		return a.sendError(r, internalError("Failed to create note", err))
 	}
 
 	// Load the creator relation for the response
@@ -178,8 +175,7 @@ func (a *App) UpdateConversationNote(r *fastglue.Request) error {
 	note.Content = req.Content
 	if err := a.DB.Save(note).Error; err != nil {
 		a.Log.Error("Failed to update conversation note", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to update note", nil, "")
+		return a.sendError(r, internalError("Failed to update note", err))
 	}
 
 	// Load the creator relation for the response
@@ -231,8 +227,7 @@ func (a *App) DeleteConversationNote(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(note).Error; err != nil {
 		a.Log.Error("Failed to delete conversation note", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to delete note", nil, "")
+		return a.sendError(r, internalError("Failed to delete note", err))
 	}
 
 	// Broadcast via WebSocket

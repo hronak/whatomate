@@ -16,7 +16,6 @@ import (
 	"github.com/shridarpatil/whatomate/internal/templateutil"
 	"github.com/shridarpatil/whatomate/internal/websocket"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -728,7 +727,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 			headerFileData, err = io.ReadAll(f)
 			if err != nil {
 				a.Log.Error("Failed to read header file", "error", err)
-				return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read header file", nil, "")
+				return a.sendError(r, internalError("Failed to read header file", err))
 			}
 			headerFileMimeType = fh.Header.Get("Content-Type")
 			if headerFileMimeType == "" {
@@ -805,7 +804,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 			}
 			if err := a.DB.Create(&c).Error; err != nil {
 				a.Log.Error("Failed to create contact", "error", err, "phone", phoneNumber)
-				return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create contact", nil, "")
+				return a.sendError(r, internalError("Failed to create contact", err))
 			}
 			a.Log.Info("Contact created from API", "contact_id", c.ID, "phone", phoneNumber)
 		}
@@ -839,9 +838,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 			}
 		}
 		if len(missingParams) > 0 {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
-				fmt.Sprintf("Missing template parameters: %s. Expected parameters: %v", strings.Join(missingParams, ", "), paramNames),
-				nil, "")
+			return a.sendError(r, invalidRequest(fmt.Sprintf("Missing template parameters: %s. Expected parameters: %v", strings.Join(missingParams, ", "), paramNames)))
 		}
 	}
 
@@ -850,16 +847,12 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	if template.HeaderType == "TEXT" {
 		headerNames := templateutil.ExtParamNames(template.HeaderContent)
 		if len(headerNames) > 1 {
-			return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
-				fmt.Sprintf("Template header text contains %d variables; Meta allows at most 1", len(headerNames)),
-				nil, "")
+			return a.sendError(r, invalidRequest(fmt.Sprintf("Template header text contains %d variables; Meta allows at most 1", len(headerNames))))
 		}
 		if len(headerNames) == 1 {
 			name := headerNames[0]
 			if req.HeaderParams[name] == "" && req.TemplateParams[name] == "" {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
-					fmt.Sprintf("Missing header parameter %q. Pass it in header_params or template_params.", name),
-					nil, "")
+				return a.sendError(r, invalidRequest(fmt.Sprintf("Missing header parameter %q. Pass it in header_params or template_params.", name)))
 			}
 		}
 	}
@@ -918,7 +911,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 			mediaID, err := a.WhatsApp.UploadMedia(context.Background(), waAcct, headerMediaData, headerMimeType, "header")
 			if err != nil {
 				a.Log.Error("Failed to upload template header media", "error", err)
-				return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to upload header media to WhatsApp", nil, "")
+				return a.sendError(r, internalError("Failed to upload header media to WhatsApp", err))
 			}
 			headerMediaID = mediaID
 		}
@@ -991,7 +984,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	message, err := a.SendOutgoingMessage(ctx, msgReq, opts)
 	if err != nil {
 		a.Log.Error("Failed to send template message", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to send template message", nil, "")
+		return a.sendError(r, internalError("Failed to send template message", err))
 	}
 
 	// Build full message response (same shape as SendMessage)

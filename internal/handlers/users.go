@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"github.com/shridarpatil/whatomate/internal/middleware"
 	"net/mail"
 	"time"
 
+	"github.com/shridarpatil/whatomate/internal/middleware"
+	"gorm.io/gorm"
+
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -140,7 +141,7 @@ func (a *App) ListUsers(r *fastglue.Request) error {
 	if err := pg.Apply(dataQuery.Order("users.created_at DESC")).
 		Find(&users).Error; err != nil {
 		a.Log.Error("Failed to list users", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list users", nil, "")
+		return a.sendError(r, internalError("Failed to list users", err))
 	}
 
 	// Fetch org-specific roles and membership info from user_organizations
@@ -271,7 +272,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		a.Log.Error("Failed to hash password", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create user", nil, "")
+		return a.sendError(r, internalError("Failed to create user", err))
 	}
 
 	isSuperAdmin := false
@@ -296,7 +297,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 			"is_super_admin":  isSuperAdmin,
 		}).Error; err != nil {
 			a.Log.Error("Failed to restore user", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create user", nil, "")
+			return a.sendError(r, internalError("Failed to create user", err))
 		}
 
 		// Restore or create UserOrganization entry
@@ -365,7 +366,7 @@ func (a *App) CreateUser(r *fastglue.Request) error {
 
 	if err != nil {
 		a.Log.Error("Failed to create user", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create user", nil, "")
+		return a.sendError(r, internalError("Failed to create user", err))
 	}
 
 	// Load role for response
@@ -447,7 +448,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 			Where("user_id = ? AND organization_id = ?", id, orgID).
 			Update("role_id", req.RoleID).Error; err != nil {
 			a.Log.Error("Failed to update member role", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update member role", nil, "")
+			return a.sendError(r, internalError("Failed to update member role", err))
 		}
 		a.InvalidateUserPermissionsCache(user.ID)
 
@@ -481,7 +482,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
 			a.Log.Error("Failed to hash password", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update user", nil, "")
+			return a.sendError(r, internalError("Failed to update user", err))
 		}
 		user.PasswordHash = string(hashedPassword)
 	}
@@ -527,7 +528,7 @@ func (a *App) UpdateUser(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&user).Error; err != nil {
 		a.Log.Error("Failed to update user", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update user", nil, "")
+		return a.sendError(r, internalError("Failed to update user", err))
 	}
 
 	// Invalidate permissions cache if role changed
@@ -589,7 +590,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 		result := a.DB.Where("user_id = ? AND organization_id = ?", id, orgID).Delete(&models.UserOrganization{})
 		if result.Error != nil {
 			a.Log.Error("Failed to remove member", "error", result.Error)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to remove member", nil, "")
+			return a.sendError(r, internalError("Failed to remove member", err))
 		}
 		a.InvalidateUserPermissionsCache(id)
 
@@ -619,7 +620,7 @@ func (a *App) DeleteUser(r *fastglue.Request) error {
 	result := a.DB.Where("id = ?", id).Delete(&models.User{})
 	if result.Error != nil {
 		a.Log.Error("Failed to delete user", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete user", nil, "")
+		return a.sendError(r, internalError("Failed to delete user", err))
 	}
 	if result.RowsAffected == 0 {
 		return a.sendError(r, notFound("User"))
@@ -727,7 +728,7 @@ func (a *App) UpdateCurrentUserSettings(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&user).Error; err != nil {
 		a.Log.Error("Failed to update user settings", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update settings", nil, "")
+		return a.sendError(r, internalError("Failed to update settings", err))
 	}
 
 	newNotif := notificationSettingsSnapshot(user.Settings)
@@ -786,13 +787,13 @@ func (a *App) ChangePassword(r *fastglue.Request) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		a.Log.Error("Failed to hash password", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to change password", nil, "")
+		return a.sendError(r, internalError("Failed to change password", err))
 	}
 
 	user.PasswordHash = string(hashedPassword)
 	if err := a.DB.Save(&user).Error; err != nil {
 		a.Log.Error("Failed to update password", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to change password", nil, "")
+		return a.sendError(r, internalError("Failed to change password", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Password changed successfully"})
@@ -884,7 +885,7 @@ func (a *App) ListMyOrganizations(r *fastglue.Request) error {
 		Preload("Role").
 		Find(&userOrgs).Error; err != nil {
 		a.Log.Error("Failed to list user organizations", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list organizations", nil, "")
+		return a.sendError(r, internalError("Failed to list organizations", err))
 	}
 
 	response := make([]MyOrganizationResponse, 0, len(userOrgs))
@@ -957,7 +958,7 @@ func (a *App) UpdateAvailability(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&user).Error; err != nil {
 		a.Log.Error("Failed to update availability", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update availability", nil, "")
+		return a.sendError(r, internalError("Failed to update availability", err))
 	}
 
 	status := "available"

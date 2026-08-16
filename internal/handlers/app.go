@@ -3,11 +3,12 @@ package handlers
 import (
 	"context"
 	"errors"
-	"github.com/shridarpatil/whatomate/internal/middleware"
 	"net/http"
 	"runtime/debug"
 	"sync"
 	"time"
+
+	"github.com/shridarpatil/whatomate/internal/middleware"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -20,7 +21,6 @@ import (
 	"github.com/shridarpatil/whatomate/internal/tts"
 	"github.com/shridarpatil/whatomate/internal/websocket"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"github.com/zerodha/logf"
 	"gorm.io/gorm"
@@ -245,7 +245,7 @@ func (a *App) GetEmbeddedSignupConfig(r *fastglue.Request) error {
 
 	appID, _, configID, err := a.resolveMetaAppCreds(orgID)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to resolve credentials", nil, "")
+		return a.sendError(r, internalError("Failed to resolve credentials", err))
 	}
 
 	type EmbeddedSignupConfig struct {

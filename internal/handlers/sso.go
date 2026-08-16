@@ -114,7 +114,7 @@ func (a *App) GetPublicSSOProviders(r *fastglue.Request) error {
 	var providers []models.SSOProvider
 	if err := a.DB.Where("is_enabled = ?", true).Find(&providers).Error; err != nil {
 		a.Log.Error("Failed to fetch SSO providers", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch providers", nil, "")
+		return a.sendError(r, internalError("Failed to fetch providers", err))
 	}
 
 	// Deduplicate by provider type (in case multiple orgs have same provider)
@@ -174,7 +174,7 @@ func (a *App) InitSSO(r *fastglue.Request) error {
 	defer cancel()
 	if err := a.Redis.Set(redisCtx, stateKey, stateJSON, 5*time.Minute).Err(); err != nil {
 		a.Log.Error("Failed to store SSO state", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to initiate SSO", nil, "")
+		return a.sendError(r, internalError("Failed to initiate SSO", err))
 	}
 
 	// Build OAuth config
@@ -388,7 +388,7 @@ func (a *App) GetSSOSettings(r *fastglue.Request) error {
 	var providers []models.SSOProvider
 	if err := a.DB.Where("organization_id = ?", orgID).Find(&providers).Error; err != nil {
 		a.Log.Error("Failed to fetch SSO providers", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch SSO settings", nil, "")
+		return a.sendError(r, internalError("Failed to fetch SSO settings", err))
 	}
 
 	// Map to response (hide secrets)
@@ -457,7 +457,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 		enc, err := appcrypto.Encrypt(req.ClientSecret, a.Config.App.EncryptionKey)
 		if err != nil {
 			a.Log.Error("Failed to encrypt SSO client secret", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save SSO configuration", nil, "")
+			return a.sendError(r, internalError("Failed to save SSO configuration", err))
 		}
 		ssoConfig.ClientSecret = enc
 	}
@@ -474,7 +474,7 @@ func (a *App) UpdateSSOProvider(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&ssoConfig).Error; err != nil {
 		a.Log.Error("Failed to save SSO provider", "error", err, "provider", provider)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save SSO settings", nil, "")
+		return a.sendError(r, internalError("Failed to save SSO settings", err))
 	}
 
 	return r.SendEnvelope(SSOProviderResponse{
@@ -506,7 +506,7 @@ func (a *App) DeleteSSOProvider(r *fastglue.Request) error {
 	result := a.DB.Unscoped().Where("organization_id = ? AND provider = ?", orgID, provider).Delete(&models.SSOProvider{})
 	if result.Error != nil {
 		a.Log.Error("Failed to delete SSO provider", "error", result.Error, "provider", provider)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete SSO provider", nil, "")
+		return a.sendError(r, internalError("Failed to delete SSO provider", err))
 	}
 
 	if result.RowsAffected == 0 {

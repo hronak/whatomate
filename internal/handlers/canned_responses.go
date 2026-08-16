@@ -93,8 +93,7 @@ func (a *App) ListCannedResponses(r *fastglue.Request) error {
 	if err := pg.Apply(query.Order("usage_count DESC, name ASC")).
 		Find(&responses).Error; err != nil {
 		a.Log.Error("Failed to list canned responses", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to list canned responses", nil, "")
+		return a.sendError(r, internalError("Failed to list canned responses", err))
 	}
 
 	result := make([]CannedResponseResponse, len(responses))
@@ -118,8 +117,7 @@ func (a *App) CreateCannedResponse(r *fastglue.Request) error {
 	}
 
 	if req.Name == "" || req.Content == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
-			"name and content are required", nil, "")
+		return a.sendError(r, invalidRequest("name and content are required"))
 	}
 
 	if err := validateCannedResponseButtons(req.Buttons); err != nil {
@@ -147,8 +145,7 @@ func (a *App) CreateCannedResponse(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&cannedResponse).Error; err != nil {
 		a.Log.Error("Failed to create canned response", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to create canned response", nil, "")
+		return a.sendError(r, internalError("Failed to create canned response", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -223,8 +220,7 @@ func (a *App) UpdateCannedResponse(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&cannedResponse).Error; err != nil {
 		a.Log.Error("Failed to update canned response", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to update canned response", nil, "")
+		return a.sendError(r, internalError("Failed to update canned response", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -254,8 +250,7 @@ func (a *App) DeleteCannedResponse(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(&cannedResponse).Error; err != nil {
 		a.Log.Error("Failed to delete canned response", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to delete canned response", nil, "")
+		return a.sendError(r, internalError("Failed to delete canned response", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -280,8 +275,7 @@ func (a *App) IncrementCannedResponseUsage(r *fastglue.Request) error {
 		Where("id = ? AND organization_id = ?", id, orgID).
 		UpdateColumn("usage_count", gorm.Expr("usage_count + 1")).Error; err != nil {
 		a.Log.Error("Failed to update usage", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to update usage", nil, "")
+		return a.sendError(r, internalError("Failed to update usage", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Usage incremented"})

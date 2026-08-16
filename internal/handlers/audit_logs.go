@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"gorm.io/gorm"
 )
@@ -80,8 +79,7 @@ func (a *App) ListAuditLogs(r *fastglue.Request) error {
 
 	if err := pg.Apply(baseQuery.Order("created_at DESC")).Find(&logs).Error; err != nil {
 		a.Log.Error("Failed to list audit logs", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError,
-			"Failed to list audit logs", nil, "")
+		return a.sendError(r, internalError("Failed to list audit logs", err))
 	}
 
 	response := make([]AuditLogResponse, len(logs))

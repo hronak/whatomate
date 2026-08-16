@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -36,7 +35,7 @@ func (a *App) ListTags(r *fastglue.Request) error {
 	tags, err := a.getTagsCached(orgID)
 	if err != nil {
 		a.Log.Error("Failed to list tags", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list tags", nil, "")
+		return a.sendError(r, internalError("Failed to list tags", err))
 	}
 
 	// Apply search filter (case-insensitive) - search by name or color
@@ -109,7 +108,7 @@ func (a *App) CreateTag(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&tag).Error; err != nil {
 		a.Log.Error("Failed to create tag", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create tag", nil, "")
+		return a.sendError(r, internalError("Failed to create tag", err))
 	}
 
 	// Invalidate cache
@@ -181,7 +180,7 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 		// Delete old tag
 		if err := a.DB.Delete(&tag).Error; err != nil {
 			a.Log.Error("Failed to delete old tag", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update tag", nil, "")
+			return a.sendError(r, internalError("Failed to update tag", err))
 		}
 
 		// Create new tag
@@ -196,7 +195,7 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 
 		if err := a.DB.Create(&newTag).Error; err != nil {
 			a.Log.Error("Failed to create renamed tag", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update tag", nil, "")
+			return a.sendError(r, internalError("Failed to update tag", err))
 		}
 
 		// Invalidate cache
@@ -211,7 +210,7 @@ func (a *App) UpdateTag(r *fastglue.Request) error {
 			Where("organization_id = ? AND name = ?", orgID, tagName).
 			Update("color", req.Color).Error; err != nil {
 			a.Log.Error("Failed to update tag", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update tag", nil, "")
+			return a.sendError(r, internalError("Failed to update tag", err))
 		}
 		tag.Color = req.Color
 
@@ -263,7 +262,7 @@ func (a *App) DeleteTag(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(&tag).Error; err != nil {
 		a.Log.Error("Failed to delete tag", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete tag", nil, "")
+		return a.sendError(r, internalError("Failed to delete tag", err))
 	}
 
 	// Invalidate cache

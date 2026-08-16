@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"gorm.io/gorm"
 )
@@ -157,7 +156,7 @@ func (a *App) ListWidgets(r *fastglue.Request) error {
 		orgID, userID,
 	).Order("display_order ASC, created_at ASC").Find(&widgets).Error; err != nil {
 		a.Log.Error("Failed to list widgets", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list widgets", nil, "")
+		return a.sendError(r, internalError("Failed to list widgets", err))
 	}
 
 	// Convert to response format
@@ -351,7 +350,7 @@ func (a *App) CreateWidget(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&widget).Error; err != nil {
 		a.Log.Error("Failed to create widget", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create widget", nil, "")
+		return a.sendError(r, internalError("Failed to create widget", err))
 	}
 
 	return r.SendEnvelope(widgetToResponse(widget, userID))
@@ -474,7 +473,7 @@ func (a *App) UpdateWidget(r *fastglue.Request) error {
 
 	if err := a.DB.Save(widget).Error; err != nil {
 		a.Log.Error("Failed to update widget", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update widget", nil, "")
+		return a.sendError(r, internalError("Failed to update widget", err))
 	}
 
 	return r.SendEnvelope(widgetToResponse(*widget, userID))
@@ -510,7 +509,7 @@ func (a *App) DeleteWidget(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(widget).Error; err != nil {
 		a.Log.Error("Failed to delete widget", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete widget", nil, "")
+		return a.sendError(r, internalError("Failed to delete widget", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Widget deleted successfully"})
@@ -561,7 +560,7 @@ func (a *App) SaveWidgetLayout(r *fastglue.Request) error {
 
 	if err != nil {
 		a.Log.Error("Failed to save widget layout", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save layout", nil, "")
+		return a.sendError(r, internalError("Failed to save layout", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Layout saved successfully"})
@@ -688,7 +687,7 @@ func (a *App) GetWidgetData(r *fastglue.Request) error {
 	data, err := a.executeWidgetQuery(orgID, widget, fromStr, toStr)
 	if err != nil {
 		a.Log.Error("Failed to execute widget query", "error", err, "widget_id", id)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to get widget data", nil, "")
+		return a.sendError(r, internalError("Failed to get widget data", err))
 	}
 
 	data.WidgetID = widget.ID
@@ -713,7 +712,7 @@ func (a *App) GetAllWidgetsData(r *fastglue.Request) error {
 		orgID, userID,
 	).Order("display_order ASC").Find(&widgets).Error; err != nil {
 		a.Log.Error("Failed to list widgets", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list widgets", nil, "")
+		return a.sendError(r, internalError("Failed to list widgets", err))
 	}
 
 	// Execute queries for all widgets

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -38,7 +37,7 @@ func (a *App) GetBusinessProfile(r *fastglue.Request) error {
 	profile, err := a.WhatsApp.GetBusinessProfile(ctx, a.toWhatsAppAccount(account))
 	if err != nil {
 		a.Log.Error("Failed to get business profile", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to get business profile", nil, "")
+		return a.sendError(r, internalError("Failed to get business profile", err))
 	}
 
 	return r.SendEnvelope(profile)
@@ -72,7 +71,7 @@ func (a *App) UpdateBusinessProfile(r *fastglue.Request) error {
 
 	if err := a.WhatsApp.UpdateBusinessProfile(ctx, waAccount, input); err != nil {
 		a.Log.Error("Failed to update business profile", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update business profile", nil, "")
+		return a.sendError(r, internalError("Failed to update business profile", err))
 	}
 
 	// Re-fetch to ensure we have the latest state
@@ -112,7 +111,7 @@ func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 	file, err := fileHeader.Open()
 	if err != nil {
 		a.Log.Error("Failed to open file", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to open file", nil, "")
+		return a.sendError(r, internalError("Failed to open file", err))
 	}
 	defer file.Close() //nolint:errcheck
 
@@ -121,7 +120,7 @@ func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 	_, err = file.Read(fileContent)
 	if err != nil {
 		a.Log.Error("Failed to read file", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file", nil, "")
+		return a.sendError(r, internalError("Failed to read file", err))
 	}
 
 	// Use a longer timeout for upload — profile pictures can be a few MB.
@@ -133,7 +132,7 @@ func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 	handle, err := a.WhatsApp.UploadProfilePicture(ctx, waAccount, fileContent, fileHeader.Header.Get("Content-Type"))
 	if err != nil {
 		a.Log.Error("Failed to upload profile picture", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to upload profile picture", nil, "")
+		return a.sendError(r, internalError("Failed to upload profile picture", err))
 	}
 
 	// Update Business Profile with the handle
@@ -146,7 +145,7 @@ func (a *App) UpdateProfilePicture(r *fastglue.Request) error {
 
 	if err != nil {
 		a.Log.Error("Failed to update profile request", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Uploaded but failed to set profile picture", nil, "")
+		return a.sendError(r, internalError("Uploaded but failed to set profile picture", err))
 	}
 
 	return r.SendEnvelope(map[string]string{

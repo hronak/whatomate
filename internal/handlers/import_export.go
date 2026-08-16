@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/internal/privacy"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"gorm.io/gorm"
 )
@@ -274,7 +273,7 @@ func (a *App) ExportData(r *fastglue.Request) error {
 	rows, err := query.Rows()
 	if err != nil {
 		a.Log.Error("Failed to export data", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to export data", nil, "")
+		return a.sendError(r, internalError("Failed to export data", err))
 	}
 	defer rows.Close() //nolint:errcheck
 

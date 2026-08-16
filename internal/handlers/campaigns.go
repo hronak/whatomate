@@ -112,7 +112,7 @@ func (a *App) ListCampaigns(r *fastglue.Request) error {
 		Order("created_at DESC")).
 		Find(&campaigns).Error; err != nil {
 		a.Log.Error("Failed to list campaigns", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list campaigns", nil, "")
+		return a.sendError(r, internalError("Failed to list campaigns", err))
 	}
 
 	// Convert to response format
@@ -192,7 +192,7 @@ func (a *App) CreateCampaign(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&campaign).Error; err != nil {
 		a.Log.Error("Failed to create campaign", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create campaign", nil, "")
+		return a.sendError(r, internalError("Failed to create campaign", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -333,7 +333,7 @@ func (a *App) UpdateCampaign(r *fastglue.Request) error {
 
 	if err := a.DB.Model(campaign).Updates(updates).Error; err != nil {
 		a.Log.Error("Failed to update campaign", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update campaign", nil, "")
+		return a.sendError(r, internalError("Failed to update campaign", err))
 	}
 
 	// Reload campaign
@@ -402,13 +402,13 @@ func (a *App) DeleteCampaign(r *fastglue.Request) error {
 	// Delete recipients first
 	if err := a.DB.Where("campaign_id = ?", id).Delete(&models.BulkMessageRecipient{}).Error; err != nil {
 		a.Log.Error("Failed to delete campaign recipients", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete campaign", nil, "")
+		return a.sendError(r, internalError("Failed to delete campaign", err))
 	}
 
 	// Delete campaign
 	if err := a.DB.Delete(campaign).Error; err != nil {
 		a.Log.Error("Failed to delete campaign", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete campaign", nil, "")
+		return a.sendError(r, internalError("Failed to delete campaign", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -451,7 +451,7 @@ func (a *App) StartCampaign(r *fastglue.Request) error {
 	var recipients []models.BulkMessageRecipient
 	if err := a.DB.Where("campaign_id = ? AND status = ?", id, models.MessageStatusPending).Find(&recipients).Error; err != nil {
 		a.Log.Error("Failed to load recipients", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to load recipients", nil, "")
+		return a.sendError(r, internalError("Failed to load recipients", err))
 	}
 
 	if len(recipients) == 0 {
@@ -475,7 +475,7 @@ func (a *App) StartCampaign(r *fastglue.Request) error {
 
 	if err := a.DB.Model(campaign).Updates(updates).Error; err != nil {
 		a.Log.Error("Failed to start campaign", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to start campaign", nil, "")
+		return a.sendError(r, internalError("Failed to start campaign", err))
 	}
 
 	a.Log.Info("Campaign started", "campaign_id", id, "recipients", len(recipients))
@@ -498,7 +498,7 @@ func (a *App) StartCampaign(r *fastglue.Request) error {
 		a.Log.Error("Failed to enqueue recipients", "error", err)
 		// Revert status on failure
 		a.logWrite("campaign status", a.DB.Model(campaign).Update("status", models.CampaignStatusDraft))
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to queue recipients", nil, "")
+		return a.sendError(r, internalError("Failed to queue recipients", err))
 	}
 
 	a.Log.Info("Recipients enqueued for processing", "campaign_id", id, "count", len(jobs))
@@ -536,7 +536,7 @@ func (a *App) PauseCampaign(r *fastglue.Request) error {
 
 	if err := a.DB.Model(campaign).Update("status", models.CampaignStatusPaused).Error; err != nil {
 		a.Log.Error("Failed to pause campaign", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to pause campaign", nil, "")
+		return a.sendError(r, internalError("Failed to pause campaign", err))
 	}
 
 	a.Log.Info("Campaign paused", "campaign_id", id)
@@ -574,7 +574,7 @@ func (a *App) CancelCampaign(r *fastglue.Request) error {
 
 	if err := a.DB.Model(campaign).Update("status", models.CampaignStatusCancelled).Error; err != nil {
 		a.Log.Error("Failed to cancel campaign", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to cancel campaign", nil, "")
+		return a.sendError(r, internalError("Failed to cancel campaign", err))
 	}
 
 	a.Log.Info("Campaign cancelled", "campaign_id", id)
@@ -615,7 +615,7 @@ func (a *App) RetryFailed(r *fastglue.Request) error {
 	var failedRecipients []models.BulkMessageRecipient
 	if err := a.DB.Where("campaign_id = ? AND status = ?", id, models.MessageStatusFailed).Find(&failedRecipients).Error; err != nil {
 		a.Log.Error("Failed to load failed recipients", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to load failed recipients", nil, "")
+		return a.sendError(r, internalError("Failed to load failed recipients", err))
 	}
 
 	if len(failedRecipients) == 0 {
@@ -630,7 +630,7 @@ func (a *App) RetryFailed(r *fastglue.Request) error {
 			"error_message": "",
 		}).Error; err != nil {
 		a.Log.Error("Failed to reset failed recipients", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to reset failed recipients", nil, "")
+		return a.sendError(r, internalError("Failed to reset failed recipients", err))
 	}
 
 	// Reset failed messages in messages table to pending
@@ -649,7 +649,7 @@ func (a *App) RetryFailed(r *fastglue.Request) error {
 	// Update campaign status to processing
 	if err := a.DB.Model(campaign).Update("status", models.CampaignStatusProcessing).Error; err != nil {
 		a.Log.Error("Failed to update campaign status", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update campaign", nil, "")
+		return a.sendError(r, internalError("Failed to update campaign", err))
 	}
 
 	a.Log.Info("Retrying failed messages", "campaign_id", id, "failed_count", len(failedRecipients))
@@ -670,7 +670,7 @@ func (a *App) RetryFailed(r *fastglue.Request) error {
 
 	if err := a.Queue.EnqueueRecipients(r.RequestCtx, jobs); err != nil {
 		a.Log.Error("Failed to enqueue recipients for retry", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to queue recipients", nil, "")
+		return a.sendError(r, internalError("Failed to queue recipients", err))
 	}
 
 	a.Log.Info("Failed recipients enqueued for retry", "campaign_id", id, "count", len(jobs))
@@ -729,7 +729,7 @@ func (a *App) ImportRecipients(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&recipients).Error; err != nil {
 		a.Log.Error("Failed to add recipients", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to add recipients", nil, "")
+		return a.sendError(r, internalError("Failed to add recipients", err))
 	}
 
 	// Update total recipients count
@@ -784,7 +784,7 @@ func (a *App) GetCampaignRecipients(r *fastglue.Request) error {
 	var recipients []models.BulkMessageRecipient
 	if err := a.DB.Where("campaign_id = ?", id).Order("created_at ASC").Find(&recipients).Error; err != nil {
 		a.Log.Error("Failed to list recipients", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list recipients", nil, "")
+		return a.sendError(r, internalError("Failed to list recipients", err))
 	}
 
 	if a.ShouldMaskPhoneNumbers(orgID) {
@@ -839,7 +839,7 @@ func (a *App) DeleteCampaignRecipient(r *fastglue.Request) error {
 	result := a.DB.Where("id = ? AND campaign_id = ?", recipientUUID, campaignUUID).Delete(&models.BulkMessageRecipient{})
 	if result.Error != nil {
 		a.Log.Error("Failed to delete recipient", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete recipient", nil, "")
+		return a.sendError(r, internalError("Failed to delete recipient", err))
 	}
 
 	if result.RowsAffected == 0 {
@@ -921,7 +921,7 @@ func (a *App) UploadCampaignMedia(r *fastglue.Request) error {
 	data, err := io.ReadAll(io.LimitReader(file, maxMediaSize+1))
 	if err != nil {
 		a.Log.Error("Failed to read file", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file", nil, "")
+		return a.sendError(r, internalError("Failed to read file", err))
 	}
 	if len(data) > maxMediaSize {
 		return a.sendError(r, invalidRequest("File too large. Maximum size is 16MB"))
@@ -951,7 +951,7 @@ func (a *App) UploadCampaignMedia(r *fastglue.Request) error {
 	mediaID, err := a.WhatsApp.UploadMedia(ctx, waAccount, data, mimeType, fileHeader.Filename)
 	if err != nil {
 		a.Log.Error("Failed to upload media to WhatsApp", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to upload media to WhatsApp", nil, "")
+		return a.sendError(r, internalError("Failed to upload media to WhatsApp", err))
 	}
 
 	// Save file locally for preview
@@ -970,7 +970,7 @@ func (a *App) UploadCampaignMedia(r *fastglue.Request) error {
 	}
 	if err := a.DB.Model(&campaign).Updates(updates).Error; err != nil {
 		a.Log.Error("Failed to update campaign with media info", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save media info", nil, "")
+		return a.sendError(r, internalError("Failed to save media info", err))
 	}
 
 	a.Log.Info("Campaign media uploaded", "campaign_id", campaignUUID, "media_id", mediaID, "filename", fileHeader.Filename, "local_path", localPath)
@@ -1044,7 +1044,7 @@ func (a *App) ServeCampaignMedia(r *fastglue.Request) error {
 	baseDir, err := filepath.Abs(a.getMediaStoragePath())
 	if err != nil {
 		a.Log.Error("Storage configuration error", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Storage configuration error", nil, "")
+		return a.sendError(r, internalError("Storage configuration error", err))
 	}
 	fullPath, err := filepath.Abs(filepath.Join(baseDir, filePath))
 	if err != nil || !strings.HasPrefix(fullPath, baseDir+string(os.PathSeparator)) {
@@ -1064,7 +1064,7 @@ func (a *App) ServeCampaignMedia(r *fastglue.Request) error {
 	data, err := os.ReadFile(fullPath)
 	if err != nil {
 		a.Log.Error("Failed to read media file", "path", fullPath, "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file", nil, "")
+		return a.sendError(r, internalError("Failed to read file", err))
 	}
 
 	// Use stored mime type or determine from extension

@@ -125,7 +125,7 @@ func (a *App) ListCustomActions(r *fastglue.Request) error {
 	if err := pg.Apply(query.Order("display_order ASC, created_at DESC")).
 		Find(&actions).Error; err != nil {
 		a.Log.Error("Failed to list custom actions", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list custom actions", nil, "")
+		return a.sendError(r, internalError("Failed to list custom actions", err))
 	}
 
 	result := make([]CustomActionResponse, len(actions))
@@ -196,7 +196,7 @@ func (a *App) CreateCustomAction(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&action).Error; err != nil {
 		a.Log.Error("Failed to create custom action", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create custom action", nil, "")
+		return a.sendError(r, internalError("Failed to create custom action", err))
 	}
 
 	a.Log.Info("Custom action created", "action_id", action.ID, "name", action.Name, "type", action.ActionType)
@@ -255,7 +255,7 @@ func (a *App) UpdateCustomAction(r *fastglue.Request) error {
 
 	if err := a.DB.Model(action).Updates(updates).Error; err != nil {
 		a.Log.Error("Failed to update custom action", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update custom action", nil, "")
+		return a.sendError(r, internalError("Failed to update custom action", err))
 	}
 
 	// Reload to get updated values
@@ -280,7 +280,7 @@ func (a *App) DeleteCustomAction(r *fastglue.Request) error {
 	result := a.DB.Where("id = ? AND organization_id = ?", actionID, orgID).Delete(&models.CustomAction{})
 	if result.Error != nil {
 		a.Log.Error("Failed to delete custom action", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete custom action", nil, "")
+		return a.sendError(r, internalError("Failed to delete custom action", err))
 	}
 	if result.RowsAffected == 0 {
 		return a.sendError(r, notFound("Custom action"))

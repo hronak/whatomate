@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/audit"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -476,7 +475,7 @@ func (a *App) UpdateChatbotSettings(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&settings).Error; err != nil {
 		a.Log.Error("Failed to save settings", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save settings", nil, "")
+		return a.sendError(r, internalError("Failed to save settings", err))
 	}
 
 	// GORM skips false (zero-value) bool fields on INSERT when the column has
@@ -497,7 +496,7 @@ func (a *App) UpdateChatbotSettings(r *fastglue.Request) error {
 		if len(zeroOverrides) > 0 {
 			if err := a.DB.Model(&settings).Updates(zeroOverrides).Error; err != nil {
 				a.Log.Error("Failed to save settings", "error", err)
-				return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save settings", nil, "")
+				return a.sendError(r, internalError("Failed to save settings", err))
 			}
 		}
 	}
@@ -565,7 +564,7 @@ func (a *App) ListKeywordRules(r *fastglue.Request) error {
 	if err := pg.Apply(query.Preload("CreatedBy").Preload("UpdatedBy").Order("priority DESC, created_at DESC")).
 		Find(&rules).Error; err != nil {
 		a.Log.Error("Failed to fetch keyword rules", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch keyword rules", nil, "")
+		return a.sendError(r, internalError("Failed to fetch keyword rules", err))
 	}
 
 	response := make([]KeywordRuleResponse, len(rules))
@@ -651,7 +650,7 @@ func (a *App) CreateKeywordRule(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&rule).Error; err != nil {
 		a.Log.Error("Failed to create keyword rule", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create keyword rule", nil, "")
+		return a.sendError(r, internalError("Failed to create keyword rule", err))
 	}
 
 	// Invalidate cache
@@ -771,7 +770,7 @@ func (a *App) UpdateKeywordRule(r *fastglue.Request) error {
 
 	if err := a.DB.Save(rule).Error; err != nil {
 		a.Log.Error("Failed to update keyword rule", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update keyword rule", nil, "")
+		return a.sendError(r, internalError("Failed to update keyword rule", err))
 	}
 
 	// Invalidate cache
@@ -808,7 +807,7 @@ func (a *App) DeleteKeywordRule(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(&rule).Error; err != nil {
 		a.Log.Error("Failed to delete keyword rule", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete keyword rule", nil, "")
+		return a.sendError(r, internalError("Failed to delete keyword rule", err))
 	}
 
 	// Invalidate cache
@@ -850,7 +849,7 @@ func (a *App) ListChatbotFlows(r *fastglue.Request) error {
 	if err := pg.Apply(query.Order("created_at DESC")).
 		Find(&flows).Error; err != nil {
 		a.Log.Error("Failed to fetch flows", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch flows", nil, "")
+		return a.sendError(r, internalError("Failed to fetch flows", err))
 	}
 
 	response := make([]ChatbotFlowResponse, len(flows))
@@ -919,7 +918,7 @@ func (a *App) CreateChatbotFlow(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&flow).Error; err != nil {
 		a.Log.Error("Failed to create flow", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create flow", nil, "")
+		return a.sendError(r, internalError("Failed to create flow", err))
 	}
 
 	// Invalidate cache
@@ -1034,7 +1033,7 @@ func (a *App) UpdateChatbotFlow(r *fastglue.Request) error {
 
 	if err := a.DB.Save(flow).Error; err != nil {
 		a.Log.Error("Failed to update flow", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update flow", nil, "")
+		return a.sendError(r, internalError("Failed to update flow", err))
 	}
 
 	a.InvalidateChatbotFlowsCache(orgID)
@@ -1074,7 +1073,7 @@ func (a *App) DeleteChatbotFlow(r *fastglue.Request) error {
 	if err := tx.Where("flow_id = ?", id).Delete(&models.ChatbotFlowStep{}).Error; err != nil {
 		tx.Rollback()
 		a.Log.Error("Failed to delete flow steps", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete flow steps", nil, "")
+		return a.sendError(r, internalError("Failed to delete flow steps", err))
 	}
 
 	// Delete flow
@@ -1082,7 +1081,7 @@ func (a *App) DeleteChatbotFlow(r *fastglue.Request) error {
 	if result.Error != nil {
 		tx.Rollback()
 		a.Log.Error("Failed to delete flow", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete flow", nil, "")
+		return a.sendError(r, internalError("Failed to delete flow", err))
 	}
 	if result.RowsAffected == 0 {
 		tx.Rollback()
@@ -1127,7 +1126,7 @@ func (a *App) ListAIContexts(r *fastglue.Request) error {
 	if err := pg.Apply(query.Preload("CreatedBy").Preload("UpdatedBy").Order("priority DESC, created_at DESC")).
 		Find(&contexts).Error; err != nil {
 		a.Log.Error("Failed to fetch AI contexts", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch AI contexts", nil, "")
+		return a.sendError(r, internalError("Failed to fetch AI contexts", err))
 	}
 
 	response := make([]AIContextResponse, len(contexts))
@@ -1200,7 +1199,7 @@ func (a *App) CreateAIContext(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&ctx).Error; err != nil {
 		a.Log.Error("Failed to create AI context", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create AI context", nil, "")
+		return a.sendError(r, internalError("Failed to create AI context", err))
 	}
 
 	// Invalidate cache
@@ -1314,7 +1313,7 @@ func (a *App) UpdateAIContext(r *fastglue.Request) error {
 
 	if err := a.DB.Save(aiCtx).Error; err != nil {
 		a.Log.Error("Failed to update AI context", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update AI context", nil, "")
+		return a.sendError(r, internalError("Failed to update AI context", err))
 	}
 
 	// Invalidate cache
@@ -1347,7 +1346,7 @@ func (a *App) DeleteAIContext(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(&aiCtx).Error; err != nil {
 		a.Log.Error("Failed to delete AI context", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete AI context", nil, "")
+		return a.sendError(r, internalError("Failed to delete AI context", err))
 	}
 
 	// Invalidate cache
@@ -1380,7 +1379,7 @@ func (a *App) ListChatbotSessions(r *fastglue.Request) error {
 	var sessions []models.ChatbotSession
 	if err := query.Limit(100).Find(&sessions).Error; err != nil {
 		a.Log.Error("Failed to fetch sessions", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch sessions", nil, "")
+		return a.sendError(r, internalError("Failed to fetch sessions", err))
 	}
 
 	return r.SendEnvelope(map[string]any{

@@ -81,7 +81,7 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 	var callLogs []models.CallLog
 	if err := pg.Apply(query).Find(&callLogs).Error; err != nil {
 		a.Log.Error("Failed to fetch call logs", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch call logs", nil, "")
+		return a.sendError(r, internalError("Failed to fetch call logs", err))
 	}
 
 	// Mask phone numbers if enabled for this organization
@@ -178,7 +178,7 @@ func (a *App) GetCallRecording(r *fastglue.Request) error {
 	url, err := a.S3Client.GetPresignedURL(r.RequestCtx, callLog.RecordingS3Key, 15*time.Minute)
 	if err != nil {
 		a.Log.Error("Failed to generate presigned URL", "error", err, "call_log_id", logID)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate recording URL", nil, "")
+		return a.sendError(r, internalError("Failed to generate recording URL", err))
 	}
 
 	return r.SendEnvelope(map[string]any{

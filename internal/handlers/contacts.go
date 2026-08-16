@@ -15,7 +15,6 @@ import (
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/internal/privacy"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"gorm.io/gorm"
 )
@@ -139,7 +138,7 @@ func (a *App) ListContacts(r *fastglue.Request) error {
 
 	if err := query.Offset(pg.Offset).Limit(pg.Limit).Find(&contacts).Error; err != nil {
 		a.Log.Error("Failed to list contacts", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list contacts", nil, "")
+		return a.sendError(r, internalError("Failed to list contacts", err))
 	}
 
 	// Check if phone masking is enabled
@@ -317,7 +316,7 @@ func (a *App) GetMessages(r *fastglue.Request) error {
 		var messages []models.Message
 		if err := msgQuery.Preload("ReplyToMessage").Order("created_at DESC").Limit(limit).Find(&messages).Error; err != nil {
 			a.Log.Error("Failed to list messages", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list messages", nil, "")
+			return a.sendError(r, internalError("Failed to list messages", err))
 		}
 		// Reverse to get chronological order
 		for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
@@ -353,7 +352,7 @@ func (a *App) GetMessages(r *fastglue.Request) error {
 	var messages []models.Message
 	if err := msgQuery.Preload("ReplyToMessage").Order("created_at ASC").Offset(offset).Limit(queryLimit).Find(&messages).Error; err != nil {
 		a.Log.Error("Failed to list messages", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list messages", nil, "")
+		return a.sendError(r, internalError("Failed to list messages", err))
 	}
 
 	// Mark messages as read
@@ -642,9 +641,7 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 
 		if req.Interactive.Type == "voice_call" {
 			if !account.BusinessCallingEnabled {
-				return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
-					"This WhatsApp account is not enrolled in the Business Calling API. Enable it under Settings → Accounts before sending Call buttons.",
-					nil, "")
+				return a.sendError(r, invalidRequest("This WhatsApp account is not enrolled in the Business Calling API. Enable it under Settings → Accounts before sending Call buttons."))
 			}
 			msgReq.DisplayText = req.Interactive.DisplayText
 			msgReq.TTLMinutes = req.Interactive.TTLMinutes
@@ -668,7 +665,7 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 	message, err := a.SendOutgoingMessage(ctx, msgReq, opts)
 	if err != nil {
 		a.Log.Error("Failed to send message", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to send message", nil, "")
+		return a.sendError(r, internalError("Failed to send message", err))
 	}
 
 	// Build response
@@ -800,7 +797,7 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 	fileData, err := io.ReadAll(file)
 	if err != nil {
 		a.Log.Error("Failed to read file data", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file data", nil, "")
+		return a.sendError(r, internalError("Failed to read file data", err))
 	}
 
 	// Get MIME type
@@ -831,7 +828,7 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 	localPath, err := a.saveMediaLocally(fileData, mimeType, fileHeader.Filename)
 	if err != nil {
 		a.Log.Error("Failed to save media locally", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save media", nil, "")
+		return a.sendError(r, internalError("Failed to save media", err))
 	}
 
 	// Build and send via unified message sender
@@ -853,7 +850,7 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 	message, err := a.SendOutgoingMessage(ctx, msgReq, opts)
 	if err != nil {
 		a.Log.Error("Failed to send message", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to send message", nil, "")
+		return a.sendError(r, internalError("Failed to send message", err))
 	}
 
 	response := MessageResponse{
@@ -1027,7 +1024,7 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 	metadata["reactions"] = newReactions
 	if err := a.DB.Model(&message).Update("metadata", metadata).Error; err != nil {
 		a.Log.Error("Failed to update message reactions", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update reaction", nil, "")
+		return a.sendError(r, internalError("Failed to update reaction", err))
 	}
 
 	// Send reaction to WhatsApp API
@@ -1109,7 +1106,7 @@ func (a *App) AssignContact(r *fastglue.Request) error {
 	// Update contact assignment
 	if err := a.DB.Model(contact).Update("assigned_user_id", req.UserID).Error; err != nil {
 		a.Log.Error("Failed to assign contact", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to assign contact", nil, "")
+		return a.sendError(r, internalError("Failed to assign contact", err))
 	}
 
 	return r.SendEnvelope(map[string]any{
@@ -1260,7 +1257,7 @@ func (a *App) UpdateContactTags(r *fastglue.Request) error {
 	// Update contact tags
 	if err := a.DB.Model(contact).Update("tags", tagsArray).Error; err != nil {
 		a.Log.Error("Failed to update contact tags", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update contact tags", nil, "")
+		return a.sendError(r, internalError("Failed to update contact tags", err))
 	}
 
 	// Reload contact to get updated tags
@@ -1379,7 +1376,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&contact).Error; err != nil {
 		a.Log.Error("Failed to create contact", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create contact", nil, "")
+		return a.sendError(r, internalError("Failed to create contact", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -1464,7 +1461,7 @@ func (a *App) UpdateContact(r *fastglue.Request) error {
 
 	if err := a.DB.Model(contact).Updates(updates).Error; err != nil {
 		a.Log.Error("Failed to update contact", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update contact", nil, "")
+		return a.sendError(r, internalError("Failed to update contact", err))
 	}
 
 	// Reload contact
@@ -1502,7 +1499,7 @@ func (a *App) DeleteContact(r *fastglue.Request) error {
 	// Soft delete the contact
 	if err := a.DB.Delete(contact).Error; err != nil {
 		a.Log.Error("Failed to delete contact", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete contact", nil, "")
+		return a.sendError(r, internalError("Failed to delete contact", err))
 	}
 
 	a.logAudit(orgID, userID,

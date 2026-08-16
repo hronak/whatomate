@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -73,7 +72,7 @@ func (a *App) ListAPIKeys(r *fastglue.Request) error {
 	if err := pg.Apply(query.Order("created_at DESC")).
 		Find(&apiKeys).Error; err != nil {
 		a.Log.Error("Failed to list API keys", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list API keys", nil, "")
+		return a.sendError(r, internalError("Failed to list API keys", err))
 	}
 
 	response := make([]APIKeyResponse, len(apiKeys))
@@ -150,7 +149,7 @@ func (a *App) UpdateAPIKey(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&apiKey).Error; err != nil {
 		a.Log.Error("Failed to update API key", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update API key", nil, "")
+		return a.sendError(r, internalError("Failed to update API key", err))
 	}
 
 	return r.SendEnvelope(APIKeyResponse{
@@ -195,14 +194,14 @@ func (a *App) CreateAPIKey(r *fastglue.Request) error {
 	fullKey, err := generateAPIKey()
 	if err != nil {
 		a.Log.Error("Failed to generate API key", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate API key", nil, "")
+		return a.sendError(r, internalError("Failed to generate API key", err))
 	}
 
 	// Hash the key for storage
 	hashedKey, err := bcrypt.GenerateFromPassword([]byte(fullKey), bcrypt.DefaultCost)
 	if err != nil {
 		a.Log.Error("Failed to hash API key", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create API key", nil, "")
+		return a.sendError(r, internalError("Failed to create API key", err))
 	}
 
 	// Extract prefix (first 16 chars after "whm_")
@@ -220,7 +219,7 @@ func (a *App) CreateAPIKey(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&apiKey).Error; err != nil {
 		a.Log.Error("Failed to create API key", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create API key", nil, "")
+		return a.sendError(r, internalError("Failed to create API key", err))
 	}
 
 	// Return full key only on creation
@@ -249,7 +248,7 @@ func (a *App) DeleteAPIKey(r *fastglue.Request) error {
 	result := a.DB.Where("id = ? AND organization_id = ?", id, orgID).Delete(&models.APIKey{})
 	if result.Error != nil {
 		a.Log.Error("Failed to delete API key", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete API key", nil, "")
+		return a.sendError(r, internalError("Failed to delete API key", err))
 	}
 	if result.RowsAffected == 0 {
 		return a.sendError(r, notFound("API key"))

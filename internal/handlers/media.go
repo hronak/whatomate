@@ -184,7 +184,7 @@ func (a *App) ServeMedia(r *fastglue.Request) error {
 	baseDir, err := filepath.Abs(a.getMediaStoragePath())
 	if err != nil {
 		a.Log.Error("Storage configuration error", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Storage configuration error", nil, "")
+		return a.sendError(r, internalError("Storage configuration error", err))
 	}
 	fullPath, err := filepath.Abs(filepath.Join(baseDir, filePath))
 	if err != nil || !strings.HasPrefix(fullPath, baseDir+string(os.PathSeparator)) {
@@ -204,7 +204,7 @@ func (a *App) ServeMedia(r *fastglue.Request) error {
 	data, err := os.ReadFile(fullPath)
 	if err != nil {
 		a.Log.Error("Failed to read media file", "path", fullPath, "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file", nil, "")
+		return a.sendError(r, internalError("Failed to read file", err))
 	}
 
 	// Determine content type from extension

@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -136,7 +135,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 		// All accounts for the organization
 		if err := a.DB.Where("organization_id = ?", orgID).Find(&accounts).Error; err != nil {
 			a.Log.Error("Failed to fetch accounts", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch accounts", nil, "")
+			return a.sendError(r, internalError("Failed to fetch accounts", err))
 		}
 	}
 
@@ -361,7 +360,7 @@ func (a *App) ListMetaAccountsForAnalytics(r *fastglue.Request) error {
 	var accounts []models.WhatsAppAccount
 	if err := a.DB.Select("id, name, phone_id").Where("organization_id = ?", orgID).Find(&accounts).Error; err != nil {
 		a.Log.Error("Failed to fetch accounts", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to fetch accounts", nil, "")
+		return a.sendError(r, internalError("Failed to fetch accounts", err))
 	}
 
 	result := make([]AccountInfo, 0, len(accounts))

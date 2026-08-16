@@ -76,7 +76,7 @@ func (a *App) ListTeams(r *fastglue.Request) error {
 			Preload("Members").Preload("Members.User").
 			Order("name ASC")).Find(&teams).Error; err != nil {
 			a.Log.Error("Failed to list teams", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list teams", nil, "")
+			return a.sendError(r, internalError("Failed to list teams", err))
 		}
 	} else {
 		// Users only see teams they belong to
@@ -90,7 +90,7 @@ func (a *App) ListTeams(r *fastglue.Request) error {
 			Preload("Members").Preload("Members.User").
 			Order("teams.name ASC")).Find(&teams).Error; err != nil {
 			a.Log.Error("Failed to list teams", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list teams", nil, "")
+			return a.sendError(r, internalError("Failed to list teams", err))
 		}
 	}
 
@@ -178,7 +178,7 @@ func (a *App) CreateTeam(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&team).Error; err != nil {
 		a.Log.Error("Failed to create team", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create team", nil, "")
+		return a.sendError(r, internalError("Failed to create team", err))
 	}
 
 	// Preload relations for response
@@ -247,7 +247,7 @@ func (a *App) UpdateTeam(r *fastglue.Request) error {
 
 	if err := a.DB.Save(&team).Error; err != nil {
 		a.Log.Error("Failed to update team", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update team", nil, "")
+		return a.sendError(r, internalError("Failed to update team", err))
 	}
 
 	if a.Assigner != nil {
@@ -282,14 +282,14 @@ func (a *App) DeleteTeam(r *fastglue.Request) error {
 	// Delete team members first
 	if err := a.DB.Where("team_id = ?", teamID).Delete(&models.TeamMember{}).Error; err != nil {
 		a.Log.Error("Failed to delete team members", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete team", nil, "")
+		return a.sendError(r, internalError("Failed to delete team", err))
 	}
 
 	// Delete team
 	result := a.DB.Where("id = ? AND organization_id = ?", teamID, orgID).Delete(&models.Team{})
 	if result.Error != nil {
 		a.Log.Error("Failed to delete team", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete team", nil, "")
+		return a.sendError(r, internalError("Failed to delete team", err))
 	}
 
 	if result.RowsAffected == 0 {
@@ -435,7 +435,7 @@ func (a *App) AddTeamMember(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&member).Error; err != nil {
 		a.Log.Error("Failed to add team member", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to add member", nil, "")
+		return a.sendError(r, internalError("Failed to add member", err))
 	}
 
 	if a.Assigner != nil {
@@ -502,7 +502,7 @@ func (a *App) RemoveTeamMember(r *fastglue.Request) error {
 	result := a.DB.Where("team_id = ? AND user_id = ?", teamID, memberUserID).Delete(&models.TeamMember{})
 	if result.Error != nil {
 		a.Log.Error("Failed to remove team member", "error", result.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to remove member", nil, "")
+		return a.sendError(r, internalError("Failed to remove member", err))
 	}
 
 	if result.RowsAffected == 0 {

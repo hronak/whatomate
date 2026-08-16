@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -142,7 +141,7 @@ func (a *App) ListWebhooks(r *fastglue.Request) error {
 	if err := pg.Apply(query.Model(&models.Webhook{}).Order("created_at DESC")).
 		Find(&webhooks).Error; err != nil {
 		a.Log.Error("Failed to list webhooks", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list webhooks", nil, "")
+		return a.sendError(r, internalError("Failed to list webhooks", err))
 	}
 
 	result := make([]WebhookResponse, len(webhooks))
@@ -227,7 +226,7 @@ func (a *App) CreateWebhook(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&webhook).Error; err != nil {
 		a.Log.Error("Failed to create webhook", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create webhook", nil, "")
+		return a.sendError(r, internalError("Failed to create webhook", err))
 	}
 
 	// Invalidate cache
@@ -294,7 +293,7 @@ func (a *App) UpdateWebhook(r *fastglue.Request) error {
 
 	if err := a.DB.Save(webhook).Error; err != nil {
 		a.Log.Error("Failed to update webhook", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update webhook", nil, "")
+		return a.sendError(r, internalError("Failed to update webhook", err))
 	}
 
 	// Invalidate cache
@@ -325,7 +324,7 @@ func (a *App) DeleteWebhook(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(&webhook).Error; err != nil {
 		a.Log.Error("Failed to delete webhook", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete webhook", nil, "")
+		return a.sendError(r, internalError("Failed to delete webhook", err))
 	}
 
 	// Invalidate cache
@@ -370,7 +369,7 @@ func (a *App) TestWebhook(r *fastglue.Request) error {
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		a.Log.Error("Failed to create test payload", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create test payload", nil, "")
+		return a.sendError(r, internalError("Failed to create test payload", err))
 	}
 
 	// Use timeout context for test webhook request
@@ -379,7 +378,7 @@ func (a *App) TestWebhook(r *fastglue.Request) error {
 
 	if err := a.sendWebhookRequest(ctx, *webhook, jsonData); err != nil {
 		a.Log.Error("Webhook test failed", "error", err, "webhook_id", webhook.ID)
-		return r.SendErrorEnvelope(fasthttp.StatusBadGateway, "Webhook test failed", nil, "")
+		return a.sendError(r, internalError("Webhook test failed", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"message": "Test webhook sent successfully"})

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -9,14 +8,14 @@ import (
 
 // MarkMessageRead is not yet implemented and always returns 501.
 func (a *App) MarkMessageRead(r *fastglue.Request) error {
-	return r.SendErrorEnvelope(fasthttp.StatusNotImplemented, "Not implemented yet", nil, "")
+	return a.sendError(r, invalidRequest("Not implemented yet"))
 }
 
 // GetMessageAnalytics is not yet implemented and always returns 501.
 func (a *App) GetMessageAnalytics(r *fastglue.Request) error {
-	return r.SendErrorEnvelope(fasthttp.StatusNotImplemented, "Not implemented yet", nil, "")
+	return a.sendError(r, invalidRequest("Not implemented yet"))
 }
 
 func (a *App) GetChatbotAnalytics(r *fastglue.Request) error {
-	return r.SendErrorEnvelope(fasthttp.StatusNotImplemented, "Not implemented yet", nil, "")
+	return a.sendError(r, invalidRequest("Not implemented yet"))
 }

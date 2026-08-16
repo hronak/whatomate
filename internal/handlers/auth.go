@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/shridarpatil/whatomate/internal/middleware"
 	"github.com/shridarpatil/whatomate/internal/models"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -90,13 +89,13 @@ func (a *App) Login(r *fastglue.Request) error {
 	accessToken, err := a.generateAccessToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate access token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	refreshToken, err := a.generateRefreshToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate refresh token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	a.setAuthCookies(r, accessToken, refreshToken)
@@ -129,7 +128,7 @@ func (a *App) Register(r *fastglue.Request) error {
 	if err := a.DB.Where("organization_id = ? AND is_default = ?", req.OrganizationID, true).First(&defaultRole).Error; err != nil {
 		if err := a.DB.Where("organization_id = ? AND name = ? AND is_system = ?", req.OrganizationID, "agent", true).First(&defaultRole).Error; err != nil {
 			a.Log.Error("Failed to find default role", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to find default role", nil, "")
+			return a.sendError(r, internalError("Failed to find default role", err))
 		}
 	}
 
@@ -164,7 +163,7 @@ func (a *App) Register(r *fastglue.Request) error {
 		}
 		if err := a.DB.Create(&userOrg).Error; err != nil {
 			a.Log.Error("Failed to add existing user to organization", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to join organization", nil, "")
+			return a.sendError(r, internalError("Failed to join organization", err))
 		}
 
 		a.Log.Info("Existing user joined organization", "user_id", existingUser.ID, "org_id", req.OrganizationID)
@@ -177,12 +176,12 @@ func (a *App) Register(r *fastglue.Request) error {
 		accessToken, err := a.generateAccessToken(&existingUser)
 		if err != nil {
 			a.Log.Error("Failed to generate access token", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+			return a.sendError(r, internalError("Failed to generate token", err))
 		}
 		refreshToken, err := a.generateRefreshToken(&existingUser)
 		if err != nil {
 			a.Log.Error("Failed to generate refresh token", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+			return a.sendError(r, internalError("Failed to generate token", err))
 		}
 
 		a.setAuthCookies(r, accessToken, refreshToken)
@@ -200,13 +199,13 @@ func (a *App) Register(r *fastglue.Request) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		a.Log.Error("Failed to hash password", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	tx := a.DB.Begin()
 	if tx.Error != nil {
 		a.Log.Error("Failed to begin transaction", "error", tx.Error)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	user := models.User{
@@ -221,7 +220,7 @@ func (a *App) Register(r *fastglue.Request) error {
 	if err := tx.Create(&user).Error; err != nil {
 		tx.Rollback()
 		a.Log.Error("Failed to create user", "error", err, "email", req.Email, "org_id", req.OrganizationID)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	userOrg := models.UserOrganization{
@@ -233,12 +232,12 @@ func (a *App) Register(r *fastglue.Request) error {
 	if err := tx.Create(&userOrg).Error; err != nil {
 		tx.Rollback()
 		a.Log.Error("Failed to create user organization entry", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		a.Log.Error("Failed to commit transaction", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	a.Log.Info("Registration completed", "user_id", user.ID, "org_id", req.OrganizationID)
@@ -248,12 +247,12 @@ func (a *App) Register(r *fastglue.Request) error {
 	accessToken, err := a.generateAccessToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate access token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 	refreshToken, err := a.generateRefreshToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate refresh token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	a.setAuthCookies(r, accessToken, refreshToken)
@@ -317,12 +316,12 @@ func (a *App) RefreshToken(r *fastglue.Request) error {
 	accessToken, err := a.generateAccessToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate access token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 	newRefreshToken, err := a.generateRefreshToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate refresh token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	a.setAuthCookies(r, accessToken, newRefreshToken)
@@ -464,13 +463,13 @@ func (a *App) SwitchOrg(r *fastglue.Request) error {
 	accessToken, err := a.generateAccessToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate access token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	refreshToken, err := a.generateRefreshToken(&user)
 	if err != nil {
 		a.Log.Error("Failed to generate refresh token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	a.setAuthCookies(r, accessToken, refreshToken)
@@ -564,7 +563,7 @@ func (a *App) GetWSToken(r *fastglue.Request) error {
 	signed, err := token.SignedString([]byte(a.Config.JWT.Secret))
 	if err != nil {
 		a.Log.Error("Failed to generate WS token", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate token", nil, "")
+		return a.sendError(r, internalError("Failed to generate token", err))
 	}
 
 	return r.SendEnvelope(map[string]string{"token": signed})

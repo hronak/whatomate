@@ -9,7 +9,6 @@ import (
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/internal/templateutil"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -94,7 +93,7 @@ func (a *App) ListTemplates(r *fastglue.Request) error {
 	if err := pg.Apply(query.Order("created_at DESC")).
 		Find(&templates).Error; err != nil {
 		a.Log.Error("Failed to list templates", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list templates", nil, "")
+		return a.sendError(r, internalError("Failed to list templates", err))
 	}
 
 	response := make([]TemplateResponse, len(templates))
@@ -186,7 +185,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&template).Error; err != nil {
 		a.Log.Error("Failed to create template", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create template", nil, "")
+		return a.sendError(r, internalError("Failed to create template", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -307,7 +306,7 @@ func (a *App) UpdateTemplate(r *fastglue.Request) error {
 
 	if err := a.DB.Save(template).Error; err != nil {
 		a.Log.Error("Failed to update template", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update template", nil, "")
+		return a.sendError(r, internalError("Failed to update template", err))
 	}
 
 	// Build per-button changes
@@ -350,7 +349,7 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(template).Error; err != nil {
 		a.Log.Error("Failed to delete template", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete template", nil, "")
+		return a.sendError(r, internalError("Failed to delete template", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -385,9 +384,8 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 
 	// Validate media header has a handle uploaded
 	if (template.HeaderType == "IMAGE" || template.HeaderType == "VIDEO" || template.HeaderType == "DOCUMENT") && template.HeaderContent == "" {
-		return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
-			fmt.Sprintf("Template has %s header but no media file has been uploaded. Please upload a sample %s first.",
-				template.HeaderType, strings.ToLower(template.HeaderType)), nil, "")
+		return a.sendError(r, invalidRequest(fmt.Sprintf("Template has %s header but no media file has been uploaded. Please upload a sample %s first.",
+			template.HeaderType, strings.ToLower(template.HeaderType))))
 	}
 
 	// Get the WhatsApp account
@@ -403,7 +401,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 	metaTemplateID, submitErr := a.submitTemplateToMeta(account, template)
 	if submitErr != nil {
 		a.Log.Error("Failed to submit template to Meta", "error", submitErr)
-		return r.SendErrorEnvelope(fasthttp.StatusBadGateway, "Failed to submit template to Meta: "+submitErr.Error(), nil, "")
+		return a.sendError(r, internalError("Failed to submit template to Meta: "+submitErr.Error(), submitErr))
 	}
 	template.MetaTemplateID = metaTemplateID
 
@@ -417,7 +415,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 
 	if err := a.DB.Save(template).Error; err != nil {
 		a.Log.Error("Failed to update template after submission", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Template submitted but failed to update local record", nil, "")
+		return a.sendError(r, internalError("Template submitted but failed to update local record", err))
 	}
 
 	a.logAudit(orgID, userID,
@@ -486,7 +484,7 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 	templates, err := a.fetchTemplatesFromMeta(account)
 	if err != nil {
 		a.Log.Error("Failed to fetch templates from Meta", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusBadGateway, "Failed to fetch templates from Meta", nil, "")
+		return a.sendError(r, internalError("Failed to fetch templates from Meta", err))
 	}
 
 	// Sync to database
@@ -680,7 +678,7 @@ func (a *App) UploadTemplateMedia(r *fastglue.Request) error {
 	file, err := fileHeader.Open()
 	if err != nil {
 		a.Log.Error("Failed to open uploaded file", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to open uploaded file", nil, "")
+		return a.sendError(r, internalError("Failed to open uploaded file", err))
 	}
 	defer func() { _ = file.Close() }()
 
@@ -688,7 +686,7 @@ func (a *App) UploadTemplateMedia(r *fastglue.Request) error {
 	fileData := make([]byte, fileHeader.Size)
 	if _, err := file.Read(fileData); err != nil {
 		a.Log.Error("Failed to read file data", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to read file data", nil, "")
+		return a.sendError(r, internalError("Failed to read file data", err))
 	}
 
 	// Determine mime type from Content-Type header or filename
@@ -718,7 +716,7 @@ func (a *App) UploadTemplateMedia(r *fastglue.Request) error {
 	handle, err := a.WhatsApp.ResumableUpload(ctx, waAccount, fileData, mimeType, fileHeader.Filename)
 	if err != nil {
 		a.Log.Error("Failed to upload template media", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusBadGateway, "Failed to upload media to Meta", nil, "")
+		return a.sendError(r, internalError("Failed to upload media to Meta", err))
 	}
 
 	return r.SendEnvelope(map[string]any{

@@ -12,7 +12,6 @@ import (
 	"github.com/shridarpatil/whatomate/internal/crypto"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"github.com/shridarpatil/whatomate/pkg/whatsapp"
-	"github.com/valyala/fasthttp"
 	"github.com/zerodha/fastglue"
 )
 
@@ -71,7 +70,7 @@ func (a *App) ListAccounts(r *fastglue.Request) error {
 	var accounts []models.WhatsAppAccount
 	if err := a.DB.Where("organization_id = ?", orgID).Order("created_at DESC").Find(&accounts).Error; err != nil {
 		a.Log.Error("Failed to list accounts", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to list accounts", nil, "")
+		return a.sendError(r, internalError("Failed to list accounts", err))
 	}
 
 	// Convert to response format (hide sensitive data)
@@ -135,7 +134,7 @@ func (a *App) CreateAccount(r *fastglue.Request) error {
 
 	if err := a.encryptAccountSecrets(&account); err != nil {
 		a.Log.Error("Failed to encrypt account secrets", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	// If this is set as default, unset other defaults
@@ -152,7 +151,7 @@ func (a *App) CreateAccount(r *fastglue.Request) error {
 
 	if err := a.DB.Create(&account).Error; err != nil {
 		a.Log.Error("Failed to create account", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to create account", nil, "")
+		return a.sendError(r, internalError("Failed to create account", err))
 	}
 
 	a.DB.Preload("CreatedBy").Preload("UpdatedBy").First(&account, "id = ?", account.ID)
@@ -226,7 +225,7 @@ func (a *App) UpdateAccount(r *fastglue.Request) error {
 		enc, err := crypto.Encrypt(req.AccessToken, a.Config.App.EncryptionKey)
 		if err != nil {
 			a.Log.Error("Failed to encrypt access token", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update account", nil, "")
+			return a.sendError(r, internalError("Failed to update account", err))
 		}
 		account.AccessToken = enc
 		tokenChanged = true
@@ -235,7 +234,7 @@ func (a *App) UpdateAccount(r *fastglue.Request) error {
 		enc, err := crypto.Encrypt(req.AppSecret, a.Config.App.EncryptionKey)
 		if err != nil {
 			a.Log.Error("Failed to encrypt app secret", "error", err)
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update account", nil, "")
+			return a.sendError(r, internalError("Failed to update account", err))
 		}
 		account.AppSecret = enc
 		secretChanged = true
@@ -266,7 +265,7 @@ func (a *App) UpdateAccount(r *fastglue.Request) error {
 
 	if err := a.DB.Save(account).Error; err != nil {
 		a.Log.Error("Failed to update account", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update account", nil, "")
+		return a.sendError(r, internalError("Failed to update account", err))
 	}
 
 	// Invalidate cache
@@ -311,7 +310,7 @@ func (a *App) DeleteAccount(r *fastglue.Request) error {
 
 	if err := a.DB.Delete(account).Error; err != nil {
 		a.Log.Error("Failed to delete account", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to delete account", nil, "")
+		return a.sendError(r, internalError("Failed to delete account", err))
 	}
 
 	// Invalidate cache
@@ -549,7 +548,7 @@ func (a *App) ExchangeToken(r *fastglue.Request) error {
 	// 1. Resolve Meta credentials for this org
 	appID, appSecret, _, err := a.resolveMetaAppCreds(orgID)
 	if err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to resolve credentials", nil, "")
+		return a.sendError(r, internalError("Failed to resolve credentials", err))
 	}
 
 	// 2. Exchange code for user access token using WhatsApp service
@@ -596,7 +595,7 @@ func (a *App) ExchangeToken(r *fastglue.Request) error {
 
 	if err := a.DB.Save(account).Error; err != nil {
 		a.Log.Error("Failed to save account", "error", err)
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to save account", nil, "")
+		return a.sendError(r, internalError("Failed to save account", err))
 	}
 
 	// Invalidate cache
@@ -849,7 +848,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 		var err error
 		pin, err = generateNumericPIN(6)
 		if err != nil {
-			return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to generate secure random PIN", nil, "")
+			return a.sendError(r, internalError("Failed to generate secure random PIN", err))
 		}
 	}
 
@@ -878,7 +877,7 @@ func (a *App) RegisterPhoneNumber(r *fastglue.Request) error {
 	}
 
 	if err := a.DB.Save(account).Error; err != nil {
-		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to update account status", nil, "")
+		return a.sendError(r, internalError("Failed to update account status", err))
 	}
 
 	// Invalidate cache
