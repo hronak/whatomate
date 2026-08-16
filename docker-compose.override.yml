@@ -1,0 +1,31 @@
+services:
+  app:
+    image: golang:1.26.6-alpine
+    working_dir: /app
+    command: ["sh", "-c", "go run ./cmd/whatomate server -config config.toml -migrate"]
+    volumes:
+      - .:/app:rw
+    environment:
+      - BACKEND_PORT=8080
+      - WHATOMATE_DATABASE__HOST=db
+      - WHATOMATE_REDIS__HOST=redis
+
+  frontend:
+    image: node:24-alpine
+    working_dir: /app/frontend
+    command: ["sh", "-c", "npm install && npm run dev"]
+    volumes:
+      - .:/app:rw
+      - frontend-node-modules:/app/frontend/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - FRONTEND_PORT=3000
+      - BACKEND_HOST=app
+    depends_on:
+      - app
+    networks:
+      - whatomate
+
+volumes:
+  frontend-node-modules:
