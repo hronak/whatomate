@@ -2,8 +2,8 @@ name: Build develop image
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v*"
 
 jobs:
   develop-image:
