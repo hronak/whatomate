@@ -833,7 +833,9 @@ func (a *App) DeleteCampaignRecipient(r *fastglue.Request) error {
 
 	// Load recipient for audit before deleting
 	var recipient models.BulkMessageRecipient
-	a.DB.Where("id = ? AND campaign_id = ?", recipientUUID, campaignUUID).First(&recipient)
+	if err := a.DB.Where("id = ? AND campaign_id = ?", recipientUUID, campaignUUID).First(&recipient).Error; err != nil {
+		return a.sendError(r, notFound("Recipient"))
+	}
 
 	// Delete recipient
 	result := a.DB.Where("id = ? AND campaign_id = ?", recipientUUID, campaignUUID).Delete(&models.BulkMessageRecipient{})

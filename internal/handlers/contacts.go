@@ -934,17 +934,15 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 		return nil
 	}
 
-	messageIDStr := r.RequestCtx.UserValue("message_id").(string)
-
-	messageID, err := uuid.Parse(messageIDStr)
+	messageID, err := parsePathUUID(r, "message_id", "message")
 	if err != nil {
-		return a.sendError(r, invalidRequest("Invalid message ID"))
+		return nil
 	}
 
 	// Parse request body
 	var req SendReactionRequest
-	if err := json.Unmarshal(r.RequestCtx.PostBody(), &req); err != nil {
-		return a.sendError(r, invalidRequest("Invalid request body"))
+	if err := a.decodeRequest(r, &req); err != nil {
+		return nil
 	}
 
 	// Get contact (users without full read permission can only react to messages in their assigned contacts)
