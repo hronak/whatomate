@@ -306,7 +306,7 @@ func (a *App) calculateAgentSummaryStats(orgID, agentID uuid.UUID, start, end ti
 	}
 
 	// Calculate break time
-	summary.TotalBreakTimeMins, summary.BreakCount = a.calculateBreakTime(agentID, start, end)
+	summary.TotalBreakTimeMins, summary.BreakCount = a.calculateBreakTime(orgID, agentID, start, end)
 }
 
 func (a *App) calculateAgentStats(orgID, agentID uuid.UUID, start, end time.Time) AgentPerformanceStats {
@@ -352,12 +352,12 @@ func (a *App) calculateAgentStats(orgID, agentID uuid.UUID, start, end time.Time
 	stats.AvgResolutionMins = resolutionTimeResult.Avg
 
 	// Calculate break time from availability logs
-	stats.TotalBreakTimeMins, stats.BreakCount = a.calculateBreakTime(agentID, start, end)
+	stats.TotalBreakTimeMins, stats.BreakCount = a.calculateBreakTime(orgID, agentID, start, end)
 
 	// Check if currently on break and get break start time
 	if !stats.IsAvailable {
 		var currentBreak models.UserAvailabilityLog
-		if a.DB.Where("user_id = ? AND is_available = false AND ended_at IS NULL", agentID).
+		if a.DB.Where("organization_id = ? AND user_id = ? AND is_available = false AND ended_at IS NULL", orgID, agentID).
 			Order("started_at DESC").First(&currentBreak).Error == nil {
 			breakStart := currentBreak.StartedAt.Format(time.RFC3339)
 			stats.CurrentBreakStart = &breakStart
@@ -390,11 +390,11 @@ func (a *App) calculateAllAgentStats(orgID uuid.UUID, start, end time.Time) []Ag
 }
 
 // calculateBreakTime calculates total break time and count for an agent within a time period
-func (a *App) calculateBreakTime(agentID uuid.UUID, start, end time.Time) (totalMins float64, count int64) {
+func (a *App) calculateBreakTime(orgID, agentID uuid.UUID, start, end time.Time) (totalMins float64, count int64) {
 	// Get all "away" periods that overlap with the time range
 	var logs []models.UserAvailabilityLog
-	if err := a.DB.Where("user_id = ? AND is_available = false AND started_at <= ? AND (ended_at >= ? OR ended_at IS NULL)",
-		agentID, end, start).
+	if err := a.DB.Where("organization_id = ? AND user_id = ? AND is_available = false AND started_at <= ? AND (ended_at >= ? OR ended_at IS NULL)",
+		orgID, agentID, end, start).
 		Find(&logs).Error; err != nil {
 		a.Log.Error("Failed to fetch availability logs for break time calculation", "error", err, "agent_id", agentID)
 		return 0, 0
