@@ -131,6 +131,7 @@ export default defineConfig({
     drop: ['console', 'debugger']
   },
   server: {
+    host: '0.0.0.0',
     port: FRONTEND_PORT,
     // Fail rather than silently drifting to :3001 — a second frontend port is
     // how you end up testing one app while looking at another.
@@ -143,7 +144,7 @@ export default defineConfig({
         configure: reportBackendDown
       },
       '/ws': {
-        target: `ws://localhost:${BACKEND_PORT}`,
+        target: BACKEND_URL.replace('http://', 'ws://'),
         ws: true,
         configure: reportBackendDown
       }
