@@ -4,6 +4,7 @@ export interface CrudState<T, F> {
   items: Ref<T[]>;
   isLoading: Ref<boolean>;
   isSubmitting: Ref<boolean>;
+  error: Ref<string | null>;
   isDialogOpen: Ref<boolean>;
   editingItem: Ref<T | null>;
   deleteDialogOpen: Ref<boolean>;
@@ -16,6 +17,7 @@ export interface CrudState<T, F> {
   closeDialog: () => void;
   closeDeleteDialog: () => void;
   resetForm: () => void;
+  clearError: () => void;
 }
 
 /**
@@ -41,6 +43,7 @@ export function useCrudState<T, F extends Record<string, any>>(
   const items = ref<T[]>([]) as Ref<T[]>;
   const isLoading = ref(true);
   const isSubmitting = ref(false);
+  const error = ref<string | null>(null);
 
   // Dialog state
   const isDialogOpen = ref(false);
@@ -114,6 +117,7 @@ export function useCrudState<T, F extends Record<string, any>>(
     items,
     isLoading,
     isSubmitting,
+    error,
     isDialogOpen,
     editingItem,
     deleteDialogOpen,
@@ -127,5 +131,8 @@ export function useCrudState<T, F extends Record<string, any>>(
     closeDialog,
     closeDeleteDialog,
     resetForm,
+    clearError: () => {
+      error.value = null;
+    },
   };
 }
