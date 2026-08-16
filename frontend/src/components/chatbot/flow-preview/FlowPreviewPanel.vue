@@ -151,10 +151,10 @@ const localListPickerOpen = computed({
                a typed placeholder card instead so authors aren't confused. -->
           <div
             v-if="selectedStep && controlNodeInfo"
-            class="flex-1 flex items-center justify-center p-6 bg-[#efeae2] dark:bg-[#0b141a]"
+            class="flex-1 flex items-center justify-center p-6 bg-muted"
           >
             <div
-              class="max-w-sm w-full bg-white dark:bg-[#202c33] rounded-xl shadow-md p-6 text-center"
+              class="max-w-sm w-full bg-white dark:bg-secondary rounded-xl shadow-md p-6 text-center"
             >
               <div
                 class="inline-flex items-center justify-center size-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-3"
@@ -185,16 +185,16 @@ const localListPickerOpen = computed({
           <!-- WhatsApp Static Preview (for message / buttons / api_fetch / whatsapp_flow / transfer) -->
           <div
             v-else
-            class="flex-1 flex items-center justify-center p-4 bg-[#efeae2] dark:bg-[#0b141a] overflow-auto"
+            class="flex-1 flex items-center justify-center p-4 bg-muted overflow-auto"
           >
             <div v-if="selectedStep" class="w-full max-w-sm">
               <!-- Phone Frame -->
               <div
-                class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] relative"
+                class="bg-muted rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] relative"
               >
                 <!-- Chat Header -->
                 <div
-                  class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0"
+                  class="bg-primary dark:bg-secondary text-white px-4 py-3 flex items-center gap-3 shrink-0"
                 >
                   <div
                     class="size-10 rounded-full bg-white/20 flex items-center justify-center"
@@ -219,7 +219,7 @@ const localListPickerOpen = computed({
                     <div class="flex justify-start">
                       <div class="max-w-[85%]">
                         <div
-                          class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none shadow-xs p-3"
+                          class="bg-white dark:bg-secondary rounded-lg rounded-tl-none shadow-xs p-3"
                         >
                           <p
                             v-if="selectedStep.message"
@@ -245,7 +245,7 @@ const localListPickerOpen = computed({
                           <button
                             v-for="(btn, idx) in selectedStep.buttons"
                             :key="idx"
-                            class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
+                            class="w-full bg-white dark:bg-secondary text-primary font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-1.5"
                           >
                             <ExternalLink
                               v-if="btn.type === 'url'"
@@ -264,7 +264,7 @@ const localListPickerOpen = computed({
                           class="mt-1"
                         >
                           <button
-                            class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
+                            class="w-full bg-white dark:bg-secondary text-primary font-medium py-2.5 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2"
                             @click="localListPickerOpen = !localListPickerOpen"
                           >
                             <svg
@@ -286,7 +286,7 @@ const localListPickerOpen = computed({
                           class="mt-1"
                         >
                           <button
-                            class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 rounded-lg shadow-xs border-0"
+                            class="w-full bg-white dark:bg-secondary text-primary font-medium py-2.5 rounded-lg shadow-xs border-0"
                           >
                             {{
                               selectedStep.input_config?.flow_cta || "Open Form"
@@ -303,7 +303,7 @@ const localListPickerOpen = computed({
                     >
                       <div class="max-w-[85%]">
                         <div
-                          class="bg-[#005c4b] dark:bg-[#d9fdd3] rounded-lg rounded-tr-none shadow-xs p-3"
+                          class="bg-primary/40 dark:bg-primary/20 rounded-lg rounded-tr-none shadow-xs p-3"
                         >
                           <p class="text-gray-800 dark:text-gray-200 italic">
                             <template v-if="selectedStep.input_type === 'none'">
@@ -332,7 +332,7 @@ const localListPickerOpen = computed({
                           >
                             12:01 PM
                             <svg
-                              class="size-4 text-[#53bdeb]"
+                              class="size-4 text-blue-500"
                               viewBox="0 0 24 24"
                               fill="currentColor"
                             >
@@ -351,10 +351,10 @@ const localListPickerOpen = computed({
                       class="flex justify-center"
                     >
                       <div
-                        class="bg-white/80 dark:bg-[#202c33]/80 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full"
+                        class="bg-white/80 dark:bg-secondary/80 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full"
                       >
                         Response saved as
-                        <code class="font-mono text-[#00a884]">{{
+                        <code class="font-mono text-primary">{{
                           selectedStep.store_as
                         }}</code>
                       </div>
@@ -402,10 +402,10 @@ const localListPickerOpen = computed({
 
                 <!-- Input Bar -->
                 <div
-                  class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0"
+                  class="bg-muted dark:bg-secondary px-3 py-2 flex items-center gap-2 shrink-0"
                 >
                   <div
-                    class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2"
+                    class="flex-1 bg-white dark:bg-accent rounded-full px-4 py-2"
                   >
                     <p class="text-gray-400">Type a message</p>
                   </div>
@@ -438,10 +438,10 @@ const localListPickerOpen = computed({
                     @click="localListPickerOpen = false"
                   ></div>
                   <div
-                    class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden"
+                    class="bg-white dark:bg-card rounded-t-2xl overflow-hidden"
                   >
                     <div
-                      class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between"
+                      class="bg-primary dark:bg-primary text-white px-4 py-3 flex items-center justify-between"
                     >
                       <button
                         class="p-1 hover:bg-white/10 rounded"
@@ -469,15 +469,15 @@ const localListPickerOpen = computed({
                       >
                         <div
                           v-if="btn.type === 'url'"
-                          class="size-5 flex items-center justify-center shrink-0 text-[#00a884]"
+                          class="size-5 flex items-center justify-center shrink-0 text-primary"
                         >
                           <ExternalLink class="size-4" />
                         </div>
                         <div
                           v-else
-                          class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
+                          class="size-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0"
                         >
-                          <span class="text-[#00a884] font-medium">{{
+                          <span class="text-primary font-medium">{{
                             idx + 1
                           }}</span>
                         </div>
@@ -501,10 +501,10 @@ const localListPickerOpen = computed({
             >
               <!-- Empty State Phone Frame -->
               <div
-                class="bg-[#efeae2] dark:bg-[#0b141a] rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] w-full"
+                class="bg-muted rounded-2xl overflow-hidden shadow-xl flex flex-col h-[600px] w-full"
               >
                 <div
-                  class="bg-[#075e54] dark:bg-[#202c33] text-white px-4 py-3 flex items-center gap-3 shrink-0"
+                  class="bg-primary dark:bg-secondary text-white px-4 py-3 flex items-center gap-3 shrink-0"
                 >
                   <div
                     class="size-10 rounded-full bg-white/20 flex items-center justify-center"
@@ -524,10 +524,10 @@ const localListPickerOpen = computed({
                   </p>
                 </div>
                 <div
-                  class="bg-[#f0f2f5] dark:bg-[#202c33] px-3 py-2 flex items-center gap-2 shrink-0"
+                  class="bg-muted dark:bg-secondary px-3 py-2 flex items-center gap-2 shrink-0"
                 >
                   <div
-                    class="flex-1 bg-white dark:bg-[#2a3942] rounded-full px-4 py-2"
+                    class="flex-1 bg-white dark:bg-accent rounded-full px-4 py-2"
                   >
                     <p class="text-gray-400">Type a message</p>
                   </div>

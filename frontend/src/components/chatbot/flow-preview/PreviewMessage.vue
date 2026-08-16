@@ -26,7 +26,7 @@ const isDebug = computed(() => props.message.type === "debug");
   <div v-if="isBot" class="flex justify-start">
     <div class="max-w-[85%]">
       <div
-        class="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none p-3 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] dark:shadow-[0_1px_0.5px_rgba(0,0,0,0.5)] ring-1 ring-black/5 dark:ring-white/5"
+        class="bg-white dark:bg-secondary rounded-lg rounded-tl-none p-3 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] dark:shadow-[0_1px_0.5px_rgba(0,0,0,0.5)] ring-1 ring-black/5 dark:ring-white/5"
         :class="{ 'border-l-2 border-red-400': message.isValidationError }"
       >
         <p class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
@@ -46,7 +46,7 @@ const isDebug = computed(() => props.message.type === "debug");
   <div v-else-if="isUser" class="flex justify-end">
     <div class="max-w-[85%]">
       <div
-        class="bg-[#d9fdd3] dark:bg-[#005c4b] rounded-lg rounded-tr-none p-3 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] dark:shadow-[0_1px_0.5px_rgba(0,0,0,0.5)] ring-1 ring-black/5 dark:ring-white/5"
+        class="bg-primary/20 dark:bg-primary/40 rounded-lg rounded-tr-none p-3 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] dark:shadow-[0_1px_0.5px_rgba(0,0,0,0.5)] ring-1 ring-black/5 dark:ring-white/5"
       >
         <p class="text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
           {{ message.content }}
@@ -56,7 +56,7 @@ const isDebug = computed(() => props.message.type === "debug");
         >
           {{ formattedTime }}
           <svg
-            class="size-4 text-[#53bdeb]"
+            class="size-4 text-blue-500"
             viewBox="0 0 24 24"
             fill="currentColor"
           >

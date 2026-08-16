@@ -161,11 +161,11 @@ function handleGoToStep(stepName: string) {
         >
           <!-- Screen -->
           <div
-            class="flex-1 rounded-[32px] overflow-hidden flex flex-col bg-[#efeae2] dark:bg-[#0b141a]"
+            class="flex-1 rounded-[32px] overflow-hidden flex flex-col bg-muted"
           >
             <!-- iOS-ish status bar -->
             <div
-              class="bg-[#008069] dark:bg-[#202c33] text-white px-5 py-1 flex items-center justify-between font-medium shrink-0"
+              class="bg-primary dark:bg-secondary text-white px-5 py-1 flex items-center justify-between font-medium shrink-0"
             >
               <span>9:41</span>
               <div class="flex items-center gap-1">
@@ -220,7 +220,7 @@ function handleGoToStep(stepName: string) {
 
             <!-- Chat Header -->
             <div
-              class="bg-[#008069] dark:bg-[#202c33] text-white px-3 py-2 flex items-center gap-3 shrink-0"
+              class="bg-primary dark:bg-secondary text-white px-3 py-2 flex items-center gap-3 shrink-0"
             >
               <div
                 class="size-9 rounded-full bg-white/20 flex items-center justify-center shrink-0"
@@ -276,7 +276,7 @@ function handleGoToStep(stepName: string) {
                 >
                   <div class="max-w-[85%]">
                     <button
-                      class="px-4 py-2 bg-[#075e54] text-white rounded-lg hover:bg-[#064e46] transition-colors"
+                      class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                       @click="handleWhatsAppFlowComplete"
                     >
                       {{ currentStep.input_config?.flow_cta || "Open Form" }}

@@ -24,7 +24,7 @@ function handleSelect(button: ButtonConfig) {
   <div class="mt-1">
     <!-- Trigger Button -->
     <button
-      class="w-full bg-white dark:bg-[#202c33] text-[#00a884] font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2 transition-colors"
+      class="w-full bg-white dark:bg-secondary text-primary font-medium py-2.5 px-4 rounded-lg shadow-xs border-0 flex items-center justify-center gap-2 transition-colors"
       :class="{
         'hover:bg-gray-50 dark:hover:bg-[#2a3942] cursor-pointer': !disabled,
         'opacity-50 cursor-not-allowed': disabled,
@@ -43,10 +43,10 @@ function handleSelect(button: ButtonConfig) {
         <div class="flex-1 bg-black/50" @click="isOpen = false" />
 
         <!-- Panel -->
-        <div class="bg-white dark:bg-[#1f2c34] rounded-t-2xl overflow-hidden">
+        <div class="bg-white dark:bg-card rounded-t-2xl overflow-hidden">
           <!-- Header -->
           <div
-            class="bg-[#075e54] dark:bg-[#00a884] text-white px-4 py-3 flex items-center justify-between"
+            class="bg-primary dark:bg-primary text-white px-4 py-3 flex items-center justify-between"
           >
             <button
               class="p-1 hover:bg-white/10 rounded transition-colors"
@@ -68,15 +68,15 @@ function handleSelect(button: ButtonConfig) {
             >
               <div
                 v-if="btn.type === 'url'"
-                class="size-5 flex items-center justify-center shrink-0 text-[#00a884]"
+                class="size-5 flex items-center justify-center shrink-0 text-primary"
               >
                 <ExternalLink class="size-4" />
               </div>
               <div
                 v-else
-                class="size-5 rounded-full border-2 border-[#00a884] flex items-center justify-center shrink-0"
+                class="size-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0"
               >
-                <span class="text-[#00a884] font-medium">{{ idx + 1 }}</span>
+                <span class="text-primary font-medium">{{ idx + 1 }}</span>
               </div>
               <span class="text-gray-800 dark:text-gray-200 flex-1">
                 {{ btn.title || `Option ${idx + 1}` }}
