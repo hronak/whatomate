@@ -214,9 +214,7 @@ lint:
 fmt:
 	$(GOCMD) fmt ./...
 
-# Generate swagger docs (if using)
-swagger:
-	swag init -g cmd/whatomate/main.go -o api/docs
+
 
 # Help
 help:

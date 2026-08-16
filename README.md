@@ -6,8 +6,6 @@ Modern, open-source WhatsApp Business Platform. Single binary app.
 >
 > **Caution:** This fork is under constant development and may break. Use at your own risk. Documentation may also be out of date.
 
-![Dashboard](docs/public/images/dashboard-light.png#gh-light-mode-only)
-![Dashboard](docs/public/images/dashboard-dark.png#gh-dark-mode-only)
 
 ## Features
 
@@ -36,26 +34,12 @@ Modern, open-source WhatsApp Business Platform. Single binary app.
   Pre-defined quick replies with slash commands (`/shortcut`) and dynamic placeholders.
 
 - **Voice Calling & IVR**
-  Incoming and outgoing WhatsApp calls with IVR menus, DTMF routing, call transfers to agent teams, hold music, and call recording. See [calling docs](https://shridarpatil.github.io/whatomate/features/calling/).
+  Incoming and outgoing WhatsApp calls with IVR menus, DTMF routing, call transfers to agent teams, hold music, and call recording.
 
 - **Analytics Dashboard**
   Track messages, engagement, and campaign performance.
 
-<details>
-<summary>View more screenshots</summary>
 
-![Dashboard](docs/public/images/dashboard-light.png#gh-light-mode-only)
-![Dashboard](docs/public/images/dashboard-dark.png#gh-dark-mode-only)
-![Chatbot](docs/public/images/chatbot-light.png#gh-light-mode-only)
-![Chatbot](docs/public/images/chatbot-dark.png#gh-dark-mode-only)
-![Agent Analytics](docs/public/images/agent-analytics-light.png#gh-light-mode-only)
-![Agent Analytics](docs/public/images/agent-analytics-dark.png#gh-dark-mode-only)
-![Conversation Flow Builder](docs/public/images/conversation-flow-light.png#gh-light-mode-only)
-![Conversation Flow Builder](docs/public/images/conversation-flow-dark.png#gh-dark-mode-only)
-![Templates](docs/public/images/11-templates.png)
-![Campaigns](docs/public/images/13-campaigns.png)
-
-</details>
 
 ## Installation
 
@@ -108,7 +92,7 @@ make build-prod
 ./whatomate server -migrate
 ```
 
-See [configuration docs](https://shridarpatil.github.io/whatomate/getting-started/configuration/) for detailed setup options.
+
 
 ## CLI Usage
 
