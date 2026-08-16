@@ -915,6 +915,7 @@ export interface WebhookEvent {
 
 export interface Team {
   id: string;
+  organization_id: string;
   name: string;
   description: string;
   assignment_strategy: "round_robin" | "load_balanced" | "manual";
