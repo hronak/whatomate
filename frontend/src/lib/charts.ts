@@ -1,40 +1,8 @@
-/**
- * Centralized Chart.js setup
- * Import this module in components that need charts to ensure registration happens once
- */
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from "chart.js";
+// Re-export Unovis chart components as wrappers for drop-in replacement
+import Line from '@/components/ui/chart/LineWrapper.vue'
+import Bar from '@/components/ui/chart/BarWrapper.vue'
+import Doughnut from '@/components/ui/chart/DonutWrapper.vue'
+import Pie from '@/components/ui/chart/PieWrapper.vue'
 
-// Register Chart.js components once
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-);
+export { Line, Bar, Pie, Doughnut }
 
-// Set default options for better tooltip behavior
-// This makes tooltips show when hovering near data points, not just exactly on them
-ChartJS.defaults.interaction.mode = "index";
-ChartJS.defaults.interaction.intersect = false;
-
-// Re-export chart components for convenience
-export { Line, Bar, Pie, Doughnut } from "vue-chartjs";
-export { ChartJS };

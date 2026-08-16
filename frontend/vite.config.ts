@@ -105,10 +105,20 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return
+
+          // d3 is here only because @unovis depends on it — 34 d3-* packages
+          // plus three that don't carry the prefix. It is the bulk of the
+          // charting weight, so it belongs in the charts chunk; matched by
+          // prefix because listing every package would go stale on the next
+          // @unovis bump.
+          if (/[\\/]node_modules[\\/](d3-|internmap[\\/]|delaunator[\\/]|robust-predicates[\\/])/.test(id)) {
+            return 'charts'
+          }
+
           const chunks: Record<string, string[]> = {
             'vue-vendor': ['vue', 'vue-router', 'pinia'],
             'reka-ui': ['reka-ui'],
-            'charts': ['chart.js', 'vue-chartjs'],
+            'charts': ['@unovis/vue', '@unovis/ts', '@unovis/dagre-layout', '@unovis/graphlibrary'],
             'grid-layout': ['grid-layout-plus'],
             'emoji-picker': ['vue3-emoji-picker'],
             'utils': ['@vueuse/core', 'axios', 'clsx', 'tailwind-merge', 'class-variance-authority']
