@@ -74,9 +74,13 @@ api_max_requests = 200        # Per-IP cap across all /api routes
 api_window_seconds = 60
 
 [tts]
-# piper_binary = "/usr/local/bin/piper"
-# piper_model = "/opt/piper/models/en_US-lessac-medium.onnx"
-# opusenc_binary = "opusenc"
+# provider = "openai"
+# openai_key = "sk-..."
+# openai_voice = "alloy"
+# elevenlabs_key = "..."
+# elevenlabs_voice_id = "..."
+# google_credentials_json = "{...}"
+# google_voice_name = "en-US-Journey-F"
 
 [calling]
 max_call_duration = 300       # seconds
@@ -186,13 +190,14 @@ Implemented as Redis fixed-window counters; failures hit Redis, so leaving rate 
 
 ### `[tts]`
 
-Optional, only used when an IVR step needs to synthesize speech (welcome prompt, menu read-out). All three keys are paths to external binaries / models:
+Optional, only used when an IVR step needs to synthesize speech (welcome prompt, menu read-out) and no pre-recorded audio file was uploaded.
 
-- `piper_binary` — [piper](https://github.com/rhasspy/piper) standalone TTS executable.
-- `piper_model` — `.onnx` voice model from [piper-voices](https://huggingface.co/rhasspy/piper-voices).
-- `opusenc_binary` — `opusenc` from `opus-tools` (`apt install opus-tools` / `dnf install opus-tools`). Defaults to looking up `opusenc` in `PATH`.
+- `provider` — one of `"openai"`, `"elevenlabs"`, `"google"`.
+- `openai_key` / `openai_voice` — credentials and voice selection for OpenAI TTS API.
+- `elevenlabs_key` / `elevenlabs_voice_id` — credentials and voice selection for ElevenLabs TTS API.
+- `google_credentials_json` / `google_voice_name` — service account JSON string and voice selection for Google Cloud TTS.
 
-If unset, IVR flows still work but cannot synthesize new audio prompts on the fly — only pre-rendered Opus files in `calling.audio_dir` will play.
+If unset, IVR flows still work but cannot synthesize new audio prompts on the fly — only pre-recorded audio uploaded in the IVR Editor will play.
 
 ### `[calling]`
 

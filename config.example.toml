@@ -88,14 +88,16 @@ trust_proxy = false            # Trust X-Forwarded-For / X-Real-IP headers (set 
 api_max_requests = 200         # Max requests per IP per window for all /api/ routes (0 = 200)
 api_window_seconds = 60        # Time window for global API rate limit (0 = 60)
 
-# Text-to-Speech for IVR greetings (optional, requires piper + opusenc installed)
-# Download piper: https://github.com/rhasspy/piper/releases (standalone binary)
-# Download voice models: https://huggingface.co/rhasspy/piper-voices
-# Install opusenc: apt install opus-tools (Debian/Ubuntu) / dnf install opus-tools (Fedora)
+# Text-to-Speech for IVR greetings
+# Supported providers: "openai", "elevenlabs", "google"
 [tts]
-# piper_binary = "/usr/local/bin/piper"
-# piper_model = "/opt/piper/models/en_US-lessac-medium.onnx"
-# opusenc_binary = "opusenc"  # defaults to finding in PATH
+# provider = "openai"
+# openai_key = "sk-..."
+# openai_voice = "alloy"
+# elevenlabs_key = "..."
+# elevenlabs_voice_id = "..."
+# google_credentials_json = "{...}"
+# google_voice_name = "en-US-Journey-F"
 
 # WhatsApp Calling / WebRTC
 [calling]

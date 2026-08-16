@@ -66,7 +66,7 @@ Plays an audio message to the caller. The audio can be uploaded as a file or gen
 | Property | Description |
 |----------|-------------|
 | **Audio** | Upload an audio file (OGG, MP3, WAV, etc.) — automatically transcoded to Opus |
-| **TTS Text** | Type text to generate audio using Piper TTS |
+| **TTS Text** | Type text to generate audio using the configured AI provider (OpenAI, ElevenLabs, Google TTS) |
 | **Interruptible** | If enabled, the caller can press a digit to skip the greeting |
 
 The greeting node has one output (`default`) that connects to the next node.
@@ -297,71 +297,32 @@ Calling is enabled per-organization in the database. Set `calling_enabled = true
 
 ## Text-to-Speech (IVR Greetings)
 
-Whatomate uses [Piper](https://github.com/OHF-Voice/piper1-gpl) for offline text-to-speech generation. When admins type greeting text in the IVR flow editor, the server generates OGG/Opus audio files using Piper + `opusenc`. This is optional — you can also upload pre-recorded audio files directly.
-
-### Install Dependencies
-
-Piper requires the `espeak-ng` shared library at runtime, and `opusenc` is needed to convert WAV output to OGG/Opus:
-
-```bash
-# Debian/Ubuntu
-sudo apt install espeak-ng opus-tools
-
-# Fedora
-sudo dnf install espeak-ng opus-tools
-```
-
-### Install Piper
-
-```bash
-# Download Piper binary (Linux x86_64)
-wget https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
-tar xf piper_linux_x86_64.tar.gz
-sudo mv piper/piper /usr/local/bin/
-```
-
-### Download a Voice Model
-
-Piper voices are available at [huggingface.co/rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices) (mirrors at [OHF-Voice](https://huggingface.co/OHF-Voice)). Each voice has a `.onnx` model file and a `.onnx.json` config file — both are required.
-
-**Choosing a voice:**
-- Browse voices and listen to samples at [rhasspy.github.io/piper-samples](https://rhasspy.github.io/piper-samples/)
-- Voices come in quality levels: `low`, `medium`, and `high` — `medium` is a good balance of quality and speed
-- For US English, `en_US-lessac-medium` is recommended (~60MB)
-
-```bash
-mkdir -p /opt/piper/models
-
-# Download model and config
-wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx \
-  -O /opt/piper/models/en_US-lessac-medium.onnx
-wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json \
-  -O /opt/piper/models/en_US-lessac-medium.onnx.json
-```
+Whatomate supports integrating with top-tier AI voice providers (OpenAI, ElevenLabs, Google Cloud TTS) for generating highly realistic, natural-sounding IVR greetings on the fly. 
 
 ### Configure TTS
 
-Add to your `config.toml`:
+Add the corresponding provider details to your `config.toml`:
 
 ```toml
 [tts]
-piper_binary = "/usr/local/bin/piper"
-piper_model = "/opt/piper/models/en_US-lessac-medium.onnx"
-# opusenc_binary = "opusenc"  # defaults to finding in PATH
-```
+# Choose from: "openai", "elevenlabs", "google"
+provider = "openai"
 
-### Test TTS
+# OpenAI TTS Settings
+openai_key = "sk-..."
+openai_voice = "alloy" # Available voices: alloy, echo, fable, onyx, nova, shimmer
 
-```bash
-echo "Press 1 for sales, press 2 for support." | piper \
-  --model /opt/piper/models/en_US-lessac-medium.onnx \
-  --output_file test.wav
-opusenc --bitrate 24 test.wav test.ogg
-# Play: aplay test.wav  OR  ffplay test.ogg
+# ElevenLabs TTS Settings
+# elevenlabs_key = "..."
+# elevenlabs_voice_id = "..."
+
+# Google Cloud TTS Settings
+# google_credentials_json = '{"type": "service_account", ...}'
+# google_voice_name = "en-US-Journey-F"
 ```
 
 <Aside type="tip">
-  Generated audio files are cached in the `audio_dir` (default: `./audio`) using a SHA256 hash of the text. The same text always reuses the existing file, so regeneration is instant after the first run.
+  Generated audio files are cached locally in the `audio_dir` (default: `./audio`) using a SHA256 hash of the text. The same text always reuses the existing file, saving on API costs and guaranteeing instant playback for subsequent calls.
 </Aside>
 
 ## Firewall & Network

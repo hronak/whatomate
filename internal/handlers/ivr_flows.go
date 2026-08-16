@@ -120,7 +120,7 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 					"Text-to-speech is not configured on this server. Please upload audio files instead.", nil, "")
 			}
 		} else {
-			if err := a.generateIVRAudio(req.Menu); err != nil {
+			if err := a.generateIVRAudio(r.RequestCtx, req.Menu); err != nil {
 				a.Log.Error("TTS generation failed", "error", err)
 				return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
 					"Text-to-speech generation failed: "+err.Error(), nil, "")
@@ -209,7 +209,7 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 					"Text-to-speech is not configured on this server. Please upload audio files instead.", nil, "")
 			}
 		} else {
-			if err := a.generateIVRAudio(req.Menu); err != nil {
+			if err := a.generateIVRAudio(r.RequestCtx, req.Menu); err != nil {
 				a.Log.Error("TTS generation failed", "error", err)
 				return r.SendErrorEnvelope(fasthttp.StatusBadRequest,
 					"Text-to-speech generation failed: "+err.Error(), nil, "")
@@ -751,7 +751,7 @@ func transcodeToOpus(inputPath, outputPath string) error {
 // generateIVRAudio iterates the flat v2 nodes array and generates TTS audio
 // for any node with a non-empty "greeting_text" in its config. The generated
 // audio filename is set as the node's "audio_file" config field.
-func (a *App) generateIVRAudio(menu models.JSONB) error {
+func (a *App) generateIVRAudio(ctx context.Context, menu models.JSONB) error {
 	nodesRaw, ok := menu["nodes"]
 	if !ok {
 		return nil
@@ -781,7 +781,7 @@ func (a *App) generateIVRAudio(menu models.JSONB) error {
 		if greetingText == "" {
 			continue
 		}
-		filename, err := a.TTS.Generate(greetingText)
+		filename, err := a.TTS.Generate(ctx, greetingText)
 		if err != nil {
 			return err
 		}

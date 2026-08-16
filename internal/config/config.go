@@ -35,9 +35,15 @@ type Config struct {
 }
 
 type TTSConfig struct {
-	PiperBinary   string `koanf:"piper_binary"`   // path to piper executable
-	PiperModel    string `koanf:"piper_model"`    // path to .onnx voice model
-	OpusencBinary string `koanf:"opusenc_binary"` // path to opusenc (defaults to "opusenc")
+	Provider string `koanf:"provider"` // "openai", "elevenlabs", "google"
+
+	// Provider specific configs
+	OpenAIKey             string `koanf:"openai_key"`
+	OpenAIVoice           string `koanf:"openai_voice"`
+	ElevenLabsKey         string `koanf:"elevenlabs_key"`
+	ElevenLabsVoiceID     string `koanf:"elevenlabs_voice_id"`
+	GoogleCredentialsJSON string `koanf:"google_credentials_json"`
+	GoogleVoiceName       string `koanf:"google_voice_name"`
 }
 
 // defaultTURNCredentialTTLSecs is the lifetime of generated coturn REST

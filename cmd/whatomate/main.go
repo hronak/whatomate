@@ -234,15 +234,33 @@ func runServer(args []string) {
 	app.S3Client = s3Client
 	lo.Info("Call manager initialized")
 
-	// Initialize TTS if configured (requires piper binary + model)
-	if cfg.TTS.PiperBinary != "" && cfg.TTS.PiperModel != "" {
-		app.TTS = &tts.PiperTTS{
-			BinaryPath:    cfg.TTS.PiperBinary,
-			ModelPath:     cfg.TTS.PiperModel,
-			OpusencBinary: cfg.TTS.OpusencBinary,
-			AudioDir:      cfg.Calling.AudioDir,
+	// Initialize TTS based on configured provider
+	switch cfg.TTS.Provider {
+	case "openai":
+		app.TTS = &tts.OpenAITTS{
+			APIKey:   cfg.TTS.OpenAIKey,
+			Voice:    cfg.TTS.OpenAIVoice,
+			AudioDir: cfg.Calling.AudioDir,
 		}
-		lo.Info("TTS initialized", "piper", cfg.TTS.PiperBinary, "model", cfg.TTS.PiperModel)
+		lo.Info("TTS initialized", "provider", "openai", "voice", cfg.TTS.OpenAIVoice)
+	case "elevenlabs":
+		app.TTS = &tts.ElevenLabsTTS{
+			APIKey:   cfg.TTS.ElevenLabsKey,
+			VoiceID:  cfg.TTS.ElevenLabsVoiceID,
+			AudioDir: cfg.Calling.AudioDir,
+		}
+		lo.Info("TTS initialized", "provider", "elevenlabs", "voice", cfg.TTS.ElevenLabsVoiceID)
+	case "google":
+		app.TTS = &tts.GoogleTTS{
+			CredentialsJSON: []byte(cfg.TTS.GoogleCredentialsJSON),
+			VoiceName:       cfg.TTS.GoogleVoiceName,
+			AudioDir:        cfg.Calling.AudioDir,
+		}
+		lo.Info("TTS initialized", "provider", "google", "voice", cfg.TTS.GoogleVoiceName)
+	default:
+		if cfg.TTS.Provider != "" {
+			lo.Warn("Unknown TTS provider configured", "provider", cfg.TTS.Provider)
+		}
 	}
 
 	// Start campaign stats subscriber for real-time WebSocket updates from worker
