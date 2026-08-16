@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -321,6 +322,34 @@ func runServer(args []string) {
 		}
 	}()
 
+	// Start frontend dev server if in development mode
+	var viteCmd *exec.Cmd
+	var viteExited chan error
+	if cfg.App.Environment == "development" {
+		cmd := exec.Command("npm", "run", "dev")
+		cmd.Dir = "frontend"
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+		if err := cmd.Start(); err != nil {
+			lo.Error("Failed to start frontend dev server", "error", err)
+		} else {
+			viteCmd = cmd
+			viteExited = make(chan error, 1)
+			frontendPort := os.Getenv("FRONTEND_PORT")
+			if frontendPort == "" {
+				frontendPort = "3000"
+			}
+			lo.Info("Frontend dev server started (Vite)")
+			lo.Info(fmt.Sprintf("App      http://localhost:%s   <-- open this", frontendPort))
+			
+			go func() {
+				viteExited <- cmd.Wait()
+			}()
+		}
+	}
+
 	// Start SLA processor (runs every minute)
 	slaProcessor := handlers.NewSLAProcessor(app, time.Minute)
 	slaCtx, slaCancel := context.WithCancel(context.Background())
@@ -364,6 +393,8 @@ func runServer(args []string) {
 		lo.Info("Shutting down...")
 	case err := <-serverFailed:
 		lo.Error("Server failed, shutting down", "error", err)
+	case err := <-viteExited:
+		lo.Error("Vite frontend dev server exited unexpectedly, shutting down", "error", err)
 	}
 
 	// Order matters. Each step must stop producing work for the step after it,
@@ -378,6 +409,12 @@ func runServer(args []string) {
 	//  5. close the Redis subscriber, whose only job was feeding the hub;
 	//  6. end live calls cleanly so recordings finalize and upload;
 	//  7. stop the hub last — everything above may broadcast to it.
+
+	if viteCmd != nil && viteCmd.Process != nil {
+		lo.Info("Stopping Vite frontend dev server...")
+		_ = syscall.Kill(-viteCmd.Process.Pid, syscall.SIGTERM)
+		lo.Info("Vite frontend dev server stopped")
+	}
 
 	lo.Info("Stopping server...")
 	if err := server.Shutdown(); err != nil {
@@ -624,7 +661,7 @@ func setupRoutes(g *fastglue.Fastglue, app *handlers.App, lo logf.Logger, basePa
 		}
 		lo.Info("Serving frontend from disk", "dir", cfg.App.FrontendDir, "base_path", basePath)
 		frontendHandler = frontend.DirHandler(basePath, cfg.App.FrontendDir)
-	case frontend.IsEmbedded():
+	case frontend.IsEmbedded() && cfg.App.Environment != "development":
 		lo.Info("Serving embedded frontend", "base_path", basePath)
 		frontendHandler = frontend.Handler(basePath)
 	default:

@@ -121,7 +121,7 @@ frontend-preview: frontend/node_modules
 # a phantom listener on :$(BACKEND_PORT).
 .PHONY: dev dev-backend dev-frontend
 dev: $(BINARY_NAME) frontend/node_modules
-	@BINARY=./$(BINARY_NAME) CONFIG=$(CONFIG) bash ./scripts/dev.sh
+	@WHATOMATE_SERVER__PORT=$(BACKEND_PORT) FRONTEND_PORT=$(FRONTEND_PORT) ./$(BINARY_NAME) server -config $(CONFIG) -migrate
 
 # Backend only, for when the frontend is already running elsewhere.
 dev-backend: run-migrate
