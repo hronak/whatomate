@@ -1131,7 +1131,7 @@ onUnmounted(() => {
             size="sm"
             @click="startDialogOpen = true"
           >
-            <Play class="size-4 mr-1" />
+            <Play class="size-4" data-icon />
             {{
               campaign.status === "paused"
                 ? $t("campaigns.resume", "Resume")
@@ -1168,7 +1168,7 @@ onUnmounted(() => {
             size="sm"
             @click="retryFailed"
           >
-            <RefreshCw class="size-4 mr-1" />
+            <RefreshCw class="size-4" data-icon />
             {{ $t("campaigns.retryFailed", "Retry Failed") }}
           </Button>
 
