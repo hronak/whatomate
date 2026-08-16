@@ -6,6 +6,15 @@ Modern, open-source WhatsApp Business Platform. Single binary app.
 >
 > **Caution:** This fork is under constant development and may break. Use at your own risk. Documentation may also be out of date.
 
+## Differences from Upstream
+
+This fork (`hronak/whatomate`) includes significant overhauls and security improvements over the original project since it was forked at commit `2e05458`:
+
+- **Security & Stability:** Closed RBAC gaps with a declarative route table, improved concurrency and lifecycle management to prevent data loss, and secured embedded endpoints.
+- **Backend Enhancements:** Upgraded to WhatsApp Graph API v26.0, replaced local Piper TTS with cloud AI providers (OpenAI, ElevenLabs, Google), and updated core dependencies (Go, PostgreSQL, Redis 8).
+- **Frontend Overhaul:** Migrated to Tailwind v4, enforced modern typographic scales (minimum 1rem font size), and refreshed the AI chatbot integration (including Gemini 3.1 Pro and Gemini 3.7 Flash). Vue 3 idioms were heavily adopted, and unnecessary UI animations were removed for better performance.
+- **DevOps & Tooling:** Dockerfiles were optimized for smaller image sizes, GitHub Pages documentation deployment was removed (along with the `docs/` directory), and the dev stack was consolidated to a single URL.
+
 
 ## Features
 
