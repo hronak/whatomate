@@ -668,6 +668,10 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceContacts, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to send messages"))
+	}
+
 	var req SendTemplateMessageRequest
 	var headerFileData []byte
 	var headerFileMimeType string
