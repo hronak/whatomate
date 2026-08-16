@@ -209,7 +209,7 @@ func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 	var userTeamIDs []uuid.UUID
 	if !hasFullAccess {
 		var memberships []models.TeamMember
-		if err := a.DB.Where("user_id = ?", userID).Find(&memberships).Error; err != nil {
+		if err := a.DB.Joins("JOIN teams ON teams.id = team_members.team_id").Where("team_members.user_id = ? AND teams.organization_id = ?", userID, orgID).Find(&memberships).Error; err != nil {
 			a.Log.Error("Failed to fetch team memberships", "error", err, "user_id", userID)
 		}
 		for _, m := range memberships {
