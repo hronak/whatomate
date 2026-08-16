@@ -389,7 +389,7 @@ defineExpose({
       </CardHeader>
       <Separator />
       <ScrollArea class="flex-1">
-        <div class="p-2 space-y-1">
+        <div class="p-2 gap-y-1">
           <div
             v-for="(screen, index) in screens"
             :key="screen.id"
@@ -468,7 +468,7 @@ defineExpose({
               <h3 class="text-lg font-semibold mb-4">
                 {{ selectedScreen.title }}
               </h3>
-              <div class="space-y-3">
+              <div class="gap-y-3">
                 <div
                   v-for="(comp, index) in selectedScreen.layout.children"
                   :key="comp.id"
@@ -542,7 +542,7 @@ defineExpose({
                         >*</span
                       >
                     </Label>
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <div
                         v-for="opt in comp['data-source']"
                         :key="opt.id"
@@ -562,7 +562,7 @@ defineExpose({
                         >*</span
                       >
                     </Label>
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <div
                         v-for="opt in comp['data-source']"
                         :key="opt.id"
@@ -653,7 +653,7 @@ defineExpose({
       </CardHeader>
       <Separator />
       <ScrollArea class="flex-1">
-        <div v-if="selectedComponent" class="p-4 space-y-4">
+        <div v-if="selectedComponent" class="p-4 gap-y-4">
           <div class="flex items-center justify-between">
             <Badge>{{ getComponentLabel(selectedComponent) }}</Badge>
             <div class="flex gap-1">
@@ -690,7 +690,7 @@ defineExpose({
           </div>
 
           <!-- Text property -->
-          <div v-if="'text' in selectedComponent" class="space-y-2">
+          <div v-if="'text' in selectedComponent" class="gap-y-2">
             <Label>Text</Label>
             <Input
               :model-value="selectedComponent.text"
@@ -704,7 +704,7 @@ defineExpose({
               'label' in selectedComponent &&
               selectedComponent.type !== 'Footer'
             "
-            class="space-y-2"
+            class="gap-y-2"
           >
             <Label>Label</Label>
             <Input
@@ -714,7 +714,7 @@ defineExpose({
           </div>
 
           <!-- Name property -->
-          <div v-if="'name' in selectedComponent" class="space-y-2">
+          <div v-if="'name' in selectedComponent" class="gap-y-2">
             <Label>Field Name (Key)</Label>
             <Input
               :model-value="selectedComponent.name"
@@ -741,7 +741,7 @@ defineExpose({
           </div>
 
           <!-- Options for Dropdown, Radio, Checkbox -->
-          <div v-if="selectedComponent['data-source']" class="space-y-2">
+          <div v-if="selectedComponent['data-source']" class="gap-y-2">
             <div class="flex items-center justify-between">
               <Label>Options</Label>
               <Button variant="ghost" size="sm" class="h-6" @click="addOption">
@@ -749,7 +749,7 @@ defineExpose({
                 Add
               </Button>
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <div
                 v-for="(opt, index) in selectedComponent['data-source']"
                 :key="opt.id"
@@ -773,15 +773,15 @@ defineExpose({
           </div>
 
           <!-- Footer specific -->
-          <div v-if="selectedComponent.type === 'Footer'" class="space-y-4">
-            <div class="space-y-2">
+          <div v-if="selectedComponent.type === 'Footer'" class="gap-y-4">
+            <div class="gap-y-2">
               <Label>Button Text</Label>
               <Input
                 :model-value="selectedComponent.label"
                 @update:model-value="updateComponentProperty('label', $event)"
               />
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label>Action</Label>
               <Select
                 :model-value="
@@ -805,7 +805,7 @@ defineExpose({
             </div>
             <div
               v-if="selectedComponent['on-click-action']?.name === 'navigate'"
-              class="space-y-2"
+              class="gap-y-2"
             >
               <Label>Target Screen</Label>
               <Select

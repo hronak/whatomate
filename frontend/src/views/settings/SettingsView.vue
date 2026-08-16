@@ -277,7 +277,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
       :icon="Settings"
     />
     <ScrollArea class="flex-1">
-      <div class="p-6 space-y-4 max-w-4xl mx-auto">
+      <div class="p-6 gap-y-4 max-w-4xl mx-auto">
         <Tabs default-value="general" class="w-full">
           <TabsList class="grid w-full grid-cols-3 mb-6 border border-border">
             <TabsTrigger
@@ -310,8 +310,8 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                   {{ $t("settings.generalSettingsDesc") }}
                 </p>
               </div>
-              <div class="p-6 pt-3 space-y-4">
-                <div class="space-y-2">
+              <div class="p-6 pt-3 gap-y-4">
+                <div class="gap-y-2">
                   <Label for="org_name" class="text-foreground/70">{{
                     $t("settings.organizationName")
                   }}</Label>
@@ -322,7 +322,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                   />
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label for="timezone" class="text-foreground/70">{{
                       $t("settings.defaultTimezone")
                     }}</Label>
@@ -345,7 +345,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label for="date_format" class="text-foreground/70">{{
                       $t("settings.dateFormat")
                     }}</Label>
@@ -363,7 +363,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                     </Select>
                   </div>
                 </div>
-                <div class="space-y-2">
+                <div class="gap-y-2">
                   <Label class="text-foreground/70">
                     <Globe class="size-4 inline mr-1" />
                     {{ $t("settings.language") }}
@@ -417,9 +417,9 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                   {{ $t("settings.metaAppCredentialsDesc") }}
                 </p>
               </div>
-              <div class="p-6 pt-3 space-y-4">
+              <div class="p-6 pt-3 gap-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label for="meta_app_id" class="text-foreground/70">{{
                       $t("settings.metaAppId")
                     }}</Label>
@@ -429,7 +429,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                       placeholder="e.g. 123456789012345"
                     />
                   </div>
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label for="meta_config_id" class="text-foreground/70">{{
                       $t("settings.metaConfigId")
                     }}</Label>
@@ -440,7 +440,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                     />
                   </div>
                 </div>
-                <div class="space-y-2">
+                <div class="gap-y-2">
                   <Label for="meta_app_secret" class="text-foreground/70">{{
                     $t("settings.metaAppSecret")
                   }}</Label>
@@ -488,7 +488,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                   {{ $t("settings.notificationsDesc") }}
                 </p>
               </div>
-              <div class="p-6 pt-3 space-y-4">
+              <div class="p-6 pt-3 gap-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">
@@ -572,7 +572,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                   {{ $t("settings.callingSettingsDesc") }}
                 </p>
               </div>
-              <div class="p-6 pt-3 space-y-4">
+              <div class="p-6 pt-3 gap-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">
@@ -595,7 +595,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                       !callingSettings.calling_enabled,
                   }"
                 >
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label for="max_call_duration" class="text-foreground/70">{{
                       $t("settings.maxCallDuration")
                     }}</Label>
@@ -610,7 +610,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                       {{ $t("settings.maxCallDurationDesc") }}
                     </p>
                   </div>
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label for="transfer_timeout" class="text-foreground/70">{{
                       $t("settings.transferTimeout")
                     }}</Label>
@@ -629,7 +629,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                 <Separator class="bg-muted" />
                 <!-- Hold Music Upload -->
                 <div
-                  class="space-y-3"
+                  class="gap-y-3"
                   :class="{
                     'opacity-50 pointer-events-none':
                       !callingSettings.calling_enabled,
@@ -692,7 +692,7 @@ function togglePlayAudio(type: "hold_music" | "ringback") {
                 </div>
                 <!-- Ringback Tone Upload -->
                 <div
-                  class="space-y-3"
+                  class="gap-y-3"
                   :class="{
                     'opacity-50 pointer-events-none':
                       !callingSettings.calling_enabled,

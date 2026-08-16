@@ -142,7 +142,7 @@ function handleSubmit() {
         </DialogDescription>
       </DialogHeader>
 
-      <div class="space-y-4 py-4">
+      <div class="gap-y-4 py-4">
         <!-- API Info -->
         <div v-if="step" class="p-3 bg-muted rounded-lg">
           <div class="font-medium text-foreground mb-1">
@@ -170,7 +170,7 @@ function handleSubmit() {
 
         <!-- Status Code -->
         <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>Status Code</Label>
             <Select v-model="statusCode">
               <SelectTrigger>
@@ -187,7 +187,7 @@ function handleSubmit() {
             </Select>
           </div>
 
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>Delay (ms)</Label>
             <Input
               v-model="delay"
@@ -200,7 +200,7 @@ function handleSubmit() {
         </div>
 
         <!-- Response Body -->
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <div class="flex items-center justify-between">
             <Label>Response Body (JSON)</Label>
             <span

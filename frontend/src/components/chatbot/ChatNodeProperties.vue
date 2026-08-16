@@ -258,7 +258,7 @@ const typeLabel: Record<string, string> = {
 </script>
 
 <template>
-  <div class="space-y-4 p-4">
+  <div class="gap-y-4 p-4">
     <div class="flex items-center justify-between">
       <h3 class="font-semibold">{{ typeLabel[node.type] || node.type }}</h3>
       <Button
@@ -278,7 +278,7 @@ const typeLabel: Record<string, string> = {
     </p>
 
     <!-- Label -->
-    <div v-if="node.type !== 'start'" class="space-y-1.5">
+    <div v-if="node.type !== 'start'" class="gap-y-1.5">
       <Label>Label</Label>
       <Input
         :model-value="node.label"
@@ -289,7 +289,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- text (message OR prompt) -->
     <template v-if="isTextNode">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Message</Label>
         <Textarea
           :model-value="textBodyValue"
@@ -304,7 +304,7 @@ const typeLabel: Record<string, string> = {
           interpolate session variables.
         </p>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Expected response</Label>
         <Select
           :model-value="expectedResponse"
@@ -326,7 +326,7 @@ const typeLabel: Record<string, string> = {
         </p>
       </div>
       <template v-if="node.type === 'prompt'">
-        <div class="space-y-1.5">
+        <div class="gap-y-1.5">
           <Label>Store response as</Label>
           <Input
             :model-value="config.store_as || ''"
@@ -337,7 +337,7 @@ const typeLabel: Record<string, string> = {
             class="h-8 font-mono"
           />
         </div>
-        <div class="space-y-1.5">
+        <div class="gap-y-1.5">
           <Label>Validation regex (optional)</Label>
           <Input
             :model-value="config.validation_regex || ''"
@@ -349,7 +349,7 @@ const typeLabel: Record<string, string> = {
             class="h-8 font-mono"
           />
         </div>
-        <div class="space-y-1.5">
+        <div class="gap-y-1.5">
           <Label>Validation error message</Label>
           <Input
             :model-value="config.validation_error || ''"
@@ -361,7 +361,7 @@ const typeLabel: Record<string, string> = {
             class="h-8"
           />
         </div>
-        <div class="space-y-1.5">
+        <div class="gap-y-1.5">
           <Label>Max retries</Label>
           <Input
             type="number"
@@ -380,7 +380,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- buttons -->
     <template v-if="node.type === 'buttons'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Body</Label>
         <Textarea
           :model-value="config.body || ''"
@@ -391,7 +391,7 @@ const typeLabel: Record<string, string> = {
           class="min-h-[60px]"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <div class="flex items-center justify-between">
           <Label
             >Button Options ({{ (config.buttons || []).length }}/{{
@@ -431,7 +431,7 @@ const typeLabel: Record<string, string> = {
         <div
           v-for="(btn, idx) in config.buttons || []"
           :key="btn.id || idx"
-          class="p-2 border rounded-md space-y-2 bg-muted/30"
+          class="p-2 border rounded-md gap-y-2 bg-muted/30"
         >
           <div class="flex items-center gap-1">
             <span class="uppercase text-muted-foreground w-12">{{
@@ -494,7 +494,7 @@ const typeLabel: Record<string, string> = {
 
       <!-- Input — buttons always expect a button selection; surface this
            for visual consistency with text nodes. -->
-      <div class="pt-2 border-t space-y-1.5">
+      <div class="pt-2 border-t gap-y-1.5">
         <Label>Expected response</Label>
         <Select model-value="button" disabled>
           <SelectTrigger class="h-8"><SelectValue /></SelectTrigger>
@@ -504,7 +504,7 @@ const typeLabel: Record<string, string> = {
         </Select>
       </div>
 
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Store response as (optional)</Label>
         <Input
           :model-value="config.store_as || ''"
@@ -523,7 +523,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- api_call -->
     <template v-if="node.type === 'api_call'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>URL</Label>
         <Input
           :model-value="config.url || ''"
@@ -534,7 +534,7 @@ const typeLabel: Record<string, string> = {
           class="h-8 font-mono"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Method</Label>
         <Select
           :model-value="config.method || 'GET'"
@@ -549,7 +549,7 @@ const typeLabel: Record<string, string> = {
           </SelectContent>
         </Select>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <div class="flex items-center justify-between">
           <Label>Headers</Label>
           <Button variant="outline" size="sm" class="h-6" @click="addHeader">
@@ -587,7 +587,7 @@ const typeLabel: Record<string, string> = {
           </Button>
         </div>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Body</Label>
         <Textarea
           :model-value="config.body || ''"
@@ -598,7 +598,7 @@ const typeLabel: Record<string, string> = {
           class="min-h-[60px] font-mono"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <div class="flex items-center justify-between">
           <Label>Response mapping</Label>
           <Button
@@ -647,7 +647,7 @@ const typeLabel: Record<string, string> = {
           </Button>
         </div>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Message template (optional)</Label>
         <Textarea
           :model-value="config.message_template || ''"
@@ -665,7 +665,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- condition -->
     <template v-if="node.type === 'condition'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Expression</Label>
         <Textarea
           :model-value="config.expression || ''"
@@ -684,7 +684,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- timing -->
     <template v-if="node.type === 'timing'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Schedule</Label>
         <div
           v-for="(entry, idx) in schedule"
@@ -728,7 +728,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- transfer -->
     <template v-if="node.type === 'transfer'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Body (sent before handoff)</Label>
         <Textarea
           :model-value="config.body || ''"
@@ -739,7 +739,7 @@ const typeLabel: Record<string, string> = {
           class="min-h-[50px]"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Team</Label>
         <Select
           :model-value="config.team_id || '_general'"
@@ -760,7 +760,7 @@ const typeLabel: Record<string, string> = {
           </SelectContent>
         </Select>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Notes (for agents)</Label>
         <Textarea
           :model-value="config.notes || ''"
@@ -775,7 +775,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- end -->
     <template v-if="node.type === 'end'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Final message (optional)</Label>
         <Textarea
           :model-value="config.message || ''"
@@ -790,7 +790,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- goto_flow -->
     <template v-if="node.type === 'goto_flow'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Target flow</Label>
         <Select
           :model-value="config.flow_id || 'none'"
@@ -820,7 +820,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- whatsapp_flow -->
     <template v-if="node.type === 'whatsapp_flow'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>WhatsApp Flow ID</Label>
         <Input
           :model-value="config.flow_id || ''"
@@ -831,7 +831,7 @@ const typeLabel: Record<string, string> = {
           class="h-8 font-mono"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Header</Label>
         <Input
           :model-value="config.header || ''"
@@ -841,7 +841,7 @@ const typeLabel: Record<string, string> = {
           class="h-8"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Body</Label>
         <Textarea
           :model-value="config.body || ''"
@@ -851,7 +851,7 @@ const typeLabel: Record<string, string> = {
           class="min-h-[50px]"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>CTA label</Label>
         <Input
           :model-value="config.cta || ''"
@@ -866,7 +866,7 @@ const typeLabel: Record<string, string> = {
 
     <!-- webhook -->
     <template v-if="node.type === 'webhook'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>URL</Label>
         <Input
           :model-value="config.url || ''"
@@ -877,7 +877,7 @@ const typeLabel: Record<string, string> = {
           class="h-8 font-mono"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Method</Label>
         <Select
           :model-value="config.method || 'POST'"
@@ -892,7 +892,7 @@ const typeLabel: Record<string, string> = {
           </SelectContent>
         </Select>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <div class="flex items-center justify-between">
           <Label>Headers</Label>
           <Button variant="outline" size="sm" class="h-6" @click="addHeader">
@@ -930,7 +930,7 @@ const typeLabel: Record<string, string> = {
           </Button>
         </div>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Body</Label>
         <Textarea
           :model-value="config.body || ''"
@@ -962,7 +962,7 @@ const typeLabel: Record<string, string> = {
           'timing',
         ].includes(node.type)
       "
-      class="pt-2 border-t space-y-1.5"
+      class="pt-2 border-t gap-y-1.5"
     >
       <Label>Skip condition (optional)</Label>
       <Input

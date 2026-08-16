@@ -190,7 +190,7 @@ function handlePlayPause() {
     </div>
 
     <ScrollArea class="flex-1">
-      <div class="p-2 space-y-2">
+      <div class="p-2 gap-y-2">
         <!-- Variables Section -->
         <Collapsible v-model:open="variablesExpanded">
           <CollapsibleTrigger
@@ -214,7 +214,7 @@ function handlePlayPause() {
               >
                 No variables set
               </div>
-              <div v-else class="space-y-1">
+              <div v-else class="gap-y-1">
                 <div
                   v-for="[key, value] in variableEntries"
                   :key="key"

@@ -19,7 +19,7 @@ defineProps<{
         $t("common.metadata", "Metadata")
       }}</CardTitle>
     </CardHeader>
-    <CardContent class="space-y-2.5">
+    <CardContent class="gap-y-2.5">
       <div v-if="createdByName" class="flex items-start gap-2">
         <UserCircle class="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         <div class="min-w-0">

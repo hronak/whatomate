@@ -225,7 +225,7 @@ const statCards = computed(() => [
 
     <!-- Content -->
     <ScrollArea v-else class="flex-1">
-      <div class="p-6 space-y-6">
+      <div class="p-6 gap-y-6">
         <!-- Stats -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <!-- Skeleton Loading State -->
@@ -236,7 +236,7 @@ const statCards = computed(() => [
               class="rounded-xl border border-border bg-card p-6"
             >
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <Skeleton class="h-4 w-24 bg-muted" />
                 <Skeleton class="size-10 rounded-lg bg-muted" />
@@ -255,7 +255,7 @@ const statCards = computed(() => [
               class="card-depth rounded-xl border border-border bg-card p-6"
             >
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   card.title
@@ -409,7 +409,7 @@ const statCards = computed(() => [
           </div>
           <div class="px-6 pb-6">
             <div class="grid gap-4 md:grid-cols-2">
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <h4 class="font-medium text-foreground/70">
                   {{ $t("chatbot.greetingMessage") }}
                 </h4>
@@ -417,7 +417,7 @@ const statCards = computed(() => [
                   {{ settings.greeting_message || $t("chatbot.notConfigured") }}
                 </p>
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <h4 class="font-medium text-foreground/70">
                   {{ $t("chatbot.fallbackMessage") }}
                 </h4>
@@ -425,7 +425,7 @@ const statCards = computed(() => [
                   {{ settings.fallback_message || $t("chatbot.notConfigured") }}
                 </p>
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <h4 class="font-medium text-foreground/70">
                   {{ $t("chatbot.sessionTimeout") }}
                 </h4>
@@ -438,7 +438,7 @@ const statCards = computed(() => [
                   }}
                 </div>
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <h4 class="font-medium text-foreground/70">
                   {{ $t("chatbot.aiProvider") }}
                 </h4>

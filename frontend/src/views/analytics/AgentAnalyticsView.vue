@@ -420,7 +420,7 @@ void _displayStats.value; // Suppress unused warning
 
     <!-- Content -->
     <ScrollArea class="flex-1">
-      <div class="p-6 space-y-6">
+      <div class="p-6 gap-y-6">
         <!-- Error State -->
         <ErrorState
           v-if="error && !isLoading"
@@ -439,7 +439,7 @@ void _displayStats.value; // Suppress unused warning
               class="rounded-xl border border-border bg-card p-6"
             >
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <Skeleton class="h-4 w-24 bg-muted" />
                 <Skeleton class="size-10 rounded-lg bg-muted" />
@@ -454,7 +454,7 @@ void _displayStats.value; // Suppress unused warning
             <!-- Transfers Handled -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   $t("agentAnalytics.transfersHandled")
@@ -482,7 +482,7 @@ void _displayStats.value; // Suppress unused warning
             <!-- Active Conversations -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   $t("agentAnalytics.activeConversations")
@@ -510,7 +510,7 @@ void _displayStats.value; // Suppress unused warning
             <!-- Avg Resolution Time -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   $t("agentAnalytics.avgResolutionTime")
@@ -543,7 +543,7 @@ void _displayStats.value; // Suppress unused warning
               class="card-depth rounded-xl border border-border bg-card p-6"
             >
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   $t("agentAnalytics.avgQueueTime")
@@ -570,7 +570,7 @@ void _displayStats.value; // Suppress unused warning
               class="card-depth rounded-xl border border-border bg-card p-6"
             >
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   $t("agentAnalytics.messagesSent")
@@ -594,7 +594,7 @@ void _displayStats.value; // Suppress unused warning
             <!-- Break Time -->
             <div class="card-depth rounded-xl border border-border bg-card p-6">
               <div
-                class="flex flex-row items-center justify-between space-y-0 pb-2"
+                class="flex flex-row items-center justify-between gap-y-0 pb-2"
               >
                 <span class="font-medium text-foreground/50">{{
                   $t("agentAnalytics.breakTime")

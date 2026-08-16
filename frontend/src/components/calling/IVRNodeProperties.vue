@@ -281,7 +281,7 @@ const greetingTab = computed(() =>
 </script>
 
 <template>
-  <div class="space-y-4 p-4">
+  <div class="gap-y-4 p-4">
     <div class="flex items-center justify-between">
       <h3 class="font-semibold capitalize">
         {{ node.type.replace("_", " ") }}
@@ -297,7 +297,7 @@ const greetingTab = computed(() =>
     </div>
 
     <!-- Label -->
-    <div class="space-y-1.5">
+    <div class="gap-y-1.5">
       <Label>Label</Label>
       <Input
         :model-value="node.label"
@@ -307,7 +307,7 @@ const greetingTab = computed(() =>
     </div>
 
     <!-- Audio Section (greeting, menu, gather, hangup) -->
-    <div v-if="hasAudio" class="space-y-1.5">
+    <div v-if="hasAudio" class="gap-y-1.5">
       <Label>Audio</Label>
       <Tabs :default-value="greetingTab">
         <TabsList class="h-8">
@@ -394,7 +394,7 @@ const greetingTab = computed(() =>
 
     <!-- Menu: options -->
     <template v-if="node.type === 'menu'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Timeout (seconds)</Label>
         <Input
           type="number"
@@ -408,7 +408,7 @@ const greetingTab = computed(() =>
           max="60"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Max Retries</Label>
         <Input
           type="number"
@@ -422,7 +422,7 @@ const greetingTab = computed(() =>
           max="10"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <div class="flex items-center justify-between">
           <Label>Menu Options</Label>
           <Button
@@ -463,7 +463,7 @@ const greetingTab = computed(() =>
 
     <!-- Gather: config -->
     <template v-if="node.type === 'gather'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Max Digits</Label>
         <Input
           type="number"
@@ -477,7 +477,7 @@ const greetingTab = computed(() =>
           max="20"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Terminator</Label>
         <Input
           :model-value="config.terminator || '#'"
@@ -487,7 +487,7 @@ const greetingTab = computed(() =>
           class="h-8"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Store As (variable name)</Label>
         <Input
           :model-value="config.store_as || ''"
@@ -498,7 +498,7 @@ const greetingTab = computed(() =>
           class="h-8"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Timeout (seconds)</Label>
         <Input
           type="number"
@@ -512,7 +512,7 @@ const greetingTab = computed(() =>
           max="60"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Max Retries</Label>
         <Input
           type="number"
@@ -530,7 +530,7 @@ const greetingTab = computed(() =>
 
     <!-- HTTP Callback: config -->
     <template v-if="node.type === 'http_callback'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>URL</Label>
         <Input
           :model-value="config.url || ''"
@@ -541,7 +541,7 @@ const greetingTab = computed(() =>
           class="h-8 font-mono"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Method</Label>
         <Select
           :model-value="config.method || 'GET'"
@@ -554,7 +554,7 @@ const greetingTab = computed(() =>
           </SelectContent>
         </Select>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <div class="flex items-center justify-between">
           <Label>Headers</Label>
           <Button variant="outline" size="sm" class="h-6" @click="addHeader">
@@ -592,7 +592,7 @@ const greetingTab = computed(() =>
           </Button>
         </div>
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Body Template</Label>
         <Textarea
           :model-value="config.body_template || ''"
@@ -603,7 +603,7 @@ const greetingTab = computed(() =>
           class="min-h-[60px] font-mono resize-none"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Timeout (seconds)</Label>
         <Input
           type="number"
@@ -617,7 +617,7 @@ const greetingTab = computed(() =>
           max="30"
         />
       </div>
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Store Response As (variable name)</Label>
         <Input
           :model-value="config.response_store_as || ''"
@@ -632,7 +632,7 @@ const greetingTab = computed(() =>
 
     <!-- Transfer: team selector -->
     <template v-if="node.type === 'transfer'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Team</Label>
         <Select
           :model-value="config.team_id || 'none'"
@@ -657,7 +657,7 @@ const greetingTab = computed(() =>
       </div>
 
       <!-- HTTP Callbacks per lifecycle event -->
-      <div class="space-y-2 mt-3">
+      <div class="gap-y-2 mt-3">
         <Label>HTTP Callbacks</Label>
         <p class="text-muted-foreground">
           Configure API calls to your CRM at each transfer stage.
@@ -686,9 +686,9 @@ const greetingTab = computed(() =>
 
           <div
             v-if="getCallbackConfig(event)._expanded"
-            class="px-3 pb-3 space-y-1.5 border-t"
+            class="px-3 pb-3 gap-y-1.5 border-t"
           >
-            <div class="space-y-1 pt-2">
+            <div class="gap-y-1 pt-2">
               <Label>URL</Label>
               <Input
                 :model-value="getCallbackConfig(event).url || ''"
@@ -700,7 +700,7 @@ const greetingTab = computed(() =>
                 class="h-7 font-mono"
               />
             </div>
-            <div class="space-y-1">
+            <div class="gap-y-1">
               <Label>Method</Label>
               <Select
                 :model-value="getCallbackConfig(event).method || 'POST'"
@@ -715,7 +715,7 @@ const greetingTab = computed(() =>
                 </SelectContent>
               </Select>
             </div>
-            <div class="space-y-1">
+            <div class="gap-y-1">
               <div class="flex items-center justify-between">
                 <Label>Headers</Label>
                 <Button
@@ -762,7 +762,7 @@ const greetingTab = computed(() =>
             </div>
             <div
               v-if="(getCallbackConfig(event).method || 'POST') === 'POST'"
-              class="space-y-1"
+              class="gap-y-1"
             >
               <Label>Body Template</Label>
               <Textarea
@@ -823,7 +823,7 @@ const greetingTab = computed(() =>
 
     <!-- Goto Flow: flow selector -->
     <template v-if="node.type === 'goto_flow'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Target Flow</Label>
         <Select
           :model-value="config.flow_id || 'none'"
@@ -850,7 +850,7 @@ const greetingTab = computed(() =>
 
     <!-- Timing: schedule -->
     <template v-if="node.type === 'timing'">
-      <div class="space-y-1.5">
+      <div class="gap-y-1.5">
         <Label>Schedule</Label>
         <div
           v-for="(entry, idx) in schedule"

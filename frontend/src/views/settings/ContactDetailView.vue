@@ -313,7 +313,7 @@ onMounted(async () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <div
               class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
@@ -334,17 +334,17 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("contacts.profileName", "Profile Name") }}</Label>
             <Input v-model="form.profile_name" :disabled="!canWrite" />
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("contacts.phoneNumber") }}</Label>
             <Input v-model="form.phone_number" disabled />
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("contacts.whatsappAccount", "WhatsApp Account")
             }}</Label>
@@ -370,7 +370,7 @@ onMounted(async () => {
             </Select>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("contacts.tags") }}</Label>
             <Popover v-model:open="tagSelectorOpen">
               <PopoverTrigger as-child>
@@ -448,7 +448,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("contacts.assignedAgent", "Assigned Agent") }}</Label>
             <Popover v-model:open="agentSelectorOpen">
               <PopoverTrigger as-child>

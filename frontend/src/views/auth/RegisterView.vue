@@ -78,7 +78,7 @@ const handleRegister = async () => {
     class="min-h-screen flex items-center justify-center bg-background p-4"
   >
     <Card class="w-full max-w-md">
-      <CardHeader class="space-y-1 text-center">
+      <CardHeader class="gap-y-1 text-center">
         <div class="flex justify-center mb-4">
           <div
             class="size-12 rounded-xl bg-primary flex items-center justify-center"
@@ -103,7 +103,7 @@ const handleRegister = async () => {
             </p>
           </div>
         </CardContent>
-        <CardFooter class="flex-col space-y-4">
+        <CardFooter class="flex-col gap-y-4">
           <RouterLink to="/login" class="w-full">
             <Button variant="outline" class="w-full">
               {{ $t("auth.signIn") }}
@@ -114,8 +114,8 @@ const handleRegister = async () => {
 
       <!-- Has org ID — show registration form -->
       <form v-else @submit.prevent="handleRegister">
-        <CardContent class="space-y-4">
-          <div class="space-y-2">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-2">
             <Label for="fullName">{{ $t("auth.fullName") }}</Label>
             <Input
               id="fullName"
@@ -126,7 +126,7 @@ const handleRegister = async () => {
               autocomplete="name"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label for="email">{{ $t("common.email") }}</Label>
             <Input
               id="email"
@@ -137,7 +137,7 @@ const handleRegister = async () => {
               autocomplete="email"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label for="password">{{ $t("auth.password") }}</Label>
             <Input
               id="password"
@@ -148,7 +148,7 @@ const handleRegister = async () => {
               autocomplete="new-password"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label for="confirmPassword">{{
               $t("auth.confirmPassword")
             }}</Label>
@@ -162,7 +162,7 @@ const handleRegister = async () => {
             />
           </div>
         </CardContent>
-        <CardFooter class="flex-col space-y-4">
+        <CardFooter class="flex-col gap-y-4">
           <Button type="submit" class="w-full" :disabled="isLoading">
             <Spinner v-if="isLoading" class="mr-2 size-4" />
             {{ $t("auth.createAccountBtn") }}

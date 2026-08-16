@@ -306,12 +306,12 @@ onMounted(async () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label>{{ $t("teams.name", "Name") }} *</Label>
             <Input v-model="form.name" :disabled="!canWrite" />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("common.description", "Description") }}</Label>
             <Textarea
               v-model="form.description"
@@ -319,7 +319,7 @@ onMounted(async () => {
               :disabled="!canWrite"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("teams.assignmentStrategy", "Assignment Strategy")
             }}</Label>
@@ -336,7 +336,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div v-if="form.assignment_strategy !== 'manual'" class="space-y-1.5">
+          <div v-if="form.assignment_strategy !== 'manual'" class="gap-y-1.5">
             <Label
               >{{ $t("teams.perAgentTimeout", "Per-Agent Timeout") }} ({{
                 $t("common.seconds", "seconds")
@@ -372,9 +372,9 @@ onMounted(async () => {
             >
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <!-- Current Members -->
-          <div v-if="members.length > 0" class="space-y-2">
+          <div v-if="members.length > 0" class="gap-y-2">
             <div
               v-for="member in members"
               :key="member.user_id"
@@ -426,7 +426,7 @@ onMounted(async () => {
               </div>
               <div
                 v-if="availableUsers.length > 0"
-                class="space-y-1 max-h-48 overflow-y-auto"
+                class="gap-y-1 max-h-48 overflow-y-auto"
               >
                 <div
                   v-for="user in availableUsers"

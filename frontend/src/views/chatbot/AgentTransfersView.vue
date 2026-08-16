@@ -444,9 +444,9 @@ function formatTimeRemaining(deadline: string | undefined): string {
 
     <!-- Content -->
     <ScrollArea class="flex-1">
-      <div class="p-6 space-y-6">
+      <div class="p-6 gap-y-6">
         <!-- Loading skeleton -->
-        <div v-if="isLoading" class="space-y-4">
+        <div v-if="isLoading" class="gap-y-4">
           <Skeleton class="h-12 w-full bg-muted rounded-xl" />
           <Skeleton class="h-64 w-full bg-muted rounded-xl" />
         </div>
@@ -513,7 +513,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         {{ getSourceBadge(transfer.source).label }}
                       </Badge>
                     </TableCell>
-                    <TableCell class="text-right space-x-2">
+                    <TableCell class="text-right gap-x-2">
                       <IconButton
                         :icon="MessageSquare"
                         :label="$t('agentTransfers.viewChat')"
@@ -626,7 +626,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                         <TableCell class="max-w-[200px] truncate">{{
                           transfer.notes || "-"
                         }}</TableCell>
-                        <TableCell class="text-right space-x-2">
+                        <TableCell class="text-right gap-x-2">
                           <Button
                             size="sm"
                             variant="outline"
@@ -772,7 +772,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <div class="space-y-1">
+                              <div class="gap-y-1">
                                 <p v-if="transfer.sla_response_deadline">
                                   {{ $t("agentTransfers.responseDeadline") }}:
                                   {{
@@ -812,7 +812,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                             {{ getSourceBadge(transfer.source).label }}
                           </Badge>
                         </TableCell>
-                        <TableCell class="text-right space-x-2">
+                        <TableCell class="text-right gap-x-2">
                           <Button
                             size="sm"
                             variant="outline"
@@ -923,7 +923,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <div class="space-y-1">
+                              <div class="gap-y-1">
                                 <p v-if="transfer.picked_up_at">
                                   {{ $t("agentTransfers.pickedUpAt") }}:
                                   {{ formatDate(transfer.picked_up_at) }}
@@ -953,7 +953,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
                             {{ getSourceBadge(transfer.source).label }}
                           </Badge>
                         </TableCell>
-                        <TableCell class="text-right space-x-2">
+                        <TableCell class="text-right gap-x-2">
                           <IconButton
                             :icon="UserPlus"
                             :label="$t('agentTransfers.assign')"
@@ -1098,7 +1098,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
           </DialogDescription>
         </DialogHeader>
 
-        <div class="space-y-4 py-4">
+        <div class="gap-y-4 py-4">
           <div
             v-if="transferToAssign"
             class="border rounded-lg p-3 bg-muted/50"
@@ -1113,7 +1113,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
             </p>
           </div>
 
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <label class="font-medium">{{
               $t("agentTransfers.teamQueue")
             }}</label>
@@ -1139,7 +1139,7 @@ function formatTimeRemaining(deadline: string | undefined): string {
             </p>
           </div>
 
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <label class="font-medium">{{
               $t("agentTransfers.assignToAgent")
             }}</label>

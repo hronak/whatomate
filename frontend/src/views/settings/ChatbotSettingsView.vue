@@ -501,7 +501,7 @@ function removeEscalationUser(userId: string) {
       :icon="Bot"
     />
     <ScrollArea class="flex-1">
-      <div class="p-6 space-y-4 max-w-4xl mx-auto">
+      <div class="p-6 gap-y-4 max-w-4xl mx-auto">
         <Tabs default-value="messages" class="w-full">
           <TabsList class="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="messages">
@@ -535,8 +535,8 @@ function removeEscalationUser(userId: string) {
                   $t("chatbotSettings.messagesDesc")
                 }}</CardDescription>
               </CardHeader>
-              <CardContent class="space-y-4">
-                <div class="space-y-2">
+              <CardContent class="gap-y-4">
+                <div class="gap-y-2">
                   <Label for="greeting">{{
                     $t("chatbotSettings.greetingMessage")
                   }}</Label>
@@ -567,7 +567,7 @@ function removeEscalationUser(userId: string) {
                     </div>
                     <div
                       v-if="chatbotSettings.greeting_buttons.length > 0"
-                      class="space-y-2"
+                      class="gap-y-2"
                     >
                       <div
                         v-for="(
@@ -601,7 +601,7 @@ function removeEscalationUser(userId: string) {
 
                 <Separator />
 
-                <div class="space-y-2">
+                <div class="gap-y-2">
                   <Label for="fallback">{{
                     $t("chatbotSettings.fallbackMessage")
                   }}</Label>
@@ -632,7 +632,7 @@ function removeEscalationUser(userId: string) {
                     </div>
                     <div
                       v-if="chatbotSettings.fallback_buttons.length > 0"
-                      class="space-y-2"
+                      class="gap-y-2"
                     >
                       <div
                         v-for="(
@@ -666,7 +666,7 @@ function removeEscalationUser(userId: string) {
 
                 <Separator />
 
-                <div class="space-y-2">
+                <div class="gap-y-2">
                   <Label for="timeout">{{
                     $t("chatbotSettings.sessionTimeout")
                   }}</Label>
@@ -712,7 +712,7 @@ function removeEscalationUser(userId: string) {
                   $t("chatbotSettings.agentSettingsDesc")
                 }}</CardDescription>
               </CardHeader>
-              <CardContent class="space-y-4">
+              <CardContent class="gap-y-4">
                 <div class="flex items-center justify-between py-2">
                   <div>
                     <p class="font-medium">
@@ -794,7 +794,7 @@ function removeEscalationUser(userId: string) {
                   $t("chatbotSettings.businessHoursDesc")
                 }}</CardDescription>
               </CardHeader>
-              <CardContent class="space-y-4">
+              <CardContent class="gap-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium">
@@ -814,11 +814,11 @@ function removeEscalationUser(userId: string) {
 
                 <div
                   v-if="chatbotSettings.business_hours_enabled"
-                  class="space-y-4 pt-2"
+                  class="gap-y-4 pt-2"
                 >
                   <Separator />
 
-                  <div class="border rounded-lg p-4 space-y-3">
+                  <div class="border rounded-lg p-4 gap-y-3">
                     <div
                       v-for="hour in chatbotSettings.business_hours"
                       :key="hour.day"
@@ -861,7 +861,7 @@ function removeEscalationUser(userId: string) {
 
                   <Separator />
 
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label>{{ $t("chatbotSettings.outOfHoursMessage") }}</Label>
                     <Textarea
                       v-model="chatbotSettings.out_of_hours_message"
@@ -921,7 +921,7 @@ function removeEscalationUser(userId: string) {
                   $t("chatbotSettings.slaSettingsDesc")
                 }}</CardDescription>
               </CardHeader>
-              <CardContent class="space-y-4">
+              <CardContent class="gap-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium">
@@ -937,11 +937,11 @@ function removeEscalationUser(userId: string) {
                   />
                 </div>
 
-                <div v-if="isSLAEnabled" class="space-y-4 pt-2">
+                <div v-if="isSLAEnabled" class="gap-y-4 pt-2">
                   <Separator />
 
                   <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.responseTime") }}</Label>
                       <Input
                         v-model.number="slaSettings.sla_response_minutes"
@@ -953,7 +953,7 @@ function removeEscalationUser(userId: string) {
                         {{ $t("chatbotSettings.responseTimeHint") }}
                       </p>
                     </div>
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.escalationTime") }}</Label>
                       <Input
                         v-model.number="slaSettings.sla_escalation_minutes"
@@ -968,7 +968,7 @@ function removeEscalationUser(userId: string) {
                   </div>
 
                   <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.resolutionTime") }}</Label>
                       <Input
                         v-model.number="slaSettings.sla_resolution_minutes"
@@ -980,7 +980,7 @@ function removeEscalationUser(userId: string) {
                         {{ $t("chatbotSettings.resolutionTimeHint") }}
                       </p>
                     </div>
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.autoCloseHours") }}</Label>
                       <Input
                         v-model.number="slaSettings.sla_auto_close_hours"
@@ -994,7 +994,7 @@ function removeEscalationUser(userId: string) {
                     </div>
                   </div>
 
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label>{{ $t("chatbotSettings.autoCloseMessage") }}</Label>
                     <Textarea
                       v-model="slaSettings.sla_auto_close_message"
@@ -1005,7 +1005,7 @@ function removeEscalationUser(userId: string) {
                     />
                   </div>
 
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label>{{
                       $t("chatbotSettings.customerWarningMessage")
                     }}</Label>
@@ -1020,7 +1020,7 @@ function removeEscalationUser(userId: string) {
 
                   <Separator />
 
-                  <div class="space-y-3">
+                  <div class="gap-y-3">
                     <div class="flex items-center justify-between">
                       <div>
                         <Label>{{
@@ -1098,7 +1098,7 @@ function removeEscalationUser(userId: string) {
                 <Separator class="my-6" />
 
                 <!-- Client Inactivity Settings (Chatbot Only) -->
-                <div class="space-y-4">
+                <div class="gap-y-4">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="font-medium">
@@ -1118,9 +1118,9 @@ function removeEscalationUser(userId: string) {
                     />
                   </div>
 
-                  <div v-if="isClientReminderEnabled" class="space-y-4 pt-2">
+                  <div v-if="isClientReminderEnabled" class="gap-y-4 pt-2">
                     <div class="grid grid-cols-2 gap-4">
-                      <div class="space-y-2">
+                      <div class="gap-y-2">
                         <Label>{{ $t("chatbotSettings.reminderAfter") }}</Label>
                         <Input
                           v-model.number="slaSettings.client_reminder_minutes"
@@ -1132,7 +1132,7 @@ function removeEscalationUser(userId: string) {
                           {{ $t("chatbotSettings.reminderAfterHint") }}
                         </p>
                       </div>
-                      <div class="space-y-2">
+                      <div class="gap-y-2">
                         <Label>{{
                           $t("chatbotSettings.autoCloseAfter")
                         }}</Label>
@@ -1148,7 +1148,7 @@ function removeEscalationUser(userId: string) {
                       </div>
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.reminderMessage") }}</Label>
                       <Textarea
                         v-model="slaSettings.client_reminder_message"
@@ -1159,7 +1159,7 @@ function removeEscalationUser(userId: string) {
                       />
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{
                         $t("chatbotSettings.clientAutoCloseMessage")
                       }}</Label>
@@ -1201,7 +1201,7 @@ function removeEscalationUser(userId: string) {
                   $t("chatbotSettings.aiSettingsDesc")
                 }}</CardDescription>
               </CardHeader>
-              <CardContent class="space-y-4">
+              <CardContent class="gap-y-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium">
@@ -1217,11 +1217,11 @@ function removeEscalationUser(userId: string) {
                   />
                 </div>
 
-                <div v-if="isAIEnabled" class="space-y-4 pt-2">
+                <div v-if="isAIEnabled" class="gap-y-4 pt-2">
                   <Separator />
 
                   <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.aiProvider") }}</Label>
                       <Select v-model="aiSettings.ai_provider">
                         <SelectTrigger>
@@ -1242,7 +1242,7 @@ function removeEscalationUser(userId: string) {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <Label>{{ $t("chatbotSettings.model") }}</Label>
                       <Select
                         v-model="aiSettings.ai_model"
@@ -1268,7 +1268,7 @@ function removeEscalationUser(userId: string) {
                     </div>
                   </div>
 
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label>{{ $t("chatbotSettings.apiKey") }}</Label>
                     <Input
                       v-model="aiSettings.ai_api_key"
@@ -1282,7 +1282,7 @@ function removeEscalationUser(userId: string) {
                     </p>
                   </div>
 
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label>{{ $t("chatbotSettings.maxTokens") }}</Label>
                     <Input
                       v-model.number="aiSettings.ai_max_tokens"
@@ -1293,7 +1293,7 @@ function removeEscalationUser(userId: string) {
                     />
                   </div>
 
-                  <div class="space-y-2">
+                  <div class="gap-y-2">
                     <Label>{{ $t("chatbotSettings.systemPrompt") }}</Label>
                     <Textarea
                       v-model="aiSettings.ai_system_prompt"

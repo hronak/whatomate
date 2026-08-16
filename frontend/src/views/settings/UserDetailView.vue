@@ -260,7 +260,7 @@ onMounted(async () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <div
               class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"
@@ -276,14 +276,14 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("users.fullName") }}
               <span class="text-destructive">*</span></Label
             >
             <Input v-model="form.full_name" :disabled="!canWrite || isMember" />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("common.email") }}
               <span class="text-destructive">*</span></Label
@@ -294,7 +294,7 @@ onMounted(async () => {
               :disabled="!canWrite || isMember"
             />
           </div>
-          <div v-if="!isMember" class="space-y-1.5">
+          <div v-if="!isMember" class="gap-y-1.5">
             <Label>
               {{ $t("users.password") }}
               <span class="text-muted-foreground">{{
@@ -308,7 +308,7 @@ onMounted(async () => {
               :disabled="!canWrite"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("users.role") }}
               <span class="text-destructive">*</span></Label

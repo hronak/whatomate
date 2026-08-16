@@ -276,7 +276,7 @@ function downloadSampleCsv() {
         </TabsList>
 
         <!-- Export Tab -->
-        <TabsContent v-if="canExport" value="export" class="space-y-4 mt-4">
+        <TabsContent v-if="canExport" value="export" class="gap-y-4 mt-4">
           <div
             v-if="isLoadingExportConfig"
             class="flex items-center justify-center py-8"
@@ -284,14 +284,14 @@ function downloadSampleCsv() {
             <Spinner class="size-6 text-muted-foreground" />
           </div>
           <template v-else>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label>{{ $t("importExport.selectColumns") }}</Label>
               <ScrollArea class="h-48 border rounded-md p-3">
-                <div class="space-y-2">
+                <div class="gap-y-2">
                   <div
                     v-for="col in exportColumns"
                     :key="col.key"
-                    class="flex items-center space-x-2"
+                    class="flex items-center gap-x-2"
                   >
                     <Checkbox
                       :id="'col-' + col.key"
@@ -325,7 +325,7 @@ function downloadSampleCsv() {
         </TabsContent>
 
         <!-- Import Tab -->
-        <TabsContent v-if="canImport" value="import" class="space-y-4 mt-4">
+        <TabsContent v-if="canImport" value="import" class="gap-y-4 mt-4">
           <div
             v-if="isLoadingImportConfig"
             class="flex items-center justify-center py-8"
@@ -334,7 +334,7 @@ function downloadSampleCsv() {
           </div>
           <template v-else>
             <!-- Column Info -->
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <div>
                 <span class="font-medium"
                   >{{ $t("importExport.requiredColumns") }}:</span
@@ -371,13 +371,13 @@ function downloadSampleCsv() {
             </div>
 
             <!-- File Upload -->
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label>{{ $t("importExport.selectCsvFile") }}</Label>
               <Input type="file" accept=".csv" @change="handleFileSelect" />
             </div>
 
             <!-- Update on duplicate -->
-            <div v-if="uniqueColumn" class="flex items-center space-x-2">
+            <div v-if="uniqueColumn" class="flex items-center gap-x-2">
               <Checkbox
                 id="update-dup"
                 :checked="updateOnDuplicate"
@@ -391,7 +391,7 @@ function downloadSampleCsv() {
             <!-- Import Result -->
             <div
               v-if="importResult"
-              class="rounded-md p-3 space-y-2"
+              class="rounded-md p-3 gap-y-2"
               :class="
                 importResult.errors > 0
                   ? 'bg-amber-500/10 border border-amber-500/20'
@@ -408,7 +408,7 @@ function downloadSampleCsv() {
                   $t("importExport.importComplete")
                 }}</span>
               </div>
-              <div class="text-muted-foreground space-y-1">
+              <div class="text-muted-foreground gap-y-1">
                 <p>
                   {{ $t("importExport.created") }}: {{ importResult.created }}
                 </p>

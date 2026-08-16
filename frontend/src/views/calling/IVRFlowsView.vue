@@ -212,7 +212,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
+  <div class="p-6 gap-y-6">
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold">{{ t("calling.ivrFlows") }}</h1>
@@ -375,15 +375,15 @@ onMounted(async () => {
           </DialogDescription>
         </DialogHeader>
 
-        <div class="space-y-4">
-          <div class="space-y-2">
+        <div class="gap-y-4">
+          <div class="gap-y-2">
             <Label>{{ t("calling.name") }}</Label>
             <Input
               v-model="createForm.name"
               :placeholder="t('calling.flowNamePlaceholder')"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>{{ t("calling.account") }}</Label>
             <Select v-model="createForm.whatsapp_account">
               <SelectTrigger>
@@ -400,7 +400,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>{{ t("calling.description") }}</Label>
             <Textarea
               v-model="createForm.description"

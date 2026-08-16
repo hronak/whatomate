@@ -400,7 +400,7 @@ onMounted(async () => {
       <!-- Test Result -->
       <Card v-if="testResult">
         <CardContent class="p-4">
-          <div v-if="testResult.success" class="space-y-2">
+          <div v-if="testResult.success" class="gap-y-2">
             <div class="flex items-center gap-2 text-success">
               <CheckCircle2 class="size-4" />
               <span class="font-medium">{{
@@ -438,7 +438,7 @@ onMounted(async () => {
                 class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-muted/20 p-3 rounded-lg border border-border/30"
               >
                 <!-- Verified Name -->
-                <div v-if="testResult.verified_name" class="space-y-1">
+                <div v-if="testResult.verified_name" class="gap-y-1">
                   <span class="text-muted-foreground block font-medium">{{
                     $t("accounts.verifiedName", "Verified Name")
                   }}</span>
@@ -449,7 +449,7 @@ onMounted(async () => {
                   >
                 </div>
                 <!-- Quality Rating -->
-                <div class="space-y-1">
+                <div class="gap-y-1">
                   <span class="text-muted-foreground block font-medium">{{
                     $t("accounts.qualityRating", "Quality Rating")
                   }}</span>
@@ -464,7 +464,7 @@ onMounted(async () => {
                   </Badge>
                 </div>
                 <!-- Messaging Limit Tier -->
-                <div class="space-y-1">
+                <div class="gap-y-1">
                   <span class="text-muted-foreground block font-medium">{{
                     $t("accounts.messagingLimitTier", "Messaging Limit")
                   }}</span>
@@ -482,7 +482,7 @@ onMounted(async () => {
                 <!-- Verification Status -->
                 <div
                   v-if="testResult.code_verification_status"
-                  class="space-y-1"
+                  class="gap-y-1"
                 >
                   <span class="text-muted-foreground block font-medium">{{
                     $t("accounts.codeVerificationStatus", "Verification Status")
@@ -527,8 +527,8 @@ onMounted(async () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label>{{ $t("accounts.accountName", "Account Name") }} *</Label>
             <Input v-model="form.name" :disabled="!canWrite" />
           </div>
@@ -536,17 +536,17 @@ onMounted(async () => {
           <Separator />
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("accounts.metaAppId", "Meta App ID") }}</Label>
               <Input v-model="form.app_id" :disabled="!canWrite" />
             </div>
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label
                 >{{ $t("accounts.phoneNumberId", "Phone Number ID") }} *</Label
               >
               <Input v-model="form.phone_id" :disabled="!canWrite" />
             </div>
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label
                 >{{
                   $t("accounts.businessAccountId", "Business Account ID")
@@ -555,7 +555,7 @@ onMounted(async () => {
               >
               <Input v-model="form.business_id" :disabled="!canWrite" />
             </div>
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("accounts.apiVersion", "API Version") }}</Label>
               <Input v-model="form.api_version" :disabled="!canWrite" />
             </div>
@@ -564,7 +564,7 @@ onMounted(async () => {
           <Separator />
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>
                 {{ $t("accounts.accessToken", "Access Token") }}
                 <span v-if="isNew" class="text-destructive">*</span>
@@ -589,7 +589,7 @@ onMounted(async () => {
                 {{ $t("accounts.configured", "Configured") }}
               </Badge>
             </div>
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>
                 {{ $t("accounts.appSecret", "App Secret") }}
                 <span v-if="!isNew" class="text-muted-foreground">{{
@@ -617,7 +617,7 @@ onMounted(async () => {
 
           <Separator />
 
-          <div class="space-y-3">
+          <div class="gap-y-3">
             <div class="flex items-center justify-between">
               <Label>{{
                 $t("accounts.defaultIncoming", "Default for Incoming")
@@ -649,7 +649,7 @@ onMounted(async () => {
               />
             </div>
             <div class="flex items-start justify-between gap-3">
-              <div class="space-y-0.5">
+              <div class="gap-y-0.5">
                 <Label>{{
                   $t(
                     "accounts.businessCallingEnabled",
@@ -682,7 +682,7 @@ onMounted(async () => {
             $t("accounts.webhookConfig", "Webhook Configuration")
           }}</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-3">
+        <CardContent class="gap-y-3">
           <div>
             <Label class="text-muted-foreground">{{
               $t("accounts.webhookUrl", "Webhook URL")
@@ -744,7 +744,7 @@ onMounted(async () => {
           </CardHeader>
           <CardContent>
             <ol
-              class="list-decimal list-inside space-y-2.5 text-muted-foreground"
+              class="list-decimal list-inside gap-y-2.5 text-muted-foreground"
             >
               <li>
                 {{ $t("accounts.setupStep1", "Go to") }}

@@ -163,7 +163,7 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-2">
+  <div class="gap-y-2">
     <!-- Empty state -->
     <div
       v-if="permissionGroups.length === 0"
@@ -205,7 +205,7 @@ watch(
             <div
               v-for="permission in group.permissions"
               :key="permission.key"
-              class="flex items-start space-x-2"
+              class="flex items-start gap-x-2"
             >
               <Checkbox
                 :id="permission.key"

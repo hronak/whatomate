@@ -76,7 +76,7 @@ async function changePassword() {
 
     <!-- Content -->
     <ScrollArea class="flex-1">
-      <div class="p-6 space-y-6 max-w-2xl mx-auto">
+      <div class="p-6 gap-y-6 max-w-2xl mx-auto">
         <!-- User Info -->
         <Card>
           <CardHeader>
@@ -85,7 +85,7 @@ async function changePassword() {
               $t("profile.accountInfoDesc")
             }}</CardDescription>
           </CardHeader>
-          <CardContent class="space-y-4">
+          <CardContent class="gap-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <Label class="text-muted-foreground">{{
@@ -119,8 +119,8 @@ async function changePassword() {
               $t("profile.changePasswordDesc")
             }}</CardDescription>
           </CardHeader>
-          <CardContent class="space-y-4">
-            <div class="space-y-2">
+          <CardContent class="gap-y-4">
+            <div class="gap-y-2">
               <Label for="current_password">{{
                 $t("profile.currentPassword")
               }}</Label>
@@ -141,7 +141,7 @@ async function changePassword() {
                 </button>
               </div>
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label for="new_password">{{ $t("profile.newPassword") }}</Label>
               <div class="relative">
                 <Input
@@ -163,7 +163,7 @@ async function changePassword() {
                 {{ $t("profile.passwordMinLength") }}
               </p>
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label for="confirm_password">{{
                 $t("profile.confirmNewPassword")
               }}</Label>

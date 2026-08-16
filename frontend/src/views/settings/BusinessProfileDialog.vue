@@ -249,7 +249,7 @@ async function handleFileChange(event: Event) {
       <Spinner class="size-8 text-muted-foreground" />
     </div>
 
-    <div v-else class="space-y-6">
+    <div v-else class="gap-y-6">
       <Alert variant="warning">
         <AlertTriangle class="size-4" />
         <AlertTitle>{{ $t("businessProfile.profileUpdates") }}</AlertTitle>
@@ -306,7 +306,7 @@ async function handleFileChange(event: Event) {
         </div>
 
         <!-- About -->
-        <div class="md:col-span-2 space-y-2">
+        <div class="md:col-span-2 gap-y-2">
           <Label for="about">{{ $t("businessProfile.about") }}</Label>
           <Input
             id="about"
@@ -320,7 +320,7 @@ async function handleFileChange(event: Event) {
         </div>
 
         <!-- Description -->
-        <div class="md:col-span-2 space-y-2">
+        <div class="md:col-span-2 gap-y-2">
           <Label for="description">{{
             $t("businessProfile.businessDescription")
           }}</Label>
@@ -337,7 +337,7 @@ async function handleFileChange(event: Event) {
         </div>
 
         <!-- Vertical (Category) -->
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label for="vertical">{{ $t("businessProfile.industry") }}</Label>
           <Select v-model="profile.vertical">
             <SelectTrigger>
@@ -360,7 +360,7 @@ async function handleFileChange(event: Event) {
         </div>
 
         <!-- Email -->
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label for="email">{{ $t("businessProfile.contactEmail") }}</Label>
           <div class="relative">
             <Mail
@@ -378,7 +378,7 @@ async function handleFileChange(event: Event) {
         </div>
 
         <!-- Address -->
-        <div class="md:col-span-2 space-y-2">
+        <div class="md:col-span-2 gap-y-2">
           <Label for="address">{{
             $t("businessProfile.businessAddress")
           }}</Label>
@@ -397,7 +397,7 @@ async function handleFileChange(event: Event) {
         </div>
 
         <!-- Websites -->
-        <div class="md:col-span-2 space-y-3">
+        <div class="md:col-span-2 gap-y-3">
           <Label>{{ $t("businessProfile.websites") }}</Label>
           <div
             v-for="(_, index) in profile.websites"

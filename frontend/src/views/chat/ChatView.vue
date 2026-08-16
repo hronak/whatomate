@@ -1898,7 +1898,7 @@ async function sendMediaMessage() {
               </Button>
             </PopoverTrigger>
             <PopoverContent align="end" class="w-56 p-2">
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <div class="flex items-center justify-between px-1">
                   <span class="font-medium">{{ $t("chat.filterByTags") }}</span>
                   <Button
@@ -1918,7 +1918,7 @@ async function sendMediaMessage() {
                 >
                   {{ $t("chat.noTagsAvailable") }}
                 </div>
-                <div v-else class="space-y-1 max-h-48 overflow-y-auto">
+                <div v-else class="gap-y-1 max-h-48 overflow-y-auto">
                   <button
                     v-for="tag in tagsStore.tags"
                     :key="tag.name"
@@ -2301,7 +2301,7 @@ async function sendMediaMessage() {
             :ref="(el: any) => (messagesScroll.scrollAreaRef.value = el)"
             class="h-full p-3 chat-background"
           >
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <!-- Loading indicator for older messages -->
               <div
                 v-if="contactsStore.isLoadingOlderMessages"
@@ -2563,7 +2563,7 @@ async function sendMediaMessage() {
                         message.message_type === 'contacts' &&
                         getContactsData(message).length > 0
                       "
-                      class="mb-2 space-y-2"
+                      class="mb-2 gap-y-2"
                     >
                       <div
                         v-for="(contact, idx) in getContactsData(message)"
@@ -3054,7 +3054,7 @@ async function sendMediaMessage() {
             {{ selectedTemplate?.display_name || selectedTemplate?.name }}
           </DialogDescription>
         </DialogHeader>
-        <div class="py-4 space-y-3">
+        <div class="py-4 gap-y-3">
           <!-- Header media upload -->
           <HeaderMediaUpload
             v-if="templateNeedsHeaderMedia"
@@ -3072,7 +3072,7 @@ async function sendMediaMessage() {
             @clear="clearTemplateHeaderMedia"
           />
 
-          <div v-if="showHeaderParamInput" class="space-y-1">
+          <div v-if="showHeaderParamInput" class="gap-y-1">
             <label class="font-medium flex items-center gap-1.5">
               <span>{{ templateHeaderParamName }}</span>
               <span
@@ -3090,7 +3090,7 @@ async function sendMediaMessage() {
           <div
             v-for="param in templateParamNames"
             :key="param"
-            class="space-y-1"
+            class="gap-y-1"
           >
             <label class="font-medium">{{ param }}</label>
             <Input
@@ -3102,7 +3102,7 @@ async function sendMediaMessage() {
           <div
             v-for="(btnParam, idx) in templateButtonUrlParams"
             :key="`btn-${btnParam.index}`"
-            class="space-y-1"
+            class="gap-y-1"
           >
             <label class="font-medium">
               {{
@@ -3121,7 +3121,7 @@ async function sendMediaMessage() {
               class="h-9"
             />
           </div>
-          <div v-if="templatePreview" class="space-y-1">
+          <div v-if="templatePreview" class="gap-y-1">
             <label class="font-medium text-muted-foreground">{{
               $t("chat.preview")
             }}</label>
@@ -3183,11 +3183,11 @@ async function sendMediaMessage() {
               {{ selectedCannedResponse?.name }}
             </DialogDescription>
           </DialogHeader>
-          <div class="py-4 space-y-3">
+          <div class="py-4 gap-y-3">
             <div
               v-for="param in cannedParamNames"
               :key="param"
-              class="space-y-1"
+              class="gap-y-1"
             >
               <label
                 class="font-medium"
@@ -3203,7 +3203,7 @@ async function sendMediaMessage() {
             </div>
             <div
               v-if="cannedPreview || cannedPreviewButtons.length"
-              class="space-y-1"
+              class="gap-y-1"
             >
               <label class="font-medium text-muted-foreground">{{
                 $t("chat.preview")
@@ -3258,7 +3258,7 @@ async function sendMediaMessage() {
             {{ $t("chat.assignContactDesc") }}
           </DialogDescription>
         </DialogHeader>
-        <div class="py-4 space-y-3">
+        <div class="py-4 gap-y-3">
           <!-- Search input -->
           <div class="relative">
             <Search
@@ -3284,7 +3284,7 @@ async function sendMediaMessage() {
           </Button>
           <Separator />
           <ScrollArea class="max-h-[280px]">
-            <div class="space-y-1">
+            <div class="gap-y-1">
               <Button
                 v-for="user in filteredAssignableUsers"
                 :key="user.id"
@@ -3332,7 +3332,7 @@ async function sendMediaMessage() {
             {{ selectedFile?.name }}
           </DialogDescription>
         </DialogHeader>
-        <div class="py-4 space-y-4">
+        <div class="py-4 gap-y-4">
           <!-- Image preview -->
           <div
             v-if="selectedFile?.type.startsWith('image/') && filePreviewUrl"

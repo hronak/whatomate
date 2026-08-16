@@ -214,7 +214,7 @@ const localListPickerOpen = computed({
 
                 <!-- Chat Messages -->
                 <ScrollArea class="flex-1 p-4">
-                  <div class="space-y-3">
+                  <div class="gap-y-3">
                     <!-- Bot Message Bubble -->
                     <div class="flex justify-start">
                       <div class="max-w-[85%]">
@@ -240,7 +240,7 @@ const localListPickerOpen = computed({
                             selectedStep.buttons.length > 0 &&
                             selectedStep.buttons.length <= 3
                           "
-                          class="mt-1 space-y-1"
+                          class="mt-1 gap-y-1"
                         >
                           <button
                             v-for="(btn, idx) in selectedStep.buttons"

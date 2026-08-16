@@ -315,8 +315,8 @@ onMounted(async () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label>{{ $t("keywords.keywordsLabel", "Keywords") }} *</Label>
             <Input
               v-model="form.keywords"
@@ -331,7 +331,7 @@ onMounted(async () => {
               }}
             </p>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("keywords.matchTypeLabel", "Match Type") }}</Label>
             <Select v-model="form.match_type" :disabled="!canWrite">
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -348,7 +348,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("keywords.responseType", "Response Type") }}</Label>
             <Select v-model="form.response_type" :disabled="!canWrite">
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -362,7 +362,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>
               {{
                 form.response_type === "transfer"
@@ -401,7 +401,7 @@ onMounted(async () => {
           </div>
 
           <!-- Buttons Section (only for text responses) -->
-          <div v-if="form.response_type === 'text'" class="space-y-1.5">
+          <div v-if="form.response_type === 'text'" class="gap-y-1.5">
             <div class="flex items-center justify-between">
               <Label>{{
                 $t("keywords.buttonsOptional", "Buttons (optional)")
@@ -427,7 +427,7 @@ onMounted(async () => {
                 )
               }}
             </p>
-            <div v-if="form.buttons.length > 0" class="space-y-2 mt-2">
+            <div v-if="form.buttons.length > 0" class="gap-y-2 mt-2">
               <div
                 v-for="(button, index) in form.buttons"
                 :key="index"
@@ -456,7 +456,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("keywords.priorityLabel", "Priority") }}</Label>
             <Input
               v-model.number="form.priority"

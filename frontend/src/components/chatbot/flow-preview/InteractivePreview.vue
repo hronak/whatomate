@@ -245,7 +245,7 @@ function handleGoToStep(stepName: string) {
 
             <!-- Chat Messages -->
             <ScrollArea ref="chatScrollRef" class="flex-1 p-4 whatsapp-bg">
-              <div class="space-y-3">
+              <div class="gap-y-3">
                 <!-- Idle State -->
                 <div
                   v-if="state.status === 'idle' && state.messages.length === 0"

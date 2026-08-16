@@ -215,7 +215,7 @@ const toggleGroup = (item: FilteredNavItem) => {
                 {{ $t(section.label) }}
               </div>
               
-              <div class="space-y-1 mt-1">
+              <div class="gap-y-1 mt-1">
                 <template v-for="item in section.items" :key="item.path">
                   <button
                     v-if="item.children"
@@ -258,7 +258,7 @@ const toggleGroup = (item: FilteredNavItem) => {
                     <span :class="isCollapsed && 'md:hidden'">{{ $t(item.name) }}</span>
                   </RouterLink>
 
-                  <div v-if="item.children && isGroupExpanded(item) && !isCollapsed" class="pl-11 pr-2 py-1 space-y-0.5">
+                  <div v-if="item.children && isGroupExpanded(item) && !isCollapsed" class="pl-11 pr-2 py-1 gap-y-0.5">
                     <RouterLink
                       v-for="child in item.children"
                       :key="child.path"
@@ -281,7 +281,7 @@ const toggleGroup = (item: FilteredNavItem) => {
 
           <div v-if="bottomSections.length > 0" class="mt-auto px-3 pt-6 pb-2">
             <template v-for="section in bottomSections" :key="section.label">
-              <div class="space-y-1">
+              <div class="gap-y-1">
                 <template v-for="item in section.items" :key="item.path">
                   <button
                     v-if="item.children"
@@ -324,9 +324,9 @@ const toggleGroup = (item: FilteredNavItem) => {
                     <span :class="isCollapsed && 'md:hidden'">{{ $t(item.name) }}</span>
                   </RouterLink>
 
-                  <div v-if="item.children && isGroupExpanded(item) && !isCollapsed" class="pl-2 pr-2 py-2 space-y-4">
+                  <div v-if="item.children && isGroupExpanded(item) && !isCollapsed" class="pl-2 pr-2 py-2 gap-y-4">
                     <template v-for="(group, gIdx) in getSubNavGroups(item)" :key="group.label || gIdx">
-                      <div class="space-y-0.5">
+                      <div class="gap-y-0.5">
                         <div
                           v-if="group.label"
                           class="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50"

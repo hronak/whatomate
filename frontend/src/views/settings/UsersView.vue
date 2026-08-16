@@ -573,8 +573,8 @@ async function copyInviteLink() {
       :create-submit-label="$t('users.createUser')"
       @submit="createUser"
     >
-      <div class="space-y-4">
-        <div class="space-y-2">
+      <div class="gap-y-4">
+        <div class="gap-y-2">
           <Label for="full_name"
             >{{ $t("users.fullName") }}
             <span class="text-destructive">*</span></Label
@@ -584,7 +584,7 @@ async function copyInviteLink() {
             :placeholder="$t('users.fullNamePlaceholder')"
           />
         </div>
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label for="email"
             >{{ $t("common.email") }}
             <span class="text-destructive">*</span></Label
@@ -595,7 +595,7 @@ async function copyInviteLink() {
             :placeholder="$t('users.emailPlaceholder')"
           />
         </div>
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label for="password"
             >{{ $t("users.password") }}
             <span class="text-destructive">*</span></Label
@@ -606,7 +606,7 @@ async function copyInviteLink() {
             :placeholder="$t('users.passwordPlaceholder')"
           />
         </div>
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label for="role"
             >{{ $t("users.role") }}
             <span class="text-destructive">*</span></Label
@@ -693,8 +693,8 @@ async function copyInviteLink() {
             $t("users.addExistingUserDesc")
           }}</DialogDescription>
         </DialogHeader>
-        <div class="space-y-4 py-4">
-          <div class="space-y-2">
+        <div class="gap-y-4 py-4">
+          <div class="gap-y-2">
             <Label for="existing-email"
               >{{ $t("common.email") }}
               <span class="text-destructive">*</span></Label
@@ -706,7 +706,7 @@ async function copyInviteLink() {
               :placeholder="$t('users.existingEmailPlaceholder')"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>{{ $t("users.role") }}</Label>
             <Select v-model="addExistingRoleId">
               <SelectTrigger>

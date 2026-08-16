@@ -39,7 +39,7 @@ const outputHandles = computed(() => {
     :has-input="!data?.isEntryNode"
   >
     <template #icon><Grid3X3 class="size-4" /></template>
-    <div v-if="options.length > 0" class="space-y-0.5">
+    <div v-if="options.length > 0" class="gap-y-0.5">
       <div v-for="[digit, opt] in options" :key="digit" class="flex gap-1">
         <span class="font-mono font-bold">{{ digit }}:</span>
         <span class="truncate">{{ (opt as any)?.label || "—" }}</span>

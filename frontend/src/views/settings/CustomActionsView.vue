@@ -540,8 +540,8 @@ onMounted(() => fetchActions());
             $t("customActions.dialogDesc")
           }}</DialogDescription>
         </DialogHeader>
-        <div class="space-y-4 py-4">
-          <div class="space-y-2">
+        <div class="gap-y-4 py-4">
+          <div class="gap-y-2">
             <Label for="name">{{ $t("customActions.name") }}</Label
             ><Input
               id="name"
@@ -549,7 +549,7 @@ onMounted(() => fetchActions());
               :placeholder="$t('customActions.namePlaceholder')"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>{{ $t("customActions.icon") }}</Label>
             <div class="flex flex-wrap gap-2">
               <Button
@@ -566,10 +566,10 @@ onMounted(() => fetchActions());
               /></Button>
             </div>
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>{{ $t("customActions.actionType") }}</Label>
             <RadioGroup v-model="formData.action_type" class="flex flex-col">
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center gap-x-2">
                 <RadioGroupItem value="webhook" id="type-webhook" /><Label
                   for="type-webhook"
                   class="flex items-center gap-2 cursor-pointer font-normal"
@@ -578,7 +578,7 @@ onMounted(() => fetchActions());
                   }}</Label
                 >
               </div>
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center gap-x-2">
                 <RadioGroupItem value="url" id="type-url" /><Label
                   for="type-url"
                   class="flex items-center gap-2 cursor-pointer font-normal"
@@ -587,7 +587,7 @@ onMounted(() => fetchActions());
                   }}</Label
                 >
               </div>
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center gap-x-2">
                 <RadioGroupItem value="javascript" id="type-javascript" /><Label
                   for="type-javascript"
                   class="flex items-center gap-2 cursor-pointer font-normal"
@@ -601,8 +601,8 @@ onMounted(() => fetchActions());
 
           <!-- Webhook Configuration -->
           <template v-if="formData.action_type === 'webhook'">
-            <div class="border-t pt-4 space-y-4">
-              <div class="space-y-2">
+            <div class="border-t pt-4 gap-y-4">
+              <div class="gap-y-2">
                 <Label for="url">{{ $t("customActions.webhookUrl") }}</Label
                 ><Input
                   id="url"
@@ -611,7 +611,7 @@ onMounted(() => fetchActions());
                   :placeholder="$t('customActions.webhookUrlPlaceholder')"
                 />
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <Label for="method">{{ $t("customActions.httpMethod") }}</Label>
                 <Select v-model="formData.config.method"
                   ><SelectTrigger><SelectValue /></SelectTrigger
@@ -623,9 +623,9 @@ onMounted(() => fetchActions());
                   ></Select
                 >
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <Label>{{ $t("customActions.headers") }}</Label>
-                <div class="space-y-2">
+                <div class="gap-y-2">
                   <div
                     v-for="(value, key) in formData.config.headers"
                     :key="key"
@@ -656,7 +656,7 @@ onMounted(() => fetchActions());
                   </div>
                 </div>
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <div class="flex items-center justify-between">
                   <Label for="body">{{ $t("customActions.requestBody") }}</Label
                   ><Button
@@ -682,8 +682,8 @@ onMounted(() => fetchActions());
 
           <!-- URL Configuration -->
           <template v-if="formData.action_type === 'url'">
-            <div class="border-t pt-4 space-y-4">
-              <div class="space-y-2">
+            <div class="border-t pt-4 gap-y-4">
+              <div class="gap-y-2">
                 <Label for="url">{{ $t("customActions.urlLabel") }}</Label
                 ><Input
                   id="url"
@@ -695,7 +695,7 @@ onMounted(() => fetchActions());
                   {{ $t("customActions.urlHint") }}
                 </p>
               </div>
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center gap-x-2">
                 <Switch
                   id="new-tab"
                   :checked="formData.config.open_in_new_tab"
@@ -709,8 +709,8 @@ onMounted(() => fetchActions());
 
           <!-- JavaScript Configuration -->
           <template v-if="formData.action_type === 'javascript'">
-            <div class="border-t pt-4 space-y-4">
-              <div class="space-y-2">
+            <div class="border-t pt-4 gap-y-4">
+              <div class="gap-y-2">
                 <Label for="code">{{ $t("customActions.jsCode") }}</Label>
                 <Textarea
                   id="code"

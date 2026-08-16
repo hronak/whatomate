@@ -315,7 +315,7 @@ onMounted(() => {
 
     <ScrollArea v-else class="flex-1">
       <div class="p-6">
-        <div class="max-w-6xl mx-auto space-y-6">
+        <div class="max-w-6xl mx-auto gap-y-6">
           <!-- Info Card -->
           <Card class="bg-info/30 border-info">
             <CardContent class="flex items-start gap-3 pt-6">
@@ -378,10 +378,10 @@ onMounted(() => {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent class="space-y-3">
+              <CardContent class="gap-y-3">
                 <div
                   v-if="getConfiguredProvider(key)"
-                  class="text-muted-foreground space-y-1"
+                  class="text-muted-foreground gap-y-1"
                 >
                   <p>
                     <span class="font-medium"
@@ -457,9 +457,9 @@ onMounted(() => {
           </DialogDescription>
         </DialogHeader>
 
-        <div class="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+        <div class="gap-y-4 py-4 max-h-[60vh] overflow-y-auto">
           <!-- Redirect URL -->
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label>{{ $t("sso.redirectUrl") }}</Label>
             <p class="text-muted-foreground mb-1">
               {{
@@ -487,7 +487,7 @@ onMounted(() => {
           </div>
 
           <!-- Client ID -->
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label for="client_id">{{ $t("sso.clientId") }}</Label>
             <Input
               id="client_id"
@@ -497,7 +497,7 @@ onMounted(() => {
           </div>
 
           <!-- Client Secret -->
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label for="client_secret">
               {{ $t("sso.clientSecret") }}
               <span
@@ -517,7 +517,7 @@ onMounted(() => {
 
           <!-- Custom Provider URLs -->
           <template v-if="editingProvider === 'custom'">
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label for="auth_url">{{ $t("sso.authUrl") }}</Label>
               <Input
                 id="auth_url"
@@ -525,7 +525,7 @@ onMounted(() => {
                 :placeholder="$t('sso.authUrlPlaceholder')"
               />
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label for="token_url">{{ $t("sso.tokenUrl") }}</Label>
               <Input
                 id="token_url"
@@ -533,7 +533,7 @@ onMounted(() => {
                 :placeholder="$t('sso.tokenUrlPlaceholder')"
               />
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label for="user_info_url">{{ $t("sso.userInfoUrl") }}</Label>
               <Input
                 id="user_info_url"
@@ -543,7 +543,7 @@ onMounted(() => {
             </div>
           </template>
 
-          <div class="border-t pt-4 space-y-4">
+          <div class="border-t pt-4 gap-y-4">
             <!-- Enable Toggle -->
             <div class="flex items-center justify-between">
               <div>
@@ -567,7 +567,7 @@ onMounted(() => {
             </div>
 
             <!-- Default Role -->
-            <div v-if="editForm.allow_auto_create" class="space-y-2">
+            <div v-if="editForm.allow_auto_create" class="gap-y-2">
               <Label>{{ $t("sso.defaultRole") }}</Label>
               <Select v-model="editForm.default_role">
                 <SelectTrigger>
@@ -584,7 +584,7 @@ onMounted(() => {
             </div>
 
             <!-- Allowed Domains -->
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label for="allowed_domains">{{
                 $t("sso.allowedEmailDomains")
               }}</Label>

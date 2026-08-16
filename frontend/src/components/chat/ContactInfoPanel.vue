@@ -275,7 +275,7 @@ async function updateContactTags(tags: string[]) {
     </div>
 
     <ScrollArea class="flex-1">
-      <div class="p-4 space-y-4">
+      <div class="p-4 gap-y-4">
         <!-- Contact Header -->
         <div class="flex flex-col items-center text-center pb-4 border-b">
           <Avatar class="size-16 mb-3">
@@ -377,7 +377,7 @@ async function updateContactTags(tags: string[]) {
         </div>
 
         <!-- Contact Metadata -->
-        <div v-if="hasMetadata" class="space-y-3">
+        <div v-if="hasMetadata" class="gap-y-3">
           <!-- General section: top-level primitives -->
           <MetadataSection
             v-if="metadataPrimitives.length > 0"
@@ -421,7 +421,7 @@ async function updateContactTags(tags: string[]) {
           <div
             v-for="section in sortedSections"
             :key="section.id"
-            class="space-y-2 border-t pt-4"
+            class="gap-y-2 border-t pt-4"
           >
             <Collapsible
               v-if="section.collapsible"

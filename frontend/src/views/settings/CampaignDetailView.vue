@@ -1205,8 +1205,8 @@ onUnmounted(() => {
             $t("campaigns.details", "Details")
           }}</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label>{{ $t("campaigns.name", "Name") }} *</Label>
             <Input
               v-model="form.name"
@@ -1216,7 +1216,7 @@ onUnmounted(() => {
               "
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("campaigns.whatsappAccount", "WhatsApp Account")
             }}</Label>
@@ -1237,7 +1237,7 @@ onUnmounted(() => {
               </SelectContent>
             </Select>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("campaigns.template", "Template") }}</Label>
             <Select
               v-model="form.template_id"
@@ -1268,7 +1268,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Media Upload Section -->
-          <div v-if="templateNeedsMedia" class="space-y-1.5">
+          <div v-if="templateNeedsMedia" class="gap-y-1.5">
             <Label>{{ $t("campaigns.headerMedia", "Header Media") }}</Label>
             <!-- Show existing media with preview -->
             <div
@@ -1330,11 +1330,11 @@ onUnmounted(() => {
           </div>
 
           <!-- Schedule field hidden until scheduling functionality is implemented -->
-          <!-- <div class="space-y-1.5">
+          <!-- <div class="gap-y-1.5">
           <Label>{{ $t('campaigns.scheduledAt', 'Schedule') }}</Label>
           <Input v-model="form.scheduled_at" type="datetime-local" :disabled="!isDraft" />
         </div> -->
-          <div v-if="!isNew && campaign" class="space-y-1.5">
+          <div v-if="!isNew && campaign" class="gap-y-1.5">
             <Label>{{ $t("campaigns.status", "Status") }}</Label>
             <div>
               <Badge
@@ -1409,7 +1409,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Progress Bar -->
-          <div v-if="campaign.total_recipients > 0" class="mt-4 space-y-2">
+          <div v-if="campaign.total_recipients > 0" class="mt-4 gap-y-2">
             <div
               class="flex items-center justify-between text-muted-foreground"
             >
@@ -1715,8 +1715,8 @@ onUnmounted(() => {
           </TabsList>
 
           <!-- Manual Entry Tab -->
-          <TabsContent value="manual" class="space-y-3 mt-3">
-            <div class="space-y-1.5">
+          <TabsContent value="manual" class="gap-y-3 mt-3">
+            <div class="gap-y-1.5">
               <Label class="text-muted-foreground">
                 {{ $t("campaigns.formatHint", "Format") }}:
                 <code class="bg-muted px-1 rounded">{{
@@ -1747,13 +1747,13 @@ onUnmounted(() => {
               </p>
               <div
                 v-else-if="manualInputValidation.invalidLines.length > 0"
-                class="space-y-1"
+                class="gap-y-1"
               >
                 <p class="text-destructive font-medium">
                   {{ manualInputValidation.invalidLines.length }} of
                   {{ manualInputValidation.totalLines }} lines have errors:
                 </p>
-                <ul class="list-disc list-inside text-destructive space-y-0.5">
+                <ul class="list-disc list-inside text-destructive gap-y-0.5">
                   <li
                     v-for="err in manualInputValidation.invalidLines.slice(
                       0,
@@ -1789,8 +1789,8 @@ onUnmounted(() => {
           </TabsContent>
 
           <!-- CSV Upload Tab -->
-          <TabsContent value="csv" class="space-y-3 mt-3">
-            <div class="space-y-1.5">
+          <TabsContent value="csv" class="gap-y-3 mt-3">
+            <div class="gap-y-1.5">
               <Label class="text-muted-foreground">
                 {{
                   $t(

@@ -322,8 +322,8 @@ onMounted(async () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("webhooks.name") }}
               <span class="text-destructive">*</span></Label
@@ -334,7 +334,7 @@ onMounted(async () => {
               :disabled="!canWrite"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("webhooks.webhookUrl", "URL") }}
               <span class="text-destructive">*</span></Label
@@ -346,7 +346,7 @@ onMounted(async () => {
               :disabled="!canWrite"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("webhooks.events") }}
               <span class="text-destructive">*</span></Label
@@ -374,7 +374,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("webhooks.secret") }}</Label>
             <Input
               v-model="form.secret"
@@ -384,9 +384,9 @@ onMounted(async () => {
             />
             <p class="text-muted-foreground">{{ $t("webhooks.secretHint") }}</p>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("webhooks.customHeaders") }}</Label>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <div
                 v-for="(value, key) in form.headers"
                 :key="key"

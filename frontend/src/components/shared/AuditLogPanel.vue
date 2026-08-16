@@ -145,7 +145,7 @@ onMounted(() => loadLogs());
             <!-- Changes -->
             <div
               v-if="log.action === 'updated' && log.changes?.length > 0"
-              class="mt-2 space-y-1"
+              class="mt-2 gap-y-1"
             >
               <div
                 v-for="(change, idx) in log.changes"

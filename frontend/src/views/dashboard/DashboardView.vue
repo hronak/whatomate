@@ -949,7 +949,7 @@ onMounted(() => {
 
     <!-- Content -->
     <ScrollArea class="flex-1">
-      <div class="p-6 space-y-6">
+      <div class="p-6 gap-y-6">
         <!-- Loading Skeleton -->
         <div v-if="isLoading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div
@@ -958,7 +958,7 @@ onMounted(() => {
             class="rounded-xl border border-border bg-card p-6"
           >
             <div
-              class="flex flex-row items-center justify-between space-y-0 pb-2"
+              class="flex flex-row items-center justify-between gap-y-0 pb-2"
             >
               <Skeleton class="h-4 w-24 bg-muted" />
               <Skeleton class="size-10 rounded-lg bg-muted" />
@@ -1019,7 +1019,7 @@ onMounted(() => {
               </div>
 
               <div
-                class="flex flex-row items-start justify-between space-y-0 pb-2"
+                class="flex flex-row items-start justify-between gap-y-0 pb-2"
               >
                 <div class="flex-1">
                   <span class="font-medium text-foreground/50">
@@ -1326,7 +1326,7 @@ onMounted(() => {
                 </template>
                 <!-- Row list (no group_by) -->
                 <template v-else-if="widgetData[item.i]?.table_rows?.length">
-                  <div class="space-y-3">
+                  <div class="gap-y-3">
                     <div
                       v-for="row in widgetData[item.i]?.table_rows"
                       :key="row.id"
@@ -1525,9 +1525,9 @@ onMounted(() => {
           </DialogDescription>
         </DialogHeader>
 
-        <div class="space-y-4 py-4">
+        <div class="gap-y-4 py-4">
           <!-- Name -->
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label class="text-foreground/70"
               >{{ $t("dashboard.widgetName") }} *</Label
             >
@@ -1539,7 +1539,7 @@ onMounted(() => {
           </div>
 
           <!-- Description -->
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label class="text-foreground/70">{{
               $t("dashboard.widgetDescription")
             }}</Label>
@@ -1552,7 +1552,7 @@ onMounted(() => {
           </div>
 
           <!-- Data Source (hidden for shortcuts) -->
-          <div v-if="widgetForm.display_type !== 'shortcuts'" class="space-y-2">
+          <div v-if="widgetForm.display_type !== 'shortcuts'" class="gap-y-2">
             <Label class="text-foreground/70"
               >{{ $t("dashboard.dataSource") }} *</Label
             >
@@ -1583,7 +1583,7 @@ onMounted(() => {
               widgetForm.display_type !== 'shortcuts' &&
               widgetForm.display_type !== 'table'
             "
-            class="space-y-2"
+            class="gap-y-2"
           >
             <Label class="text-foreground/70">{{
               $t("dashboard.metric")
@@ -1610,7 +1610,7 @@ onMounted(() => {
           </div>
 
           <!-- Display Type -->
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label class="text-foreground/70">{{
               $t("dashboard.displayType")
             }}</Label>
@@ -1641,7 +1641,7 @@ onMounted(() => {
           </div>
 
           <!-- Chart Type (visible when display type is chart) -->
-          <div v-if="widgetForm.display_type === 'chart'" class="space-y-2">
+          <div v-if="widgetForm.display_type === 'chart'" class="gap-y-2">
             <Label class="text-foreground/70">{{
               $t("dashboard.chartType")
             }}</Label>
@@ -1673,7 +1673,7 @@ onMounted(() => {
                 widgetForm.display_type === 'table') &&
               widgetForm.data_source
             "
-            class="space-y-2"
+            class="gap-y-2"
           >
             <Label class="text-foreground/70">{{
               $t("dashboard.groupBy")
@@ -1705,11 +1705,11 @@ onMounted(() => {
           </div>
 
           <!-- Shortcuts selector (only for shortcuts display type) -->
-          <div v-if="widgetForm.display_type === 'shortcuts'" class="space-y-2">
+          <div v-if="widgetForm.display_type === 'shortcuts'" class="gap-y-2">
             <Label class="text-foreground/70">{{
               $t("dashboard.selectShortcuts")
             }}</Label>
-            <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <div class="gap-y-2 max-h-64 overflow-y-auto pr-1">
               <label
                 v-for="(shortcut, key) in SHORTCUT_REGISTRY"
                 :key="key"
@@ -1734,7 +1734,7 @@ onMounted(() => {
           </div>
 
           <!-- Filters (hidden for shortcuts) -->
-          <div v-if="widgetForm.display_type !== 'shortcuts'" class="space-y-2">
+          <div v-if="widgetForm.display_type !== 'shortcuts'" class="gap-y-2">
             <div class="flex items-center justify-between">
               <Label class="text-foreground/70"
                 >{{ $t("dashboard.filters") }} ({{
@@ -1823,7 +1823,7 @@ onMounted(() => {
               widgetForm.display_type !== 'shortcuts' &&
               widgetForm.display_type !== 'table'
             "
-            class="space-y-2"
+            class="gap-y-2"
           >
             <Label class="text-foreground/70">{{
               $t("dashboard.color")

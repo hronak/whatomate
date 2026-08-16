@@ -257,8 +257,8 @@ onMounted(async () => {
             $t("teams.details", "Details")
           }}</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("apiKeys.name") }}
               <span class="text-destructive">*</span></Label
@@ -268,7 +268,7 @@ onMounted(async () => {
               :placeholder="$t('apiKeys.namePlaceholder')"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("apiKeys.expiration") }}</Label>
             <Input v-model="form.expires_at" type="datetime-local" />
             <p class="text-muted-foreground">
@@ -288,7 +288,7 @@ onMounted(async () => {
             <Badge :variant="statusVariant">{{ statusLabel }}</Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
             <div
               class="size-10 rounded-full bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0"
@@ -305,7 +305,7 @@ onMounted(async () => {
           </div>
 
           <div class="grid gap-4">
-            <div class="space-y-1">
+            <div class="gap-y-1">
               <p class="text-muted-foreground">
                 {{ $t("common.createdAt", "Created") }}
               </p>
@@ -315,7 +315,7 @@ onMounted(async () => {
                 }}
               </p>
             </div>
-            <div class="space-y-1">
+            <div class="gap-y-1">
               <p class="text-muted-foreground">
                 {{ $t("apiKeys.lastUsedAt", "Last Used") }}
               </p>
@@ -327,7 +327,7 @@ onMounted(async () => {
                 }}
               </p>
             </div>
-            <div class="space-y-1">
+            <div class="gap-y-1">
               <p class="text-muted-foreground">
                 {{ $t("apiKeys.expiresAt", "Expires") }}
               </p>
@@ -387,8 +387,8 @@ onMounted(async () => {
             </div>
           </DialogDescription>
         </DialogHeader>
-        <div class="space-y-4 py-4">
-          <div class="space-y-2">
+        <div class="gap-y-4 py-4">
+          <div class="gap-y-2">
             <Label>{{ $t("apiKeys.yourApiKey") }}</Label>
             <div class="flex gap-2">
               <Input

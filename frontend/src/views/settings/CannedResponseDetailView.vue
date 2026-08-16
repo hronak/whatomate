@@ -379,8 +379,8 @@ onMounted(() => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("cannedResponses.name") }}
               <span class="text-destructive">*</span></Label
@@ -392,7 +392,7 @@ onMounted(() => {
             />
           </div>
           <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("cannedResponses.shortcut") }}</Label>
               <div class="relative">
                 <span
@@ -410,7 +410,7 @@ onMounted(() => {
                 {{ $t("cannedResponses.shortcutHint") }}
               </p>
             </div>
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("cannedResponses.category") }}</Label>
               <Select v-model="form.category" :disabled="!canWrite">
                 <SelectTrigger>
@@ -428,7 +428,7 @@ onMounted(() => {
               </Select>
             </div>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("cannedResponses.content") }}
               <span class="text-destructive">*</span></Label
@@ -466,7 +466,7 @@ onMounted(() => {
             $t("cannedResponses.buttons", "Buttons")
           }}</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <MessageButtonsEditor
             :buttons="form.buttons"
             :allowed-types="['reply', 'url', 'voice_call', 'flow']"
@@ -487,7 +487,7 @@ onMounted(() => {
               {{ $t("common.preview", "Preview") }}
             </p>
             <div
-              class="max-w-sm bg-[#0a141a] dark:bg-[#0a141a] rounded-lg p-3 space-y-1"
+              class="max-w-sm bg-[#0a141a] dark:bg-[#0a141a] rounded-lg p-3 gap-y-1"
             >
               <p v-if="form.content" class="text-white whitespace-pre-wrap">
                 {{ form.content }}

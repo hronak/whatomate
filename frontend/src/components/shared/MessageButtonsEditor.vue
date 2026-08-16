@@ -151,7 +151,7 @@ function typeIcon(type?: string) {
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="gap-y-3">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <Label>
         {{ $t("flowBuilder.buttonOptions", "Buttons") }} ({{
@@ -217,11 +217,11 @@ function typeIcon(type?: string) {
       </div>
     </div>
 
-    <div class="space-y-2">
+    <div class="gap-y-2">
       <div
         v-for="(btn, idx) in buttons"
         :key="idx"
-        class="p-2 border rounded-md bg-muted/30 space-y-2"
+        class="p-2 border rounded-md bg-muted/30 gap-y-2"
       >
         <div class="flex items-center gap-2">
           <Badge variant="outline" class="px-1.5">
@@ -292,7 +292,7 @@ function typeIcon(type?: string) {
             {{ $t("flowBuilder.voiceCallTtlSuffix", "minutes (1–60)") }}
           </span>
         </div>
-        <div v-else-if="btn.type === 'flow'" class="space-y-1">
+        <div v-else-if="btn.type === 'flow'" class="gap-y-1">
           <select
             :value="btn.flow_id || ''"
             class="h-7 w-full rounded-md border bg-card px-2"

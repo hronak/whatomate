@@ -53,10 +53,10 @@ defineProps<{
     <ScrollArea v-else class="flex-1">
       <div class="p-6">
         <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 space-y-6">
+          <div class="lg:col-span-2 gap-y-6">
             <slot />
           </div>
-          <div class="space-y-6">
+          <div class="gap-y-6">
             <slot name="sidebar" />
           </div>
         </div>

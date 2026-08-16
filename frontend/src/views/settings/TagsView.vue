@@ -294,8 +294,8 @@ function getColorLabel(color: string): string {
       max-width="max-w-md"
       @submit="saveTag"
     >
-      <div class="space-y-4">
-        <div class="space-y-2">
+      <div class="gap-y-4">
+        <div class="gap-y-2">
           <Label
             >{{ $t("tags.name") }}
             <span class="text-destructive">*</span></Label
@@ -307,7 +307,7 @@ function getColorLabel(color: string): string {
           />
           <p class="text-muted-foreground">{{ $t("tags.maxCharacters") }}</p>
         </div>
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label>{{ $t("tags.color") }}</Label>
           <Select v-model="formData.color" :default-value="formData.color">
             <SelectTrigger>

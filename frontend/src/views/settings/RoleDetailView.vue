@@ -241,7 +241,7 @@ onMounted(async () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <p v-if="isSystem" class="text-muted-foreground">
             {{
               isSuperAdmin
@@ -249,7 +249,7 @@ onMounted(async () => {
                 : $t("roles.systemRoleViewOnly")
             }}
           </p>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label
               >{{ $t("roles.name") }}
               <span class="text-destructive">*</span></Label
@@ -260,7 +260,7 @@ onMounted(async () => {
               :disabled="!canEditForm || isSystem"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("roles.description") }}</Label>
             <Textarea
               v-model="form.description"
@@ -270,7 +270,7 @@ onMounted(async () => {
             />
           </div>
           <div v-if="!isSystem" class="flex items-center justify-between">
-            <div class="space-y-0.5">
+            <div class="gap-y-0.5">
               <Label class="font-normal cursor-pointer">{{
                 $t("roles.defaultRole")
               }}</Label>

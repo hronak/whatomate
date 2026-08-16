@@ -17,7 +17,7 @@ function handleClick(button: ButtonConfig) {
 </script>
 
 <template>
-  <div class="mt-1 space-y-1">
+  <div class="mt-1 gap-y-1">
     <button
       v-for="btn in buttons"
       :key="btn.id"

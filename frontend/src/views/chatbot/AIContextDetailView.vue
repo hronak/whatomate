@@ -265,8 +265,8 @@ onMounted(async () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div class="gap-y-1.5">
             <Label>{{ $t("aiContexts.name", "Name") }} *</Label>
             <Input
               v-model="form.name"
@@ -276,7 +276,7 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("aiContexts.contextType", "Context Type") }}</Label>
             <Select v-model="form.context_type">
               <SelectTrigger
@@ -294,7 +294,7 @@ onMounted(async () => {
             </Select>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("aiContexts.triggerKeywords", "Trigger Keywords")
             }}</Label>
@@ -317,7 +317,7 @@ onMounted(async () => {
             </p>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("aiContexts.contentPrompt", "Static Content")
             }}</Label>
@@ -339,7 +339,7 @@ onMounted(async () => {
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("aiContexts.priorityLabel", "Priority") }}</Label>
               <Input
                 v-model.number="form.priority"
@@ -374,7 +374,7 @@ onMounted(async () => {
             $t("aiContexts.apiConfiguration", "API Configuration")
           }}</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-4">
+        <CardContent class="gap-y-4">
           <p class="text-muted-foreground">
             {{
               $t(
@@ -385,7 +385,7 @@ onMounted(async () => {
           </p>
 
           <div class="grid grid-cols-4 gap-4">
-            <div class="col-span-1 space-y-1.5">
+            <div class="col-span-1 gap-y-1.5">
               <Label>{{ $t("aiContexts.method", "Method") }}</Label>
               <Select v-model="form.api_method">
                 <SelectTrigger
@@ -398,7 +398,7 @@ onMounted(async () => {
                 </SelectContent>
               </Select>
             </div>
-            <div class="col-span-3 space-y-1.5">
+            <div class="col-span-3 gap-y-1.5">
               <Label>{{ $t("aiContexts.apiUrl", "API URL") }}</Label>
               <Input
                 v-model="form.api_url"
@@ -422,7 +422,7 @@ onMounted(async () => {
             }}</code>
           </p>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("aiContexts.headersOptional", "Headers (optional)")
             }}</Label>
@@ -436,7 +436,7 @@ onMounted(async () => {
             </p>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("aiContexts.responsePath", "Response Path") }}</Label>
             <Input
               v-model="form.api_response_path"

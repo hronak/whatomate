@@ -395,7 +395,7 @@ function getProgressPercentage(campaign: Campaign): number {
                   </Badge>
                 </template>
                 <template #cell-stats="{ item: campaign }">
-                  <div class="space-y-1">
+                  <div class="gap-y-1">
                     <div
                       v-if="
                         campaign.status === 'running' ||

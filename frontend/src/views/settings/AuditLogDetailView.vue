@@ -117,7 +117,7 @@ onMounted(async () => {
         <CardTitle class="font-medium">{{ t("auditLogs.changes") }}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div v-if="log.changes && log.changes.length > 0" class="space-y-3">
+        <div v-if="log.changes && log.changes.length > 0" class="gap-y-3">
           <div
             v-for="(change, idx) in log.changes"
             :key="idx"
@@ -165,7 +165,7 @@ onMounted(async () => {
             }}</CardTitle>
           </div>
         </CardHeader>
-        <CardContent class="space-y-3">
+        <CardContent class="gap-y-3">
           <div>
             <span class="text-muted-foreground">{{ t("auditLogs.user") }}</span>
             <p class="font-medium">{{ log.user_name }}</p>

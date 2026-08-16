@@ -94,7 +94,7 @@ async function doTransfer(agentId?: string) {
         >
           {{ t("callTransfers.noTeams") }}
         </div>
-        <div v-else class="space-y-1 max-h-64 overflow-y-auto">
+        <div v-else class="gap-y-1 max-h-64 overflow-y-auto">
           <button
             v-for="team in teams"
             :key="team.id"
@@ -142,7 +142,7 @@ async function doTransfer(agentId?: string) {
         <div v-if="membersLoading" class="flex justify-center py-6">
           <Spinner class="size-5 text-muted-foreground" />
         </div>
-        <div v-else class="space-y-1 max-h-48 overflow-y-auto">
+        <div v-else class="gap-y-1 max-h-48 overflow-y-auto">
           <button
             v-for="member in members"
             :key="member.user_id"

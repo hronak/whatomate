@@ -208,7 +208,7 @@ function formatNoteTime(dateStr: string) {
       :ref="(el: any) => (notesScroll.scrollAreaRef.value = el)"
       class="flex-1 p-3"
     >
-      <div class="space-y-3">
+      <div class="gap-y-3">
         <!-- Loading older notes -->
         <div v-if="notesStore.isLoadingOlder" class="flex justify-center py-2">
           <Spinner class="size-4 text-foreground/30" />

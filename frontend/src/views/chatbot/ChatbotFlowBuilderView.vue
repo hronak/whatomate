@@ -1013,7 +1013,7 @@ onMounted(async () => {
 
         <!-- Flow settings when nothing is selected -->
         <ScrollArea v-else orientation="vertical" class="flex-1">
-          <div class="p-4 space-y-4 min-w-0">
+          <div class="p-4 gap-y-4 min-w-0">
             <CardHeader class="p-0 pb-2">
               <CardTitle class="font-medium">{{
                 $t("flowBuilder.flowSettings")
@@ -1021,7 +1021,7 @@ onMounted(async () => {
             </CardHeader>
 
             <!-- Trigger keywords -->
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("flowBuilder.triggerKeywords") }}</Label>
               <Input
                 v-model="triggerKeywords"
@@ -1036,7 +1036,7 @@ onMounted(async () => {
             <Separator />
 
             <!-- Initial message -->
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("flowBuilder.initialMessage") }}</Label>
               <Textarea
                 v-model="initialMessage"
@@ -1046,7 +1046,7 @@ onMounted(async () => {
             </div>
 
             <!-- Completion message -->
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("flowBuilder.completionMessage") }}</Label>
               <Textarea
                 v-model="completionMessage"
@@ -1068,8 +1068,8 @@ onMounted(async () => {
                   class="size-4"
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent class="pt-3 space-y-3">
-                <div class="space-y-1.5">
+              <CollapsibleContent class="pt-3 gap-y-3">
+                <div class="gap-y-1.5">
                   <Label>{{ $t("flowBuilder.action") }}</Label>
                   <Select v-model="onCompleteAction">
                     <SelectTrigger class="h-8"><SelectValue /></SelectTrigger>
@@ -1085,7 +1085,7 @@ onMounted(async () => {
                 </div>
 
                 <template v-if="onCompleteAction === 'webhook'">
-                  <div class="space-y-3 p-3 border rounded-lg bg-muted/30">
+                  <div class="gap-y-3 p-3 border rounded-lg bg-muted/30">
                     <div class="flex gap-2">
                       <div class="w-20">
                         <Label>{{ $t("flowBuilder.method") }}</Label>
@@ -1110,7 +1110,7 @@ onMounted(async () => {
                         />
                       </div>
                     </div>
-                    <div class="space-y-2">
+                    <div class="gap-y-2">
                       <div class="flex items-center justify-between">
                         <Label>{{ $t("flowBuilder.headers") }}</Label>
                         <Button
@@ -1158,7 +1158,7 @@ onMounted(async () => {
                         </Button>
                       </div>
                     </div>
-                    <div class="space-y-1">
+                    <div class="gap-y-1">
                       <Label>Body</Label>
                       <Textarea
                         v-model="completionConfig.body"
@@ -1205,7 +1205,7 @@ onMounted(async () => {
                     class="size-4"
                   />
                 </CollapsibleTrigger>
-                <CollapsibleContent class="pt-3 space-y-3">
+                <CollapsibleContent class="pt-3 gap-y-3">
                   <MetadataPanel
                     :created-at="createdAt"
                     :updated-at="updatedAt"

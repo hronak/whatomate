@@ -170,8 +170,8 @@ function closeDialog() {
         <DialogTitle>{{ $t("contacts.createTitle") }}</DialogTitle>
         <DialogDescription>{{ $t("contacts.createDesc") }}</DialogDescription>
       </DialogHeader>
-      <div class="space-y-4 py-4">
-        <div class="space-y-2">
+      <div class="gap-y-4 py-4">
+        <div class="gap-y-2">
           <Label
             >{{ $t("contacts.phoneNumber") }}
             <span class="text-destructive">*</span></Label
@@ -182,14 +182,14 @@ function closeDialog() {
           />
           <p class="text-muted-foreground">{{ $t("contacts.phoneHint") }}</p>
         </div>
-        <div class="space-y-2">
+        <div class="gap-y-2">
           <Label>{{ $t("contacts.profileName") }}</Label>
           <Input
             v-model="formData.profile_name"
             :placeholder="$t('contacts.namePlaceholder')"
           />
         </div>
-        <div v-if="availableAccounts.length > 0" class="space-y-2">
+        <div v-if="availableAccounts.length > 0" class="gap-y-2">
           <Label>{{ $t("contacts.whatsappAccount") }}</Label>
           <Select v-model="formData.whatsapp_account">
             <SelectTrigger>
@@ -206,7 +206,7 @@ function closeDialog() {
             </SelectContent>
           </Select>
         </div>
-        <div v-if="availableTags.length > 0" class="space-y-2">
+        <div v-if="availableTags.length > 0" class="gap-y-2">
           <Label>{{ $t("contacts.tags") }}</Label>
           <Popover v-model:open="tagSelectorOpen">
             <PopoverTrigger as-child>

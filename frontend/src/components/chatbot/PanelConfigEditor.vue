@@ -155,10 +155,10 @@ function setField(
 </script>
 
 <template>
-  <div class="space-y-3 min-w-0 overflow-hidden">
+  <div class="gap-y-3 min-w-0 overflow-hidden">
     <div
       v-if="availableVariables.length > 0"
-      class="text-muted-foreground space-y-1"
+      class="text-muted-foreground gap-y-1"
     >
       <div class="font-medium">Available variables</div>
       <div class="flex flex-wrap gap-1">
@@ -175,7 +175,7 @@ function setField(
       value, or an API node with response mapping.
     </div>
 
-    <div class="space-y-2">
+    <div class="gap-y-2">
       <div class="flex items-center justify-between">
         <Label>Sections</Label>
         <Button
@@ -198,7 +198,7 @@ function setField(
       <div
         v-for="(section, sectionIdx) in panelConfig.sections"
         :key="section.id"
-        class="border rounded-md p-2 space-y-2 bg-muted/20 min-w-0"
+        class="border rounded-md p-2 gap-y-2 bg-muted/20 min-w-0"
       >
         <div class="flex items-center gap-2">
           <Input
@@ -258,7 +258,7 @@ function setField(
           </div>
         </div>
 
-        <div class="space-y-1">
+        <div class="gap-y-1">
           <div class="flex items-center justify-between">
             <span class="text-muted-foreground">Fields:</span>
             <Select @update:model-value="(v: any) => addField(sectionIdx, v)">
@@ -293,7 +293,7 @@ function setField(
           <div
             v-for="(field, fieldIdx) in section.fields"
             :key="field.key"
-            class="bg-background rounded p-2 space-y-2"
+            class="bg-background rounded p-2 gap-y-2"
           >
             <div class="flex items-center gap-1">
               <Badge variant="secondary" class="font-mono">{{

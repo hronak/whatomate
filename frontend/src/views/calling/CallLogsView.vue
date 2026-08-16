@@ -274,7 +274,7 @@ watch(phoneSearch, () => {
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
+  <div class="p-6 gap-y-6">
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold">{{ t("calling.callLogs") }}</h1>
@@ -475,7 +475,7 @@ watch(phoneSearch, () => {
             }}
           </DialogDescription>
         </DialogHeader>
-        <div v-if="selectedLog" class="space-y-4">
+        <div v-if="selectedLog" class="gap-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-muted-foreground">{{ t("calling.caller") }}</p>
@@ -545,16 +545,16 @@ watch(phoneSearch, () => {
             </div>
           </div>
 
-          <div v-if="selectedTransfers.length > 0" class="space-y-2">
+          <div v-if="selectedTransfers.length > 0" class="gap-y-2">
             <p class="text-muted-foreground flex items-center gap-1.5">
               <ArrowRightLeft class="size-3.5" />
               {{ t("calling.transferHistory") }}
             </p>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <div
                 v-for="transfer in selectedTransfers"
                 :key="transfer.id"
-                class="border rounded-lg p-3 space-y-1"
+                class="border rounded-lg p-3 gap-y-1"
               >
                 <div class="flex items-center justify-between">
                   <Badge
@@ -606,7 +606,7 @@ watch(phoneSearch, () => {
             <IVRPathTree :steps="selectedLog.ivr_path.steps" />
           </div>
 
-          <div v-if="selectedLog.recording_s3_key" class="space-y-2">
+          <div v-if="selectedLog.recording_s3_key" class="gap-y-2">
             <p class="text-muted-foreground">{{ t("calling.recording") }}</p>
             <div
               v-if="recordingLoading"

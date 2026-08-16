@@ -30,7 +30,7 @@ const outputHandles = computed(() => {
     :has-input="!data?.isEntryNode"
   >
     <template #icon><MousePointerClick class="size-4" /></template>
-    <div v-if="buttons.length > 0" class="space-y-0.5">
+    <div v-if="buttons.length > 0" class="gap-y-0.5">
       <div
         v-for="(btn, idx) in buttons"
         :key="btn.id"

@@ -884,7 +884,7 @@ onMounted(async () => {
             />
           </div>
         </CardHeader>
-        <CardContent v-show="isDetailsOpen" class="space-y-4">
+        <CardContent v-show="isDetailsOpen" class="gap-y-4">
           <!-- Edit limits info for approved templates -->
           <div
             v-if="template?.status?.toUpperCase() === 'APPROVED'"
@@ -898,7 +898,7 @@ onMounted(async () => {
               )
             }}</span>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{
               $t("templates.whatsappAccount", "WhatsApp Account")
             }}</Label>
@@ -923,21 +923,21 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("templates.name", "Name") }} *</Label>
             <Input
               v-model="form.name"
               :disabled="!canWrite || !!template?.meta_template_id"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("templates.displayName", "Display Name") }}</Label>
             <Input
               v-model="form.display_name"
               :disabled="!canWrite || !isEditable"
             />
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("templates.language", "Language") }}</Label>
             <Select
               v-model="form.language"
@@ -955,7 +955,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="space-y-1.5">
+          <div class="gap-y-1.5">
             <Label>{{ $t("templates.category", "Category") }}</Label>
             <Select
               v-model="form.category"
@@ -988,8 +988,8 @@ onMounted(async () => {
             $t("templates.content", "Content")
           }}</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-4">
-          <div v-if="!isAuthentication" class="space-y-1.5">
+        <CardContent class="gap-y-4">
+          <div v-if="!isAuthentication" class="gap-y-1.5">
             <Label>{{ $t("templates.headerType", "Header Type") }}</Label>
             <Select
               v-model="form.header_type"
@@ -1007,7 +1007,7 @@ onMounted(async () => {
               </SelectContent>
             </Select>
           </div>
-          <div v-if="form.header_type === 'TEXT'" class="space-y-1.5">
+          <div v-if="form.header_type === 'TEXT'" class="gap-y-1.5">
             <Label for="header-content">{{
               $t("templates.headerContent", "Header Content")
             }}</Label>
@@ -1028,7 +1028,7 @@ onMounted(async () => {
             v-else-if="
               ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(form.header_type)
             "
-            class="space-y-3"
+            class="gap-y-3"
           >
             <Label
               >{{ $t("templates.headerSample", "Header") }}
@@ -1089,9 +1089,9 @@ onMounted(async () => {
           </div>
 
           <!-- Authentication template: fixed body & options -->
-          <div v-if="isAuthentication" class="space-y-4">
+          <div v-if="isAuthentication" class="gap-y-4">
             <!-- OTP Code Delivery Method -->
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <Label>{{
                 $t("templates.codeDelivery", "Code Delivery Method")
               }}</Label>
@@ -1128,7 +1128,7 @@ onMounted(async () => {
               </p>
             </div>
 
-            <div class="space-y-1.5">
+            <div class="gap-y-1.5">
               <Label>{{ $t("templates.bodyContent", "Body Content") }}</Label>
               <div
                 class="rounded-md border bg-muted/50 p-3 text-muted-foreground"
@@ -1158,7 +1158,7 @@ onMounted(async () => {
                 )
               }}</Label>
             </div>
-            <div class="space-y-2">
+            <div class="gap-y-2">
               <div class="flex items-center gap-2">
                 <input
                   id="code-expiration"
@@ -1244,9 +1244,9 @@ onMounted(async () => {
             <!-- ONE_TAP: autofill text + supported apps -->
             <div
               v-if="authOtpType === 'ONE_TAP'"
-              class="space-y-3 border rounded-lg p-3"
+              class="gap-y-3 border rounded-lg p-3"
             >
-              <div class="space-y-1">
+              <div class="gap-y-1">
                 <Label>{{
                   $t("templates.autofillText", "Autofill Text")
                 }}</Label>
@@ -1257,7 +1257,7 @@ onMounted(async () => {
                   :disabled="!canWrite || !isEditable"
                 />
               </div>
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <div class="flex items-center justify-between">
                   <Label
                     >{{
@@ -1285,7 +1285,7 @@ onMounted(async () => {
                   :key="i"
                   class="flex items-end gap-2"
                 >
-                  <div class="flex-1 space-y-1">
+                  <div class="flex-1 gap-y-1">
                     <Label>Package Name *</Label>
                     <Input
                       v-model="app.package_name"
@@ -1294,7 +1294,7 @@ onMounted(async () => {
                       :disabled="!canWrite || !isEditable"
                     />
                   </div>
-                  <div class="flex-1 space-y-1">
+                  <div class="flex-1 gap-y-1">
                     <Label>Signature Hash *</Label>
                     <Input
                       v-model="app.signature_hash"
@@ -1324,9 +1324,9 @@ onMounted(async () => {
             <!-- ZERO_TAP: supported apps -->
             <div
               v-if="authOtpType === 'ZERO_TAP'"
-              class="space-y-3 border rounded-lg p-3"
+              class="gap-y-3 border rounded-lg p-3"
             >
-              <div class="space-y-2">
+              <div class="gap-y-2">
                 <div class="flex items-center justify-between">
                   <Label
                     >{{
@@ -1354,7 +1354,7 @@ onMounted(async () => {
                   :key="i"
                   class="flex items-end gap-2"
                 >
-                  <div class="flex-1 space-y-1">
+                  <div class="flex-1 gap-y-1">
                     <Label>Package Name *</Label>
                     <Input
                       v-model="app.package_name"
@@ -1363,7 +1363,7 @@ onMounted(async () => {
                       :disabled="!canWrite || !isEditable"
                     />
                   </div>
-                  <div class="flex-1 space-y-1">
+                  <div class="flex-1 gap-y-1">
                     <Label>Signature Hash *</Label>
                     <Input
                       v-model="app.signature_hash"
@@ -1392,7 +1392,7 @@ onMounted(async () => {
           </div>
 
           <!-- Standard template: editable body -->
-          <div v-else class="space-y-1.5">
+          <div v-else class="gap-y-1.5">
             <Label>{{ $t("templates.bodyContent", "Body Content") }} *</Label>
             <Textarea
               v-model="form.body_content"
@@ -1420,7 +1420,7 @@ onMounted(async () => {
           <!-- Sample Values for Variables -->
           <div
             v-if="!isAuthentication && allVariables.length > 0"
-            class="space-y-3"
+            class="gap-y-3"
           >
             <div>
               <Label>{{
@@ -1459,7 +1459,7 @@ onMounted(async () => {
           </div>
 
           <!-- Buttons (hidden for auth templates — OTP managed via selector above) -->
-          <div v-if="!isAuthentication" class="space-y-3">
+          <div v-if="!isAuthentication" class="gap-y-3">
             <div class="flex items-center justify-between">
               <Label
                 >{{ $t("templates.buttons", "Buttons") }}
@@ -1485,7 +1485,7 @@ onMounted(async () => {
             <div
               v-for="(button, index) in form.buttons"
               :key="index"
-              class="border rounded-lg p-3 space-y-3"
+              class="border rounded-lg p-3 gap-y-3"
             >
               <div class="flex items-center justify-between">
                 <span class="font-medium"
@@ -1503,7 +1503,7 @@ onMounted(async () => {
                 </Button>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
+                <div class="gap-y-1">
                   <Label>{{ $t("templates.buttonType", "Type") }}</Label>
                   <Select
                     v-model="button.type"
@@ -1521,7 +1521,7 @@ onMounted(async () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div class="space-y-1">
+                <div class="gap-y-1">
                   <Label>{{ $t("templates.buttonText", "Text") }}</Label>
                   <Input
                     v-model="button.text"
@@ -1530,7 +1530,7 @@ onMounted(async () => {
                   />
                 </div>
               </div>
-              <div v-if="button.type === 'URL'" class="space-y-1">
+              <div v-if="button.type === 'URL'" class="gap-y-1">
                 <Label>{{ $t("templates.buttonUrl", "URL") }}</Label>
                 <Input
                   v-model="button.url"
@@ -1540,7 +1540,7 @@ onMounted(async () => {
                 />
                 <div
                   v-if="button.url && button.url.includes('{')"
-                  class="space-y-1 mt-1"
+                  class="gap-y-1 mt-1"
                 >
                   <Label>{{
                     $t("templates.buttonUrlExample", "URL Example")
@@ -1553,7 +1553,7 @@ onMounted(async () => {
                   />
                 </div>
               </div>
-              <div v-if="button.type === 'PHONE_NUMBER'" class="space-y-1">
+              <div v-if="button.type === 'PHONE_NUMBER'" class="gap-y-1">
                 <Label>{{
                   $t("templates.buttonPhoneNumber", "Phone Number")
                 }}</Label>
@@ -1564,7 +1564,7 @@ onMounted(async () => {
                   :disabled="!canWrite || !isEditable"
                 />
               </div>
-              <div v-if="button.type === 'COPY_CODE'" class="space-y-1">
+              <div v-if="button.type === 'COPY_CODE'" class="gap-y-1">
                 <Label>{{
                   $t("templates.copyCodeExample", "Example Code")
                 }}</Label>
@@ -1575,8 +1575,8 @@ onMounted(async () => {
                   :disabled="!canWrite || !isEditable"
                 />
               </div>
-              <div v-if="button.type === 'FLOW'" class="space-y-2">
-                <div class="space-y-1">
+              <div v-if="button.type === 'FLOW'" class="gap-y-2">
+                <div class="gap-y-1">
                   <Label>{{ $t("templates.flow", "Flow") }}</Label>
                   <Select
                     v-model="button.flow_id"
@@ -1600,7 +1600,7 @@ onMounted(async () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div class="space-y-1">
+                <div class="gap-y-1">
                   <Label>{{ $t("templates.flowAction", "Flow Action") }}</Label>
                   <Select
                     v-model="button.flow_action"
@@ -1623,7 +1623,7 @@ onMounted(async () => {
                     button.flow_id &&
                     getFlowScreens(button.flow_id).length > 0
                   "
-                  class="space-y-1"
+                  class="gap-y-1"
                 >
                   <Label>{{ $t("templates.navigateScreen", "Screen") }}</Label>
                   <Select
@@ -1650,7 +1650,7 @@ onMounted(async () => {
                 </div>
                 <div
                   v-else-if="button.flow_action === 'navigate'"
-                  class="space-y-1"
+                  class="gap-y-1"
                 >
                   <Label>{{ $t("templates.navigateScreen", "Screen") }}</Label>
                   <Input
@@ -1661,8 +1661,8 @@ onMounted(async () => {
                   />
                 </div>
               </div>
-              <div v-if="button.type === 'OTP'" class="space-y-2">
-                <div class="space-y-1">
+              <div v-if="button.type === 'OTP'" class="gap-y-2">
+                <div class="gap-y-1">
                   <Label>{{ $t("templates.otpType", "OTP Type") }}</Label>
                   <Select
                     v-model="button.otp_type"
@@ -1678,7 +1678,7 @@ onMounted(async () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div v-if="button.otp_type === 'ONE_TAP'" class="space-y-1">
+                <div v-if="button.otp_type === 'ONE_TAP'" class="gap-y-1">
                   <Label>{{
                     $t("templates.autofillText", "Autofill Text")
                   }}</Label>
@@ -1694,7 +1694,7 @@ onMounted(async () => {
                     button.otp_type === 'ONE_TAP' ||
                     button.otp_type === 'ZERO_TAP'
                   "
-                  class="space-y-1"
+                  class="gap-y-1"
                 >
                   <Label>{{
                     $t("templates.packageName", "Package Name")
@@ -1719,7 +1719,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div v-if="!isAuthentication" class="space-y-1.5">
+          <div v-if="!isAuthentication" class="gap-y-1.5">
             <Label>{{ $t("templates.footerContent", "Footer Content") }}</Label>
             <Textarea
               v-model="form.footer_content"
@@ -1755,7 +1755,7 @@ onMounted(async () => {
             }}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul class="list-disc list-inside space-y-2 text-muted-foreground">
+            <ul class="list-disc list-inside gap-y-2 text-muted-foreground">
               <li>
                 {{
                   $t(
@@ -1900,7 +1900,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div class="mt-4 space-y-2">
+          <div class="mt-4 gap-y-2">
             <div class="flex justify-between">
               <span class="text-muted-foreground"
                 >{{ $t("templates.status", "Status") }}:</span

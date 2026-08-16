@@ -103,7 +103,7 @@ const initiateSSO = (provider: string) => {
     <div
       class="w-full max-w-md rounded-2xl border border-border bg-card backdrop-blur-sm shadow-xl"
     >
-      <div class="p-8 space-y-1 text-center">
+      <div class="p-8 gap-y-1 text-center">
         <div class="flex justify-center mb-4">
           <div
             class="size-12 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20"
@@ -120,8 +120,8 @@ const initiateSSO = (provider: string) => {
       </div>
 
       <form @submit.prevent="handleLogin">
-        <div class="px-8 pb-4 space-y-4">
-          <div class="space-y-2">
+        <div class="px-8 pb-4 gap-y-4">
+          <div class="gap-y-2">
             <Label for="email" class="text-foreground/70">{{
               $t("common.email")
             }}</Label>
@@ -134,7 +134,7 @@ const initiateSSO = (provider: string) => {
               autocomplete="email"
             />
           </div>
-          <div class="space-y-2">
+          <div class="gap-y-2">
             <Label for="password" class="text-foreground/70">{{
               $t("auth.password")
             }}</Label>
@@ -159,7 +159,7 @@ const initiateSSO = (provider: string) => {
       </form>
 
       <!-- SSO Section -->
-      <div v-if="ssoProviders.length > 0" class="px-8 pb-4 space-y-3">
+      <div v-if="ssoProviders.length > 0" class="px-8 pb-4 gap-y-3">
         <div class="relative my-2">
           <Separator class="bg-muted" />
           <span

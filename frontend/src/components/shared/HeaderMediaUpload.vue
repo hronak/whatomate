@@ -17,7 +17,7 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="space-y-1">
+  <div class="gap-y-1">
     <label v-if="label" class="font-medium">{{ label }}</label>
     <div
       v-if="!file"
