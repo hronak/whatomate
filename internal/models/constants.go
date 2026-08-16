@@ -147,7 +147,6 @@ type TemplateStatus string
 const (
 	TemplateStatusPending  TemplateStatus = "PENDING"
 	TemplateStatusApproved TemplateStatus = "APPROVED"
-	TemplateStatusRejected TemplateStatus = "REJECTED"
 )
 
 // TemplateCategory represents WhatsApp template categories
@@ -197,8 +196,6 @@ type SSOProviderType string
 const (
 	SSOProviderGoogle    SSOProviderType = "google"
 	SSOProviderMicrosoft SSOProviderType = "microsoft"
-	SSOProviderGitHub    SSOProviderType = "github"
-	SSOProviderFacebook  SSOProviderType = "facebook"
 	SSOProviderCustom    SSOProviderType = "custom"
 )
 

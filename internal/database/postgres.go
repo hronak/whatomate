@@ -126,7 +126,7 @@ func AutoMigrate(db *gorm.DB) error {
 	migrationModels := GetMigrationModels()
 	for _, m := range migrationModels {
 		if err := db.AutoMigrate(m.Model); err != nil {
-			return err
+			return fmt.Errorf("failed to migrate %s: %w", m.Name, err)
 		}
 	}
 	return nil
