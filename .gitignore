@@ -77,3 +77,4 @@ scratch_*
 # AI Assistants
 .agents/
 .claude/
+skills-lock.json
