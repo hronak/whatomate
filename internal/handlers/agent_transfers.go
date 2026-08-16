@@ -776,27 +776,38 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 		a.UpdateSLAOnPickup(&transfer)
 	}
 
-	if err := a.DB.Save(&transfer).Error; err != nil {
+	err = a.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(&transfer).Error; err != nil {
+			return err
+		}
+
+		// Update contact assignment using the same rule as pickup / auto-assign:
+		// only pin the relationship manager when AssignToSameAgent is enabled and
+		// the contact has no existing manager. Active transfers already grant the
+		// assigned agent visibility, so we don't need to over-write contact.AssignedUserID.
+		if targetAgentID != nil && transfer.Contact != nil {
+			settings, _ := a.getChatbotSettingsCached(orgID, "")
+			if settings != nil && settings.AgentAssignment.AssignToSameAgent && transfer.Contact.AssignedUserID == nil {
+				if err := tx.Model(transfer.Contact).Update("assigned_user_id", targetAgentID).Error; err != nil {
+					return err
+				}
+			}
+		} else if targetAgentID == nil && transfer.Contact != nil {
+			// Unassigning (returning to queue) — clear the relationship-manager
+			// pointer iff it was pointing at the agent we just removed. Don't
+			// blow away a manually set manager that wasn't this transfer's agent.
+			if previousAgentID != nil && transfer.Contact.AssignedUserID != nil && *transfer.Contact.AssignedUserID == *previousAgentID {
+				if err := tx.Model(transfer.Contact).Update("assigned_user_id", nil).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
 		a.Log.Error("Failed to assign transfer", "error", err, "transfer_id", transfer.ID)
 		return r.SendErrorEnvelope(fasthttp.StatusInternalServerError, "Failed to assign transfer", nil, "")
-	}
-
-	// Update contact assignment using the same rule as pickup / auto-assign:
-	// only pin the relationship manager when AssignToSameAgent is enabled and
-	// the contact has no existing manager. Active transfers already grant the
-	// assigned agent visibility, so we don't need to over-write contact.AssignedUserID.
-	if targetAgentID != nil && transfer.Contact != nil {
-		settings, _ := a.getChatbotSettingsCached(orgID, "")
-		if settings != nil && settings.AgentAssignment.AssignToSameAgent && transfer.Contact.AssignedUserID == nil {
-			a.logWrite("contact assignment", a.DB.Model(transfer.Contact).Update("assigned_user_id", targetAgentID))
-		}
-	} else if targetAgentID == nil && transfer.Contact != nil {
-		// Unassigning (returning to queue) — clear the relationship-manager
-		// pointer iff it was pointing at the agent we just removed. Don't
-		// blow away a manually set manager that wasn't this transfer's agent.
-		if previousAgentID != nil && transfer.Contact.AssignedUserID != nil && *transfer.Contact.AssignedUserID == *previousAgentID {
-			a.logWrite("contact unassignment", a.DB.Model(transfer.Contact).Update("assigned_user_id", nil))
-		}
 	}
 
 	// Broadcast WebSocket notification
