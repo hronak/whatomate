@@ -67,9 +67,13 @@ type RecipientRequest struct {
 
 // ListCampaigns implements campaign listing
 func (a *App) ListCampaigns(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionRead, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to read campaigns"))
 	}
 
 	pg := parsePagination(r)
@@ -149,6 +153,10 @@ func (a *App) CreateCampaign(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to create campaigns"))
+	}
+
 	var req CampaignRequest
 	if err := a.decodeRequest(r, &req); err != nil {
 		return nil
@@ -215,9 +223,13 @@ func (a *App) CreateCampaign(r *fastglue.Request) error {
 
 // GetCampaign implements getting a single campaign
 func (a *App) GetCampaign(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionRead, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to read campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -272,6 +284,10 @@ func (a *App) UpdateCampaign(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to update campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -364,6 +380,10 @@ func (a *App) DeleteCampaign(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionDelete, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to delete campaigns"))
+	}
+
 	id, err := parsePathUUID(r, "id", "campaign")
 	if err != nil {
 		return nil
@@ -403,9 +423,13 @@ func (a *App) DeleteCampaign(r *fastglue.Request) error {
 
 // StartCampaign implements starting a campaign
 func (a *App) StartCampaign(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionExecute, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to execute campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -487,9 +511,13 @@ func (a *App) StartCampaign(r *fastglue.Request) error {
 
 // PauseCampaign implements pausing a campaign
 func (a *App) PauseCampaign(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionExecute, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to execute campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -521,9 +549,13 @@ func (a *App) PauseCampaign(r *fastglue.Request) error {
 
 // CancelCampaign implements cancelling a campaign
 func (a *App) CancelCampaign(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionExecute, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to execute campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -555,9 +587,13 @@ func (a *App) CancelCampaign(r *fastglue.Request) error {
 
 // RetryFailed retries sending to all failed recipients
 func (a *App) RetryFailed(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionExecute, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to execute campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -653,6 +689,10 @@ func (a *App) ImportRecipients(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionWrite, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to update campaigns"))
+	}
+
 	id, err := parsePathUUID(r, "id", "campaign")
 	if err != nil {
 		return nil
@@ -721,9 +761,13 @@ func (a *App) ImportRecipients(r *fastglue.Request) error {
 
 // GetCampaignRecipients implements listing campaign recipients
 func (a *App) GetCampaignRecipients(r *fastglue.Request) error {
-	orgID, err := a.getOrgID(r)
+	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionRead, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to read campaigns"))
 	}
 
 	id, err := parsePathUUID(r, "id", "campaign")
@@ -761,6 +805,10 @@ func (a *App) DeleteCampaignRecipient(r *fastglue.Request) error {
 	orgID, userID, err := a.getOrgAndUserID(r)
 	if err != nil {
 		return a.sendError(r, unauthorized("Unauthorized"))
+	}
+
+	if !a.HasPermission(userID, models.ResourceCampaigns, models.ActionDelete, orgID) {
+		return a.sendError(r, forbidden("Insufficient permissions to delete campaigns"))
 	}
 
 	campaignUUID, err := parsePathUUID(r, "id", "campaign")
