@@ -71,7 +71,7 @@ func (a *App) ListCatalogs(r *fastglue.Request) error {
 
 	query := a.DB.Where("organization_id = ?", orgID)
 	if whatsAppAccount != "" {
-		query = query.Where("whats_app_account = ?", whatsAppAccount)
+		query = query.Where("whatsapp_account_id = ?", whatsAppAccount)
 	}
 
 	var catalogs []models.Catalog

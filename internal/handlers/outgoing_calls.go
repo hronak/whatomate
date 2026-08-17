@@ -28,7 +28,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 	}
 
 	if req.ContactID == "" || req.WhatsAppAccountID == "" || req.SDPOffer == "" {
-		return a.sendError(r, invalidRequest("contact_id, whatsapp_account, and sdp_offer are required"))
+		return a.sendError(r, invalidRequest("contact_id, whatsapp_account_id, and sdp_offer are required"))
 	}
 
 	if err := a.requireCallingEnabled(r, orgID); err != nil {
@@ -201,7 +201,7 @@ func (a *App) GetICEServers(r *fastglue.Request) error {
 	})
 }
 
-// GetCallPermission handles GET /api/calls/permission/{contactId}?whatsapp_account=X
+// GetCallPermission handles GET /api/calls/permission/{contactId}?whatsapp_account_id=X
 // Checks call permission state directly via WhatsApp API.
 func (a *App) GetCallPermission(r *fastglue.Request) error {
 	orgID, _, err := a.requireAuth(r, models.ResourceOutgoingCalls, models.ActionRead)

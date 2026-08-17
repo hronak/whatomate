@@ -44,8 +44,8 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 		countQuery = countQuery.Where("status = ?", status)
 	}
 	if account != "" {
-		query = query.Where("call_logs.whatsapp_account = ?", account)
-		countQuery = countQuery.Where("whatsapp_account = ?", account)
+		query = query.Where("call_logs.whatsapp_account_id = ?", account)
+		countQuery = countQuery.Where("whatsapp_account_id = ?", account)
 	}
 	if contactIDStr != "" {
 		query = query.Where("call_logs.contact_id = ?", contactIDStr)

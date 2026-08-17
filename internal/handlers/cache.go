@@ -62,9 +62,9 @@ func (a *App) getChatbotSettingsCached(orgID uuid.UUID, whatsAppAccount string) 
 
 	// Cache miss - fetch from database
 	var settings models.ChatbotSettings
-	result := a.DB.Where("organization_id = ? AND (whats_app_account = ? OR whats_app_account = '')",
+	result := a.DB.Where("organization_id = ? AND (whatsapp_account_id = ? OR whatsapp_account_id IS NULL)",
 		orgID, whatsAppAccount).
-		Order("CASE WHEN whats_app_account = '' THEN 1 ELSE 0 END"). // Prefer account-specific settings
+		Order("CASE WHEN whatsapp_account_id IS NULL THEN 1 ELSE 0 END"). // Prefer account-specific settings
 		First(&settings)
 
 	if result.Error != nil {
@@ -149,16 +149,16 @@ func (a *App) getKeywordRulesCached(orgID uuid.UUID, whatsAppAccount string) ([]
 
 	// Get account-specific rules
 	var accountRules []models.KeywordRule
-	if err := a.DB.Where("organization_id = ? AND whats_app_account = ? AND is_enabled = true",
+	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND is_enabled = true",
 		orgID, whatsAppAccount).
 		Order("priority DESC").
 		Find(&accountRules).Error; err != nil {
 		a.Log.Error("Failed to fetch account keyword rules", "error", err, "org_id", orgID)
 	}
 
-	// Get global rules (whats_app_account = '')
+	// Get global rules (whatsapp_account_id IS NULL)
 	var globalRules []models.KeywordRule
-	if err := a.DB.Where("organization_id = ? AND whats_app_account = '' AND is_enabled = true",
+	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id IS NULL AND is_enabled = true",
 		orgID).
 		Order("priority DESC").
 		Find(&globalRules).Error; err != nil {
@@ -397,16 +397,16 @@ func (a *App) getAIContextsCached(orgID uuid.UUID, whatsAppAccount string) ([]mo
 
 	// Get account-specific contexts
 	var accountContexts []models.AIContext
-	if err := a.DB.Where("organization_id = ? AND whats_app_account = ? AND is_enabled = true",
+	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND is_enabled = true",
 		orgID, whatsAppAccount).
 		Order("priority DESC").
 		Find(&accountContexts).Error; err != nil {
 		a.Log.Error("Failed to fetch account AI contexts", "error", err, "org_id", orgID)
 	}
 
-	// Get global contexts (whats_app_account = '')
+	// Get global contexts (whatsapp_account_id IS NULL)
 	var globalContexts []models.AIContext
-	if err := a.DB.Where("organization_id = ? AND whats_app_account = '' AND is_enabled = true",
+	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id IS NULL AND is_enabled = true",
 		orgID).
 		Order("priority DESC").
 		Find(&globalContexts).Error; err != nil {

@@ -259,14 +259,14 @@ func getIndexes() []string {
 		`CREATE INDEX IF NOT EXISTS idx_agent_transfers_agent_active ON agent_transfers(agent_id, status) WHERE status = 'active'`,
 		`CREATE INDEX IF NOT EXISTS idx_agent_transfers_team ON agent_transfers(team_id, status) WHERE team_id IS NOT NULL`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idx_whatsapp_accounts_org_phone ON whatsapp_accounts(organization_id, phone_id)`,
-		`CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_account_name_lang ON templates(whats_app_account, name, language)`,
-		`CREATE INDEX IF NOT EXISTS idx_keyword_rules_account ON keyword_rules(whats_app_account, is_enabled, priority DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_chatbot_flows_account ON chatbot_flows(whats_app_account, is_enabled)`,
-		`CREATE INDEX IF NOT EXISTS idx_ai_contexts_account ON ai_contexts(whats_app_account, is_enabled, priority DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_bulk_campaigns_account ON bulk_message_campaigns(whats_app_account, status)`,
-		`CREATE INDEX IF NOT EXISTS idx_notification_rules_account ON notification_rules(whats_app_account, is_enabled)`,
-		`CREATE INDEX IF NOT EXISTS idx_messages_account ON messages(whats_app_account, created_at DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_contacts_account ON contacts(whats_app_account)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_account_name_lang ON templates(whatsapp_account_id, name, language)`,
+		`CREATE INDEX IF NOT EXISTS idx_keyword_rules_account ON keyword_rules(whatsapp_account_id, is_enabled, priority DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_chatbot_flows_account ON chatbot_flows(whatsapp_account_id, is_enabled)`,
+		`CREATE INDEX IF NOT EXISTS idx_ai_contexts_account ON ai_contexts(whatsapp_account_id, is_enabled, priority DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_bulk_campaigns_account ON bulk_message_campaigns(whatsapp_account_id, status)`,
+		`CREATE INDEX IF NOT EXISTS idx_notification_rules_account ON notification_rules(whatsapp_account_id, is_enabled)`,
+		`CREATE INDEX IF NOT EXISTS idx_messages_account ON messages(whatsapp_account_id, created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_contacts_account ON contacts(whatsapp_account_id)`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idx_canned_responses_org_name ON canned_responses(organization_id, name)`,
 		`CREATE INDEX IF NOT EXISTS idx_canned_responses_active ON canned_responses(organization_id, is_active, usage_count DESC)`,
 		`CREATE INDEX IF NOT EXISTS idx_webhooks_org_active ON webhooks(organization_id, is_active)`,
@@ -293,8 +293,8 @@ func getIndexes() []string {
 		`CREATE INDEX IF NOT EXISTS idx_call_logs_contact ON call_logs(contact_id, created_at DESC)`,
 		`CREATE INDEX IF NOT EXISTS idx_call_logs_wa_call_id ON call_logs(whatsapp_call_id) WHERE whatsapp_call_id != ''`,
 		// IVR flows
-		`CREATE INDEX IF NOT EXISTS idx_ivr_flows_org_active ON ivr_flows(organization_id, whatsapp_account, is_active)`,
-		`CREATE UNIQUE INDEX IF NOT EXISTS idx_ivr_flows_org_call_start ON ivr_flows(organization_id, whatsapp_account) WHERE is_call_start = true AND is_active = true AND deleted_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_ivr_flows_org_active ON ivr_flows(organization_id, whatsapp_account_id, is_active)`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_ivr_flows_org_call_start ON ivr_flows(organization_id, whatsapp_account_id) WHERE is_call_start = true AND is_active = true AND deleted_at IS NULL`,
 	}
 }
 

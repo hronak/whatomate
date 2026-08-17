@@ -663,7 +663,7 @@ func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountName, phoneN
 	// Look for an active session that hasn't timed out
 	var session models.ChatbotSession
 	timeout := now.Add(-time.Duration(timeoutMins) * time.Minute)
-	result := a.DB.Where("organization_id = ? AND contact_id = ? AND whats_app_account = ? AND status = ? AND last_activity_at > ?",
+	result := a.DB.Where("organization_id = ? AND contact_id = ? AND whatsapp_account_id = ? AND status = ? AND last_activity_at > ?",
 		orgID, contactID, accountName, models.SessionStatusActive, timeout).First(&session)
 
 	if result.Error == nil {
@@ -1659,7 +1659,7 @@ func (a *App) saveIncomingMessage(account *models.WhatsAppAccount, contact *mode
 		"last_message_at":      now,
 		"last_message_preview": preview,
 		"is_read":              false,
-		"whats_app_account":    account.Name,
+		"whatsapp_account_id":    account.Name,
 		"last_inbound_at":      now,
 	}))
 

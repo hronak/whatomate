@@ -25,7 +25,7 @@ type agentTransferRow struct {
 	ID                    uuid.UUID             `gorm:"column:id"`
 	OrganizationID        uuid.UUID             `gorm:"column:organization_id"`
 	ContactID             uuid.UUID             `gorm:"column:contact_id"`
-	WhatsAppAccountID     string                `gorm:"column:whatsapp_account"`
+	WhatsAppAccountID     string                `gorm:"column:whatsapp_account_id"`
 	PhoneNumber           string                `gorm:"column:phone_number"`
 	Status                models.TransferStatus `gorm:"column:status"`
 	Source                models.TransferSource `gorm:"column:source"`

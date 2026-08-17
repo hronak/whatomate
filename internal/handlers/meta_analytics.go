@@ -194,7 +194,7 @@ func (a *App) GetMetaAnalytics(r *fastglue.Request) error {
 			if len(req.TemplateIDs) == 0 {
 				var templates []models.Template
 				if err := a.DB.Select("meta_template_id").
-					Where("organization_id = ? AND whats_app_account = ? AND meta_template_id != '' AND meta_template_id IS NOT NULL",
+					Where("organization_id = ? AND whatsapp_account_id = ? AND meta_template_id != '' AND meta_template_id IS NOT NULL",
 						orgID, account.Name).
 					Find(&templates).Error; err == nil {
 					for _, t := range templates {

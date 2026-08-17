@@ -33,7 +33,7 @@ type ContactResponse struct {
 	LastMessagePreview string     `json:"last_message_preview"`
 	UnreadCount        int        `json:"unread_count"`
 	AssignedUserID     *uuid.UUID `json:"assigned_user_id,omitempty"`
-	WhatsAppAccountID  string     `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID  string     `json:"whatsapp_account_id,omitempty"`
 	LastInboundAt      *time.Time `json:"last_inbound_at,omitempty"`
 	ServiceWindowOpen  bool       `json:"service_window_open"`
 	MarketingOptOut    bool       `json:"marketing_opt_out"`
@@ -59,7 +59,7 @@ type MessageResponse struct {
 	ReplyToMessageID  *string              `json:"reply_to_message_id,omitempty"`
 	ReplyToMessage    *ReplyPreview        `json:"reply_to_message,omitempty"`
 	Reactions         []ReactionInfo       `json:"reactions,omitempty"`
-	WhatsAppAccountID string               `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID string               `json:"whatsapp_account_id,omitempty"`
 	CreatedAt         time.Time            `json:"created_at"`
 	UpdatedAt         time.Time            `json:"updated_at"`
 }
@@ -284,7 +284,7 @@ func (a *App) GetMessages(r *fastglue.Request) error {
 	// Filter by WhatsApp account if specified
 	accountFilter := string(r.RequestCtx.QueryArgs().Peek("account"))
 	if accountFilter != "" {
-		msgQuery = msgQuery.Where("whats_app_account = ?", accountFilter)
+		msgQuery = msgQuery.Where("whatsapp_account_id = ?", accountFilter)
 	}
 
 	// Check if user without contacts:read should only see current conversation
@@ -515,7 +515,7 @@ type SendMessageRequest struct {
 		Body string `json:"body"`
 	} `json:"content"`
 	ReplyToMessageID  string `json:"reply_to_message_id,omitempty"`
-	WhatsAppAccountID string `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID string `json:"whatsapp_account_id,omitempty"`
 
 	// Interactive message fields (for type="interactive")
 	Interactive *InteractiveContent `json:"interactive,omitempty"`

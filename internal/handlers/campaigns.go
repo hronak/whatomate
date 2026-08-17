@@ -93,7 +93,7 @@ func (a *App) ListCampaigns(r *fastglue.Request) error {
 		baseQuery = baseQuery.Where("status = ?", status)
 	}
 	if whatsappAccount != "" {
-		baseQuery = baseQuery.Where("whats_app_account = ?", whatsappAccount)
+		baseQuery = baseQuery.Where("whatsapp_account_id = ?", whatsappAccount)
 	}
 	if from, ok := parseDateParam(r, "from"); ok {
 		baseQuery = baseQuery.Where("created_at >= ?", from)
@@ -343,7 +343,7 @@ func (a *App) UpdateCampaign(r *fastglue.Request) error {
 	}
 
 	if req.WhatsAppAccountID != "" {
-		updates["whats_app_account"] = req.WhatsAppAccountID
+		updates["whatsapp_account_id"] = req.WhatsAppAccountID
 	}
 
 	if err := a.DB.Model(campaign).Updates(updates).Error; err != nil {

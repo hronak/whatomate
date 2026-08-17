@@ -330,7 +330,7 @@ func runServer(args []string) {
 		cmd.Dir = "frontend"
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		setProcessGroup(cmd)
 
 		if err := cmd.Start(); err != nil {
 			lo.Error("Failed to start frontend dev server", "error", err)
@@ -412,7 +412,7 @@ func runServer(args []string) {
 
 	if viteCmd != nil && viteCmd.Process != nil {
 		lo.Info("Stopping Vite frontend dev server...")
-		_ = syscall.Kill(-viteCmd.Process.Pid, syscall.SIGTERM)
+		_ = killProcessGroup(viteCmd)
 		lo.Info("Vite frontend dev server stopped")
 	}
 

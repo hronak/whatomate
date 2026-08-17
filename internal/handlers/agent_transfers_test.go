@@ -882,7 +882,7 @@ func TestApp_ReturnAgentTransfersToQueue(t *testing.T) {
 // raw-update both flags explicitly so the test sees the value we asked for.
 func upsertChatbotSettings(t *testing.T, app *handlers.App, orgID uuid.UUID, assignToSameAgent bool) {
 	t.Helper()
-	require.NoError(t, app.DB.Where("organization_id = ? AND whats_app_account = ?", orgID, "").
+	require.NoError(t, app.DB.Where("organization_id = ? AND whatsapp_account_id IS NULL", orgID).
 		Delete(&models.ChatbotSettings{}).Error)
 	settings := &models.ChatbotSettings{OrganizationID: orgID}
 	require.NoError(t, app.DB.Create(settings).Error)

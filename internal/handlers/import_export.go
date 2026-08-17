@@ -43,14 +43,14 @@ var exportConfigs = map[string]ExportConfig{
 		Model:    &models.Contact{},
 		Resource: "contacts",
 		AllowedColumns: []string{
-			"phone_number", "profile_name", "whats_app_account", "tags",
+			"phone_number", "profile_name", "whatsapp_account_id", "tags",
 			"assigned_user_id", "last_message_at", "created_at", "updated_at",
 		},
 		DefaultColumns: []string{"phone_number", "profile_name", "tags"},
 		ColumnLabels: map[string]string{
 			"phone_number":      "Phone Number",
 			"profile_name":      "Name",
-			"whats_app_account": "WhatsApp Account",
+			"whatsapp_account_id": "WhatsApp Account",
 			"tags":              "Tags",
 			"assigned_user_id":  "Assigned User ID",
 			"last_message_at":   "Last Message At",
@@ -124,7 +124,7 @@ var importConfigs = map[string]ImportConfig{
 		Model:           &models.Contact{},
 		Resource:        "contacts",
 		RequiredColumns: []string{"phone_number"},
-		OptionalColumns: []string{"profile_name", "whats_app_account", "tags", "assigned_user_id"},
+		OptionalColumns: []string{"profile_name", "whatsapp_account_id", "tags", "assigned_user_id"},
 		UniqueColumn:    "phone_number",
 		ColumnTransform: map[string]func(string) (any, error){
 			"phone_number": func(s string) (any, error) {

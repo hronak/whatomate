@@ -544,7 +544,7 @@ func (a *App) processTemplateStatusUpdate(wabaID, event, templateName, templateL
 	for _, account := range accounts {
 		// Find and update the template
 		result := a.DB.Model(&models.Template{}).
-			Where("whats_app_account = ? AND name = ? AND language = ?", account.Name, templateName, templateLanguage).
+			Where("whatsapp_account_id = ? AND name = ? AND language = ?", account.Name, templateName, templateLanguage).
 			Update("status", status)
 
 		if result.Error != nil {
@@ -729,7 +729,7 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 		"last_message_at":      now,
 		"last_message_preview": preview,
 		"is_read":              true, // Echoes from mobile app are outgoing, so conversation is read
-		"whats_app_account":    account.Name,
+		"whatsapp_account_id":    account.Name,
 	}))
 
 	// Broadcast new message via WebSocket to keep UI updated

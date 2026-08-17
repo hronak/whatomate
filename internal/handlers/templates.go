@@ -74,7 +74,7 @@ func (a *App) ListTemplates(r *fastglue.Request) error {
 	query := a.DB.Where("organization_id = ?", orgID)
 
 	if accountName != "" {
-		query = query.Where("whats_app_account = ?", accountName)
+		query = query.Where("whatsapp_account_id = ?", accountName)
 	}
 	if status != "" {
 		query = query.Where("status = ?", status)
@@ -119,7 +119,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 	// Validate required fields
 	isAuthTemplate := strings.ToUpper(req.Category) == "AUTHENTICATION"
 	if req.WhatsAppAccountID == "" || req.Name == "" || req.Language == "" || req.Category == "" {
-		return a.sendError(r, invalidRequest("whatsapp_account, name, language, and category are required"))
+		return a.sendError(r, invalidRequest("whatsapp_account_id, name, language, and category are required"))
 	}
 	if !isAuthTemplate && req.BodyContent == "" {
 		return a.sendError(r, invalidRequest("body_content is required"))
@@ -153,7 +153,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 
 	// Check if template with same name exists for this account
 	var existingTemplate models.Template
-	if err := a.DB.Where("organization_id = ? AND whats_app_account = ? AND name = ?", orgID, req.WhatsAppAccountID, templateName).First(&existingTemplate).Error; err == nil {
+	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND name = ?", orgID, req.WhatsAppAccountID, templateName).First(&existingTemplate).Error; err == nil {
 		return a.sendError(r, conflict("Template with this name already exists"))
 	}
 
@@ -549,7 +549,7 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 
 		// Upsert (including soft-deleted templates to restore them)
 		existing := models.Template{}
-		if err := a.DB.Unscoped().Where("organization_id = ? AND whats_app_account = ? AND name = ? AND language = ?",
+		if err := a.DB.Unscoped().Where("organization_id = ? AND whatsapp_account_id = ? AND name = ? AND language = ?",
 			orgID, account.Name, template.Name, template.Language).First(&existing).Error; err == nil {
 			// Update existing and restore if soft-deleted (explicitly set deleted_at to NULL)
 			template.ID = existing.ID

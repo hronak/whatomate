@@ -110,7 +110,7 @@ func (a *App) GetChatbotSettings(r *fastglue.Request) error {
 
 	// Get or create default settings
 	var settings models.ChatbotSettings
-	result := a.DB.Where("organization_id = ? AND whats_app_account = ?", orgID, "").First(&settings)
+	result := a.DB.Where("organization_id = ? AND whatsapp_account_id IS NULL", orgID).First(&settings)
 	if result.Error != nil {
 		// Return default settings if none exist
 		settings = models.ChatbotSettings{
@@ -317,7 +317,7 @@ func (a *App) UpdateChatbotSettings(r *fastglue.Request) error {
 	// Get or create settings
 	var settings models.ChatbotSettings
 	isNew := false
-	result := a.DB.Where("organization_id = ? AND whats_app_account = ?", orgID, "").First(&settings)
+	result := a.DB.Where("organization_id = ? AND whatsapp_account_id IS NULL", orgID).First(&settings)
 	if result.Error != nil {
 		// Create new settings
 		isNew = true
