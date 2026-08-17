@@ -70,7 +70,7 @@ func runMigrations(db *gorm.DB) error {
 	if err := database.RenameWhatsAppAccountIDColumns(db); err != nil {
 		return err
 	}
-	return db.AutoMigrate(
+	if err := db.AutoMigrate(
 		// Core models
 		&models.Organization{},
 		&models.Permission{},
@@ -120,7 +120,13 @@ func runMigrations(db *gorm.DB) error {
 		&models.CallPermission{},
 		// Audit
 		&models.AuditLog{},
-	)
+	); err != nil {
+		return err
+	}
+	// Same order as production: the name-to-ID backfill needs the column
+	// AutoMigrate just created. A test database created before v0.3.0 still
+	// carries the legacy name column, which is NOT NULL and would reject inserts.
+	return database.MigrateWhatsAppAccountNames(db)
 }
 
 // truncatableTables lists every table created by runMigrations, ordered

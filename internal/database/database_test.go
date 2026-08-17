@@ -1,6 +1,7 @@
 package database_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -248,4 +249,144 @@ func TestCreateDefaultAdmin_UsesExistingOrg(t *testing.T) {
 	var orgCount int64
 	db.Model(&models.Organization{}).Count(&orgCount)
 	assert.Equal(t, int64(1), orgCount, "should reuse existing organization")
+}
+
+// --- MigrateWhatsAppAccountNames ---
+
+// reintroduceLegacyAccountColumn puts a table back into its pre-v0.3.0 shape:
+// the account stored as a NOT NULL name, with no whatsapp_account_id set.
+func reintroduceLegacyAccountColumn(t *testing.T, db *gorm.DB, table, nameCol string) {
+	t.Helper()
+	require.NoError(t, db.Exec(fmt.Sprintf(
+		`ALTER TABLE %q ADD COLUMN %q varchar(100) NOT NULL DEFAULT ''`, table, nameCol)).Error)
+	t.Cleanup(func() {
+		_ = db.Exec(fmt.Sprintf(`ALTER TABLE %q DROP COLUMN IF EXISTS %q`, table, nameCol)).Error
+	})
+}
+
+// seedLegacyAccountFixture creates an org plus a WhatsApp account, and returns
+// both so a test can link rows to it by name the way v0.2.0 did.
+func seedLegacyAccountFixture(t *testing.T, db *gorm.DB, accountName string) (models.Organization, models.WhatsAppAccount) {
+	t.Helper()
+	org := models.Organization{
+		BaseModel: models.BaseModel{ID: uuid.New()},
+		Name:      "Legacy Upgrade Org",
+		Slug:      "legacy-upgrade-" + uuid.NewString(),
+		Settings:  models.JSONB{},
+	}
+	require.NoError(t, db.Create(&org).Error)
+
+	account := models.WhatsAppAccount{
+		BaseModel:      models.BaseModel{ID: uuid.New()},
+		OrganizationID: org.ID,
+		Name:           accountName,
+		PhoneID:        "phone-" + accountName,
+		BusinessID:     "business-" + accountName,
+		AccessToken:    "token",
+	}
+	require.NoError(t, db.Create(&account).Error)
+	return org, account
+}
+
+func TestMigrateWhatsAppAccountNames_BackfillsIDAndDropsLegacyColumn(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	cleanAll(t, db)
+
+	org, account := seedLegacyAccountFixture(t, db, "Legacy Account")
+	reintroduceLegacyAccountColumn(t, db, "contacts", "whats_app_account")
+
+	// A v0.2.0 row: linked by name, no ID.
+	contactID := uuid.New()
+	require.NoError(t, db.Exec(`
+		INSERT INTO contacts (id, created_at, updated_at, organization_id, phone_number, whats_app_account)
+		VALUES (?, now(), now(), ?, '919999900001', ?)`,
+		contactID, org.ID, account.Name).Error)
+
+	require.NoError(t, database.MigrateWhatsAppAccountNames(db))
+
+	assert.False(t, db.Migrator().HasColumn("contacts", "whats_app_account"),
+		"legacy name column should be dropped so inserts stop hitting its NOT NULL")
+
+	var linked string
+	require.NoError(t, db.Raw(
+		`SELECT whatsapp_account_id FROM contacts WHERE id = ?`, contactID).Scan(&linked).Error)
+	assert.Equal(t, account.ID.String(), linked, "row should be relinked to the account by ID")
+}
+
+func TestMigrateWhatsAppAccountNames_EmptyNameBecomesOrgWideNull(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	cleanAll(t, db)
+
+	org, _ := seedLegacyAccountFixture(t, db, "Some Account")
+	reintroduceLegacyAccountColumn(t, db, "contacts", "whats_app_account")
+
+	// v0.2.0 spelled "organization-wide" as an empty name; v0.3.x spells it NULL.
+	contactID := uuid.New()
+	require.NoError(t, db.Exec(`
+		INSERT INTO contacts (id, created_at, updated_at, organization_id, phone_number, whats_app_account)
+		VALUES (?, now(), now(), ?, '919999900002', '')`, contactID, org.ID).Error)
+
+	require.NoError(t, database.MigrateWhatsAppAccountNames(db))
+
+	var linked *string
+	require.NoError(t, db.Raw(
+		`SELECT whatsapp_account_id FROM contacts WHERE id = ?`, contactID).Scan(&linked).Error)
+	assert.Nil(t, linked, "an empty legacy name means org-wide, which is NULL now")
+}
+
+func TestMigrateWhatsAppAccountNames_UnresolvableNameAbortsWithoutDropping(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	cleanAll(t, db)
+
+	org, _ := seedLegacyAccountFixture(t, db, "Real Account")
+	reintroduceLegacyAccountColumn(t, db, "contacts", "whats_app_account")
+
+	require.NoError(t, db.Exec(`
+		INSERT INTO contacts (id, created_at, updated_at, organization_id, phone_number, whats_app_account)
+		VALUES (?, now(), now(), ?, '919999900003', 'Account That Never Existed')`,
+		uuid.New(), org.ID).Error)
+
+	err := database.MigrateWhatsAppAccountNames(db)
+	require.Error(t, err, "an unresolvable name must not be silently discarded")
+	assert.Contains(t, err.Error(), "contacts")
+	assert.True(t, db.Migrator().HasColumn("contacts", "whats_app_account"),
+		"the column must survive so the operator can still see and fix the data")
+}
+
+func TestMigrateWhatsAppAccountNames_DoesNotResolveAcrossOrganizations(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	cleanAll(t, db)
+
+	// whatsapp_accounts.name is globally unique, so the risk is not two orgs
+	// sharing a name — it is resolving a name against some *other* org's account.
+	_, accountA := seedLegacyAccountFixture(t, db, "Org A Account "+uuid.NewString())
+
+	orgB := models.Organization{
+		BaseModel: models.BaseModel{ID: uuid.New()},
+		Name:      "Second Org",
+		Slug:      "second-org-" + uuid.NewString(),
+		Settings:  models.JSONB{},
+	}
+	require.NoError(t, db.Create(&orgB).Error)
+
+	reintroduceLegacyAccountColumn(t, db, "contacts", "whats_app_account")
+	require.NoError(t, db.Exec(`
+		INSERT INTO contacts (id, created_at, updated_at, organization_id, phone_number, whats_app_account)
+		VALUES (?, now(), now(), ?, '919999900004', ?)`,
+		uuid.New(), orgB.ID, accountA.Name).Error)
+
+	// Had the backfill ignored organization_id this would have linked and passed
+	// silently, handing org B a pointer into org A's data.
+	err := database.MigrateWhatsAppAccountNames(db)
+	require.Error(t, err, "a name owned by another organization must not resolve")
+	assert.Contains(t, err.Error(), "contacts")
+}
+
+func TestMigrateWhatsAppAccountNames_IdempotentOnCurrentSchema(t *testing.T) {
+	db := testutil.SetupTestDB(t)
+	cleanAll(t, db)
+
+	// No legacy columns present — this is the fresh-install path.
+	require.NoError(t, database.MigrateWhatsAppAccountNames(db))
+	require.NoError(t, database.MigrateWhatsAppAccountNames(db))
 }

@@ -132,7 +132,9 @@ func AutoMigrate(db *gorm.DB) error {
 			return fmt.Errorf("failed to migrate %s: %w", m.Name, err)
 		}
 	}
-	return nil
+	// After AutoMigrate: whatsapp_account_id has to exist before it can be
+	// backfilled from the pre-v0.3.0 name column.
+	return MigrateWhatsAppAccountNames(db)
 }
 
 // whatsAppAccountIDTables are the tables whose WhatsApp-account foreign key was
@@ -190,6 +192,95 @@ func RenameWhatsAppAccountIDColumns(db *gorm.DB) error {
 	return nil
 }
 
+// whatsAppAccountNameColumns are the pre-v0.3.0 columns that stored the WhatsApp
+// account by *name*. Two spellings shipped: GORM derived whats_app_account from
+// the WhatsAppAccount field, while call_logs and ivr_flows pinned
+// whatsapp_account explicitly.
+var whatsAppAccountNameColumns = []string{"whats_app_account", "whatsapp_account"}
+
+// MigrateWhatsAppAccountNames converts a pre-v0.3.0 database from linking a
+// WhatsApp account by name to linking it by ID.
+//
+// v0.2.0 and earlier stored the account as a varchar name; v0.3.x stores
+// whatsapp_account_id. AutoMigrate adds the new column but never populates it and
+// never removes the old one, which breaks an upgraded database two ways: every
+// existing row is orphaned (whatsapp_account_id IS NULL), and every INSERT is
+// rejected, because the abandoned name column is still NOT NULL on 13 tables and
+// no current code path writes it. So for each table this resolves the name
+// against whatsapp_accounts within the owning organization, then drops the name
+// column.
+//
+// An empty name meant "organization-wide" in v0.2.0 and is left NULL, which is
+// how the current queries spell the same thing (see getChatbotSettingsCached).
+// Soft-deleted accounts still match: the account a row points at may have been
+// deleted since, and keeping the link beats discarding it.
+//
+// Ordering is load-bearing. It must run AFTER AutoMigrate, which is what creates
+// whatsapp_account_id, and BEFORE getIndexes: v0.2.0 indexes such as
+// idx_messages_account already occupy the names getIndexes uses, so they have to
+// be dropped along with their column first — otherwise CREATE INDEX IF NOT EXISTS
+// finds the name taken and silently keeps the stale index.
+//
+// Dropping a column is irreversible, so a column is only dropped once every row
+// resolved; if any name matches no account, it is left in place and the migration
+// fails with the count rather than discarding the link. Back up before upgrading.
+//
+// Idempotent: once the name column is gone each table is skipped, so this is a
+// no-op on fresh databases and on already-migrated ones.
+func MigrateWhatsAppAccountNames(db *gorm.DB) error {
+	for _, table := range whatsAppAccountIDTables {
+		if !db.Migrator().HasTable(table) {
+			continue
+		}
+		// Nothing to migrate into yet — AutoMigrate has not created it.
+		if !db.Migrator().HasColumn(table, "whatsapp_account_id") {
+			continue
+		}
+		for _, nameCol := range whatsAppAccountNameColumns {
+			if !db.Migrator().HasColumn(table, nameCol) {
+				continue
+			}
+			if err := migrateWhatsAppAccountNameColumn(db, table, nameCol); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// migrateWhatsAppAccountNameColumn backfills one table's whatsapp_account_id from
+// its legacy name column and drops that column.
+func migrateWhatsAppAccountNameColumn(db *gorm.DB, table, nameCol string) error {
+	backfill := fmt.Sprintf(
+		`UPDATE %[1]q AS tgt SET whatsapp_account_id = wa.id
+		   FROM whatsapp_accounts AS wa
+		  WHERE wa.name = tgt.%[2]q
+		    AND wa.organization_id = tgt.organization_id
+		    AND tgt.%[2]q <> ''
+		    AND tgt.whatsapp_account_id IS NULL`, table, nameCol)
+	if err := db.Exec(backfill).Error; err != nil {
+		return fmt.Errorf("failed to backfill whatsapp_account_id on %s: %w", table, err)
+	}
+
+	var unresolved int64
+	countStmt := fmt.Sprintf(
+		`SELECT count(*) FROM %[1]q WHERE %[2]q <> '' AND whatsapp_account_id IS NULL`, table, nameCol)
+	if err := db.Raw(countStmt).Scan(&unresolved).Error; err != nil {
+		return fmt.Errorf("failed to count unresolved account names on %s: %w", table, err)
+	}
+	if unresolved > 0 {
+		return fmt.Errorf(
+			"%s: %d row(s) name a WhatsApp account that is not in whatsapp_accounts; "+
+				"recreate the account or clear %s on those rows, then re-run the migration",
+			table, unresolved, nameCol)
+	}
+
+	if err := db.Exec(fmt.Sprintf(`ALTER TABLE %q DROP COLUMN %q`, table, nameCol)).Error; err != nil {
+		return fmt.Errorf("failed to drop %s on %s: %w", nameCol, table, err)
+	}
+	return nil
+}
+
 // RunMigrationWithProgress runs migrations, drawing a progress bar to out.
 //
 // The bar is a deliberate CLI affordance for `server -migrate`, so it is
@@ -243,6 +334,15 @@ func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig, 
 			return fmt.Errorf("failed to migrate %s: %w", m.Name, err)
 		}
 		currentStep++
+	}
+
+	// Between AutoMigrate and the indexes, and not by accident: the new column
+	// must exist before it can be backfilled, and the legacy columns must be gone
+	// before getIndexes runs, or the v0.2.0 indexes squatting on the same names
+	// survive as CREATE INDEX IF NOT EXISTS no-ops.
+	if err := MigrateWhatsAppAccountNames(silentDB); err != nil {
+		lo.Error("Migration step failed", "step", "migrate_whatsapp_account_names", "error", err)
+		return err
 	}
 
 	// Create indexes
