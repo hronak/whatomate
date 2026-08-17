@@ -26,7 +26,7 @@ const seedMarker = "whatomate:demo-seed"
 //
 // Contacts and tags are always created. A starter chatbot flow is created only
 // when the organization already has a WhatsApp account to attach it to —
-// ChatbotFlow.WhatsAppAccount is NOT NULL, and inventing a fake account would
+// ChatbotFlow.WhatsAppAccountID is NOT NULL, and inventing a fake account would
 // mean a flow that silently fails to send and an account row that looks real in
 // Settings. Connect an account first, then re-run with -seed to get the flow.
 func SeedDemoData(db *gorm.DB) (summary string, err error) {
@@ -193,7 +193,7 @@ func seedStarterFlow(db *gorm.DB, orgID uuid.UUID) (bool, error) {
 
 	flow := models.ChatbotFlow{
 		OrganizationID:  orgID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "Demo: welcome menu",
 		Description:     "Sample flow created by `whatomate install -seed` (" + seedMarker + "). Safe to delete.",
 		TriggerKeywords: models.StringArray{"hi", "hello", "menu"},

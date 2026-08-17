@@ -425,7 +425,7 @@ class WebSocketService {
       contact_id: payload.contact_id,
       contact_name: payload.contact_name || payload.phone_number,
       phone_number: payload.phone_number,
-      whatsapp_account: payload.whatsapp_account,
+      whatsapp_account_id: payload.whatsapp_account_id,
       status: payload.status,
       source: payload.source || "manual",
       agent_id: payload.agent_id,

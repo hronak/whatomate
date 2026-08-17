@@ -3,6 +3,7 @@ import axios, {
   type AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
+import router from "@/router";
 
 // Get base path from server-injected config or fallback
 const basePath = ((window as any).__BASE_PATH__ ?? "").replace(/\/$/, "");
@@ -171,7 +172,7 @@ api.interceptors.response.use(
         localStorage.removeItem("user");
         localStorage.removeItem("auth_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = basePath + "/login";
+        router.push("/login");
       }
     }
 
@@ -348,7 +349,7 @@ export const messagesService = {
       type: string;
       content: any;
       reply_to_message_id?: string;
-      whatsapp_account?: string;
+      whatsapp_account_id?: string;
       // Interactive payload. Mirrors backend InteractiveContent.
       interactive?: {
         type: "button" | "cta_url" | "list" | "voice_call" | "flow";
@@ -443,7 +444,7 @@ export const flowsService = {
   publish: (id: string) => api.post(`/flows/${id}/publish`),
   duplicate: (id: string) => api.post(`/flows/${id}/duplicate`),
   sync: (whatsappAccount: string) =>
-    api.post("/flows/sync", { whatsapp_account: whatsappAccount }),
+    api.post("/flows/sync", { whatsapp_account_id: whatsappAccount }),
 };
 
 export const campaignsService = {
@@ -535,7 +536,7 @@ export const chatbotService = {
   }) => api.get("/chatbot/transfers", { params }),
   createTransfer: (data: {
     contact_id: string;
-    whatsapp_account: string;
+    whatsapp_account_id: string;
     agent_id?: string;
     notes?: string;
     source?: string;
@@ -1208,7 +1209,7 @@ export const notesService = {
 export interface CallLog {
   id: string;
   organization_id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   contact_id: string;
   whatsapp_call_id: string;
   caller_phone: string;
@@ -1329,7 +1330,7 @@ export interface ChatFlowGraph {
 export interface IVRFlow {
   id: string;
   organization_id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   name: string;
   description: string;
   is_active: boolean;
@@ -1348,7 +1349,7 @@ export interface CallTransfer {
   whatsapp_call_id: string;
   caller_phone: string;
   contact_id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   status: "waiting" | "connected" | "completed" | "abandoned" | "no_answer";
   team_id?: string;
   agent_id?: string;
@@ -1387,7 +1388,7 @@ export interface CallTransfer {
 export interface CallPermission {
   id: string;
   contact_id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   status: "pending" | "accepted" | "declined" | "expired";
   message_id?: string;
   requested_at: string;
@@ -1398,7 +1399,7 @@ export interface CallPermission {
 export const outgoingCallsService = {
   initiate: (data: {
     contact_id: string;
-    whatsapp_account: string;
+    whatsapp_account_id: string;
     sdp_offer: string;
   }) =>
     api.post<{ call_log_id: string; sdp_answer: string }>(
@@ -1407,11 +1408,11 @@ export const outgoingCallsService = {
     ),
   hangup: (callLogId: string) =>
     api.post(`/calls/outgoing/${callLogId}/hangup`),
-  requestPermission: (data: { contact_id: string; whatsapp_account: string }) =>
+  requestPermission: (data: { contact_id: string; whatsapp_account_id: string }) =>
     api.post<{ permission_id: string }>("/calls/permission-request", data),
   getPermission: (contactId: string, whatsappAccount: string) =>
     api.get<CallPermission>(`/calls/permission/${contactId}`, {
-      params: { whatsapp_account: whatsappAccount },
+      params: { whatsapp_account_id: whatsappAccount },
     }),
   getICEServers: () =>
     api.get<{
@@ -1469,7 +1470,7 @@ export const ivrFlowsService = {
     api.get<{ ivr_flows: IVRFlow[]; total: number }>("/ivr-flows", { params }),
   get: (id: string) => api.get<IVRFlow>(`/ivr-flows/${id}`),
   create: (data: {
-    whatsapp_account: string;
+    whatsapp_account_id: string;
     name: string;
     description?: string;
     is_call_start?: boolean;

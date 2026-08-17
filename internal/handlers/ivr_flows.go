@@ -19,7 +19,7 @@ import (
 
 // IVRFlowRequest represents the request body for creating/updating an IVR flow
 type IVRFlowRequest struct {
-	WhatsAppAccount string       `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	Name            string       `json:"name"`
 	Description     string       `json:"description"`
 	IsActive        bool         `json:"is_active"`
@@ -41,7 +41,7 @@ func (a *App) ListIVRFlows(r *fastglue.Request) error {
 
 	query := a.DB.Where("organization_id = ?", orgID).Order("created_at DESC")
 	if account != "" {
-		query = query.Where("whatsapp_account = ?", account)
+		query = query.Where("whatsapp_account_id = ?", account)
 	}
 
 	var total int64
@@ -91,21 +91,21 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	if req.Name == "" {
 		return a.sendError(r, invalidRequest("Name is required"))
 	}
-	if req.WhatsAppAccount == "" {
+	if req.WhatsAppAccountID == "" {
 		return a.sendError(r, invalidRequest("WhatsApp account is required"))
 	}
 
 	// If marking this as call start, unset others for the same account
 	if req.IsCallStart {
 		a.DB.Model(&models.IVRFlow{}).
-			Where("organization_id = ? AND whatsapp_account = ? AND is_call_start = ?", orgID, req.WhatsAppAccount, true).
+			Where("organization_id = ? AND whatsapp_account_id = ? AND is_call_start = ?", orgID, req.WhatsAppAccountID, true).
 			Update("is_call_start", false)
 	}
 
 	// If marking this as outgoing end, unset others for the same account
 	if req.IsOutgoingEnd {
 		a.DB.Model(&models.IVRFlow{}).
-			Where("organization_id = ? AND whatsapp_account = ? AND is_outgoing_end = ?", orgID, req.WhatsAppAccount, true).
+			Where("organization_id = ? AND whatsapp_account_id = ? AND is_outgoing_end = ?", orgID, req.WhatsAppAccountID, true).
 			Update("is_outgoing_end", false)
 	}
 
@@ -129,7 +129,7 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	flow := models.IVRFlow{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
-		WhatsAppAccount: req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 		Name:            req.Name,
 		Description:     req.Description,
 		IsActive:        req.IsActive,
@@ -147,7 +147,7 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	}
 
 	if a.CallManager != nil {
-		a.CallManager.InvalidateIVRFlowCache(flow.ID, flow.OrganizationID, flow.WhatsAppAccount)
+		a.CallManager.InvalidateIVRFlowCache(flow.ID, flow.OrganizationID, flow.WhatsAppAccountID)
 	}
 
 	a.logAudit(orgID, userID,
@@ -183,16 +183,16 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 	// If marking this as call start, unset others for the same account
 	if req.IsCallStart && !flow.IsCallStart {
 		a.DB.Model(&models.IVRFlow{}).
-			Where("organization_id = ? AND whatsapp_account = ? AND is_call_start = ? AND id != ?",
-				orgID, flow.WhatsAppAccount, true, flowID).
+			Where("organization_id = ? AND whatsapp_account_id = ? AND is_call_start = ? AND id != ?",
+				orgID, flow.WhatsAppAccountID, true, flowID).
 			Update("is_call_start", false)
 	}
 
 	// If marking this as outgoing end, unset others for the same account
 	if req.IsOutgoingEnd && !flow.IsOutgoingEnd {
 		a.DB.Model(&models.IVRFlow{}).
-			Where("organization_id = ? AND whatsapp_account = ? AND is_outgoing_end = ? AND id != ?",
-				orgID, flow.WhatsAppAccount, true, flowID).
+			Where("organization_id = ? AND whatsapp_account_id = ? AND is_outgoing_end = ? AND id != ?",
+				orgID, flow.WhatsAppAccountID, true, flowID).
 			Update("is_outgoing_end", false)
 	}
 
@@ -234,8 +234,8 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 	if req.WelcomeAudioURL != "" {
 		updates["welcome_audio_url"] = req.WelcomeAudioURL
 	}
-	if req.WhatsAppAccount != "" {
-		updates["whatsapp_account"] = req.WhatsAppAccount
+	if req.WhatsAppAccountID != "" {
+		updates["whatsapp_account_id"] = req.WhatsAppAccountID
 	}
 
 	if err := a.DB.Model(flow).Updates(updates).Error; err != nil {
@@ -247,7 +247,7 @@ func (a *App) UpdateIVRFlow(r *fastglue.Request) error {
 	a.DB.Preload("CreatedBy").Preload("UpdatedBy").First(flow, flowID)
 
 	if a.CallManager != nil {
-		a.CallManager.InvalidateIVRFlowCache(flow.ID, flow.OrganizationID, flow.WhatsAppAccount)
+		a.CallManager.InvalidateIVRFlowCache(flow.ID, flow.OrganizationID, flow.WhatsAppAccountID)
 	}
 
 	// Compare IVR menu nodes for audit
@@ -433,7 +433,7 @@ func (a *App) DeleteIVRFlow(r *fastglue.Request) error {
 	}
 
 	if a.CallManager != nil {
-		a.CallManager.InvalidateIVRFlowCache(flow.ID, flow.OrganizationID, flow.WhatsAppAccount)
+		a.CallManager.InvalidateIVRFlowCache(flow.ID, flow.OrganizationID, flow.WhatsAppAccountID)
 	}
 
 	a.logAudit(orgID, userID,

@@ -59,7 +59,7 @@ interface WhatsAppAccount {
 
 interface Template {
   id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   meta_template_id: string;
   name: string;
   display_name: string;
@@ -270,7 +270,7 @@ async function syncTemplates() {
   isSyncing.value = true;
   try {
     const response = await api.post("/templates/sync", {
-      whatsapp_account: selectedAccount.value,
+      whatsapp_account_id: selectedAccount.value,
     });
     toast.success(response.data.message || t("templates.syncSuccess"));
     await fetchTemplates();
@@ -413,7 +413,7 @@ function getHeaderIcon(type: string) {
                         <SelectItem
                           v-for="account in accounts"
                           :key="account.id"
-                          :value="account.name"
+                          :value="account.id"
                         >
                           {{ account.name }}
                         </SelectItem>

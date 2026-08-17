@@ -11,7 +11,7 @@ import (
 
 // CatalogRequest represents the request body for creating a catalog
 type CatalogRequest struct {
-	WhatsAppAccount string `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	Name            string `json:"name"`
 }
 
@@ -19,7 +19,7 @@ type CatalogRequest struct {
 type CatalogResponse struct {
 	ID              uuid.UUID                `json:"id"`
 	MetaCatalogID   string                   `json:"meta_catalog_id"`
-	WhatsAppAccount string                   `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	Name            string                   `json:"name"`
 	IsActive        bool                     `json:"is_active"`
 	ProductCount    int                      `json:"product_count"`
@@ -57,7 +57,7 @@ type CatalogProductResponse struct {
 
 // SyncCatalogsRequest represents the request body for syncing catalogs
 type SyncCatalogsRequest struct {
-	WhatsAppAccount string `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 }
 
 // ListCatalogs returns all catalogs for the organization
@@ -105,12 +105,12 @@ func (a *App) CreateCatalog(r *fastglue.Request) error {
 		return nil
 	}
 
-	if req.Name == "" || req.WhatsAppAccount == "" {
+	if req.Name == "" || req.WhatsAppAccountID == "" {
 		return a.sendError(r, invalidRequest("name and whatsapp_account are required"))
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -128,7 +128,7 @@ func (a *App) CreateCatalog(r *fastglue.Request) error {
 	// Store catalog locally
 	catalog := models.Catalog{
 		OrganizationID:  orgID,
-		WhatsAppAccount: req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 		MetaCatalogID:   metaCatalogID,
 		Name:            req.Name,
 		IsActive:        true,
@@ -187,7 +187,7 @@ func (a *App) DeleteCatalog(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, catalog.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(catalog.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -225,12 +225,12 @@ func (a *App) SyncCatalogs(r *fastglue.Request) error {
 		return nil
 	}
 
-	if req.WhatsAppAccount == "" {
+	if req.WhatsAppAccountID == "" {
 		return a.sendError(r, invalidRequest("whatsapp_account is required"))
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -254,7 +254,7 @@ func (a *App) SyncCatalogs(r *fastglue.Request) error {
 			// Create new catalog
 			catalog := models.Catalog{
 				OrganizationID:  orgID,
-				WhatsAppAccount: req.WhatsAppAccount,
+				WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 				MetaCatalogID:   mc.ID,
 				Name:            mc.Name,
 				IsActive:        true,
@@ -342,7 +342,7 @@ func (a *App) CreateCatalogProduct(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, catalog.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(catalog.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -444,7 +444,7 @@ func (a *App) UpdateCatalogProduct(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, catalog.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(catalog.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -522,7 +522,7 @@ func (a *App) DeleteCatalogProduct(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, catalog.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(catalog.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -550,7 +550,7 @@ func catalogToResponse(c models.Catalog, productCount int) CatalogResponse {
 	return CatalogResponse{
 		ID:              c.ID,
 		MetaCatalogID:   c.MetaCatalogID,
-		WhatsAppAccount: c.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(c.WhatsAppAccountID),
 		Name:            c.Name,
 		IsActive:        c.IsActive,
 		ProductCount:    productCount,

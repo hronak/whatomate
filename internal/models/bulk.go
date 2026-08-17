@@ -10,7 +10,7 @@ import (
 type BulkMessageCampaign struct {
 	BaseModel
 	OrganizationID       uuid.UUID      `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccount      string         `gorm:"size:100;index;not null" json:"whatsapp_account"` // References WhatsAppAccount.Name
+	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
 	Name                 string         `gorm:"size:255;not null" json:"name"`
 	TemplateID           uuid.UUID      `gorm:"type:uuid;not null" json:"template_id"`
 	HeaderMediaID        string         `gorm:"type:text" json:"header_media_id"`         // Meta media ID (from uploaded media)
@@ -74,7 +74,7 @@ func (BulkMessageRecipient) TableName() string {
 type NotificationRule struct {
 	BaseModel
 	OrganizationID   uuid.UUID `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccount  string    `gorm:"size:100;index;not null" json:"whatsapp_account"` // References WhatsAppAccount.Name
+	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
 	Name             string    `gorm:"size:255;not null" json:"name"`
 	IsEnabled        bool      `gorm:"default:true" json:"is_enabled"`
 	TriggerType      string    `gorm:"size:50;not null" json:"trigger_type"` // webhook, scheduler, api

@@ -117,7 +117,7 @@ func createTestCampaignData(t *testing.T, w *Worker) (*models.Organization, *mod
 	// Create template
 	template := &models.Template{
 		OrganizationID:  org.ID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountName,
 		Name:            "test_template_" + uniqueID,
 		Language:        "en",
 		Category:        "MARKETING",
@@ -130,7 +130,7 @@ func createTestCampaignData(t *testing.T, w *Worker) (*models.Organization, *mod
 	campaign := &models.BulkMessageCampaign{
 		OrganizationID:  org.ID,
 		Name:            "Test Campaign " + uniqueID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountName,
 		TemplateID:      template.ID,
 		Status:          models.CampaignStatusProcessing,
 		TotalRecipients: 1,
@@ -210,7 +210,7 @@ func TestWorker_HandleRecipientJob_AccountNotFound(t *testing.T) {
 	org, _, _, campaign, recipient := createTestCampaignData(t, w)
 
 	// Change campaign to use non-existent account
-	campaign.WhatsAppAccount = "non-existent-account"
+	campaign.WhatsAppAccountID = "non-existent-account"
 	require.NoError(t, w.DB.Save(campaign).Error)
 
 	job := &queue.RecipientJob{
@@ -288,7 +288,7 @@ func createMinimalCampaignData(t *testing.T, w *Worker, status models.CampaignSt
 
 	template := &models.Template{
 		OrganizationID:  org.ID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountName,
 		Name:            "test_template_" + uniqueID,
 		Language:        "en",
 		Category:        string(models.TemplateCategoryMarketing),
@@ -300,7 +300,7 @@ func createMinimalCampaignData(t *testing.T, w *Worker, status models.CampaignSt
 	campaign := &models.BulkMessageCampaign{
 		OrganizationID:  org.ID,
 		Name:            "Test Campaign " + uniqueID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountName,
 		TemplateID:      template.ID,
 		Status:          status,
 		CreatedBy:       user.ID,

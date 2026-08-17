@@ -62,7 +62,7 @@ func (s *signal) Done() <-chan struct{} {
 type CallSession struct {
 	ID             string // WhatsApp call_id
 	OrganizationID uuid.UUID
-	AccountName    string
+	WhatsAppAccountID *uuid.UUID
 	CallerPhone    string
 	ContactID      uuid.UUID
 	CallLogID      uuid.UUID
@@ -296,7 +296,7 @@ func (m *Manager) HandleIncomingCall(account *models.WhatsAppAccount, contact *m
 	session := &CallSession{
 		ID:             callLog.WhatsAppCallID,
 		OrganizationID: account.OrganizationID,
-		AccountName:    account.Name,
+		WhatsAppAccountID: &account.ID,
 		CallerPhone:    contact.PhoneNumber,
 		ContactID:      contact.ID,
 		CallLogID:      callLog.ID,
@@ -665,7 +665,7 @@ func (m *Manager) terminateCall(session *CallSession, waAccount *whatsapp.Accoun
 // terminates the call. Used when only the session is available.
 func (m *Manager) terminateCallBySession(session *CallSession) {
 	var account models.WhatsAppAccount
-	if err := m.db.Where("organization_id = ? AND name = ?", session.OrganizationID, session.AccountName).
+	if err := m.db.Where("organization_id = ? AND name = ?", session.OrganizationID, session.WhatsAppAccountID).
 		First(&account).Error; err != nil {
 		m.log.Error("Failed to look up account for call termination", "error", err, "call_id", session.ID)
 		return

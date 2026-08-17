@@ -91,7 +91,7 @@ const canDelete = computed(() => authStore.hasPermission("contacts", "delete"));
 const form = ref({
   profile_name: "",
   phone_number: "",
-  whatsapp_account: "",
+  whatsapp_account_id: "",
   tags: [] as string[],
   assigned_user_id: "" as string,
 });
@@ -139,7 +139,7 @@ function syncForm() {
   form.value = {
     profile_name: contact.value.profile_name || "",
     phone_number: contact.value.phone_number,
-    whatsapp_account: contact.value.whatsapp_account || "",
+    whatsapp_account_id: contact.value.whatsapp_account_id || "",
     tags: contact.value.tags ? [...contact.value.tags] : [],
     assigned_user_id: contact.value.assigned_user_id || "",
   };
@@ -161,7 +161,7 @@ async function save() {
   try {
     const payload: Record<string, any> = {
       profile_name: form.value.profile_name,
-      whatsapp_account: form.value.whatsapp_account,
+      whatsapp_account_id: form.value.whatsapp_account_id,
       tags: form.value.tags,
     };
     if (form.value.assigned_user_id) {
@@ -348,13 +348,13 @@ onMounted(async () => {
             <Label>{{
               $t("contacts.whatsappAccount", "WhatsApp Account")
             }}</Label>
-            <Select v-model="form.whatsapp_account" :disabled="!canWrite">
+            <Select v-model="form.whatsapp_account_id" :disabled="!canWrite">
               <SelectTrigger>
                 <SelectValue
                   :placeholder="$t('contacts.selectAccount', 'Select account')"
                 >
-                  <template v-if="form.whatsapp_account">
-                    {{ form.whatsapp_account }}
+                  <template v-if="form.whatsapp_account_id">
+                    {{ form.whatsapp_account_id }}
                   </template>
                 </SelectValue>
               </SelectTrigger>
@@ -362,7 +362,7 @@ onMounted(async () => {
                 <SelectItem
                   v-for="account in accounts"
                   :key="account.id"
-                  :value="account.name"
+                  :value="account.id"
                 >
                   {{ account.name }} ({{ account.phone_number }})
                 </SelectItem>

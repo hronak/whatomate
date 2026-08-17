@@ -668,7 +668,7 @@ const chartOptions = {
                     <CommandItem
                       v-for="account in accounts"
                       :key="account.id"
-                      :value="account.name"
+                      :value="account.id"
                       @select="() => { selectedAccountId = account.id; accountComboboxOpen = false }"
                     >
                       <Check :class="['mr-2 size-4', selectedAccountId === account.id ? 'opacity-100' : 'opacity-0']" />

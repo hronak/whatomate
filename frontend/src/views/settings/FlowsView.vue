@@ -63,7 +63,7 @@ const { t } = useI18n();
 
 interface WhatsAppFlow {
   id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   meta_flow_id: string;
   name: string;
   status: "DRAFT" | "PUBLISHED" | "DEPRECATED";
@@ -121,7 +121,7 @@ const flowToSaveToMeta = ref<WhatsAppFlow | null>(null);
 const flowToEdit = ref<WhatsAppFlow | null>(null);
 
 const formData = ref({
-  whatsapp_account: "",
+  whatsapp_account_id: "",
   name: "",
   category: "",
   json_version: "6.0",
@@ -200,7 +200,7 @@ async function fetchFlows() {
 
 function openCreateDialog() {
   formData.value = {
-    whatsapp_account:
+    whatsapp_account_id:
       selectedAccount.value && selectedAccount.value !== "all"
         ? selectedAccount.value
         : accounts.value[0]?.name || "",
@@ -217,14 +217,14 @@ async function createFlow() {
     toast.error(t("flows.enterFlowName"));
     return;
   }
-  if (!formData.value.whatsapp_account) {
+  if (!formData.value.whatsapp_account_id) {
     toast.error(t("flows.selectAccountRequired"));
     return;
   }
   isCreating.value = true;
   try {
     const payload: any = {
-      whatsapp_account: formData.value.whatsapp_account,
+      whatsapp_account_id: formData.value.whatsapp_account_id,
       name: formData.value.name,
       category: formData.value.category || undefined,
       json_version: formData.value.json_version,
@@ -516,7 +516,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                       ><SelectItem
                         v-for="account in accounts"
                         :key="account.id"
-                        :value="account.name"
+                        :value="account.id"
                         >{{ account.name }}</SelectItem
                       ></SelectContent
                     >
@@ -558,7 +558,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                   <div>
                     <span class="font-medium">{{ flow.name }}</span>
                     <p class="text-muted-foreground">
-                      {{ flow.whatsapp_account }}
+                      {{ flow.whatsapp_account_id }}
                     </p>
                   </div>
                 </template>
@@ -676,7 +676,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
         <div class="flex gap-4 py-2 border-b">
           <div class="flex items-center gap-2">
             <Label class="whitespace-nowrap">{{ $t("flows.account") }}:</Label>
-            <Select v-model="formData.whatsapp_account" :disabled="isCreating"
+            <Select v-model="formData.whatsapp_account_id" :disabled="isCreating"
               ><SelectTrigger class="w-[180px]"
                 ><SelectValue
                   :placeholder="$t('flows.selectAccount')" /></SelectTrigger
@@ -684,7 +684,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
                 ><SelectItem
                   v-for="account in accounts"
                   :key="account.id"
-                  :value="account.name"
+                  :value="account.id"
                   >{{ account.name }}</SelectItem
                 ></SelectContent
               ></Select
@@ -748,7 +748,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
           <div class="flex items-center gap-2">
             <Label class="whitespace-nowrap">{{ $t("flows.account") }}:</Label
             ><span class="text-muted-foreground">{{
-              flowToEdit?.whatsapp_account
+              flowToEdit?.whatsapp_account_id
             }}</span>
           </div>
           <div class="flex items-center gap-2">

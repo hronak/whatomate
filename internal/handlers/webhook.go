@@ -686,7 +686,7 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 	message := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    account.OrganizationID,
-		WhatsAppAccount:   account.Name,
+		WhatsAppAccountID: &account.ID,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: msg.ID,
 		Direction:         models.DirectionOutgoing,
@@ -743,7 +743,7 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 		ContactName:     contact.ProfileName,
 		MessageType:     models.MessageType(messageType),
 		Content:         messageText,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: account.ID.String(),
 		Direction:       models.DirectionOutgoing,
 	})
 }
@@ -778,7 +778,7 @@ func (a *App) processContactSync(phoneNumberID, contactPhone, contactName, actio
 				ContactID:       contact.ID.String(),
 				ContactPhone:    contact.PhoneNumber,
 				ContactName:     contact.ProfileName,
-				WhatsAppAccount: account.Name,
+				WhatsAppAccountID: account.ID.String(),
 			})
 		}
 	case "remove":

@@ -90,7 +90,7 @@ const columns = computed<Column<CallLog>[]>(() => [
   { key: "agent", label: t("calling.agent") },
   { key: "disconnected_by", label: t("calling.disconnectedBy") },
   { key: "ivr_flow", label: t("calling.ivrFlow") },
-  { key: "whatsapp_account", label: t("calling.account") },
+  { key: "whatsapp_account_id", label: t("calling.account") },
   { key: "started_at", label: t("calling.time") },
 ]);
 
@@ -454,8 +454,8 @@ watch(phoneSearch, () => {
           <template #cell-ivr_flow="{ item: log }">
             {{ log.ivr_flow?.name || "-" }}
           </template>
-          <template #cell-whatsapp_account="{ item: log }">
-            {{ log.whatsapp_account }}
+          <template #cell-whatsapp_account_id="{ item: log }">
+            {{ log.whatsapp_account_id }}
           </template>
           <template #cell-started_at="{ item: log }">
             {{ formatDate(log.started_at || log.created_at) }}
@@ -506,7 +506,7 @@ watch(phoneSearch, () => {
             </div>
             <div>
               <p class="text-muted-foreground">{{ t("calling.account") }}</p>
-              <p class="font-medium">{{ selectedLog.whatsapp_account }}</p>
+              <p class="font-medium">{{ selectedLog.whatsapp_account_id }}</p>
             </div>
             <div>
               <p class="text-muted-foreground">{{ t("calling.startedAt") }}</p>

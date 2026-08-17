@@ -796,7 +796,7 @@ const greetingTab = computed(() =>
                 'call_log_id',
                 'transfer_id',
                 'team_id',
-                'whatsapp_account',
+                'whatsapp_account_id',
                 'status',
                 'transferred_at',
                 'ivr_path',

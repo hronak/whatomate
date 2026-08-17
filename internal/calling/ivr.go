@@ -453,7 +453,7 @@ func (m *Manager) executeTransfer(session *CallSession, node *IVRNode, ctx *IVRC
 	// Check if this transfer node has any outgoing edges — if not, terminal.
 	edges := graph.OutgoingEdges(node.ID)
 	if len(edges) == 0 {
-		m.initiateTransfer(session, session.AccountName, teamID, ctx.Path)
+		m.initiateTransfer(session, session.WhatsAppAccountID, teamID, ctx.Path)
 		return "" // terminal
 	}
 
@@ -464,7 +464,7 @@ func (m *Manager) executeTransfer(session *CallSession, node *IVRNode, ctx *IVRC
 	session.TransferDone = transferDone
 	session.mu.Unlock()
 
-	m.initiateTransfer(session, session.AccountName, teamID, ctx.Path)
+	m.initiateTransfer(session, session.WhatsAppAccountID, teamID, ctx.Path)
 
 	// Block until the transfer completes (or the channel is closed during cleanup).
 	outcome, ok := <-transferDone

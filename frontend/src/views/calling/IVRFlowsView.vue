@@ -65,14 +65,14 @@ const togglingFlow = ref<IVRFlow | null>(null);
 const createForm = ref({
   name: "",
   description: "",
-  whatsapp_account: "",
+  whatsapp_account_id: "",
 });
 
 function resetCreateForm() {
   createForm.value = {
     name: "",
     description: "",
-    whatsapp_account: accounts.value[0]?.name || "",
+    whatsapp_account_id: accounts.value[0]?.name || "",
   };
 }
 
@@ -95,7 +95,7 @@ async function createFlow() {
     toast.error(t("calling.nameRequired"));
     return;
   }
-  if (!createForm.value.whatsapp_account) {
+  if (!createForm.value.whatsapp_account_id) {
     toast.error(t("calling.accountRequired"));
     return;
   }
@@ -112,7 +112,7 @@ async function createFlow() {
     const flow = await store.createIVRFlow({
       name: createForm.value.name,
       description: createForm.value.description,
-      whatsapp_account: createForm.value.whatsapp_account,
+      whatsapp_account_id: createForm.value.whatsapp_account_id,
       menu: emptyFlow,
     });
     showCreateDialog.value = false;
@@ -264,7 +264,7 @@ onMounted(async () => {
                   </p>
                 </div>
               </TableCell>
-              <TableCell>{{ flow.whatsapp_account }}</TableCell>
+              <TableCell>{{ flow.whatsapp_account_id }}</TableCell>
               <TableCell>
                 <div class="flex gap-1.5">
                   <Badge
@@ -385,7 +385,7 @@ onMounted(async () => {
           </div>
           <div class="gap-y-2">
             <Label>{{ t("calling.account") }}</Label>
-            <Select v-model="createForm.whatsapp_account">
+            <Select v-model="createForm.whatsapp_account_id">
               <SelectTrigger>
                 <SelectValue :placeholder="t('calling.selectAccount')" />
               </SelectTrigger>

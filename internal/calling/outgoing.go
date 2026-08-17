@@ -17,7 +17,7 @@ import (
 // Returns the call log ID and the SDP answer for the agent's browser.
 func (m *Manager) InitiateOutgoingCall(
 	orgID, agentID, contactID uuid.UUID,
-	contactPhone, accountName string,
+	contactPhone string, accountID uuid.UUID,
 	waAccount *whatsapp.Account,
 	agentSDPOffer string,
 ) (uuid.UUID, string, error) {
@@ -28,7 +28,7 @@ func (m *Manager) InitiateOutgoingCall(
 	callLog := models.CallLog{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: &accountID,
 		ContactID:       contactID,
 		CallerPhone:     contactPhone,
 		Direction:       models.CallDirectionOutgoing,
@@ -56,7 +56,7 @@ func (m *Manager) InitiateOutgoingCall(
 	// Create session early so OnTrack can reference it
 	session := &CallSession{
 		OrganizationID: orgID,
-		AccountName:    accountName,
+		WhatsAppAccountID: &accountID,
 		CallerPhone:    contactPhone,
 		ContactID:      contactID,
 		CallLogID:      callLog.ID,
@@ -427,7 +427,7 @@ func (m *Manager) HangupOutgoingCall(callLogID, agentID uuid.UUID) error {
 	}
 
 	// Look up a post-call IVR flow for this account (cached)
-	ivrFlowPtr := m.getIVRFlowByConfigCached(session.OrganizationID, session.AccountName, "outgoing_end")
+	ivrFlowPtr := m.getIVRFlowByConfigCached(session.OrganizationID, session.WhatsAppAccountID, "outgoing_end")
 	hasPostCallIVR := ivrFlowPtr != nil
 	var ivrFlow models.IVRFlow
 	if hasPostCallIVR {

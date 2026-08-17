@@ -221,9 +221,9 @@ func CreateTestContact(t *testing.T, db *gorm.DB, orgID uuid.UUID) *models.Conta
 type ContactOption func(*models.Contact)
 
 // WithContactAccount sets the WhatsApp account name on the contact.
-func WithContactAccount(accountName string) ContactOption {
+func WithContactAccount(accountID *uuid.UUID) ContactOption {
 	return func(c *models.Contact) {
-		c.WhatsAppAccount = accountName
+		c.WhatsAppAccountID = accountID
 	}
 }
 
@@ -257,13 +257,13 @@ func CreateTestContactWith(t *testing.T, db *gorm.DB, orgID uuid.UUID, opts ...C
 // --- Template ---
 
 // CreateTestTemplate creates a test template in the database.
-func CreateTestTemplate(t *testing.T, db *gorm.DB, orgID uuid.UUID, accountName string) *models.Template {
+func CreateTestTemplate(t *testing.T, db *gorm.DB, orgID uuid.UUID, accountID *uuid.UUID) *models.Template {
 	t.Helper()
 
 	template := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountID,
 		Name:            "test-template-" + uuid.New().String()[:8],
 		MetaTemplateID:  "meta-" + uuid.New().String()[:8],
 		Category:        "MARKETING",

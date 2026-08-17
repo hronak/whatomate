@@ -372,7 +372,7 @@ export const useCallingStore = defineStore("calling", () => {
     // Send to server
     const response = await outgoingCallsService.initiate({
       contact_id: contactId,
-      whatsapp_account: whatsappAccount,
+      whatsapp_account_id: whatsappAccount,
       sdp_offer: sdpOffer,
     });
     const data = response.data as any;

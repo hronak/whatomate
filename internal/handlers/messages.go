@@ -274,7 +274,7 @@ func (a *App) createOutgoingMessage(req OutgoingMessageRequest, opts MessageSend
 	msg := &models.Message{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  req.Account.OrganizationID,
-		WhatsAppAccount: req.Account.Name,
+		WhatsAppAccountID: &req.Account.ID,
 		ContactID:       req.Contact.ID,
 		Direction:       models.DirectionOutgoing,
 		MessageType:     req.Type,
@@ -569,7 +569,7 @@ func (a *App) dispatchMessageSentWebhook(account *models.WhatsAppAccount, contac
 		ContactName:     contact.ProfileName,
 		MessageType:     msg.MessageType,
 		Content:         msg.Content,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: account.ID.String(),
 		Direction:       models.DirectionOutgoing,
 		SentByUserID:    sentByUserID,
 	})
@@ -814,10 +814,10 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	// Determine which WhatsApp account to use (explicit > template > contact > default)
 	accountName := req.AccountName
 	if accountName == "" {
-		accountName = template.WhatsAppAccount
+		accountName = func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(template.WhatsAppAccountID)
 	}
 	if accountName == "" && contact != nil {
-		accountName = contact.WhatsAppAccount
+		accountName = func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(contact.WhatsAppAccountID)
 	}
 
 	account, err := a.resolveWhatsAppAccount(orgID, accountName)
@@ -997,7 +997,7 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		InteractiveData: message.InteractiveData,
 		Status:          message.Status,
 		IsReply:         message.IsReply,
-		WhatsAppAccount: message.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(message.WhatsAppAccountID),
 		CreatedAt:       message.CreatedAt,
 		UpdatedAt:       message.UpdatedAt,
 	}

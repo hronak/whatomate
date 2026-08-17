@@ -33,7 +33,7 @@ type ContactResponse struct {
 	LastMessagePreview string     `json:"last_message_preview"`
 	UnreadCount        int        `json:"unread_count"`
 	AssignedUserID     *uuid.UUID `json:"assigned_user_id,omitempty"`
-	WhatsAppAccount    string     `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID string     `json:"whatsapp_account,omitempty"`
 	LastInboundAt      *time.Time `json:"last_inbound_at,omitempty"`
 	ServiceWindowOpen  bool       `json:"service_window_open"`
 	MarketingOptOut    bool       `json:"marketing_opt_out"`
@@ -59,7 +59,7 @@ type MessageResponse struct {
 	ReplyToMessageID *string              `json:"reply_to_message_id,omitempty"`
 	ReplyToMessage   *ReplyPreview        `json:"reply_to_message,omitempty"`
 	Reactions        []ReactionInfo       `json:"reactions,omitempty"`
-	WhatsAppAccount  string               `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID string               `json:"whatsapp_account,omitempty"`
 	CreatedAt        time.Time            `json:"created_at"`
 	UpdatedAt        time.Time            `json:"updated_at"`
 }
@@ -183,7 +183,7 @@ func (a *App) ListContacts(r *fastglue.Request) error {
 			LastMessagePreview: c.LastMessagePreview,
 			UnreadCount:        int(unreadCount),
 			AssignedUserID:     c.AssignedUserID,
-			WhatsAppAccount:    c.WhatsAppAccount,
+			WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(c.WhatsAppAccountID),
 			LastInboundAt:      c.LastInboundAt,
 			ServiceWindowOpen:  serviceWindowOpen,
 			MarketingOptOut:    c.MarketingOptOut,
@@ -393,7 +393,7 @@ func (a *App) buildMessagesResponse(messages []models.Message) []MessageResponse
 			WAMID:           m.WhatsAppMessageID,
 			Error:           m.ErrorMessage,
 			IsReply:         m.IsReply,
-			WhatsAppAccount: m.WhatsAppAccount,
+			WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(m.WhatsAppAccountID),
 			CreatedAt:       m.CreatedAt,
 			UpdatedAt:       m.UpdatedAt,
 		}
@@ -471,8 +471,8 @@ func (a *App) markMessagesAsRead(orgID uuid.UUID, contactID uuid.UUID, contact *
 
 	a.logWrite("contact read flag", a.DB.Model(contact).Update("is_read", true))
 
-	if len(unreadMessages) > 0 && contact.WhatsAppAccount != "" {
-		if account, err := a.resolveWhatsAppAccount(orgID, contact.WhatsAppAccount); err == nil {
+	if len(unreadMessages) > 0 && contact.WhatsAppAccountID != nil {
+		if account, err := a.resolveWhatsAppAccount(orgID, contact.WhatsAppAccountID.String()); err == nil {
 			if account.AutoReadReceipt {
 				a.wg.Go(func() {
 					// Use timeout context for external API calls
@@ -505,7 +505,7 @@ type SendMessageRequest struct {
 		Body string `json:"body"`
 	} `json:"content"`
 	ReplyToMessageID string `json:"reply_to_message_id,omitempty"`
-	WhatsAppAccount  string `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID string `json:"whatsapp_account,omitempty"`
 
 	// Interactive message fields (for type="interactive")
 	Interactive *InteractiveContent `json:"interactive,omitempty"`
@@ -564,11 +564,12 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account - prefer request-specified account over contact default
-	accountName := contact.WhatsAppAccount
-	if req.WhatsAppAccount != "" {
-		accountName = req.WhatsAppAccount
+	accountName := contact.WhatsAppAccountID
+	if req.WhatsAppAccountID != "" {
+		u, _ := uuid.Parse(req.WhatsAppAccountID)
+		accountName = &u
 	}
-	account, err := a.resolveWhatsAppAccount(orgID, accountName)
+	account, err := a.resolveWhatsAppAccount(orgID, accountName.String())
 	if err != nil {
 		return a.sendError(r, invalidRequest("Failed to resolve WhatsApp account"))
 	}
@@ -678,7 +679,7 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 		InteractiveData: message.InteractiveData,
 		Status:          message.Status,
 		IsReply:         message.IsReply,
-		WhatsAppAccount: message.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(message.WhatsAppAccountID),
 		CreatedAt:       message.CreatedAt,
 		UpdatedAt:       message.UpdatedAt,
 	}
@@ -815,11 +816,11 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account - prefer form-specified account over contact default
-	mediaAccountName := contact.WhatsAppAccount
+	mediaAccountName := contact.WhatsAppAccountID
 	if formWhatsAppAccount != "" {
-		mediaAccountName = formWhatsAppAccount
+		mediaAccountName = func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(formWhatsAppAccount)
 	}
-	account, err := a.resolveWhatsAppAccount(orgID, mediaAccountName)
+	account, err := a.resolveWhatsAppAccount(orgID, mediaAccountName.String())
 	if err != nil {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}
@@ -863,7 +864,7 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 		MediaMimeType:   message.MediaMimeType,
 		MediaFilename:   message.MediaFilename,
 		Status:          message.Status,
-		WhatsAppAccount: message.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(message.WhatsAppAccountID),
 		CreatedAt:       message.CreatedAt,
 		UpdatedAt:       message.UpdatedAt,
 	}
@@ -960,11 +961,11 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account from the message being reacted to (not from contact, which may be stale)
-	reactionAccountName := message.WhatsAppAccount
-	if reactionAccountName == "" {
-		reactionAccountName = contact.WhatsAppAccount
+	reactionAccountName := message.WhatsAppAccountID
+	if reactionAccountName == nil {
+		reactionAccountName = contact.WhatsAppAccountID
 	}
-	account, err := a.resolveWhatsAppAccount(orgID, reactionAccountName)
+	account, err := a.resolveWhatsAppAccount(orgID, reactionAccountName.String())
 	if err != nil {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}
@@ -1283,7 +1284,7 @@ func (a *App) UpdateContactTags(r *fastglue.Request) error {
 type CreateContactRequest struct {
 	PhoneNumber     string         `json:"phone_number"`
 	ProfileName     string         `json:"profile_name"`
-	WhatsAppAccount string         `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	Tags            []string       `json:"tags"`
 	Metadata        map[string]any `json:"metadata"`
 }
@@ -1328,8 +1329,9 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 			if req.ProfileName != "" {
 				updates["profile_name"] = req.ProfileName
 			}
-			if req.WhatsAppAccount != "" {
-				updates["whats_app_account"] = req.WhatsAppAccount
+			if req.WhatsAppAccountID != "" {
+				u, _ := uuid.Parse(req.WhatsAppAccountID)
+				updates["whatsapp_account_id"] = u
 			}
 			if req.Tags != nil {
 				tagsArray := make(models.JSONBArray, len(req.Tags))
@@ -1357,7 +1359,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 		OrganizationID:  orgID,
 		PhoneNumber:     normalizedPhone,
 		ProfileName:     req.ProfileName,
-		WhatsAppAccount: req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 	}
 
 	if req.Tags != nil {
@@ -1388,7 +1390,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 // "sent as null" (pointer to empty string) to allow clearing the field.
 type UpdateContactRequest struct {
 	ProfileName        *string         `json:"profile_name"`
-	WhatsAppAccount    *string         `json:"whatsapp_account"`
+	WhatsAppAccountID    *string         `json:"whatsapp_account_id"`
 	Tags               []string        `json:"tags"`
 	Metadata           *map[string]any `json:"metadata"`
 	AssignedUserID     *uuid.UUID      `json:"assigned_user_id"`
@@ -1430,8 +1432,9 @@ func (a *App) UpdateContact(r *fastglue.Request) error {
 	if req.ProfileName != nil {
 		updates["profile_name"] = *req.ProfileName
 	}
-	if req.WhatsAppAccount != nil {
-		updates["whats_app_account"] = *req.WhatsAppAccount
+	if req.WhatsAppAccountID != nil {
+		u, _ := uuid.Parse(*req.WhatsAppAccountID)
+		updates["whatsapp_account_id"] = u
 	}
 	if req.Tags != nil {
 		tagsArray := make(models.JSONBArray, len(req.Tags))
@@ -1548,7 +1551,7 @@ func (a *App) buildContactResponse(contact *models.Contact, orgID uuid.UUID) Con
 		LastMessagePreview: contact.LastMessagePreview,
 		UnreadCount:        int(unreadCount),
 		AssignedUserID:     contact.AssignedUserID,
-		WhatsAppAccount:    contact.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(contact.WhatsAppAccountID),
 		LastInboundAt:      contact.LastInboundAt,
 		ServiceWindowOpen:  serviceWindowOpen,
 		MarketingOptOut:    contact.MarketingOptOut,

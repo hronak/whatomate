@@ -25,7 +25,7 @@ type agentTransferRow struct {
 	ID                    uuid.UUID             `gorm:"column:id"`
 	OrganizationID        uuid.UUID             `gorm:"column:organization_id"`
 	ContactID             uuid.UUID             `gorm:"column:contact_id"`
-	WhatsAppAccount       string                `gorm:"column:whatsapp_account"`
+	WhatsAppAccountID string                `gorm:"column:whatsapp_account"`
 	PhoneNumber           string                `gorm:"column:phone_number"`
 	Status                models.TransferStatus `gorm:"column:status"`
 	Source                models.TransferSource `gorm:"column:source"`
@@ -56,7 +56,7 @@ type agentTransferRow struct {
 // CreateAgentTransferRequest represents the request to create an agent transfer
 type CreateAgentTransferRequest struct {
 	ContactID       string                `json:"contact_id"`
-	WhatsAppAccount string                `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	AgentID         *string               `json:"agent_id"`
 	TeamID          *string               `json:"team_id"` // Optional team queue
 	Notes           string                `json:"notes"`
@@ -75,7 +75,7 @@ type AgentTransferResponse struct {
 	ContactID         string                `json:"contact_id"`
 	ContactName       string                `json:"contact_name"`
 	PhoneNumber       string                `json:"phone_number"`
-	WhatsAppAccount   string                `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	Status            models.TransferStatus `json:"status"`
 	Source            models.TransferSource `json:"source"`
 	AgentID           *string               `json:"agent_id,omitempty"`
@@ -312,7 +312,7 @@ func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 			ID:              t.ID.String(),
 			ContactID:       t.ContactID.String(),
 			PhoneNumber:     phoneNumber,
-			WhatsAppAccount: t.WhatsAppAccount,
+			WhatsAppAccountID: t.WhatsAppAccountID,
 			Status:          t.Status,
 			Source:          t.Source,
 			Notes:           t.Notes,
@@ -435,7 +435,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	}
 
 	// Get chatbot settings to check AssignToSameAgent (use cache)
-	settings, _ := a.getChatbotSettingsCached(orgID, req.WhatsAppAccount)
+	settings, _ := a.getChatbotSettingsCached(orgID, req.WhatsAppAccountID)
 
 	// Parse team_id if provided
 	var teamID *uuid.UUID
@@ -494,7 +494,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 		BaseModel:           models.BaseModel{ID: uuid.New()},
 		OrganizationID:      orgID,
 		ContactID:           contactID,
-		WhatsAppAccount:     req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, err := uuid.Parse(s); if err != nil { return nil }; return &u }(req.WhatsAppAccountID),
 		PhoneNumber:         contact.PhoneNumber,
 		Status:              models.TransferStatusActive,
 		Source:              source,
@@ -554,7 +554,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 		Reason:          transfer.Notes,
 		AgentID:         agentIDStr,
 		AgentName:       agentName,
-		WhatsAppAccount: transfer.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
 	})
 
 	// Load relations for response
@@ -568,7 +568,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 		ContactID:       transfer.ContactID.String(),
 		ContactName:     contactName,
 		PhoneNumber:     phoneNumber,
-		WhatsAppAccount: transfer.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
 		Status:          transfer.Status,
 		Source:          transfer.Source,
 		Notes:           transfer.Notes,
@@ -674,7 +674,7 @@ func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 		ContactPhone:    contact.PhoneNumber,
 		ContactName:     contact.ProfileName,
 		Source:          transfer.Source,
-		WhatsAppAccount: transfer.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
 	})
 
 	return a.sendJSON(r, map[string]any{
@@ -840,7 +840,7 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 		Source:          transfer.Source,
 		AgentID:         agentIDStr,
 		AgentName:       agentName,
-		WhatsAppAccount: transfer.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
 	})
 
 	return a.sendJSON(r, map[string]any{
@@ -1014,7 +1014,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 		ID:              transfer.ID.String(),
 		ContactID:       transfer.ContactID.String(),
 		PhoneNumber:     phoneNumber,
-		WhatsAppAccount: transfer.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
 		Status:          transfer.Status,
 		Source:          transfer.Source,
 		Notes:           transfer.Notes,
@@ -1117,7 +1117,7 @@ func (a *App) broadcastTransferCreated(transfer *models.AgentTransfer, contact *
 		"contact_id":       transfer.ContactID.String(),
 		"contact_name":     contactName,
 		"phone_number":     phoneNumber,
-		"whatsapp_account": transfer.WhatsAppAccount,
+		"whatsapp_account": transfer.WhatsAppAccountID,
 		"status":           transfer.Status,
 		"source":           transfer.Source,
 		"notes":            transfer.Notes,
@@ -1257,7 +1257,7 @@ func (a *App) createTransferToQueue(account *models.WhatsAppAccount, contact *mo
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  account.OrganizationID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.TransferStatusActive,
 		Source:          source,
@@ -1305,7 +1305,7 @@ func (a *App) createTransferFromKeyword(account *models.WhatsAppAccount, contact
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  account.OrganizationID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.TransferStatusActive,
 		Source:          models.TransferSourceKeyword,
@@ -1359,7 +1359,7 @@ func (a *App) createTransferToTeam(account *models.WhatsAppAccount, contact *mod
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  account.OrganizationID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.TransferStatusActive,
 		Source:          source,

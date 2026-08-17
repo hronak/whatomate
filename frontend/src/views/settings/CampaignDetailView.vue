@@ -84,7 +84,7 @@ import {
 interface Campaign {
   id: string;
   name: string;
-  whatsapp_account?: string;
+  whatsapp_account_id?: string;
   template_id?: string;
   template_name?: string;
   header_media_id?: string;
@@ -155,7 +155,7 @@ const isDraft = computed(
 
 const form = ref({
   name: "",
-  whatsapp_account: "",
+  whatsapp_account_id: "",
   template_id: "",
   scheduled_at: "",
 });
@@ -364,13 +364,13 @@ async function loadAccounts() {
 }
 
 async function loadTemplates() {
-  if (!form.value.whatsapp_account) {
+  if (!form.value.whatsapp_account_id) {
     templates.value = [];
     return;
   }
   try {
     const response = await api.get("/templates", {
-      params: { whatsapp_account: form.value.whatsapp_account },
+      params: { whatsapp_account_id: form.value.whatsapp_account_id },
     });
     templates.value = response.data?.templates || [];
   } catch {
@@ -401,7 +401,7 @@ function syncForm() {
   if (!campaign.value) return;
   form.value = {
     name: campaign.value.name || "",
-    whatsapp_account: campaign.value.whatsapp_account || "",
+    whatsapp_account_id: campaign.value.whatsapp_account_id || "",
     template_id: campaign.value.template_id || "",
     scheduled_at: campaign.value.scheduled_at
       ? campaign.value.scheduled_at.slice(0, 16)
@@ -420,7 +420,7 @@ watch(
 
 // Reload templates when account changes
 watch(
-  () => form.value.whatsapp_account,
+  () => form.value.whatsapp_account_id,
   (newVal, oldVal) => {
     if (newVal !== oldVal) {
       // Clear template selection if account changed
@@ -458,7 +458,7 @@ async function save() {
   try {
     const payload: Record<string, any> = {
       name: form.value.name,
-      whatsapp_account: form.value.whatsapp_account || undefined,
+      whatsapp_account_id: form.value.whatsapp_account_id || undefined,
       template_id: form.value.template_id || undefined,
       scheduled_at: form.value.scheduled_at || undefined,
     };
@@ -1049,7 +1049,7 @@ onMounted(async () => {
   } else {
     await loadCampaign();
     // Load templates for the selected account after campaign loads
-    if (form.value.whatsapp_account) {
+    if (form.value.whatsapp_account_id) {
       await loadTemplates();
     }
     // Load template details for header media detection
@@ -1220,7 +1220,7 @@ onUnmounted(() => {
             <Label>{{
               $t("campaigns.whatsappAccount", "WhatsApp Account")
             }}</Label>
-            <Select v-model="form.whatsapp_account" :disabled="!isDraft">
+            <Select v-model="form.whatsapp_account_id" :disabled="!isDraft">
               <SelectTrigger>
                 <SelectValue
                   :placeholder="$t('campaigns.selectAccount', 'Select account')"
@@ -1230,7 +1230,7 @@ onUnmounted(() => {
                 <SelectItem
                   v-for="account in accounts"
                   :key="account.name"
-                  :value="account.name"
+                  :value="account.id"
                 >
                   {{ account.name }}
                 </SelectItem>
@@ -1241,12 +1241,12 @@ onUnmounted(() => {
             <Label>{{ $t("campaigns.template", "Template") }}</Label>
             <Select
               v-model="form.template_id"
-              :disabled="!isDraft || !form.whatsapp_account"
+              :disabled="!isDraft || !form.whatsapp_account_id"
             >
               <SelectTrigger>
                 <SelectValue
                   :placeholder="
-                    form.whatsapp_account
+                    form.whatsapp_account_id
                       ? $t('campaigns.selectTemplate', 'Select template')
                       : $t(
                           'campaigns.selectAccountFirst',

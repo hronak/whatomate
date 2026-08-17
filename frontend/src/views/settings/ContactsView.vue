@@ -59,7 +59,7 @@ interface Contact {
   phone_number: string;
   profile_name: string;
   name: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   tags: string[];
   metadata: Record<string, any>;
   assigned_user_id: string | null;

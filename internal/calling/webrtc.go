@@ -181,7 +181,7 @@ func (m *Manager) negotiateWebRTC(session *CallSession, account *models.WhatsApp
 	// empty team target keeps the no-team broadcast as the eventual
 	// fallback if the sticky agent doesn't answer.
 	if session.StickyAgentID != nil {
-		go m.initiateTransfer(session, session.AccountName, "", nil)
+		go m.initiateTransfer(session, session.WhatsAppAccountID, "", nil)
 		return
 	}
 

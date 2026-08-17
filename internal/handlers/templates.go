@@ -14,7 +14,7 @@ import (
 
 // TemplateRequest represents the request body for creating/updating a template
 type TemplateRequest struct {
-	WhatsAppAccount string `json:"whatsapp_account" validate:"required"` // WhatsApp account name
+	WhatsAppAccountID string `json:"whatsapp_account" validate:"required"` // WhatsApp account name
 	Name            string `json:"name" validate:"required"`
 	DisplayName     string `json:"display_name"`
 	Language        string `json:"language" validate:"required"`
@@ -34,7 +34,7 @@ type TemplateRequest struct {
 // TemplateResponse represents the response for a template
 type TemplateResponse struct {
 	ID                        uuid.UUID `json:"id"`
-	WhatsAppAccount           string    `json:"whatsapp_account"` // WhatsApp account name
+	WhatsAppAccountID string `json:"whatsapp_account_id"` // WhatsApp account name
 	MetaTemplateID            string    `json:"meta_template_id"`
 	Name                      string    `json:"name"`
 	DisplayName               string    `json:"display_name"`
@@ -118,7 +118,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 
 	// Validate required fields
 	isAuthTemplate := strings.ToUpper(req.Category) == "AUTHENTICATION"
-	if req.WhatsAppAccount == "" || req.Name == "" || req.Language == "" || req.Category == "" {
+	if req.WhatsAppAccountID == "" || req.Name == "" || req.Language == "" || req.Category == "" {
 		return a.sendError(r, invalidRequest("whatsapp_account, name, language, and category are required"))
 	}
 	if !isAuthTemplate && req.BodyContent == "" {
@@ -144,7 +144,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 	}
 
 	// Verify account belongs to organization
-	if _, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount); err != nil {
+	if _, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccountID); err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
@@ -153,7 +153,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 
 	// Check if template with same name exists for this account
 	var existingTemplate models.Template
-	if err := a.DB.Where("organization_id = ? AND whats_app_account = ? AND name = ?", orgID, req.WhatsAppAccount, templateName).First(&existingTemplate).Error; err == nil {
+	if err := a.DB.Where("organization_id = ? AND whats_app_account = ? AND name = ?", orgID, req.WhatsAppAccountID, templateName).First(&existingTemplate).Error; err == nil {
 		return a.sendError(r, conflict("Template with this name already exists"))
 	}
 
@@ -164,7 +164,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 
 	template := models.Template{
 		OrganizationID:            orgID,
-		WhatsAppAccount:           req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 		Name:                      templateName,
 		DisplayName:               displayName,
 		Language:                  req.Language,
@@ -338,7 +338,7 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 
 	// If template exists on Meta, delete it there too
 	if template.MetaTemplateID != "" {
-		if account, err := a.resolveWhatsAppAccount(orgID, template.WhatsAppAccount); err == nil {
+		if account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(template.WhatsAppAccountID)); err == nil {
 			// Delete from Meta API
 			templateName := template.Name
 			a.spawn("delete_template_from_meta", func(context.Context) {
@@ -389,7 +389,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, template.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(template.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -465,13 +465,13 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 	accountName := string(r.RequestCtx.QueryArgs().Peek("account"))
 	if accountName == "" {
 		var body struct {
-			WhatsAppAccount string `json:"whatsapp_account"`
+			WhatsAppAccountID string `json:"whatsapp_account_id"`
 		}
 		if len(r.RequestCtx.PostBody()) > 0 {
 			if err := a.decodeRequest(r, &body); err != nil {
 				return nil
 			}
-			accountName = body.WhatsAppAccount
+			accountName = body.WhatsAppAccountID
 		}
 	}
 
@@ -505,7 +505,7 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 
 		template := models.Template{
 			OrganizationID:  orgID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			MetaTemplateID:  metaTemplate.ID,
 			Name:            metaTemplate.Name,
 			DisplayName:     metaTemplate.Name,
@@ -595,7 +595,7 @@ func (a *App) deleteTemplateFromMeta(account *models.WhatsAppAccount, templateNa
 func templateToResponse(t models.Template) TemplateResponse {
 	return TemplateResponse{
 		ID:                        t.ID,
-		WhatsAppAccount:           t.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(t.WhatsAppAccountID),
 		MetaTemplateID:            t.MetaTemplateID,
 		Name:                      t.Name,
 		DisplayName:               t.DisplayName,

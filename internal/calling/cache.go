@@ -46,9 +46,13 @@ func (m *Manager) getIVRFlowCached(flowID uuid.UUID) *models.IVRFlow {
 
 // getIVRFlowByConfigCached finds the IVR flow for a given org+account+config flag.
 // configType is "call_start" or "outgoing_end".
-func (m *Manager) getIVRFlowByConfigCached(orgID uuid.UUID, accountName, configType string) *models.IVRFlow {
+func (m *Manager) getIVRFlowByConfigCached(orgID uuid.UUID, accountID *uuid.UUID, configType string) *models.IVRFlow {
 	ctx := context.Background()
-	key := fmt.Sprintf("%s%s:%s:%s", ivrFlowCfgCachePrefix, orgID.String(), accountName, configType)
+	accountStr := "global"
+	if accountID != nil {
+		accountStr = accountID.String()
+	}
+	key := fmt.Sprintf("%s%s:%s:%s", ivrFlowCfgCachePrefix, orgID.String(), accountStr, configType)
 
 	// Try cache
 	if cached, err := m.redis.Get(ctx, key).Result(); err == nil {
@@ -66,14 +70,14 @@ func (m *Manager) getIVRFlowByConfigCached(orgID uuid.UUID, accountName, configT
 	var query string
 	switch configType {
 	case "call_start":
-		query = "organization_id = ? AND whatsapp_account = ? AND is_call_start = ? AND is_active = ? AND deleted_at IS NULL"
+		query = "organization_id = ? AND whatsapp_account_id = ? AND is_call_start = ? AND is_active = ? AND deleted_at IS NULL"
 	case "outgoing_end":
-		query = "organization_id = ? AND whatsapp_account = ? AND is_outgoing_end = ? AND is_active = ?"
+		query = "organization_id = ? AND whatsapp_account_id = ? AND is_outgoing_end = ? AND is_active = ?"
 	default:
 		return nil
 	}
 
-	if err := m.db.Where(query, orgID, accountName, true, true).First(&flow).Error; err != nil {
+	if err := m.db.Where(query, orgID, accountID, true, true).First(&flow).Error; err != nil {
 		// Cache the miss so we don't hit DB again
 		m.redis.Set(ctx, key, "null", callingCacheTTL)
 		return nil
@@ -154,18 +158,18 @@ func (m *Manager) applyOrgOverrides(s *orgCallingSettings, settings map[string]a
 
 // GetIVRFlowByConfig is the public wrapper for getIVRFlowByConfigCached,
 // used by handlers that need cached config-flag lookups (e.g., call_webhook).
-func (m *Manager) GetIVRFlowByConfig(orgID uuid.UUID, accountName, configType string) *models.IVRFlow {
-	return m.getIVRFlowByConfigCached(orgID, accountName, configType)
+func (m *Manager) GetIVRFlowByConfig(orgID uuid.UUID, accountID *uuid.UUID, configType string) *models.IVRFlow {
+	return m.getIVRFlowByConfigCached(orgID, accountID, configType)
 }
 
 // InvalidateIVRFlowCache removes cached IVR flow data. Called from IVR flow CRUD handlers.
-func (m *Manager) InvalidateIVRFlowCache(flowID uuid.UUID, orgID uuid.UUID, accountName string) {
+func (m *Manager) InvalidateIVRFlowCache(flowID uuid.UUID, orgID uuid.UUID, accountID *uuid.UUID) {
 	ctx := context.Background()
 	// Invalidate by-ID cache
 	m.redis.Del(ctx, ivrFlowCachePrefix+flowID.String())
 	// Invalidate config-based caches for this org+account
-	m.redis.Del(ctx, fmt.Sprintf("%s%s:%s:call_start", ivrFlowCfgCachePrefix, orgID.String(), accountName))
-	m.redis.Del(ctx, fmt.Sprintf("%s%s:%s:outgoing_end", ivrFlowCfgCachePrefix, orgID.String(), accountName))
+	m.redis.Del(ctx, fmt.Sprintf("%s%s:%s:call_start", ivrFlowCfgCachePrefix, orgID.String(), accountID))
+	m.redis.Del(ctx, fmt.Sprintf("%s%s:%s:outgoing_end", ivrFlowCfgCachePrefix, orgID.String(), accountID))
 }
 
 // InvalidateOrgCallingSettingsCache removes cached org calling settings.

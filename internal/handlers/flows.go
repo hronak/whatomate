@@ -14,7 +14,7 @@ import (
 
 // FlowRequest represents the request body for creating/updating a flow
 type FlowRequest struct {
-	WhatsAppAccount string         `json:"whatsapp_account" validate:"required"`
+	WhatsAppAccountID string         `json:"whatsapp_account_id" validate:"required"`
 	Name            string         `json:"name" validate:"required"`
 	Category        string         `json:"category"`
 	JSONVersion     string         `json:"json_version"`
@@ -25,7 +25,7 @@ type FlowRequest struct {
 // FlowResponse represents the response for a flow
 type FlowResponse struct {
 	ID              uuid.UUID      `json:"id"`
-	WhatsAppAccount string         `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	MetaFlowID      string         `json:"meta_flow_id"`
 	Name            string         `json:"name"`
 	Status          string         `json:"status"`
@@ -101,12 +101,12 @@ func (a *App) CreateFlow(r *fastglue.Request) error {
 	if req.Name == "" {
 		return a.sendError(r, invalidRequest("Name is required"))
 	}
-	if req.WhatsAppAccount == "" {
+	if req.WhatsAppAccountID == "" {
 		return a.sendError(r, invalidRequest("WhatsApp account is required"))
 	}
 
 	// Verify account exists and belongs to org
-	if _, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount); err != nil {
+	if _, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccountID); err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
 
@@ -118,7 +118,7 @@ func (a *App) CreateFlow(r *fastglue.Request) error {
 
 	flow := models.WhatsAppFlow{
 		OrganizationID:  orgID,
-		WhatsAppAccount: req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 		Name:            req.Name,
 		Status:          "DRAFT",
 		Category:        req.Category,
@@ -273,7 +273,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, flow.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(flow.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -384,7 +384,7 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, flow.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(flow.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -452,7 +452,7 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 	// Call Meta API to deprecate the flow if we have a Meta flow ID
 	if flow.MetaFlowID != "" {
 		// Get the WhatsApp account
-		account, err := a.resolveWhatsAppAccount(orgID, flow.WhatsAppAccount)
+		account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(flow.WhatsAppAccountID))
 		if err != nil {
 			return a.sendError(r, invalidRequest("WhatsApp account not found"))
 		}
@@ -505,7 +505,7 @@ func (a *App) DuplicateFlow(r *fastglue.Request) error {
 	// Create a duplicate with a new name
 	newFlow := models.WhatsAppFlow{
 		OrganizationID:  orgID,
-		WhatsAppAccount: flow.WhatsAppAccount,
+		WhatsAppAccountID: flow.WhatsAppAccountID,
 		Name:            flow.Name + " (Copy)",
 		Status:          "DRAFT",
 		Category:        flow.Category,
@@ -537,18 +537,18 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 
 	// Get account name from request
 	var req struct {
-		WhatsAppAccount string `json:"whatsapp_account"`
+		WhatsAppAccountID string `json:"whatsapp_account_id"`
 	}
 	if err := a.decodeRequest(r, &req); err != nil {
 		return nil
 	}
 
-	if req.WhatsAppAccount == "" {
+	if req.WhatsAppAccountID == "" {
 		return a.sendError(r, invalidRequest("WhatsApp account is required"))
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccount)
+	account, err := a.resolveWhatsAppAccount(orgID, req.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -604,7 +604,7 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 			// Flow doesn't exist locally, create it
 			newFlow := models.WhatsAppFlow{
 				OrganizationID:  orgID,
-				WhatsAppAccount: req.WhatsAppAccount,
+				WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 				MetaFlowID:      mf.ID,
 				Name:            mf.Name,
 				Status:          string(mf.Status),
@@ -1044,7 +1044,7 @@ func sanitizeComponentsWithPayload(children []any, allFieldNames []string, field
 func flowToResponse(f models.WhatsAppFlow) FlowResponse {
 	return FlowResponse{
 		ID:              f.ID,
-		WhatsAppAccount: f.WhatsAppAccount,
+		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(f.WhatsAppAccountID),
 		MetaFlowID:      f.MetaFlowID,
 		Name:            f.Name,
 		Status:          f.Status,

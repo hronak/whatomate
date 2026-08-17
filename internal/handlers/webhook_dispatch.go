@@ -31,7 +31,7 @@ type MessageEventData struct {
 	ContactName     string             `json:"contact_name"`
 	MessageType     models.MessageType `json:"message_type"`
 	Content         string             `json:"content"`
-	WhatsAppAccount string             `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 	Direction       models.Direction   `json:"direction,omitempty"`
 	SentByUserID    string             `json:"sent_by_user_id,omitempty"`
 }
@@ -41,7 +41,7 @@ type ContactEventData struct {
 	ContactID       string `json:"contact_id"`
 	ContactPhone    string `json:"contact_phone"`
 	ContactName     string `json:"contact_name"`
-	WhatsAppAccount string `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 }
 
 // TransferEventData represents data for transfer events
@@ -54,7 +54,7 @@ type TransferEventData struct {
 	Reason          string                `json:"reason,omitempty"`
 	AgentID         *string               `json:"agent_id,omitempty"`
 	AgentName       *string               `json:"agent_name,omitempty"`
-	WhatsAppAccount string                `json:"whatsapp_account"`
+	WhatsAppAccountID string `json:"whatsapp_account_id"`
 }
 
 // maxConcurrentWebhooks limits the number of concurrent webhook deliveries per dispatch

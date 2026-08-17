@@ -817,10 +817,10 @@ func (a *App) execChatGotoFlow(node *ChatNode, ctx *chatNodeCtx) (nodeOutcome, e
 			"node", node.ID, "flow_id", targetID)
 		return nodeOutcome{}, nil
 	}
-	if target.WhatsAppAccount != ctx.session.WhatsAppAccount {
+	if target.WhatsAppAccountID != ctx.session.WhatsAppAccountID {
 		a.Log.Warn("goto_flow target belongs to a different WA account; refusing",
-			"node", node.ID, "target_account", target.WhatsAppAccount,
-			"session_account", ctx.session.WhatsAppAccount)
+			"node", node.ID, "target_account", target.WhatsAppAccountID,
+			"session_account", ctx.session.WhatsAppAccountID)
 		return nodeOutcome{}, nil
 	}
 	if target.Graph == nil {

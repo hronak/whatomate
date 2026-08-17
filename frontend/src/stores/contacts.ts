@@ -28,7 +28,7 @@ export interface Contact {
   service_window_open?: boolean;
   unread_count: number;
   assigned_user_id?: string;
-  whatsapp_account?: string;
+  whatsapp_account_id?: string;
   marketing_opt_out?: boolean;
   created_at: string;
   updated_at: string;
@@ -77,7 +77,7 @@ export interface Message {
   reply_to_message_id?: string;
   reply_to_message?: ReplyPreview;
   reactions?: Reaction[];
-  whatsapp_account?: string;
+  whatsapp_account_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -268,7 +268,7 @@ export const useContactsStore = defineStore("contacts", () => {
         type,
         content,
         reply_to_message_id: replyToMessageId,
-        whatsapp_account: whatsappAccount,
+        whatsapp_account_id: whatsappAccount,
         ...(extra?.interactive ? { interactive: extra.interactive } : {}),
       });
       // API returns { status: "success", data: { ... } }
@@ -346,8 +346,8 @@ export const useContactsStore = defineStore("contacts", () => {
     // Skip adding to messages array if account filter is active and doesn't match
     if (
       accountFilter.value &&
-      message.whatsapp_account &&
-      message.whatsapp_account !== accountFilter.value
+      message.whatsapp_account_id &&
+      message.whatsapp_account_id !== accountFilter.value
     ) {
       return;
     }

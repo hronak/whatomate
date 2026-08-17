@@ -57,7 +57,7 @@ interface Campaign {
   name: string;
   template_name: string;
   template_id?: string;
-  whatsapp_account?: string;
+  whatsapp_account_id?: string;
   header_media_id?: string;
   header_media_filename?: string;
   header_media_mime_type?: string;

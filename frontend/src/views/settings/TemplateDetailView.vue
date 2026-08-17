@@ -58,7 +58,7 @@ interface WhatsAppAccount {
 
 interface Template {
   id: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   meta_template_id: string;
   name: string;
   display_name: string;
@@ -193,7 +193,7 @@ const isEditable = computed(() => {
 });
 
 const form = ref({
-  whatsapp_account: "",
+  whatsapp_account_id: "",
   name: "",
   display_name: "",
   language: "en",
@@ -436,7 +436,7 @@ async function loadAccounts() {
 function syncForm() {
   if (!template.value) return;
   form.value = {
-    whatsapp_account: template.value.whatsapp_account || "",
+    whatsapp_account_id: template.value.whatsapp_account_id || "",
     name: template.value.name || "",
     display_name: template.value.display_name || "",
     language: template.value.language || "en",
@@ -602,7 +602,7 @@ async function save() {
   isSaving.value = true;
   try {
     const payload: Record<string, any> = {
-      whatsapp_account: form.value.whatsapp_account,
+      whatsapp_account_id: form.value.whatsapp_account_id,
       name: form.value.name,
       display_name: form.value.display_name,
       language: form.value.language,
@@ -668,14 +668,14 @@ function onHeaderMediaFileChange(event: Event) {
 
 async function uploadHeaderMedia() {
   if (!headerMediaFile.value) return;
-  if (!form.value.whatsapp_account) {
+  if (!form.value.whatsapp_account_id) {
     toast.error(t("templates.selectAccountFirst", "Select an account first"));
     return;
   }
   headerMediaUploading.value = true;
   try {
     const response = await templatesService.uploadMedia(
-      form.value.whatsapp_account,
+      form.value.whatsapp_account_id,
       headerMediaFile.value,
     );
     const data = response.data;
@@ -903,7 +903,7 @@ onMounted(async () => {
               $t("templates.whatsappAccount", "WhatsApp Account")
             }}</Label>
             <Select
-              v-model="form.whatsapp_account"
+              v-model="form.whatsapp_account_id"
               :disabled="!canWrite || !!template?.meta_template_id"
             >
               <SelectTrigger
@@ -916,7 +916,7 @@ onMounted(async () => {
                 <SelectItem
                   v-for="account in accounts"
                   :key="account.id"
-                  :value="account.name"
+                  :value="account.id"
                 >
                   {{ account.name }}
                 </SelectItem>

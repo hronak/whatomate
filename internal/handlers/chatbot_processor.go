@@ -177,7 +177,7 @@ func (a *App) processIncomingMessageFull(phoneNumberID string, msg IncomingTextM
 			ContactID:       contact.ID.String(),
 			ContactPhone:    contact.PhoneNumber,
 			ContactName:     contact.ProfileName,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: account.ID.String(),
 		})
 	}
 
@@ -677,7 +677,7 @@ func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountName, phoneN
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
 		ContactID:       contactID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: session.WhatsAppAccountID,
 		PhoneNumber:     phoneNumber,
 		Status:          models.SessionStatusActive,
 		SessionData:     models.JSONB{},
@@ -864,7 +864,7 @@ func (a *App) buildAIContext(orgID uuid.UUID, session *models.ChatbotSession, us
 	// Get WhatsApp account for cache key
 	whatsAppAccount := ""
 	if session != nil {
-		whatsAppAccount = session.WhatsAppAccount
+		whatsAppAccount = func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(session.WhatsAppAccountID)
 	}
 
 	// Use cached AI contexts
@@ -1599,7 +1599,7 @@ func (a *App) saveIncomingMessage(account *models.WhatsAppAccount, contact *mode
 	message := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    account.OrganizationID,
-		WhatsAppAccount:   account.Name,
+		WhatsAppAccountID: &account.ID,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: whatsappMsgID,
 		Direction:         models.DirectionIncoming,
@@ -1671,7 +1671,7 @@ func (a *App) saveIncomingMessage(account *models.WhatsAppAccount, contact *mode
 		ContactName:     contact.ProfileName,
 		MessageType:     models.MessageType(msgType),
 		Content:         content,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: account.ID.String(),
 		Direction:       models.DirectionIncoming,
 	})
 }

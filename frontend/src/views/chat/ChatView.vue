@@ -627,7 +627,7 @@ async function selectContact(id: string) {
     // Discover distinct accounts from the unfiltered message set
     const accounts = new Set<string>();
     for (const msg of contactsStore.messages) {
-      if (msg.whatsapp_account) accounts.add(msg.whatsapp_account);
+      if (msg.whatsapp_account_id) accounts.add(msg.whatsapp_account_id);
     }
     contactAccounts.value = Array.from(accounts).sort();
 
@@ -636,15 +636,15 @@ async function selectContact(id: string) {
       // Find account of the most recent incoming message
       for (let i = contactsStore.messages.length - 1; i >= 0; i--) {
         const msg = contactsStore.messages[i];
-        if (msg.direction === "incoming" && msg.whatsapp_account) {
-          selectedAccount.value = msg.whatsapp_account;
+        if (msg.direction === "incoming" && msg.whatsapp_account_id) {
+          selectedAccount.value = msg.whatsapp_account_id;
           break;
         }
       }
       // Fallback to contact's default account, then first org account
       if (!selectedAccount.value) {
         selectedAccount.value =
-          contact.whatsapp_account ||
+          contact.whatsapp_account_id ||
           contactAccounts.value[0] ||
           orgAccounts.value[0]?.name;
       }
@@ -652,13 +652,13 @@ async function selectContact(id: string) {
         contactsStore.setAccountFilter(selectedAccount.value);
         // Filter messages client-side instead of re-fetching
         contactsStore.messages = contactsStore.messages.filter(
-          (m: any) => m.whatsapp_account === selectedAccount.value,
+          (m: any) => m.whatsapp_account_id === selectedAccount.value,
         );
       }
     } else if (contactAccounts.value.length === 1) {
       selectedAccount.value = contactAccounts.value[0];
-    } else if (contact.whatsapp_account) {
-      selectedAccount.value = contact.whatsapp_account;
+    } else if (contact.whatsapp_account_id) {
+      selectedAccount.value = contact.whatsapp_account_id;
     }
 
     // Tell WebSocket server which contact we're viewing
@@ -799,7 +799,7 @@ async function retryMessage(message: Message) {
       message.message_type,
       content,
       undefined,
-      message.whatsapp_account || selectedAccount.value || undefined,
+      message.whatsapp_account_id || selectedAccount.value || undefined,
     );
 
     // Remove the failed message from the list after successful retry
@@ -1332,7 +1332,7 @@ async function transferToAgent() {
   try {
     await chatbotService.createTransfer({
       contact_id: contactsStore.currentContact.id,
-      whatsapp_account: (contactsStore.currentContact as any).whatsapp_account,
+      whatsapp_account_id: (contactsStore.currentContact as any).whatsapp_account_id,
       source: "manual",
     });
     toast.success(t("chat.transferSuccess"), {
@@ -1806,7 +1806,7 @@ async function sendMediaMessage() {
       formData.append("caption", mediaCaption.value.trim());
     }
     if (selectedAccount.value) {
-      formData.append("whatsapp_account", selectedAccount.value);
+      formData.append("whatsapp_account_id", selectedAccount.value);
     }
 
     const basePath = ((window as any).__BASE_PATH__ ?? "").replace(/\/$/, "");

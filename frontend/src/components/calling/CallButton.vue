@@ -106,7 +106,7 @@ async function handleCall() {
       // Send permission request and notify the agent
       await outgoingCallsService.requestPermission({
         contact_id: props.contactId,
-        whatsapp_account: props.whatsappAccount,
+        whatsapp_account_id: props.whatsappAccount,
       });
       store.setCallPermissionPending(props.contactId);
       toast.info(t("outgoingCalls.permissionSent"), {

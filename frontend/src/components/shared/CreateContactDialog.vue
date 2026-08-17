@@ -56,14 +56,14 @@ const emit = defineEmits<{
 interface ContactFormData {
   phone_number: string;
   profile_name: string;
-  whatsapp_account: string;
+  whatsapp_account_id: string;
   tags: string[];
 }
 
 const defaultFormData: ContactFormData = {
   phone_number: "",
   profile_name: "",
-  whatsapp_account: "",
+  whatsapp_account_id: "",
   tags: [],
 };
 
@@ -116,7 +116,7 @@ async function saveContact() {
     const response = await contactsService.create({
       phone_number: formData.value.phone_number.trim(),
       profile_name: formData.value.profile_name.trim() || undefined,
-      whatsapp_account: formData.value.whatsapp_account || undefined,
+      whatsapp_account_id: formData.value.whatsapp_account_id || undefined,
       tags: formData.value.tags.length > 0 ? formData.value.tags : undefined,
     });
     const contact = response.data?.data || response.data;
@@ -191,7 +191,7 @@ function closeDialog() {
         </div>
         <div v-if="availableAccounts.length > 0" class="gap-y-2">
           <Label>{{ $t("contacts.whatsappAccount") }}</Label>
-          <Select v-model="formData.whatsapp_account">
+          <Select v-model="formData.whatsapp_account_id">
             <SelectTrigger>
               <SelectValue :placeholder="$t('contacts.selectAccount')" />
             </SelectTrigger>
@@ -199,7 +199,7 @@ function closeDialog() {
               <SelectItem
                 v-for="account in availableAccounts"
                 :key="account.id"
-                :value="account.name"
+                :value="account.id"
               >
                 {{ account.name }} ({{ account.phone_number }})
               </SelectItem>

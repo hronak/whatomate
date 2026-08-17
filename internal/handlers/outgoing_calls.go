@@ -20,14 +20,14 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 
 	var req struct {
 		ContactID       string `json:"contact_id"`
-		WhatsAppAccount string `json:"whatsapp_account"`
+		WhatsAppAccountID string `json:"whatsapp_account_id"`
 		SDPOffer        string `json:"sdp_offer"`
 	}
 	if err := a.decodeRequest(r, &req); err != nil {
 		return nil
 	}
 
-	if req.ContactID == "" || req.WhatsAppAccount == "" || req.SDPOffer == "" {
+	if req.ContactID == "" || req.WhatsAppAccountID == "" || req.SDPOffer == "" {
 		return a.sendError(r, invalidRequest("contact_id, whatsapp_account, and sdp_offer are required"))
 	}
 
@@ -37,7 +37,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 
 	// Look up account
 	var account models.WhatsAppAccount
-	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccount).
+	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccountID).
 		First(&account).Error; err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -58,7 +58,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 
 	callLogID, sdpAnswer, err := a.CallManager.InitiateOutgoingCall(
 		orgID, userID, contact.ID,
-		contact.PhoneNumber, req.WhatsAppAccount,
+		contact.PhoneNumber, func(s string) uuid.UUID { u, _ := uuid.Parse(s); return u }(req.WhatsAppAccountID),
 		waAccount, req.SDPOffer,
 	)
 	if err != nil {
@@ -108,13 +108,13 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 
 	var req struct {
 		ContactID       string `json:"contact_id"`
-		WhatsAppAccount string `json:"whatsapp_account"`
+		WhatsAppAccountID string `json:"whatsapp_account_id"`
 	}
 	if err := a.decodeRequest(r, &req); err != nil {
 		return nil
 	}
 
-	if req.ContactID == "" || req.WhatsAppAccount == "" {
+	if req.ContactID == "" || req.WhatsAppAccountID == "" {
 		return a.sendError(r, invalidRequest("contact_id and whatsapp_account are required"))
 	}
 
@@ -135,7 +135,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 
 	// Look up account
 	var account models.WhatsAppAccount
-	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccount).
+	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccountID).
 		First(&account).Error; err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -156,7 +156,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
 		ContactID:       contactID,
-		WhatsAppAccount: req.WhatsAppAccount,
+		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 		Status:          models.CallPermissionPending,
 		MessageID:       messageID,
 		RequestedByID:   &userID,
