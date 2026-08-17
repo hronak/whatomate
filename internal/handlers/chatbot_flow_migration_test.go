@@ -253,7 +253,7 @@ func TestBackfillChatbotFlowGraph_FillsNullGraphsAndLeavesOthersAlone(t *testing
 		INSERT INTO chatbot_flows
 		(id, organization_id, whatsapp_account_id, name, is_enabled, canvas_layout, graph, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?::jsonb, NULL, NOW(), NOW())
-	`, legacyID, org.ID, account.Name, "legacy", true, `{"node_positions":{"step_1":{"x":100,"y":200}}}`).Error)
+	`, legacyID, org.ID, account.ID, "legacy", true, `{"node_positions":{"step_1":{"x":100,"y":200}}}`).Error)
 	require.NoError(t, app.DB.Create(&models.ChatbotFlowStep{
 		BaseModel:   models.BaseModel{ID: uuid.New()},
 		FlowID:      legacyID,

@@ -35,20 +35,18 @@ func TestApp_ListAccounts_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Accounts []handlers.AccountResponse `json:"accounts"`
-		} `json:"data"`
+		Accounts []handlers.AccountResponse `json:"accounts"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Accounts, 2)
+	assert.Len(t, resp.Accounts, 2)
 
 	// Accounts are ordered by created_at DESC, so acc2 should be first
-	assert.Equal(t, acc2.ID, resp.Data.Accounts[0].ID)
-	assert.Equal(t, acc1.ID, resp.Data.Accounts[1].ID)
+	assert.Equal(t, acc2.ID, resp.Accounts[0].ID)
+	assert.Equal(t, acc1.ID, resp.Accounts[1].ID)
 
 	// Verify sensitive fields are not exposed (has_access_token is set instead)
-	assert.True(t, resp.Data.Accounts[0].HasAccessToken)
+	assert.True(t, resp.Accounts[0].HasAccessToken)
 }
 
 func TestApp_ListAccounts_Empty(t *testing.T) {
@@ -66,13 +64,11 @@ func TestApp_ListAccounts_Empty(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Accounts []handlers.AccountResponse `json:"accounts"`
-		} `json:"data"`
+		Accounts []handlers.AccountResponse `json:"accounts"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Accounts, 0)
+	assert.Len(t, resp.Accounts, 0)
 }
 
 func TestApp_ListAccounts_Unauthorized(t *testing.T) {
@@ -112,13 +108,11 @@ func TestApp_ListAccounts_OrgIsolation(t *testing.T) {
 	require.NoError(t, err)
 
 	var resp1 struct {
-		Data struct {
-			Accounts []handlers.AccountResponse `json:"accounts"`
-		} `json:"data"`
+		Accounts []handlers.AccountResponse `json:"accounts"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req1), &resp1)
 	require.NoError(t, err)
-	assert.Len(t, resp1.Data.Accounts, 2)
+	assert.Len(t, resp1.Accounts, 2)
 
 	// org2 user should see 1 account
 	req2 := testutil.NewGETRequest(t)
@@ -128,13 +122,11 @@ func TestApp_ListAccounts_OrgIsolation(t *testing.T) {
 	require.NoError(t, err)
 
 	var resp2 struct {
-		Data struct {
-			Accounts []handlers.AccountResponse `json:"accounts"`
-		} `json:"data"`
+		Accounts []handlers.AccountResponse `json:"accounts"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 	require.NoError(t, err)
-	assert.Len(t, resp2.Data.Accounts, 1)
+	assert.Len(t, resp2.Accounts, 1)
 }
 
 // --- CreateAccount Tests ---
@@ -158,19 +150,17 @@ func TestApp_CreateAccount_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AccountResponse `json:"data"`
-	}
+	var resp handlers.AccountResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "My WhatsApp Account", resp.Data.Name)
-	assert.Equal(t, "123456789", resp.Data.PhoneID)
-	assert.Equal(t, "987654321", resp.Data.BusinessID)
-	assert.Equal(t, "active", resp.Data.Status)
-	assert.Equal(t, whatsapp.DefaultAPIVersion, resp.Data.APIVersion) // default version
-	assert.True(t, resp.Data.HasAccessToken)
-	assert.NotEmpty(t, resp.Data.WebhookVerifyToken) // auto-generated
-	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
+	assert.Equal(t, "My WhatsApp Account", resp.Name)
+	assert.Equal(t, "123456789", resp.PhoneID)
+	assert.Equal(t, "987654321", resp.BusinessID)
+	assert.Equal(t, "active", resp.Status)
+	assert.Equal(t, whatsapp.DefaultAPIVersion, resp.APIVersion) // default version
+	assert.True(t, resp.HasAccessToken)
+	assert.NotEmpty(t, resp.WebhookVerifyToken) // auto-generated
+	assert.NotEqual(t, uuid.Nil, resp.ID)
 }
 
 func TestApp_CreateAccount_WithOptionalFields(t *testing.T) {
@@ -199,20 +189,18 @@ func TestApp_CreateAccount_WithOptionalFields(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AccountResponse `json:"data"`
-	}
+	var resp handlers.AccountResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Full Account", resp.Data.Name)
-	assert.Equal(t, "my-app-id", resp.Data.AppID)
-	assert.Equal(t, "custom-verify-token", resp.Data.WebhookVerifyToken)
-	assert.Equal(t, "v19.0", resp.Data.APIVersion)
-	assert.True(t, resp.Data.IsDefaultIncoming)
-	assert.True(t, resp.Data.IsDefaultOutgoing)
-	assert.True(t, resp.Data.AutoReadReceipt)
-	assert.True(t, resp.Data.HasAccessToken)
-	assert.True(t, resp.Data.HasAppSecret)
+	assert.Equal(t, "Full Account", resp.Name)
+	assert.Equal(t, "my-app-id", resp.AppID)
+	assert.Equal(t, "custom-verify-token", resp.WebhookVerifyToken)
+	assert.Equal(t, "v19.0", resp.APIVersion)
+	assert.True(t, resp.IsDefaultIncoming)
+	assert.True(t, resp.IsDefaultOutgoing)
+	assert.True(t, resp.AutoReadReceipt)
+	assert.True(t, resp.HasAccessToken)
+	assert.True(t, resp.HasAppSecret)
 }
 
 func TestApp_CreateAccount_ValidationErrors(t *testing.T) {
@@ -312,18 +300,16 @@ func TestApp_GetAccount_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AccountResponse `json:"data"`
-	}
+	var resp handlers.AccountResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, account.ID, resp.Data.ID)
-	assert.Equal(t, account.Name, resp.Data.Name)
-	assert.Equal(t, account.PhoneID, resp.Data.PhoneID)
-	assert.Equal(t, account.BusinessID, resp.Data.BusinessID)
-	assert.Equal(t, account.APIVersion, resp.Data.APIVersion)
-	assert.Equal(t, "active", resp.Data.Status)
-	assert.True(t, resp.Data.HasAccessToken)
+	assert.Equal(t, account.ID, resp.ID)
+	assert.Equal(t, account.Name, resp.Name)
+	assert.Equal(t, account.PhoneID, resp.PhoneID)
+	assert.Equal(t, account.BusinessID, resp.BusinessID)
+	assert.Equal(t, account.APIVersion, resp.APIVersion)
+	assert.Equal(t, "active", resp.Status)
+	assert.True(t, resp.HasAccessToken)
 }
 
 func TestApp_GetAccount_NotFound(t *testing.T) {
@@ -407,18 +393,16 @@ func TestApp_UpdateAccount_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AccountResponse `json:"data"`
-	}
+	var resp handlers.AccountResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, account.ID, resp.Data.ID)
-	assert.Equal(t, "Updated Account Name", resp.Data.Name)
-	assert.Equal(t, "new-phone-id", resp.Data.PhoneID)
-	assert.Equal(t, "new-business-id", resp.Data.BusinessID)
-	assert.Equal(t, "v20.0", resp.Data.APIVersion)
-	assert.True(t, resp.Data.AutoReadReceipt)
-	assert.True(t, resp.Data.HasAccessToken)
+	assert.Equal(t, account.ID, resp.ID)
+	assert.Equal(t, "Updated Account Name", resp.Name)
+	assert.Equal(t, "new-phone-id", resp.PhoneID)
+	assert.Equal(t, "new-business-id", resp.BusinessID)
+	assert.Equal(t, "v20.0", resp.APIVersion)
+	assert.True(t, resp.AutoReadReceipt)
+	assert.True(t, resp.HasAccessToken)
 
 	// Verify the update persisted in the database
 	var updated models.WhatsAppAccount
@@ -448,16 +432,14 @@ func TestApp_UpdateAccount_PartialUpdate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AccountResponse `json:"data"`
-	}
+	var resp handlers.AccountResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Only Name Changed", resp.Data.Name)
+	assert.Equal(t, "Only Name Changed", resp.Name)
 	// Original values should be preserved
-	assert.Equal(t, account.PhoneID, resp.Data.PhoneID)
-	assert.Equal(t, account.BusinessID, resp.Data.BusinessID)
-	assert.Equal(t, account.APIVersion, resp.Data.APIVersion)
+	assert.Equal(t, account.PhoneID, resp.PhoneID)
+	assert.Equal(t, account.BusinessID, resp.BusinessID)
+	assert.Equal(t, account.APIVersion, resp.APIVersion)
 }
 
 func TestApp_UpdateAccount_NotFound(t *testing.T) {
@@ -515,13 +497,11 @@ func TestApp_DeleteAccount_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Account deleted successfully", resp.Data.Message)
+	assert.Equal(t, "Account deleted successfully", resp.Message)
 
 	// Verify account is soft-deleted (GORM default with DeletedAt)
 	var count int64

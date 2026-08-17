@@ -104,23 +104,21 @@ func TestApp_GetChatbotSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-				Stats    handlers.ChatbotStatsResponse    `json:"stats"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
+			Stats    handlers.ChatbotStatsResponse    `json:"stats"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
 		// Default settings should have chatbot disabled
-		assert.False(t, resp.Data.Settings.Enabled)
-		assert.Equal(t, "Hello! How can I help you today?", resp.Data.Settings.GreetingMessage)
-		assert.Equal(t, 30, resp.Data.Settings.SessionTimeoutMinutes)
-		assert.False(t, resp.Data.Settings.AIEnabled)
+		assert.False(t, resp.Settings.Enabled)
+		assert.Equal(t, "Hello! How can I help you today?", resp.Settings.GreetingMessage)
+		assert.Equal(t, 30, resp.Settings.SessionTimeoutMinutes)
+		assert.False(t, resp.Settings.AIEnabled)
 
 		// Stats should all be zero for a fresh org
-		assert.Equal(t, int64(0), resp.Data.Stats.TotalSessions)
-		assert.Equal(t, int64(0), resp.Data.Stats.KeywordsCount)
+		assert.Equal(t, int64(0), resp.Stats.TotalSessions)
+		assert.Equal(t, int64(0), resp.Stats.KeywordsCount)
 	})
 }
 
@@ -134,7 +132,8 @@ func TestApp_UpdateChatbotSettings(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		enabled := true
 		greeting := "Welcome to our shop!"
@@ -160,13 +159,11 @@ func TestApp_UpdateChatbotSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Settings updated successfully", resp.Data.Message)
+		assert.Equal(t, "Settings updated successfully", resp.Message)
 
 		// Verify settings were persisted by reading them back
 		getReq := testutil.NewGETRequest(t)
@@ -177,23 +174,21 @@ func TestApp_UpdateChatbotSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(getReq))
 
 		var getResp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(getReq), &getResp)
 		require.NoError(t, err)
 
-		assert.True(t, getResp.Data.Settings.Enabled)
-		assert.Equal(t, greeting, getResp.Data.Settings.GreetingMessage)
-		assert.Equal(t, timeout, getResp.Data.Settings.SessionTimeoutMinutes)
-		assert.Equal(t, "Sorry, I did not understand that.", getResp.Data.Settings.FallbackMessage)
-		assert.True(t, getResp.Data.Settings.AIEnabled)
-		assert.Equal(t, models.AIProvider("openai"), getResp.Data.Settings.AIProvider)
-		assert.Equal(t, "gpt-5.6-terra", getResp.Data.Settings.AIModel)
-		assert.Equal(t, 1000, getResp.Data.Settings.AIMaxTokens)
-		assert.True(t, getResp.Data.Settings.SLAEnabled)
-		assert.Equal(t, 10, getResp.Data.Settings.SLAResponseMinutes)
+		assert.True(t, getResp.Settings.Enabled)
+		assert.Equal(t, greeting, getResp.Settings.GreetingMessage)
+		assert.Equal(t, timeout, getResp.Settings.SessionTimeoutMinutes)
+		assert.Equal(t, "Sorry, I did not understand that.", getResp.Settings.FallbackMessage)
+		assert.True(t, getResp.Settings.AIEnabled)
+		assert.Equal(t, models.AIProvider("openai"), getResp.Settings.AIProvider)
+		assert.Equal(t, "gpt-5.6-terra", getResp.Settings.AIModel)
+		assert.Equal(t, 1000, getResp.Settings.AIMaxTokens)
+		assert.True(t, getResp.Settings.SLAEnabled)
+		assert.Equal(t, 10, getResp.Settings.SLAResponseMinutes)
 	})
 }
 
@@ -220,13 +215,11 @@ func TestApp_ListKeywordRules(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Rules []handlers.KeywordRuleResponse `json:"rules"`
-			} `json:"data"`
+			Rules []handlers.KeywordRuleResponse `json:"rules"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Rules, 2)
+		assert.Len(t, resp.Rules, 2)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -242,13 +235,11 @@ func TestApp_ListKeywordRules(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Rules []handlers.KeywordRuleResponse `json:"rules"`
-			} `json:"data"`
+			Rules []handlers.KeywordRuleResponse `json:"rules"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Rules, 0)
+		assert.Len(t, resp.Rules, 0)
 	})
 }
 
@@ -262,7 +253,8 @@ func TestApp_CreateKeywordRule(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":          "Greeting Rule",
@@ -282,18 +274,16 @@ func TestApp_CreateKeywordRule(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID      string `json:"id"`
-				Message string `json:"message"`
-			} `json:"data"`
+			ID      string `json:"id"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.NotEmpty(t, resp.Data.ID)
-		assert.Equal(t, "Keyword rule created successfully", resp.Data.Message)
+		assert.NotEmpty(t, resp.ID)
+		assert.Equal(t, "Keyword rule created successfully", resp.Message)
 
 		// Verify it was persisted
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -307,7 +297,8 @@ func TestApp_CreateKeywordRule(t *testing.T) {
 	t.Run("validation error missing keywords", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":          "Bad Rule",
@@ -327,7 +318,8 @@ func TestApp_CreateKeywordRule(t *testing.T) {
 	t.Run("defaults name to first keyword when name empty", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"keywords":      []string{"pricing"},
@@ -344,14 +336,12 @@ func TestApp_CreateKeywordRule(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -381,16 +371,14 @@ func TestApp_GetKeywordRule(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.KeywordRuleResponse `json:"data"`
-		}
+		var resp handlers.KeywordRuleResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, rule.ID.String(), resp.Data.ID)
-		assert.Equal(t, "Greeting", resp.Data.Name)
-		assert.Equal(t, []string{"hello"}, resp.Data.Keywords)
-		assert.Equal(t, models.MatchTypeContains, resp.Data.MatchType)
-		assert.True(t, resp.Data.Enabled)
+		assert.Equal(t, rule.ID.String(), resp.ID)
+		assert.Equal(t, "Greeting", resp.Name)
+		assert.Equal(t, []string{"hello"}, resp.Keywords)
+		assert.Equal(t, models.MatchTypeContains, resp.MatchType)
+		assert.True(t, resp.Enabled)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -418,7 +406,8 @@ func TestApp_UpdateKeywordRule(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 		rule := createTestKeywordRule(t, app, org.ID, "Original", []string{"hello"})
 
 		updatedName := "Updated Greeting"
@@ -439,13 +428,11 @@ func TestApp_UpdateKeywordRule(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Keyword rule updated successfully", resp.Data.Message)
+		assert.Equal(t, "Keyword rule updated successfully", resp.Message)
 
 		// Verify the update persisted
 		var updated models.KeywordRule
@@ -467,7 +454,8 @@ func TestApp_DeleteKeywordRule(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 		rule := createTestKeywordRule(t, app, org.ID, "To Delete", []string{"delete"})
 
 		req := testutil.NewGETRequest(t)
@@ -479,13 +467,11 @@ func TestApp_DeleteKeywordRule(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Keyword rule deleted successfully", resp.Data.Message)
+		assert.Equal(t, "Keyword rule deleted successfully", resp.Message)
 
 		// Verify it was soft-deleted
 		var count int64
@@ -496,7 +482,8 @@ func TestApp_DeleteKeywordRule(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewGETRequest(t)
 		testutil.SetAuthContext(req, org.ID, user.ID)
@@ -536,13 +523,11 @@ func TestApp_ListChatbotFlows(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Flows []handlers.ChatbotFlowResponse `json:"flows"`
-			} `json:"data"`
+			Flows []handlers.ChatbotFlowResponse `json:"flows"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Flows, 2)
+		assert.Len(t, resp.Flows, 2)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -563,13 +548,11 @@ func TestApp_ListChatbotFlows(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Flows []handlers.ChatbotFlowResponse `json:"flows"`
-			} `json:"data"`
+			Flows []handlers.ChatbotFlowResponse `json:"flows"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Flows, 0)
+		assert.Len(t, resp.Flows, 0)
 	})
 }
 
@@ -625,18 +608,16 @@ func TestApp_CreateChatbotFlow(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID      string `json:"id"`
-				Message string `json:"message"`
-			} `json:"data"`
+			ID      string `json:"id"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.NotEmpty(t, resp.Data.ID)
-		assert.Equal(t, "Flow created successfully", resp.Data.Message)
+		assert.NotEmpty(t, resp.ID)
+		assert.Equal(t, "Flow created successfully", resp.Message)
 
 		// Verify flow and steps persisted
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var flow models.ChatbotFlow
@@ -672,13 +653,11 @@ func TestApp_GetChatbotFlow(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data models.ChatbotFlow `json:"data"`
-		}
+		var resp models.ChatbotFlow
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, flow.ID, resp.Data.ID)
-		assert.Equal(t, "My Flow", resp.Data.Name)
+		assert.Equal(t, flow.ID, resp.ID)
+		assert.Equal(t, "My Flow", resp.Name)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -736,13 +715,11 @@ func TestApp_UpdateChatbotFlow(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Flow updated successfully", resp.Data.Message)
+		assert.Equal(t, "Flow updated successfully", resp.Message)
 
 		// Verify update persisted
 		var updated models.ChatbotFlow
@@ -780,13 +757,11 @@ func TestApp_DeleteChatbotFlow(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Flow deleted successfully", resp.Data.Message)
+		assert.Equal(t, "Flow deleted successfully", resp.Message)
 
 		// Verify soft-deleted
 		var count int64
@@ -837,13 +812,11 @@ func TestApp_ListAIContexts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contexts []handlers.AIContextResponse `json:"contexts"`
-			} `json:"data"`
+			Contexts []handlers.AIContextResponse `json:"contexts"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Contexts, 2)
+		assert.Len(t, resp.Contexts, 2)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -859,13 +832,11 @@ func TestApp_ListAIContexts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contexts []handlers.AIContextResponse `json:"contexts"`
-			} `json:"data"`
+			Contexts []handlers.AIContextResponse `json:"contexts"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Contexts, 0)
+		assert.Len(t, resp.Contexts, 0)
 	})
 }
 
@@ -896,18 +867,16 @@ func TestApp_CreateAIContext(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID      string `json:"id"`
-				Message string `json:"message"`
-			} `json:"data"`
+			ID      string `json:"id"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.NotEmpty(t, resp.Data.ID)
-		assert.Equal(t, "AI context created successfully", resp.Data.Message)
+		assert.NotEmpty(t, resp.ID)
+		assert.Equal(t, "AI context created successfully", resp.Message)
 
 		// Verify persisted
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var ctx models.AIContext
@@ -940,14 +909,12 @@ func TestApp_GetAIContext(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data models.AIContext `json:"data"`
-		}
+		var resp models.AIContext
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, ctx.ID, resp.Data.ID)
-		assert.Equal(t, "FAQ Context", resp.Data.Name)
-		assert.Equal(t, models.ContextTypeStatic, resp.Data.ContextType)
+		assert.Equal(t, ctx.ID, resp.ID)
+		assert.Equal(t, "FAQ Context", resp.Name)
+		assert.Equal(t, models.ContextTypeStatic, resp.ContextType)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -987,13 +954,11 @@ func TestApp_DeleteAIContext(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "AI context deleted successfully", resp.Data.Message)
+		assert.Equal(t, "AI context deleted successfully", resp.Message)
 
 		// Verify soft-deleted
 		var count int64
@@ -1052,20 +1017,18 @@ func TestApp_GetChatbotSettings_ExistingSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.True(t, resp.Data.Settings.Enabled)
-		assert.Equal(t, "Custom greeting!", resp.Data.Settings.GreetingMessage)
-		assert.Equal(t, "I do not understand.", resp.Data.Settings.FallbackMessage)
-		assert.Equal(t, 45, resp.Data.Settings.SessionTimeoutMinutes)
-		assert.True(t, resp.Data.Settings.AIEnabled)
-		assert.Equal(t, models.AIProviderOpenAI, resp.Data.Settings.AIProvider)
-		assert.Equal(t, "gpt-5.6-terra", resp.Data.Settings.AIModel)
+		assert.True(t, resp.Settings.Enabled)
+		assert.Equal(t, "Custom greeting!", resp.Settings.GreetingMessage)
+		assert.Equal(t, "I do not understand.", resp.Settings.FallbackMessage)
+		assert.Equal(t, 45, resp.Settings.SessionTimeoutMinutes)
+		assert.True(t, resp.Settings.AIEnabled)
+		assert.Equal(t, models.AIProviderOpenAI, resp.Settings.AIProvider)
+		assert.Equal(t, "gpt-5.6-terra", resp.Settings.AIModel)
 	})
 
 	t.Run("stats reflect actual data counts", func(t *testing.T) {
@@ -1086,15 +1049,13 @@ func TestApp_GetChatbotSettings_ExistingSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Stats handlers.ChatbotStatsResponse `json:"stats"`
-			} `json:"data"`
+			Stats handlers.ChatbotStatsResponse `json:"stats"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, int64(2), resp.Data.Stats.KeywordsCount)
-		assert.Equal(t, int64(1), resp.Data.Stats.FlowsCount)
+		assert.Equal(t, int64(2), resp.Stats.KeywordsCount)
+		assert.Equal(t, int64(1), resp.Stats.FlowsCount)
 	})
 }
 
@@ -1108,7 +1069,8 @@ func TestApp_UpdateChatbotSettings_PartialUpdate(t *testing.T) {
 	t.Run("partial update only changes provided fields", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		// First, create full settings
 		setupReq := testutil.NewJSONRequest(t, map[string]any{
@@ -1137,23 +1099,22 @@ func TestApp_UpdateChatbotSettings_PartialUpdate(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(getReq), &resp)
 		require.NoError(t, err)
 
-		assert.True(t, resp.Data.Settings.Enabled)
-		assert.Equal(t, "Welcome!", resp.Data.Settings.GreetingMessage)
-		assert.Equal(t, 60, resp.Data.Settings.SessionTimeoutMinutes)
-		assert.Equal(t, "Sorry, I did not get that.", resp.Data.Settings.FallbackMessage)
+		assert.True(t, resp.Settings.Enabled)
+		assert.Equal(t, "Welcome!", resp.Settings.GreetingMessage)
+		assert.Equal(t, 60, resp.Settings.SessionTimeoutMinutes)
+		assert.Equal(t, "Sorry, I did not get that.", resp.Settings.FallbackMessage)
 	})
 
 	t.Run("update business hours settings", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"business_hours_enabled":        true,
@@ -1173,22 +1134,21 @@ func TestApp_UpdateChatbotSettings_PartialUpdate(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(getReq), &resp)
 		require.NoError(t, err)
 
-		assert.True(t, resp.Data.Settings.BusinessHoursEnabled)
-		assert.Equal(t, "We are closed right now.", resp.Data.Settings.OutOfHoursMessage)
-		assert.False(t, resp.Data.Settings.AllowAutomatedOutsideHours)
+		assert.True(t, resp.Settings.BusinessHoursEnabled)
+		assert.Equal(t, "We are closed right now.", resp.Settings.OutOfHoursMessage)
+		assert.False(t, resp.Settings.AllowAutomatedOutsideHours)
 	})
 
 	t.Run("update agent assignment settings", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"allow_agent_queue_pickup":        false,
@@ -1207,22 +1167,21 @@ func TestApp_UpdateChatbotSettings_PartialUpdate(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(getReq), &resp)
 		require.NoError(t, err)
 
-		assert.False(t, resp.Data.Settings.AllowAgentQueuePickup)
-		assert.True(t, resp.Data.Settings.AssignToSameAgent)
-		assert.True(t, resp.Data.Settings.AgentCurrentConversationOnly)
+		assert.False(t, resp.Settings.AllowAgentQueuePickup)
+		assert.True(t, resp.Settings.AssignToSameAgent)
+		assert.True(t, resp.Settings.AgentCurrentConversationOnly)
 	})
 
 	t.Run("update client inactivity settings", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"client_reminder_enabled":   true,
@@ -1243,24 +1202,23 @@ func TestApp_UpdateChatbotSettings_PartialUpdate(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(getReq), &resp)
 		require.NoError(t, err)
 
-		assert.True(t, resp.Data.Settings.ClientReminderEnabled)
-		assert.Equal(t, 15, resp.Data.Settings.ClientReminderMinutes)
-		assert.Equal(t, "Are you still there?", resp.Data.Settings.ClientReminderMessage)
-		assert.Equal(t, 30, resp.Data.Settings.ClientAutoCloseMinutes)
-		assert.Equal(t, "Session closed due to inactivity.", resp.Data.Settings.ClientAutoCloseMessage)
+		assert.True(t, resp.Settings.ClientReminderEnabled)
+		assert.Equal(t, 15, resp.Settings.ClientReminderMinutes)
+		assert.Equal(t, "Are you still there?", resp.Settings.ClientReminderMessage)
+		assert.Equal(t, 30, resp.Settings.ClientAutoCloseMinutes)
+		assert.Equal(t, "Session closed due to inactivity.", resp.Settings.ClientAutoCloseMessage)
 	})
 
 	t.Run("update SLA settings", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"sla_enabled":            true,
@@ -1283,26 +1241,25 @@ func TestApp_UpdateChatbotSettings_PartialUpdate(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Settings handlers.ChatbotSettingsResponse `json:"settings"`
-			} `json:"data"`
+			Settings handlers.ChatbotSettingsResponse `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(getReq), &resp)
 		require.NoError(t, err)
 
-		assert.True(t, resp.Data.Settings.SLAEnabled)
-		assert.Equal(t, 5, resp.Data.Settings.SLAResponseMinutes)
-		assert.Equal(t, 120, resp.Data.Settings.SLAResolutionMinutes)
-		assert.Equal(t, 45, resp.Data.Settings.SLAEscalationMinutes)
-		assert.Equal(t, 48, resp.Data.Settings.SLAAutoCloseHours)
-		assert.Equal(t, "Conversation auto-closed.", resp.Data.Settings.SLAAutoCloseMessage)
-		assert.Equal(t, "SLA warning: response time exceeded.", resp.Data.Settings.SLAWarningMessage)
+		assert.True(t, resp.Settings.SLAEnabled)
+		assert.Equal(t, 5, resp.Settings.SLAResponseMinutes)
+		assert.Equal(t, 120, resp.Settings.SLAResolutionMinutes)
+		assert.Equal(t, 45, resp.Settings.SLAEscalationMinutes)
+		assert.Equal(t, 48, resp.Settings.SLAAutoCloseHours)
+		assert.Equal(t, "Conversation auto-closed.", resp.Settings.SLAAutoCloseMessage)
+		assert.Equal(t, "SLA warning: response time exceeded.", resp.Settings.SLAWarningMessage)
 	})
 
 	t.Run("invalid JSON body returns 400", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		ctx := &fasthttp.RequestCtx{}
 		ctx.Request.Header.SetContentType("application/json")
@@ -1327,7 +1284,8 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 	t.Run("exact match type", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":          "Exact Match Rule",
@@ -1347,14 +1305,12 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -1366,7 +1322,8 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 	t.Run("starts_with match type", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":          "Prefix Rule",
@@ -1385,14 +1342,12 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -1403,7 +1358,8 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 	t.Run("regex match type", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":          "Regex Rule",
@@ -1422,14 +1378,12 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -1440,7 +1394,8 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 	t.Run("transfer response type", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":          "Transfer Rule",
@@ -1460,14 +1415,12 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -1479,7 +1432,8 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 	t.Run("defaults match_type and response_type when omitted", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name":     "Default Types Rule",
@@ -1496,14 +1450,12 @@ func TestApp_CreateKeywordRule_MatchTypes(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var rule models.KeywordRule
@@ -1523,7 +1475,8 @@ func TestApp_UpdateKeywordRule_Additional(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"name": "Ghost",
@@ -1539,7 +1492,8 @@ func TestApp_UpdateKeywordRule_Additional(t *testing.T) {
 	t.Run("update match_type and response_content", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 		rule := createTestKeywordRule(t, app, org.ID, "MatchUpdate", []string{"hello"})
 
 		newMatchType := models.MatchTypeExact
@@ -1565,7 +1519,8 @@ func TestApp_UpdateKeywordRule_Additional(t *testing.T) {
 	t.Run("update response_type to transfer", func(t *testing.T) {
 		app := newTestApp(t)
 		org := testutil.CreateTestOrganization(t, app.DB)
-		user := testutil.CreateTestUser(t, app.DB, org.ID)
+		role := testutil.CreateAdminRole(t, app.DB, org.ID)
+		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 		rule := createTestKeywordRule(t, app, org.ID, "TypeSwitch", []string{"agent"})
 
 		newRespType := models.ResponseTypeTransfer
@@ -1614,14 +1569,12 @@ func TestApp_ListKeywordRules_OrgIsolation(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Rules []handlers.KeywordRuleResponse `json:"rules"`
-			} `json:"data"`
+			Rules []handlers.KeywordRuleResponse `json:"rules"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Rules, 1)
-		assert.Equal(t, "Org1 Rule", resp.Data.Rules[0].Name)
+		assert.Len(t, resp.Rules, 1)
+		assert.Equal(t, "Org1 Rule", resp.Rules[0].Name)
 
 		// User from org2 should only see org2's rules
 		req2 := testutil.NewGETRequest(t)
@@ -1631,14 +1584,12 @@ func TestApp_ListKeywordRules_OrgIsolation(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp2 struct {
-			Data struct {
-				Rules []handlers.KeywordRuleResponse `json:"rules"`
-			} `json:"data"`
+			Rules []handlers.KeywordRuleResponse `json:"rules"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 		require.NoError(t, err)
-		assert.Len(t, resp2.Data.Rules, 1)
-		assert.Equal(t, "Org2 Rule", resp2.Data.Rules[0].Name)
+		assert.Len(t, resp2.Rules, 1)
+		assert.Equal(t, "Org2 Rule", resp2.Rules[0].Name)
 	})
 }
 
@@ -1694,14 +1645,12 @@ func TestApp_CreateChatbotFlow_Additional(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var flow models.ChatbotFlow
@@ -1747,14 +1696,12 @@ func TestApp_CreateChatbotFlow_Additional(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var flow models.ChatbotFlow
@@ -1824,9 +1771,7 @@ func TestApp_UpdateChatbotFlow_Additional(t *testing.T) {
 		require.NoError(t, err)
 
 		var createResp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(createReq), &createResp)
 		require.NoError(t, err)
@@ -1851,7 +1796,7 @@ func TestApp_UpdateChatbotFlow_Additional(t *testing.T) {
 			},
 		})
 		testutil.SetAuthContext(updateReq, org.ID, user.ID)
-		testutil.SetPathParam(updateReq, "id", createResp.Data.ID)
+		testutil.SetPathParam(updateReq, "id", createResp.ID)
 
 		err = app.UpdateChatbotFlow(updateReq)
 		require.NoError(t, err)
@@ -1923,14 +1868,12 @@ func TestApp_ListChatbotFlows_OrgIsolation(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Flows []handlers.ChatbotFlowResponse `json:"flows"`
-			} `json:"data"`
+			Flows []handlers.ChatbotFlowResponse `json:"flows"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Flows, 1)
-		assert.Equal(t, "Org1 Flow", resp.Data.Flows[0].Name)
+		assert.Len(t, resp.Flows, 1)
+		assert.Equal(t, "Org1 Flow", resp.Flows[0].Name)
 
 		// Org2 sees only its flow
 		req2 := testutil.NewGETRequest(t)
@@ -1940,14 +1883,12 @@ func TestApp_ListChatbotFlows_OrgIsolation(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp2 struct {
-			Data struct {
-				Flows []handlers.ChatbotFlowResponse `json:"flows"`
-			} `json:"data"`
+			Flows []handlers.ChatbotFlowResponse `json:"flows"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 		require.NoError(t, err)
-		assert.Len(t, resp2.Data.Flows, 1)
-		assert.Equal(t, "Org2 Flow", resp2.Data.Flows[0].Name)
+		assert.Len(t, resp2.Flows, 1)
+		assert.Equal(t, "Org2 Flow", resp2.Flows[0].Name)
 	})
 }
 
@@ -1993,14 +1934,12 @@ func TestApp_CreateAIContext_Additional(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var ctx models.AIContext
@@ -2027,14 +1966,12 @@ func TestApp_CreateAIContext_Additional(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var ctx models.AIContext
@@ -2066,14 +2003,12 @@ func TestApp_CreateAIContext_Additional(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				ID string `json:"id"`
-			} `json:"data"`
+			ID string `json:"id"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		parsedID, err := uuid.Parse(resp.Data.ID)
+		parsedID, err := uuid.Parse(resp.ID)
 		require.NoError(t, err)
 
 		var ctx models.AIContext
@@ -2116,13 +2051,11 @@ func TestApp_UpdateAIContext(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "AI context updated successfully", resp.Data.Message)
+		assert.Equal(t, "AI context updated successfully", resp.Message)
 
 		// Verify persisted
 		var updated models.AIContext
@@ -2257,14 +2190,12 @@ func TestApp_ListAIContexts_OrgIsolation(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Contexts []handlers.AIContextResponse `json:"contexts"`
-			} `json:"data"`
+			Contexts []handlers.AIContextResponse `json:"contexts"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Contexts, 1)
-		assert.Equal(t, "Org1 Context", resp.Data.Contexts[0].Name)
+		assert.Len(t, resp.Contexts, 1)
+		assert.Equal(t, "Org1 Context", resp.Contexts[0].Name)
 
 		req2 := testutil.NewGETRequest(t)
 		testutil.SetAuthContext(req2, org2.ID, user2.ID)
@@ -2273,14 +2204,12 @@ func TestApp_ListAIContexts_OrgIsolation(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp2 struct {
-			Data struct {
-				Contexts []handlers.AIContextResponse `json:"contexts"`
-			} `json:"data"`
+			Contexts []handlers.AIContextResponse `json:"contexts"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 		require.NoError(t, err)
-		assert.Len(t, resp2.Data.Contexts, 1)
-		assert.Equal(t, "Org2 Context", resp2.Data.Contexts[0].Name)
+		assert.Len(t, resp2.Contexts, 1)
+		assert.Equal(t, "Org2 Context", resp2.Contexts[0].Name)
 	})
 }
 
@@ -2327,13 +2256,11 @@ func TestApp_ListChatbotSessions(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Sessions []models.ChatbotSession `json:"sessions"`
-			} `json:"data"`
+			Sessions []models.ChatbotSession `json:"sessions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Sessions, 2)
+		assert.Len(t, resp.Sessions, 2)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -2349,13 +2276,11 @@ func TestApp_ListChatbotSessions(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Sessions []models.ChatbotSession `json:"sessions"`
-			} `json:"data"`
+			Sessions []models.ChatbotSession `json:"sessions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Sessions, 0)
+		assert.Len(t, resp.Sessions, 0)
 	})
 
 	t.Run("filter by status active", func(t *testing.T) {
@@ -2377,14 +2302,12 @@ func TestApp_ListChatbotSessions(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Sessions []models.ChatbotSession `json:"sessions"`
-			} `json:"data"`
+			Sessions []models.ChatbotSession `json:"sessions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Sessions, 2)
-		for _, s := range resp.Data.Sessions {
+		assert.Len(t, resp.Sessions, 2)
+		for _, s := range resp.Sessions {
 			assert.Equal(t, models.SessionStatusActive, s.Status)
 		}
 	})
@@ -2407,14 +2330,12 @@ func TestApp_ListChatbotSessions(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Sessions []models.ChatbotSession `json:"sessions"`
-			} `json:"data"`
+			Sessions []models.ChatbotSession `json:"sessions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Sessions, 1)
-		assert.Equal(t, models.SessionStatusCompleted, resp.Data.Sessions[0].Status)
+		assert.Len(t, resp.Sessions, 1)
+		assert.Equal(t, models.SessionStatusCompleted, resp.Sessions[0].Status)
 	})
 
 	t.Run("cross-org isolation", func(t *testing.T) {
@@ -2439,13 +2360,11 @@ func TestApp_ListChatbotSessions(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp struct {
-			Data struct {
-				Sessions []models.ChatbotSession `json:"sessions"`
-			} `json:"data"`
+			Sessions []models.ChatbotSession `json:"sessions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Sessions, 1)
+		assert.Len(t, resp.Sessions, 1)
 
 		req2 := testutil.NewGETRequest(t)
 		testutil.SetAuthContext(req2, org2.ID, user2.ID)
@@ -2454,13 +2373,11 @@ func TestApp_ListChatbotSessions(t *testing.T) {
 		require.NoError(t, err)
 
 		var resp2 struct {
-			Data struct {
-				Sessions []models.ChatbotSession `json:"sessions"`
-			} `json:"data"`
+			Sessions []models.ChatbotSession `json:"sessions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 		require.NoError(t, err)
-		assert.Len(t, resp2.Data.Sessions, 1)
+		assert.Len(t, resp2.Sessions, 1)
 	})
 }
 
@@ -2486,14 +2403,12 @@ func TestApp_GetChatbotSession(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data models.ChatbotSession `json:"data"`
-		}
+		var resp models.ChatbotSession
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, session.ID, resp.Data.ID)
-		assert.Equal(t, models.SessionStatusActive, resp.Data.Status)
-		assert.Equal(t, "+5555555555", resp.Data.PhoneNumber)
+		assert.Equal(t, session.ID, resp.ID)
+		assert.Equal(t, models.SessionStatusActive, resp.Status)
+		assert.Equal(t, "+5555555555", resp.PhoneNumber)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -2543,13 +2458,11 @@ func TestApp_GetChatbotSession(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data models.ChatbotSession `json:"data"`
-		}
+		var resp models.ChatbotSession
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, session.ID, resp.Data.ID)
-		assert.Len(t, resp.Data.Messages, 2)
+		assert.Equal(t, session.ID, resp.ID)
+		assert.Len(t, resp.Messages, 2)
 	})
 
 	t.Run("cross-org isolation prevents access", func(t *testing.T) {
@@ -2589,8 +2502,12 @@ func TestApp_DeleteKeywordRule_CrossOrg(t *testing.T) {
 		rule := createTestKeywordRule(t, app, org1.ID, "Org1 Rule", []string{"org1"})
 
 		org2 := testutil.CreateTestOrganization(t, app.DB)
+		// Needs the permission, so the request reaches the org scoping
+		// check and 404s rather than short-circuiting on a 403.
+		role2 := testutil.CreateAdminRole(t, app.DB, org2.ID)
 		user2 := testutil.CreateTestUser(t, app.DB, org2.ID,
 			testutil.WithEmail(testutil.UniqueEmail("org2-delkw")),
+			testutil.WithRoleID(&role2.ID),
 		)
 
 		req := testutil.NewGETRequest(t)
@@ -2799,19 +2716,17 @@ func TestApp_GetKeywordRule_ResponseFields(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.KeywordRuleResponse `json:"data"`
-		}
+		var resp handlers.KeywordRuleResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, rule.ID.String(), resp.Data.ID)
-		assert.Equal(t, "Full Rule", resp.Data.Name)
-		assert.Equal(t, []string{"keyword1", "keyword2"}, resp.Data.Keywords)
-		assert.Equal(t, models.MatchTypeStartsWith, resp.Data.MatchType)
-		assert.Equal(t, models.ResponseTypeTemplate, resp.Data.ResponseType)
-		assert.Equal(t, 42, resp.Data.Priority)
-		assert.False(t, resp.Data.Enabled)
-		assert.NotEmpty(t, resp.Data.CreatedAt)
+		assert.Equal(t, rule.ID.String(), resp.ID)
+		assert.Equal(t, "Full Rule", resp.Name)
+		assert.Equal(t, []string{"keyword1", "keyword2"}, resp.Keywords)
+		assert.Equal(t, models.MatchTypeStartsWith, resp.MatchType)
+		assert.Equal(t, models.ResponseTypeTemplate, resp.ResponseType)
+		assert.Equal(t, 42, resp.Priority)
+		assert.False(t, resp.Enabled)
+		assert.NotEmpty(t, resp.CreatedAt)
 	})
 }

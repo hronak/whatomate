@@ -53,13 +53,11 @@ func TestApp_ListCannedResponses(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-			} `json:"data"`
+			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.CannedResponses, 2)
+		assert.Len(t, resp.CannedResponses, 2)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -75,13 +73,11 @@ func TestApp_ListCannedResponses(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-			} `json:"data"`
+			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Empty(t, resp.Data.CannedResponses)
+		assert.Empty(t, resp.CannedResponses)
 	})
 
 	t.Run("filters by category", func(t *testing.T) {
@@ -101,14 +97,12 @@ func TestApp_ListCannedResponses(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-			} `json:"data"`
+			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.CannedResponses, 1)
-		assert.Equal(t, "Sales Intro", resp.Data.CannedResponses[0].Name)
+		assert.Len(t, resp.CannedResponses, 1)
+		assert.Equal(t, "Sales Intro", resp.CannedResponses[0].Name)
 	})
 
 	t.Run("filters by search", func(t *testing.T) {
@@ -128,14 +122,12 @@ func TestApp_ListCannedResponses(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-			} `json:"data"`
+			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.CannedResponses, 1)
-		assert.Equal(t, "Hello World", resp.Data.CannedResponses[0].Name)
+		assert.Len(t, resp.CannedResponses, 1)
+		assert.Equal(t, "Hello World", resp.CannedResponses[0].Name)
 	})
 
 	t.Run("filters active only", func(t *testing.T) {
@@ -158,14 +150,12 @@ func TestApp_ListCannedResponses(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-			} `json:"data"`
+			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.CannedResponses, 1)
-		assert.Equal(t, "Active One", resp.Data.CannedResponses[0].Name)
+		assert.Len(t, resp.CannedResponses, 1)
+		assert.Equal(t, "Active One", resp.CannedResponses[0].Name)
 	})
 
 	t.Run("isolates by organization", func(t *testing.T) {
@@ -186,14 +176,12 @@ func TestApp_ListCannedResponses(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-			} `json:"data"`
+			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.CannedResponses, 1)
-		assert.Equal(t, "Org1 Response", resp.Data.CannedResponses[0].Name)
+		assert.Len(t, resp.CannedResponses, 1)
+		assert.Equal(t, "Org1 Response", resp.CannedResponses[0].Name)
 	})
 
 	t.Run("unauthorized", func(t *testing.T) {
@@ -230,18 +218,16 @@ func TestApp_CreateCannedResponse(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CannedResponseResponse `json:"data"`
-		}
+		var resp handlers.CannedResponseResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Welcome Message", resp.Data.Name)
-		assert.Equal(t, "/welcome", resp.Data.Shortcut)
-		assert.Equal(t, "Welcome to our support!", resp.Data.Content)
-		assert.Equal(t, "onboarding", resp.Data.Category)
-		assert.True(t, resp.Data.IsActive)
-		assert.Equal(t, 0, resp.Data.UsageCount)
-		assert.NotEqual(t, uuid.Nil, resp.Data.ID)
+		assert.Equal(t, "Welcome Message", resp.Name)
+		assert.Equal(t, "/welcome", resp.Shortcut)
+		assert.Equal(t, "Welcome to our support!", resp.Content)
+		assert.Equal(t, "onboarding", resp.Category)
+		assert.True(t, resp.IsActive)
+		assert.Equal(t, 0, resp.UsageCount)
+		assert.NotEqual(t, uuid.Nil, resp.ID)
 	})
 
 	t.Run("validation error missing name", func(t *testing.T) {
@@ -397,17 +383,15 @@ func TestApp_GetCannedResponse(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CannedResponseResponse `json:"data"`
-		}
+		var resp handlers.CannedResponseResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, cr.ID, resp.Data.ID)
-		assert.Equal(t, "Get Me", resp.Data.Name)
-		assert.Equal(t, "/getme", resp.Data.Shortcut)
-		assert.Equal(t, "Get this response", resp.Data.Content)
-		assert.Equal(t, "support", resp.Data.Category)
-		assert.True(t, resp.Data.IsActive)
+		assert.Equal(t, cr.ID, resp.ID)
+		assert.Equal(t, "Get Me", resp.Name)
+		assert.Equal(t, "/getme", resp.Shortcut)
+		assert.Equal(t, "Get this response", resp.Content)
+		assert.Equal(t, "support", resp.Category)
+		assert.True(t, resp.IsActive)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -495,17 +479,15 @@ func TestApp_UpdateCannedResponse(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CannedResponseResponse `json:"data"`
-		}
+		var resp handlers.CannedResponseResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, cr.ID, resp.Data.ID)
-		assert.Equal(t, "Updated Name", resp.Data.Name)
-		assert.Equal(t, "/updated", resp.Data.Shortcut)
-		assert.Equal(t, "Updated content", resp.Data.Content)
-		assert.Equal(t, "updated-category", resp.Data.Category)
-		assert.True(t, resp.Data.IsActive)
+		assert.Equal(t, cr.ID, resp.ID)
+		assert.Equal(t, "Updated Name", resp.Name)
+		assert.Equal(t, "/updated", resp.Shortcut)
+		assert.Equal(t, "Updated content", resp.Content)
+		assert.Equal(t, "updated-category", resp.Category)
+		assert.True(t, resp.IsActive)
 	})
 
 	t.Run("partial update", func(t *testing.T) {
@@ -526,14 +508,12 @@ func TestApp_UpdateCannedResponse(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CannedResponseResponse `json:"data"`
-		}
+		var resp handlers.CannedResponseResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 		// Name should remain unchanged since empty string is not sent
-		assert.Equal(t, "Keep Name", resp.Data.Name)
-		assert.Equal(t, "Only content changed", resp.Data.Content)
+		assert.Equal(t, "Keep Name", resp.Name)
+		assert.Equal(t, "Only content changed", resp.Content)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -632,13 +612,11 @@ func TestApp_DeleteCannedResponse(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Canned response deleted", resp.Data.Message)
+		assert.Equal(t, "Canned response deleted", resp.Message)
 
 		// Verify it is deleted (soft-deleted via GORM)
 		var count int64
@@ -734,13 +712,11 @@ func TestApp_CreateCannedResponse_DuplicateShortcut(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Second", resp.Data.Name)
-	assert.Equal(t, "/dup-shortcut", resp.Data.Shortcut)
+	assert.Equal(t, "Second", resp.Name)
+	assert.Equal(t, "/dup-shortcut", resp.Shortcut)
 }
 
 func TestApp_CreateCannedResponse_SameNameDifferentOrgs(t *testing.T) {
@@ -766,12 +742,10 @@ func TestApp_CreateCannedResponse_SameNameDifferentOrgs(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Shared Name", resp.Data.Name)
+	assert.Equal(t, "Shared Name", resp.Name)
 }
 
 func TestApp_CreateCannedResponse_InvalidJSON(t *testing.T) {
@@ -813,19 +787,17 @@ func TestApp_CreateCannedResponse_WithAllOptionalFields(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Full Response", resp.Data.Name)
-	assert.Equal(t, "/full", resp.Data.Shortcut)
-	assert.Equal(t, "Full content with all fields", resp.Data.Content)
-	assert.Equal(t, "premium", resp.Data.Category)
-	assert.True(t, resp.Data.IsActive)
-	assert.Equal(t, 0, resp.Data.UsageCount)
-	assert.NotEmpty(t, resp.Data.CreatedAt)
-	assert.NotEmpty(t, resp.Data.UpdatedAt)
+	assert.Equal(t, "Full Response", resp.Name)
+	assert.Equal(t, "/full", resp.Shortcut)
+	assert.Equal(t, "Full content with all fields", resp.Content)
+	assert.Equal(t, "premium", resp.Category)
+	assert.True(t, resp.IsActive)
+	assert.Equal(t, 0, resp.UsageCount)
+	assert.NotEmpty(t, resp.CreatedAt)
+	assert.NotEmpty(t, resp.UpdatedAt)
 }
 
 func TestApp_CreateCannedResponse_WithoutShortcutOrCategory(t *testing.T) {
@@ -846,15 +818,13 @@ func TestApp_CreateCannedResponse_WithoutShortcutOrCategory(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Minimal Response", resp.Data.Name)
-	assert.Equal(t, "", resp.Data.Shortcut)
-	assert.Equal(t, "", resp.Data.Category)
-	assert.Equal(t, "Just name and content", resp.Data.Content)
+	assert.Equal(t, "Minimal Response", resp.Name)
+	assert.Equal(t, "", resp.Shortcut)
+	assert.Equal(t, "", resp.Category)
+	assert.Equal(t, "Just name and content", resp.Content)
 }
 
 // --- ListCannedResponses Additional Tests ---
@@ -878,14 +848,12 @@ func TestApp_ListCannedResponses_SearchByShortcut(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-		} `json:"data"`
+		CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.CannedResponses, 1)
-	assert.Equal(t, "Alpha", resp.Data.CannedResponses[0].Name)
+	assert.Len(t, resp.CannedResponses, 1)
+	assert.Equal(t, "Alpha", resp.CannedResponses[0].Name)
 }
 
 func TestApp_ListCannedResponses_OrderedByUsageCount(t *testing.T) {
@@ -910,16 +878,14 @@ func TestApp_ListCannedResponses_OrderedByUsageCount(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-		} `json:"data"`
+		CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	require.Len(t, resp.Data.CannedResponses, 2)
+	require.Len(t, resp.CannedResponses, 2)
 	// Higher usage count should come first
-	assert.Equal(t, "High Usage", resp.Data.CannedResponses[0].Name)
-	assert.Equal(t, "Low Usage", resp.Data.CannedResponses[1].Name)
+	assert.Equal(t, "High Usage", resp.CannedResponses[0].Name)
+	assert.Equal(t, "Low Usage", resp.CannedResponses[1].Name)
 }
 
 func TestApp_ListCannedResponses_SearchByContent(t *testing.T) {
@@ -941,14 +907,12 @@ func TestApp_ListCannedResponses_SearchByContent(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-		} `json:"data"`
+		CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.CannedResponses, 1)
-	assert.Equal(t, "Promo", resp.Data.CannedResponses[0].Name)
+	assert.Len(t, resp.CannedResponses, 1)
+	assert.Equal(t, "Promo", resp.CannedResponses[0].Name)
 }
 
 func TestApp_ListCannedResponses_CombinedCategoryAndSearch(t *testing.T) {
@@ -972,14 +936,12 @@ func TestApp_ListCannedResponses_CombinedCategoryAndSearch(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-		} `json:"data"`
+		CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.CannedResponses, 1)
-	assert.Equal(t, "Sales Hello", resp.Data.CannedResponses[0].Name)
+	assert.Len(t, resp.CannedResponses, 1)
+	assert.Equal(t, "Sales Hello", resp.CannedResponses[0].Name)
 }
 
 // --- UpdateCannedResponse Additional Tests ---
@@ -1006,12 +968,10 @@ func TestApp_UpdateCannedResponse_DeactivateResponse(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.False(t, resp.Data.IsActive)
+	assert.False(t, resp.IsActive)
 
 	// Verify in DB
 	var updated models.CannedResponse
@@ -1043,13 +1003,11 @@ func TestApp_UpdateCannedResponse_ClearShortcutAndCategory(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "", resp.Data.Shortcut)
-	assert.Equal(t, "", resp.Data.Category)
+	assert.Equal(t, "", resp.Shortcut)
+	assert.Equal(t, "", resp.Category)
 }
 
 func TestApp_UpdateCannedResponse_PreservesUsageCount(t *testing.T) {
@@ -1075,13 +1033,11 @@ func TestApp_UpdateCannedResponse_PreservesUsageCount(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Count Preserver Updated", resp.Data.Name)
-	assert.Equal(t, 42, resp.Data.UsageCount)
+	assert.Equal(t, "Count Preserver Updated", resp.Name)
+	assert.Equal(t, 42, resp.UsageCount)
 }
 
 // --- DeleteCannedResponse Additional Tests ---
@@ -1142,14 +1098,12 @@ func TestApp_DeleteCannedResponse_VerifyNotListedAfterDelete(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(listReq))
 
 	var resp struct {
-		Data struct {
-			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-		} `json:"data"`
+		CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(listReq), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.CannedResponses, 1)
-	assert.Equal(t, "Will Stay", resp.Data.CannedResponses[0].Name)
+	assert.Len(t, resp.CannedResponses, 1)
+	assert.Equal(t, "Will Stay", resp.CannedResponses[0].Name)
 }
 
 // --- IncrementCannedResponseUsage Additional Tests ---
@@ -1209,12 +1163,10 @@ func TestApp_IncrementCannedResponseUsage_ReflectedInGet(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(getReq))
 
-	var resp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var resp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(getReq), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, 1, resp.Data.UsageCount)
+	assert.Equal(t, 1, resp.UsageCount)
 }
 
 // --- CRUD Lifecycle Test ---
@@ -1239,12 +1191,10 @@ func TestApp_CannedResponse_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(createReq))
 
-	var createResp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var createResp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(createReq), &createResp)
 	require.NoError(t, err)
-	crID := createResp.Data.ID
+	crID := createResp.ID
 	assert.NotEqual(t, uuid.Nil, crID)
 
 	// 2. Get
@@ -1256,13 +1206,11 @@ func TestApp_CannedResponse_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(getReq))
 
-	var getResp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var getResp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(getReq), &getResp)
 	require.NoError(t, err)
-	assert.Equal(t, "Lifecycle Response", getResp.Data.Name)
-	assert.Equal(t, "Original lifecycle content", getResp.Data.Content)
+	assert.Equal(t, "Lifecycle Response", getResp.Name)
+	assert.Equal(t, "Original lifecycle content", getResp.Content)
 
 	// 3. Update
 	updateReq := testutil.NewJSONRequest(t, map[string]any{
@@ -1279,14 +1227,12 @@ func TestApp_CannedResponse_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(updateReq))
 
-	var updateResp struct {
-		Data handlers.CannedResponseResponse `json:"data"`
-	}
+	var updateResp handlers.CannedResponseResponse
 	err = json.Unmarshal(testutil.GetResponseBody(updateReq), &updateResp)
 	require.NoError(t, err)
-	assert.Equal(t, "Lifecycle Response Updated", updateResp.Data.Name)
-	assert.Equal(t, "Updated lifecycle content", updateResp.Data.Content)
-	assert.Equal(t, "/lifecycle-v2", updateResp.Data.Shortcut)
+	assert.Equal(t, "Lifecycle Response Updated", updateResp.Name)
+	assert.Equal(t, "Updated lifecycle content", updateResp.Content)
+	assert.Equal(t, "/lifecycle-v2", updateResp.Shortcut)
 
 	// 4. Increment usage
 	incReq := testutil.NewJSONRequest(t, nil)
@@ -1306,15 +1252,13 @@ func TestApp_CannedResponse_FullLifecycle(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(listReq))
 
 	var listResp struct {
-		Data struct {
-			CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
-		} `json:"data"`
+		CannedResponses []handlers.CannedResponseResponse `json:"canned_responses"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(listReq), &listResp)
 	require.NoError(t, err)
-	require.Len(t, listResp.Data.CannedResponses, 1)
-	assert.Equal(t, "Lifecycle Response Updated", listResp.Data.CannedResponses[0].Name)
-	assert.Equal(t, 1, listResp.Data.CannedResponses[0].UsageCount)
+	require.Len(t, listResp.CannedResponses, 1)
+	assert.Equal(t, "Lifecycle Response Updated", listResp.CannedResponses[0].Name)
+	assert.Equal(t, 1, listResp.CannedResponses[0].UsageCount)
 
 	// 6. Delete
 	delReq := testutil.NewGETRequest(t)
@@ -1357,13 +1301,11 @@ func TestApp_IncrementCannedResponseUsage(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Usage incremented", resp.Data.Message)
+		assert.Equal(t, "Usage incremented", resp.Message)
 
 		// Verify count incremented in DB
 		var updated models.CannedResponse

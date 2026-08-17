@@ -36,22 +36,17 @@ func TestApp_ListRoles_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Roles []handlers.RoleResponse `json:"roles"`
-		} `json:"data"`
+		Roles []handlers.RoleResponse `json:"roles"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Len(t, resp.Data.Roles, 2)
+	assert.Len(t, resp.Roles, 2)
 
 	// Check that roles are sorted (system first, then by name)
-	assert.Equal(t, adminRole.Name, resp.Data.Roles[0].Name)
-	assert.True(t, resp.Data.Roles[0].IsSystem)
-	assert.Equal(t, agentRole.Name, resp.Data.Roles[1].Name)
-	assert.True(t, resp.Data.Roles[1].IsDefault)
+	assert.Equal(t, adminRole.Name, resp.Roles[0].Name)
+	assert.True(t, resp.Roles[0].IsSystem)
+	assert.Equal(t, agentRole.Name, resp.Roles[1].Name)
+	assert.True(t, resp.Roles[1].IsDefault)
 }
 
 func TestApp_GetRole_Success(t *testing.T) {
@@ -71,17 +66,12 @@ func TestApp_GetRole_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Status string                `json:"status"`
-		Data   handlers.RoleResponse `json:"data"`
-	}
+	var resp handlers.RoleResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, role.ID, resp.Data.ID)
-	assert.Equal(t, role.Name, resp.Data.Name)
-	assert.Len(t, resp.Data.Permissions, 2)
+	assert.Equal(t, role.ID, resp.ID)
+	assert.Equal(t, role.Name, resp.Name)
+	assert.Len(t, resp.Permissions, 2)
 }
 
 func TestApp_GetRole_NotFound(t *testing.T) {
@@ -120,22 +110,17 @@ func TestApp_CreateRole_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Status string                `json:"status"`
-		Data   handlers.RoleResponse `json:"data"`
-	}
+	var resp handlers.RoleResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, "New Role", resp.Data.Name)
-	assert.Equal(t, "A new custom role", resp.Data.Description)
-	assert.False(t, resp.Data.IsSystem)
-	assert.Len(t, resp.Data.Permissions, 2)
+	assert.Equal(t, "New Role", resp.Name)
+	assert.Equal(t, "A new custom role", resp.Description)
+	assert.False(t, resp.IsSystem)
+	assert.Len(t, resp.Permissions, 2)
 
 	// Verify permissions were assigned correctly
 	var dbRole models.CustomRole
-	require.NoError(t, app.DB.Preload("Permissions").First(&dbRole, "id = ?", resp.Data.ID).Error)
+	require.NoError(t, app.DB.Preload("Permissions").First(&dbRole, "id = ?", resp.ID).Error)
 	assert.Len(t, dbRole.Permissions, 2)
 
 	// Clean up permissions for next test
@@ -238,16 +223,13 @@ func TestApp_UpdateRole_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Status string                `json:"status"`
-		Data   handlers.RoleResponse `json:"data"`
-	}
+	var resp handlers.RoleResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, "Updated Role Name", resp.Data.Name)
-	assert.Equal(t, "Updated description", resp.Data.Description)
-	assert.Len(t, resp.Data.Permissions, 3)
+	assert.Equal(t, "Updated Role Name", resp.Name)
+	assert.Equal(t, "Updated description", resp.Description)
+	assert.Len(t, resp.Permissions, 3)
 }
 
 func TestApp_UpdateRole_SystemRoleOnlyDescription(t *testing.T) {
@@ -274,18 +256,15 @@ func TestApp_UpdateRole_SystemRoleOnlyDescription(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Status string                `json:"status"`
-		Data   handlers.RoleResponse `json:"data"`
-	}
+	var resp handlers.RoleResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Name should not change for system roles
-	assert.Equal(t, "System Admin", resp.Data.Name)
-	assert.Equal(t, "Updated description", resp.Data.Description)
+	assert.Equal(t, "System Admin", resp.Name)
+	assert.Equal(t, "Updated description", resp.Description)
 	// Permissions should remain the same
-	assert.Len(t, resp.Data.Permissions, len(permissions))
+	assert.Len(t, resp.Permissions, len(permissions))
 }
 
 func TestApp_UpdateRole_NotFound(t *testing.T) {
@@ -387,19 +366,14 @@ func TestApp_ListPermissions_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Permissions []handlers.PermissionResponse `json:"permissions"`
-		} `json:"data"`
+		Permissions []handlers.PermissionResponse `json:"permissions"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.GreaterOrEqual(t, len(resp.Data.Permissions), len(permissions))
+	assert.GreaterOrEqual(t, len(resp.Permissions), len(permissions))
 
 	// Verify permission format
-	for _, perm := range resp.Data.Permissions {
+	for _, perm := range resp.Permissions {
 		assert.NotEmpty(t, perm.Resource)
 		assert.NotEmpty(t, perm.Action)
 		assert.Equal(t, perm.Resource+":"+perm.Action, perm.Key)

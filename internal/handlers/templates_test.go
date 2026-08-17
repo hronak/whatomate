@@ -177,12 +177,10 @@ func TestApp_ListTemplates_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Templates []handlers.TemplateResponse `json:"templates"`
-		} `json:"data"`
+		Templates []handlers.TemplateResponse `json:"templates"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Len(t, resp.Data.Templates, 2)
+	assert.Len(t, resp.Templates, 2)
 }
 
 func TestApp_ListTemplates_EmptyList(t *testing.T) {
@@ -200,12 +198,10 @@ func TestApp_ListTemplates_EmptyList(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Templates []handlers.TemplateResponse `json:"templates"`
-		} `json:"data"`
+		Templates []handlers.TemplateResponse `json:"templates"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Len(t, resp.Data.Templates, 0)
+	assert.Len(t, resp.Templates, 0)
 }
 
 func TestApp_ListTemplates_FilterByAccount(t *testing.T) {
@@ -223,21 +219,19 @@ func TestApp_ListTemplates_FilterByAccount(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
-	testutil.SetQueryParam(req, "account", account1.Name)
+	testutil.SetQueryParam(req, "account", account1.ID.String())
 
 	err := app.ListTemplates(req)
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Templates []handlers.TemplateResponse `json:"templates"`
-		} `json:"data"`
+		Templates []handlers.TemplateResponse `json:"templates"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Len(t, resp.Data.Templates, 2)
-	for _, tmpl := range resp.Data.Templates {
-		assert.Equal(t, account1.Name, tmpl.WhatsAppAccountID)
+	assert.Len(t, resp.Templates, 2)
+	for _, tmpl := range resp.Templates {
+		assert.Equal(t, account1.ID.String(), tmpl.WhatsAppAccountID)
 	}
 }
 
@@ -262,13 +256,11 @@ func TestApp_ListTemplates_FilterByStatus(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Templates []handlers.TemplateResponse `json:"templates"`
-		} `json:"data"`
+		Templates []handlers.TemplateResponse `json:"templates"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Len(t, resp.Data.Templates, 1)
-	assert.Equal(t, "APPROVED", resp.Data.Templates[0].Status)
+	assert.Len(t, resp.Templates, 1)
+	assert.Equal(t, "APPROVED", resp.Templates[0].Status)
 }
 
 func TestApp_ListTemplates_FilterByCategory(t *testing.T) {
@@ -304,13 +296,11 @@ func TestApp_ListTemplates_FilterByCategory(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Templates []handlers.TemplateResponse `json:"templates"`
-		} `json:"data"`
+		Templates []handlers.TemplateResponse `json:"templates"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Len(t, resp.Data.Templates, 1)
-	assert.Equal(t, "UTILITY", resp.Data.Templates[0].Category)
+	assert.Len(t, resp.Templates, 1)
+	assert.Equal(t, "UTILITY", resp.Templates[0].Category)
 }
 
 func TestApp_ListTemplates_CrossOrgIsolation(t *testing.T) {
@@ -335,13 +325,11 @@ func TestApp_ListTemplates_CrossOrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Templates []handlers.TemplateResponse `json:"templates"`
-		} `json:"data"`
+		Templates []handlers.TemplateResponse `json:"templates"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Len(t, resp.Data.Templates, 1)
-	assert.Equal(t, "org1_tmpl", resp.Data.Templates[0].Name)
+	assert.Len(t, resp.Templates, 1)
+	assert.Equal(t, "org1_tmpl", resp.Templates[0].Name)
 }
 
 // --- CreateTemplate Tests ---
@@ -355,14 +343,14 @@ func TestApp_CreateTemplate_Success(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	body := map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "My New Template",
-		"language":         "en",
-		"category":         "marketing",
-		"body_content":     "Hello {{1}}, your order is ready!",
-		"header_type":      "TEXT",
-		"header_content":   "Order Update",
-		"footer_content":   "Reply STOP to unsubscribe",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "My New Template",
+		"language":            "en",
+		"category":            "marketing",
+		"body_content":        "Hello {{1}}, your order is ready!",
+		"header_type":         "TEXT",
+		"header_content":      "Order Update",
+		"footer_content":      "Reply STOP to unsubscribe",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -372,22 +360,20 @@ func TestApp_CreateTemplate_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "my_new_template", resp.Data.Name) // normalized
-	assert.Equal(t, "My New Template", resp.Data.DisplayName)
-	assert.Equal(t, "en", resp.Data.Language)
-	assert.Equal(t, "MARKETING", resp.Data.Category) // uppercased
-	assert.Equal(t, "DRAFT", resp.Data.Status)
-	assert.Equal(t, "TEXT", resp.Data.HeaderType)
-	assert.Equal(t, "Order Update", resp.Data.HeaderContent)
-	assert.Equal(t, "Hello {{1}}, your order is ready!", resp.Data.BodyContent)
-	assert.Equal(t, "Reply STOP to unsubscribe", resp.Data.FooterContent)
-	assert.Equal(t, &account.ID, resp.Data.WhatsAppAccountID)
-	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
-	assert.Equal(t, "UNKNOWN", resp.Data.QualityRating)
+	assert.Equal(t, "my_new_template", resp.Name) // normalized
+	assert.Equal(t, "My New Template", resp.DisplayName)
+	assert.Equal(t, "en", resp.Language)
+	assert.Equal(t, "MARKETING", resp.Category) // uppercased
+	assert.Equal(t, "DRAFT", resp.Status)
+	assert.Equal(t, "TEXT", resp.HeaderType)
+	assert.Equal(t, "Order Update", resp.HeaderContent)
+	assert.Equal(t, "Hello {{1}}, your order is ready!", resp.BodyContent)
+	assert.Equal(t, "Reply STOP to unsubscribe", resp.FooterContent)
+	assert.Equal(t, account.ID.String(), resp.WhatsAppAccountID)
+	assert.NotEqual(t, uuid.Nil, resp.ID)
+	assert.Equal(t, "UNKNOWN", resp.QualityRating)
 }
 
 func TestApp_CreateTemplate_MissingRequiredFields(t *testing.T) {
@@ -399,7 +385,7 @@ func TestApp_CreateTemplate_MissingRequiredFields(t *testing.T) {
 
 	// Missing name, language, category, body_content
 	body := map[string]any{
-		"whatsapp_account": "some-account",
+		"whatsapp_account_id": "some-account",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -419,10 +405,10 @@ func TestApp_CreateTemplate_MissingBodyContent(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	body := map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "test_template",
-		"language":         "en",
-		"category":         "MARKETING",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "test_template",
+		"language":            "en",
+		"category":            "MARKETING",
 		// body_content is missing
 	}
 
@@ -442,11 +428,11 @@ func TestApp_CreateTemplate_AccountNotFound(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 
 	body := map[string]any{
-		"whatsapp_account": "nonexistent-account",
-		"name":             "test_template",
-		"language":         "en",
-		"category":         "MARKETING",
-		"body_content":     "Hello!",
+		"whatsapp_account_id": "nonexistent-account",
+		"name":                "test_template",
+		"language":            "en",
+		"category":            "MARKETING",
+		"body_content":        "Hello!",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -470,11 +456,11 @@ func TestApp_CreateTemplate_DuplicateName(t *testing.T) {
 
 	// Try to create another with the same name
 	body := map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "duplicate_name",
-		"language":         "en",
-		"category":         "MARKETING",
-		"body_content":     "Hello!",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "duplicate_name",
+		"language":            "en",
+		"category":            "MARKETING",
+		"body_content":        "Hello!",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -495,11 +481,11 @@ func TestApp_CreateTemplate_AccountFromAnotherOrg(t *testing.T) {
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org2.ID)
 
 	body := map[string]any{
-		"whatsapp_account": account2.Name,
-		"name":             "test_template",
-		"language":         "en",
-		"category":         "MARKETING",
-		"body_content":     "Hello!",
+		"whatsapp_account_id": account2.ID.String(),
+		"name":                "test_template",
+		"language":            "en",
+		"category":            "MARKETING",
+		"body_content":        "Hello!",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -540,13 +526,13 @@ func TestApp_CreateTemplate_RejectsTooManyHeaderVariables(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	body := map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "two_header_vars",
-		"language":         "en",
-		"category":         "MARKETING",
-		"body_content":     "Hi {{1}}",
-		"header_type":      "TEXT",
-		"header_content":   "Order {{1}} for {{2}}",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "two_header_vars",
+		"language":            "en",
+		"category":            "MARKETING",
+		"body_content":        "Hi {{1}}",
+		"header_type":         "TEXT",
+		"header_content":      "Order {{1}} for {{2}}",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -604,11 +590,11 @@ func TestApp_CreateTemplate_NameNormalization(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	body := map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "My Template-Name With Spaces!",
-		"language":         "en",
-		"category":         "MARKETING",
-		"body_content":     "Hello!",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "My Template-Name With Spaces!",
+		"language":            "en",
+		"category":            "MARKETING",
+		"body_content":        "Hello!",
 	}
 
 	req := testutil.NewJSONRequest(t, body)
@@ -618,12 +604,10 @@ func TestApp_CreateTemplate_NameNormalization(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 	// Should be lowercase, spaces->underscores, hyphens->underscores, special chars removed
-	assert.Equal(t, "my_template_name_with_spaces", resp.Data.Name)
+	assert.Equal(t, "my_template_name_with_spaces", resp.Name)
 }
 
 // --- GetTemplate Tests ---
@@ -646,14 +630,12 @@ func TestApp_GetTemplate_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, tmpl.ID, resp.Data.ID)
-	assert.Equal(t, "get_me", resp.Data.Name)
-	assert.Equal(t, "APPROVED", resp.Data.Status)
-	assert.Equal(t, &account.ID, resp.Data.WhatsAppAccountID)
+	assert.Equal(t, tmpl.ID, resp.ID)
+	assert.Equal(t, "get_me", resp.Name)
+	assert.Equal(t, "APPROVED", resp.Status)
+	assert.Equal(t, account.ID.String(), resp.WhatsAppAccountID)
 }
 
 func TestApp_GetTemplate_NotFound(t *testing.T) {
@@ -736,14 +718,12 @@ func TestApp_UpdateTemplate_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "Updated Display Name", resp.Data.DisplayName)
-	assert.Equal(t, "Updated body {{1}}", resp.Data.BodyContent)
-	assert.Equal(t, "UTILITY", resp.Data.Category)
-	assert.Equal(t, "es", resp.Data.Language)
+	assert.Equal(t, "Updated Display Name", resp.DisplayName)
+	assert.Equal(t, "Updated body {{1}}", resp.BodyContent)
+	assert.Equal(t, "UTILITY", resp.Category)
+	assert.Equal(t, "es", resp.Language)
 }
 
 func TestApp_UpdateTemplate_ApprovedToDraft(t *testing.T) {
@@ -769,12 +749,10 @@ func TestApp_UpdateTemplate_ApprovedToDraft(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "Updated body content", resp.Data.BodyContent)
-	assert.Equal(t, "DRAFT", resp.Data.Status, "Status should change to DRAFT after editing approved template")
+	assert.Equal(t, "Updated body content", resp.BodyContent)
+	assert.Equal(t, "DRAFT", resp.Status, "Status should change to DRAFT after editing approved template")
 }
 
 func TestApp_UpdateTemplate_RejectedToDraft(t *testing.T) {
@@ -800,12 +778,10 @@ func TestApp_UpdateTemplate_RejectedToDraft(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "Fixed body content", resp.Data.BodyContent)
-	assert.Equal(t, "DRAFT", resp.Data.Status, "Status should change to DRAFT after editing rejected template")
+	assert.Equal(t, "Fixed body content", resp.BodyContent)
+	assert.Equal(t, "DRAFT", resp.Status, "Status should change to DRAFT after editing rejected template")
 }
 
 func TestApp_UpdateTemplate_NotFound(t *testing.T) {
@@ -894,11 +870,9 @@ func TestApp_UpdateTemplate_RejectedTemplateEditable(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.TemplateResponse `json:"data"`
-	}
+	var resp handlers.TemplateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "Fixed content after rejection", resp.Data.BodyContent)
+	assert.Equal(t, "Fixed content after rejection", resp.BodyContent)
 }
 
 // --- DeleteTemplate Tests ---
@@ -922,12 +896,10 @@ func TestApp_DeleteTemplate_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Contains(t, resp.Data.Message, "deleted successfully")
+	assert.Contains(t, resp.Message, "deleted successfully")
 
 	// Verify template is soft-deleted
 	var count int64
@@ -1022,18 +994,16 @@ func TestApp_SubmitTemplate_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message        string                    `json:"message"`
-			MetaTemplateID string                    `json:"meta_template_id"`
-			Status         string                    `json:"status"`
-			Template       handlers.TemplateResponse `json:"template"`
-		} `json:"data"`
+		Message        string                    `json:"message"`
+		MetaTemplateID string                    `json:"meta_template_id"`
+		Status         string                    `json:"status"`
+		Template       handlers.TemplateResponse `json:"template"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Contains(t, resp.Data.Message, "submitted")
-	assert.Equal(t, "PENDING", resp.Data.Status)
-	assert.NotEmpty(t, resp.Data.MetaTemplateID)
-	assert.Equal(t, "PENDING", resp.Data.Template.Status)
+	assert.Contains(t, resp.Message, "submitted")
+	assert.Equal(t, "PENDING", resp.Status)
+	assert.NotEmpty(t, resp.MetaTemplateID)
+	assert.Equal(t, "PENDING", resp.Template.Status)
 }
 
 func TestApp_SubmitTemplate_AlreadySubmitted(t *testing.T) {
@@ -1114,7 +1084,7 @@ func TestApp_SyncTemplates_Success(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": account.Name,
+		"whatsapp_account_id": account.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -1123,14 +1093,12 @@ func TestApp_SyncTemplates_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-			Count   int    `json:"count"`
-		} `json:"data"`
+		Message string `json:"message"`
+		Count   int    `json:"count"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 3, resp.Data.Count)
-	assert.Contains(t, resp.Data.Message, "Synced 3 templates")
+	assert.Equal(t, 3, resp.Count)
+	assert.Contains(t, resp.Message, "Synced 3 templates")
 
 	// Verify templates were created in the database
 	var templates []models.Template
@@ -1179,7 +1147,7 @@ func TestApp_SyncTemplates_AccountNotFound(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": "nonexistent-account",
+		"whatsapp_account_id": "nonexistent-account",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -1201,17 +1169,15 @@ func TestApp_SyncTemplates_ViaQueryParam(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
-	testutil.SetQueryParam(req, "account", account.Name)
+	testutil.SetQueryParam(req, "account", account.ID.String())
 
 	err := app.SyncTemplates(req)
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Count int `json:"count"`
-		} `json:"data"`
+		Count int `json:"count"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 3, resp.Data.Count)
+	assert.Equal(t, 3, resp.Count)
 }

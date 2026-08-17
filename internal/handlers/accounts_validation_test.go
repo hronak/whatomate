@@ -139,18 +139,17 @@ func TestApp_TestAccountConnection_Success(t *testing.T) {
 	require.NoError(t, app.TestAccountConnection(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, true, resp.Data["success"])
-	assert.Equal(t, "+1234567890", resp.Data["display_phone_number"])
-	assert.Equal(t, false, resp.Data["is_test_number"])
-	assert.Equal(t, "GREEN", resp.Data["quality_rating"])
-	assert.Equal(t, "TIER_250", resp.Data["messaging_limit_tier"])
-	assert.Equal(t, "VERIFIED", resp.Data["code_verification_status"])
-	assert.Equal(t, "LIVE", resp.Data["account_mode"])
-	assert.Equal(t, "Test", resp.Data["verified_name"])
+	assert.Equal(t, true, resp["success"])
+	assert.Equal(t, "+1234567890", resp["display_phone_number"])
+	assert.Equal(t, false, resp["is_test_number"])
+	assert.Equal(t, "GREEN", resp["quality_rating"])
+	assert.Equal(t, "TIER_250", resp["messaging_limit_tier"])
+	assert.Equal(t, "VERIFIED", resp["code_verification_status"])
+	assert.Equal(t, "LIVE", resp["account_mode"])
+	assert.Equal(t, "Test", resp["verified_name"])
 }
 
 func TestApp_TestAccountConnection_FallbackToWABA(t *testing.T) {
@@ -178,12 +177,11 @@ func TestApp_TestAccountConnection_FallbackToWABA(t *testing.T) {
 	require.NoError(t, app.TestAccountConnection(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, true, resp.Data["success"])
-	assert.Equal(t, "TIER_10K", resp.Data["messaging_limit_tier"])
+	assert.Equal(t, true, resp["success"])
+	assert.Equal(t, "TIER_10K", resp["messaging_limit_tier"])
 }
 
 func TestApp_TestAccountConnection_SandboxFlagged(t *testing.T) {
@@ -206,13 +204,12 @@ func TestApp_TestAccountConnection_SandboxFlagged(t *testing.T) {
 	require.NoError(t, app.TestAccountConnection(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, true, resp.Data["success"])
-	assert.Equal(t, true, resp.Data["is_test_number"])
-	assert.Contains(t, resp.Data["warning"], "test/sandbox")
+	assert.Equal(t, true, resp["success"])
+	assert.Equal(t, true, resp["is_test_number"])
+	assert.Contains(t, resp["warning"], "test/sandbox")
 }
 
 func TestApp_TestAccountConnection_NotVerifiedRejected(t *testing.T) {
@@ -231,12 +228,11 @@ func TestApp_TestAccountConnection_NotVerifiedRejected(t *testing.T) {
 
 	require.NoError(t, app.TestAccountConnection(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, false, resp.Data["success"])
-	assert.Contains(t, resp.Data["error"], "not verified")
+	assert.Equal(t, false, resp["success"])
+	assert.Contains(t, resp["error"], "not verified")
 }
 
 func TestApp_TestAccountConnection_PhoneNotInBusiness(t *testing.T) {
@@ -256,12 +252,11 @@ func TestApp_TestAccountConnection_PhoneNotInBusiness(t *testing.T) {
 
 	require.NoError(t, app.TestAccountConnection(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, false, resp.Data["success"])
-	assert.Contains(t, resp.Data["error"], "does not belong to business_id")
+	assert.Equal(t, false, resp["success"])
+	assert.Contains(t, resp["error"], "does not belong to business_id")
 }
 
 func TestApp_TestAccountConnection_AccountNotFound(t *testing.T) {
@@ -307,11 +302,10 @@ func TestApp_SubscribeApp_Success(t *testing.T) {
 	require.NoError(t, app.SubscribeApp(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, true, resp.Data["success"])
+	assert.Equal(t, true, resp["success"])
 	// Verify Meta was actually called on the subscribe endpoint.
 	assert.Greater(t, meta.hits["/v18.0/biz-1/subscribed_apps"], 0, "expected POST to subscribed_apps endpoint")
 }
@@ -333,11 +327,10 @@ func TestApp_SubscribeApp_MetaFails(t *testing.T) {
 	require.NoError(t, app.SubscribeApp(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	// Handlers return the payload unwrapped — there is no "data" envelope.
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, false, resp.Data["success"])
+	assert.Equal(t, false, resp["success"])
 }
 
 func TestApp_SubscribeApp_AccountNotFound(t *testing.T) {

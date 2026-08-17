@@ -51,13 +51,11 @@ func TestApp_ListFlows_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flows []handlers.FlowResponse `json:"flows"`
-		} `json:"data"`
+		Flows []handlers.FlowResponse `json:"flows"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Flows, 2)
+	assert.Len(t, resp.Flows, 2)
 }
 
 func TestApp_ListFlows_EmptyList(t *testing.T) {
@@ -75,13 +73,11 @@ func TestApp_ListFlows_EmptyList(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flows []handlers.FlowResponse `json:"flows"`
-		} `json:"data"`
+		Flows []handlers.FlowResponse `json:"flows"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Flows, 0)
+	assert.Len(t, resp.Flows, 0)
 }
 
 func TestApp_ListFlows_FilterByAccount(t *testing.T) {
@@ -99,22 +95,20 @@ func TestApp_ListFlows_FilterByAccount(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
-	testutil.SetQueryParam(req, "account", account1.Name)
+	testutil.SetQueryParam(req, "account", account1.ID.String())
 
 	err := app.ListFlows(req)
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flows []handlers.FlowResponse `json:"flows"`
-		} `json:"data"`
+		Flows []handlers.FlowResponse `json:"flows"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Flows, 2)
-	for _, f := range resp.Data.Flows {
-		assert.Equal(t, account1.Name, f.WhatsAppAccountID)
+	assert.Len(t, resp.Flows, 2)
+	for _, f := range resp.Flows {
+		assert.Equal(t, account1.ID.String(), f.WhatsAppAccountID)
 	}
 }
 
@@ -142,10 +136,10 @@ func TestApp_CreateFlow_Success(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "My New Flow",
-		"category":         "SIGN_UP",
-		"json_version":     "6.0",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "My New Flow",
+		"category":            "SIGN_UP",
+		"json_version":        "6.0",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -154,18 +148,16 @@ func TestApp_CreateFlow_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flow handlers.FlowResponse `json:"flow"`
-		} `json:"data"`
+		Flow handlers.FlowResponse `json:"flow"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "My New Flow", resp.Data.Flow.Name)
-	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccountID)
-	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
-	assert.Equal(t, "SIGN_UP", resp.Data.Flow.Category)
-	assert.Equal(t, "6.0", resp.Data.Flow.JSONVersion)
-	assert.NotEqual(t, uuid.Nil, resp.Data.Flow.ID)
+	assert.Equal(t, "My New Flow", resp.Flow.Name)
+	assert.Equal(t, account.ID.String(), resp.Flow.WhatsAppAccountID)
+	assert.Equal(t, "DRAFT", resp.Flow.Status)
+	assert.Equal(t, "SIGN_UP", resp.Flow.Category)
+	assert.Equal(t, "6.0", resp.Flow.JSONVersion)
+	assert.NotEqual(t, uuid.Nil, resp.Flow.ID)
 }
 
 func TestApp_CreateFlow_DefaultJSONVersion(t *testing.T) {
@@ -177,8 +169,8 @@ func TestApp_CreateFlow_DefaultJSONVersion(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": account.Name,
-		"name":             "Flow Without Version",
+		"whatsapp_account_id": account.ID.String(),
+		"name":                "Flow Without Version",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -187,13 +179,11 @@ func TestApp_CreateFlow_DefaultJSONVersion(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flow handlers.FlowResponse `json:"flow"`
-		} `json:"data"`
+		Flow handlers.FlowResponse `json:"flow"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "6.0", resp.Data.Flow.JSONVersion)
+	assert.Equal(t, "6.0", resp.Flow.JSONVersion)
 }
 
 func TestApp_CreateFlow_MissingName(t *testing.T) {
@@ -205,7 +195,7 @@ func TestApp_CreateFlow_MissingName(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": account.Name,
+		"whatsapp_account_id": account.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -239,8 +229,8 @@ func TestApp_CreateFlow_AccountNotFound(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": "nonexistent-account",
-		"name":             "Flow With Bad Account",
+		"whatsapp_account_id": "nonexistent-account",
+		"name":                "Flow With Bad Account",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -255,8 +245,8 @@ func TestApp_CreateFlow_Unauthorized(t *testing.T) {
 	app := newTestApp(t)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": "some-account",
-		"name":             "Flow",
+		"whatsapp_account_id": "some-account",
+		"name":                "Flow",
 	})
 	// No auth context
 
@@ -285,16 +275,14 @@ func TestApp_GetFlow_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flow handlers.FlowResponse `json:"flow"`
-		} `json:"data"`
+		Flow handlers.FlowResponse `json:"flow"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, flow.ID, resp.Data.Flow.ID)
-	assert.Equal(t, "Test Flow", resp.Data.Flow.Name)
-	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccountID)
-	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
+	assert.Equal(t, flow.ID, resp.Flow.ID)
+	assert.Equal(t, "Test Flow", resp.Flow.Name)
+	assert.Equal(t, account.ID.String(), resp.Flow.WhatsAppAccountID)
+	assert.Equal(t, "DRAFT", resp.Flow.Status)
 }
 
 func TestApp_GetFlow_NotFound(t *testing.T) {
@@ -372,16 +360,14 @@ func TestApp_UpdateFlow_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flow handlers.FlowResponse `json:"flow"`
-		} `json:"data"`
+		Flow handlers.FlowResponse `json:"flow"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, flow.ID, resp.Data.Flow.ID)
-	assert.Equal(t, "Updated Flow", resp.Data.Flow.Name)
-	assert.Equal(t, "CUSTOMER_SUPPORT", resp.Data.Flow.Category)
-	assert.True(t, resp.Data.Flow.HasLocalChanges)
+	assert.Equal(t, flow.ID, resp.Flow.ID)
+	assert.Equal(t, "Updated Flow", resp.Flow.Name)
+	assert.Equal(t, "CUSTOMER_SUPPORT", resp.Flow.Category)
+	assert.True(t, resp.Flow.HasLocalChanges)
 }
 
 func TestApp_UpdateFlow_NotFound(t *testing.T) {
@@ -456,13 +442,11 @@ func TestApp_DeleteFlow_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Contains(t, resp.Data.Message, "deleted")
+	assert.Contains(t, resp.Message, "deleted")
 
 	// Verify flow is soft-deleted
 	var count int64
@@ -561,35 +545,33 @@ func TestApp_DuplicateFlow_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flow    handlers.FlowResponse `json:"flow"`
-			Message string                `json:"message"`
-		} `json:"data"`
+		Flow    handlers.FlowResponse `json:"flow"`
+		Message string                `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Duplicated flow should have a different ID
-	assert.NotEqual(t, flow.ID, resp.Data.Flow.ID)
-	assert.NotEqual(t, uuid.Nil, resp.Data.Flow.ID)
+	assert.NotEqual(t, flow.ID, resp.Flow.ID)
+	assert.NotEqual(t, uuid.Nil, resp.Flow.ID)
 
 	// Duplicated flow should have "(Copy)" appended to the name
-	assert.Equal(t, "Original Flow (Copy)", resp.Data.Flow.Name)
+	assert.Equal(t, "Original Flow (Copy)", resp.Flow.Name)
 
 	// Duplicated flow should be in DRAFT status
-	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
+	assert.Equal(t, "DRAFT", resp.Flow.Status)
 
 	// Duplicated flow should keep the same account
-	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccountID)
+	assert.Equal(t, account.ID.String(), resp.Flow.WhatsAppAccountID)
 
 	// Duplicated flow should keep the same category
-	assert.Equal(t, flow.Category, resp.Data.Flow.Category)
+	assert.Equal(t, flow.Category, resp.Flow.Category)
 
 	// MetaFlowID should be empty for the duplicate
-	assert.Empty(t, resp.Data.Flow.MetaFlowID)
+	assert.Empty(t, resp.Flow.MetaFlowID)
 
 	// Success message should be present
-	assert.Contains(t, resp.Data.Message, "duplicated")
+	assert.Contains(t, resp.Message, "duplicated")
 }
 
 func TestApp_DuplicateFlow_NotFound(t *testing.T) {
@@ -695,19 +677,17 @@ func TestApp_DuplicateFlow_PreservesFlowJSON(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Flow handlers.FlowResponse `json:"flow"`
-		} `json:"data"`
+		Flow handlers.FlowResponse `json:"flow"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Duplicate should preserve screens
-	assert.Len(t, resp.Data.Flow.Screens, 1)
+	assert.Len(t, resp.Flow.Screens, 1)
 
 	// Duplicate should be DRAFT regardless of original status
-	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
+	assert.Equal(t, "DRAFT", resp.Flow.Status)
 
 	// MetaFlowID should be empty (it's a new local-only flow)
-	assert.Empty(t, resp.Data.Flow.MetaFlowID)
+	assert.Empty(t, resp.Flow.MetaFlowID)
 }

@@ -33,16 +33,14 @@ func TestApp_CreateOrganization_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.OrganizationResponse `json:"data"`
-	}
+	var resp handlers.OrganizationResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, "New Test Organization", resp.Data.Name)
-	assert.NotEmpty(t, resp.Data.Slug)
-	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
-	assert.NotEmpty(t, resp.Data.CreatedAt)
+	assert.Equal(t, "New Test Organization", resp.Name)
+	assert.NotEmpty(t, resp.Slug)
+	assert.NotEqual(t, uuid.Nil, resp.ID)
+	assert.NotEmpty(t, resp.CreatedAt)
 }
 
 func TestApp_CreateOrganization_EmptyName(t *testing.T) {
@@ -97,18 +95,16 @@ func TestApp_ListOrganizationMembers_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Members []handlers.MemberResponse `json:"members"`
-		} `json:"data"`
+		Members []handlers.MemberResponse `json:"members"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.GreaterOrEqual(t, len(resp.Data.Members), 1)
+	assert.GreaterOrEqual(t, len(resp.Members), 1)
 
 	// Find our user in members
 	found := false
-	for _, m := range resp.Data.Members {
+	for _, m := range resp.Members {
 		if m.UserID == user.ID {
 			found = true
 			assert.Equal(t, user.Email, m.Email)
@@ -479,22 +475,20 @@ func TestApp_ListMyOrganizations_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Organizations []struct {
-				OrganizationID uuid.UUID `json:"organization_id"`
-				Name           string    `json:"name"`
-				Slug           string    `json:"slug"`
-				IsDefault      bool      `json:"is_default"`
-			} `json:"organizations"`
-		} `json:"data"`
+		Organizations []struct {
+			OrganizationID uuid.UUID `json:"organization_id"`
+			Name           string    `json:"name"`
+			Slug           string    `json:"slug"`
+			IsDefault      bool      `json:"is_default"`
+		} `json:"organizations"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Len(t, resp.Data.Organizations, 2)
+	assert.Len(t, resp.Organizations, 2)
 
 	orgIDs := make(map[uuid.UUID]bool)
-	for _, o := range resp.Data.Organizations {
+	for _, o := range resp.Organizations {
 		orgIDs[o.OrganizationID] = true
 		assert.NotEmpty(t, o.Name)
 	}
@@ -518,17 +512,15 @@ func TestApp_ListMyOrganizations_SingleOrg(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Organizations []struct {
-				OrganizationID uuid.UUID `json:"organization_id"`
-			} `json:"organizations"`
-		} `json:"data"`
+		Organizations []struct {
+			OrganizationID uuid.UUID `json:"organization_id"`
+		} `json:"organizations"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Len(t, resp.Data.Organizations, 1)
-	assert.Equal(t, org.ID, resp.Data.Organizations[0].OrganizationID)
+	assert.Len(t, resp.Organizations, 1)
+	assert.Equal(t, org.ID, resp.Organizations[0].OrganizationID)
 }
 
 func TestApp_ListMyOrganizations_Unauthorized(t *testing.T) {
@@ -579,13 +571,11 @@ func TestApp_SwitchOrg_Success(t *testing.T) {
 	assert.NotEmpty(t, refreshCookie, "whm_refresh cookie should be set")
 
 	var resp struct {
-		Data struct {
-			ExpiresIn int `json:"expires_in"`
-		} `json:"data"`
+		ExpiresIn int `json:"expires_in"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Greater(t, resp.Data.ExpiresIn, 0)
+	assert.Greater(t, resp.ExpiresIn, 0)
 }
 
 func TestApp_SwitchOrg_SuperAdmin(t *testing.T) {

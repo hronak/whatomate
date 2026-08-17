@@ -58,16 +58,14 @@ func TestApp_ListAuditLogs_Success(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
-			Total     int                         `json:"total"`
-		} `json:"data"`
+		AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
+		Total     int                         `json:"total"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 3, resp.Data.Total)
-	assert.Len(t, resp.Data.AuditLogs, 3)
+	assert.Equal(t, 3, resp.Total)
+	assert.Len(t, resp.AuditLogs, 3)
 	// DESC by created_at: newest first.
-	assert.Equal(t, models.AuditActionDeleted, resp.Data.AuditLogs[0].Action)
+	assert.Equal(t, models.AuditActionDeleted, resp.AuditLogs[0].Action)
 }
 
 func TestApp_ListAuditLogs_FilterByResourceType(t *testing.T) {
@@ -86,14 +84,12 @@ func TestApp_ListAuditLogs_FilterByResourceType(t *testing.T) {
 
 	require.NoError(t, app.ListAuditLogs(req))
 	var resp struct {
-		Data struct {
-			AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
-			Total     int                         `json:"total"`
-		} `json:"data"`
+		AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
+		Total     int                         `json:"total"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 2, resp.Data.Total)
-	for _, l := range resp.Data.AuditLogs {
+	assert.Equal(t, 2, resp.Total)
+	for _, l := range resp.AuditLogs {
 		assert.Equal(t, "contact", l.ResourceType)
 	}
 }
@@ -113,13 +109,11 @@ func TestApp_ListAuditLogs_FilterByAction(t *testing.T) {
 
 	require.NoError(t, app.ListAuditLogs(req))
 	var resp struct {
-		Data struct {
-			AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
-		} `json:"data"`
+		AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	require.Len(t, resp.Data.AuditLogs, 1)
-	assert.Equal(t, models.AuditActionDeleted, resp.Data.AuditLogs[0].Action)
+	require.Len(t, resp.AuditLogs, 1)
+	assert.Equal(t, models.AuditActionDeleted, resp.AuditLogs[0].Action)
 }
 
 func TestApp_ListAuditLogs_DateRangeFilter(t *testing.T) {
@@ -139,12 +133,10 @@ func TestApp_ListAuditLogs_DateRangeFilter(t *testing.T) {
 
 	require.NoError(t, app.ListAuditLogs(req))
 	var resp struct {
-		Data struct {
-			AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
-		} `json:"data"`
+		AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	require.Len(t, resp.Data.AuditLogs, 1, "from-filter must exclude logs older than 24h ago")
+	require.Len(t, resp.AuditLogs, 1, "from-filter must exclude logs older than 24h ago")
 }
 
 func TestApp_ListAuditLogs_CrossOrgIsolation(t *testing.T) {
@@ -163,13 +155,11 @@ func TestApp_ListAuditLogs_CrossOrgIsolation(t *testing.T) {
 	testutil.SetAuthContext(req, orgB.ID, userB.ID)
 	require.NoError(t, app.ListAuditLogs(req))
 	var resp struct {
-		Data struct {
-			AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
-			Total     int                         `json:"total"`
-		} `json:"data"`
+		AuditLogs []handlers.AuditLogResponse `json:"audit_logs"`
+		Total     int                         `json:"total"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 0, resp.Data.Total, "audit logs from another org must not be returned")
+	assert.Equal(t, 0, resp.Total, "audit logs from another org must not be returned")
 }
 
 func TestApp_ListAuditLogs_PermissionDenied(t *testing.T) {
@@ -201,12 +191,10 @@ func TestApp_GetAuditLog_Success(t *testing.T) {
 	require.NoError(t, app.GetAuditLog(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AuditLogResponse `json:"data"`
-	}
+	var resp handlers.AuditLogResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, log.ID, resp.Data.ID)
-	assert.Equal(t, "contact", resp.Data.ResourceType)
+	assert.Equal(t, log.ID, resp.ID)
+	assert.Equal(t, "contact", resp.ResourceType)
 }
 
 func TestApp_GetAuditLog_NotFound(t *testing.T) {

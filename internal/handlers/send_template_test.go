@@ -62,18 +62,16 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.MessageResponse `json:"data"`
-		}
+		var resp handlers.MessageResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 
-		assert.Equal(t, contact.ID, resp.Data.ContactID)
-		assert.Equal(t, models.DirectionOutgoing, resp.Data.Direction)
-		assert.Equal(t, models.MessageTypeTemplate, resp.Data.MessageType)
-		assert.Equal(t, account.Name, resp.Data.WhatsAppAccountID)
+		assert.Equal(t, contact.ID, resp.ContactID)
+		assert.Equal(t, models.DirectionOutgoing, resp.Direction)
+		assert.Equal(t, models.MessageTypeTemplate, resp.MessageType)
+		assert.Equal(t, account.ID.String(), resp.WhatsAppAccountID)
 
 		// Verify rendered body content
-		contentMap, ok := resp.Data.Content.(map[string]any)
+		contentMap, ok := resp.Content.(map[string]any)
 		require.True(t, ok)
 		assert.Equal(t, "Hello Alice! Your order ORD-42 has been confirmed.", contentMap["body"])
 
@@ -127,12 +125,10 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.MessageResponse `json:"data"`
-		}
+		var resp handlers.MessageResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 
-		contentMap, ok := resp.Data.Content.(map[string]any)
+		contentMap, ok := resp.Content.(map[string]any)
 		require.True(t, ok)
 		assert.Equal(t, "Welcome to our service!", contentMap["body"])
 	})
@@ -164,13 +160,11 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.MessageResponse `json:"data"`
-		}
+		var resp handlers.MessageResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, models.MessageTypeTemplate, resp.Data.MessageType)
+		assert.Equal(t, models.MessageTypeTemplate, resp.MessageType)
 
-		contentMap, ok := resp.Data.Content.(map[string]any)
+		contentMap, ok := resp.Content.(map[string]any)
 		require.True(t, ok)
 		assert.Equal(t, "Hello Bob! Your order ORD-99 has been confirmed.", contentMap["body"])
 	})
@@ -191,7 +185,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":    contact.ID.String(),
 			"template_name": tpl.Name,
-			"account_name":  account.Name,
+			"account_name":  account.ID.String(),
 			"template_params": map[string]string{
 				"name":     "Charlie",
 				"order_id": "ORD-77",
@@ -203,11 +197,9 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.MessageResponse `json:"data"`
-		}
+		var resp handlers.MessageResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, account.Name, resp.Data.WhatsAppAccountID)
+		assert.Equal(t, account.ID.String(), resp.WhatsAppAccountID)
 	})
 
 	t.Run("missing contact_id and phone_number", func(t *testing.T) {
@@ -516,7 +508,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		// Verify the response has all MessageResponse fields
 		var raw map[string]any
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &raw))
-		data := raw["data"].(map[string]any)
+		data := raw
 
 		assert.NotEmpty(t, data["id"])
 		assert.NotEmpty(t, data["contact_id"])
@@ -570,7 +562,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		// Verify response includes interactive_data with buttons
 		var raw map[string]any
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &raw))
-		data := raw["data"].(map[string]any)
+		data := raw
 
 		interactiveData, ok := data["interactive_data"].(map[string]any)
 		require.True(t, ok, "interactive_data should be present for template with buttons")
@@ -781,7 +773,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 
 		var raw map[string]any
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &raw))
-		data := raw["data"].(map[string]any)
+		data := raw
 
 		// interactive_data should be absent (omitempty) or nil
 		_, hasInteractive := data["interactive_data"]

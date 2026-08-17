@@ -186,16 +186,12 @@ func TestApp_GetWSToken_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Token string `json:"token"`
-		} `json:"data"`
+		Token string `json:"token"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "success", resp.Status)
-	require.NotEmpty(t, resp.Data.Token)
+	require.NotEmpty(t, resp.Token)
 
-	parsed, err := jwt.ParseWithClaims(resp.Data.Token, &middleware.JWTClaims{}, func(token *jwt.Token) (any, error) {
+	parsed, err := jwt.ParseWithClaims(resp.Token, &middleware.JWTClaims{}, func(token *jwt.Token) (any, error) {
 		return []byte(testutil.TestJWTSecret), nil
 	})
 	require.NoError(t, err)

@@ -106,12 +106,10 @@ func TestApp_GetBusinessProfile_Success(t *testing.T) {
 	require.NoError(t, app.GetBusinessProfile(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data whatsapp.BusinessProfile `json:"data"`
-	}
+	var resp whatsapp.BusinessProfile
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "hello", resp.Data.About)
-	assert.Equal(t, "x@example.com", resp.Data.Email)
+	assert.Equal(t, "hello", resp.About)
+	assert.Equal(t, "x@example.com", resp.Email)
 }
 
 func TestApp_GetBusinessProfile_AccountNotFound(t *testing.T) {
@@ -202,11 +200,9 @@ func TestApp_UpdateBusinessProfile_Success(t *testing.T) {
 	assert.Equal(t, "new@example.com", meta.LastBody["email"])
 
 	// Handler does a re-fetch (GET) and returns the refreshed profile from the fake.
-	var resp struct {
-		Data whatsapp.BusinessProfile `json:"data"`
-	}
+	var resp whatsapp.BusinessProfile
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "hello", resp.Data.About) // fake's default GET response
+	assert.Equal(t, "hello", resp.About) // fake's default GET response
 }
 
 func TestApp_UpdateBusinessProfile_RefetchFailureStillReportsSuccess(t *testing.T) {
@@ -227,11 +223,9 @@ func TestApp_UpdateBusinessProfile_RefetchFailureStillReportsSuccess(t *testing.
 	require.NoError(t, app.UpdateBusinessProfile(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	var resp map[string]any
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Contains(t, resp.Data["message"], "Profile updated successfully",
+	assert.Contains(t, resp["message"], "Profile updated successfully",
 		"when re-fetch fails the handler should still report success with a message")
 }
 

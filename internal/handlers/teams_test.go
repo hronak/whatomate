@@ -78,25 +78,20 @@ func TestApp_ListTeams_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Teams []handlers.TeamResponse `json:"teams"`
-		} `json:"data"`
+		Teams []handlers.TeamResponse `json:"teams"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Len(t, resp.Data.Teams, 2)
+	assert.Len(t, resp.Teams, 2)
 
 	// Teams should be sorted by name ASC
-	assert.Equal(t, team1.Name, resp.Data.Teams[0].Name)
-	assert.Equal(t, team2.Name, resp.Data.Teams[1].Name)
+	assert.Equal(t, team1.Name, resp.Teams[0].Name)
+	assert.Equal(t, team2.Name, resp.Teams[1].Name)
 
 	// team1 has one member
-	assert.Equal(t, 1, resp.Data.Teams[0].MemberCount)
+	assert.Equal(t, 1, resp.Teams[0].MemberCount)
 	// team2 has no members
-	assert.Equal(t, 0, resp.Data.Teams[1].MemberCount)
+	assert.Equal(t, 0, resp.Teams[1].MemberCount)
 }
 
 func TestApp_ListTeams_Empty(t *testing.T) {
@@ -114,16 +109,11 @@ func TestApp_ListTeams_Empty(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Teams []handlers.TeamResponse `json:"teams"`
-		} `json:"data"`
+		Teams []handlers.TeamResponse `json:"teams"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Len(t, resp.Data.Teams, 0)
+	assert.Len(t, resp.Teams, 0)
 }
 
 // --- GetTeam Tests ---
@@ -148,22 +138,17 @@ func TestApp_GetTeam_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Team handlers.TeamResponse `json:"team"`
-		} `json:"data"`
+		Team handlers.TeamResponse `json:"team"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, team.ID, resp.Data.Team.ID)
-	assert.Equal(t, "Support Team", resp.Data.Team.Name)
-	assert.Equal(t, 1, resp.Data.Team.MemberCount)
+	assert.Equal(t, team.ID, resp.Team.ID)
+	assert.Equal(t, "Support Team", resp.Team.Name)
+	assert.Equal(t, 1, resp.Team.MemberCount)
 	// GetTeam includes members
-	require.Len(t, resp.Data.Team.Members, 1)
-	assert.Equal(t, agent.ID, resp.Data.Team.Members[0].UserID)
-	assert.Equal(t, "Agent Smith", resp.Data.Team.Members[0].FullName)
+	require.Len(t, resp.Team.Members, 1)
+	assert.Equal(t, agent.ID, resp.Team.Members[0].UserID)
+	assert.Equal(t, "Agent Smith", resp.Team.Members[0].FullName)
 }
 
 func TestApp_GetTeam_NotFound(t *testing.T) {
@@ -206,24 +191,19 @@ func TestApp_CreateTeam_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Team handlers.TeamResponse `json:"team"`
-		} `json:"data"`
+		Team handlers.TeamResponse `json:"team"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, "New Team", resp.Data.Team.Name)
-	assert.Equal(t, "A brand new team", resp.Data.Team.Description)
-	assert.Equal(t, models.AssignmentStrategyLoadBalanced, resp.Data.Team.AssignmentStrategy)
-	assert.True(t, resp.Data.Team.IsActive)
-	assert.NotEqual(t, uuid.Nil, resp.Data.Team.ID)
+	assert.Equal(t, "New Team", resp.Team.Name)
+	assert.Equal(t, "A brand new team", resp.Team.Description)
+	assert.Equal(t, models.AssignmentStrategyLoadBalanced, resp.Team.AssignmentStrategy)
+	assert.True(t, resp.Team.IsActive)
+	assert.NotEqual(t, uuid.Nil, resp.Team.ID)
 
 	// Verify in DB
 	var dbTeam models.Team
-	require.NoError(t, app.DB.First(&dbTeam, "id = ?", resp.Data.Team.ID).Error)
+	require.NoError(t, app.DB.First(&dbTeam, "id = ?", resp.Team.ID).Error)
 	assert.Equal(t, "New Team", dbTeam.Name)
 	assert.Equal(t, org.ID, dbTeam.OrganizationID)
 }
@@ -249,15 +229,12 @@ func TestApp_CreateTeam_DefaultStrategy(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Team handlers.TeamResponse `json:"team"`
-		} `json:"data"`
+		Team handlers.TeamResponse `json:"team"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, models.AssignmentStrategyRoundRobin, resp.Data.Team.AssignmentStrategy)
+	assert.Equal(t, models.AssignmentStrategyRoundRobin, resp.Team.AssignmentStrategy)
 }
 
 func TestApp_CreateTeam_MissingName(t *testing.T) {
@@ -307,19 +284,14 @@ func TestApp_UpdateTeam_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Team handlers.TeamResponse `json:"team"`
-		} `json:"data"`
+		Team handlers.TeamResponse `json:"team"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, "Updated Name", resp.Data.Team.Name)
-	assert.Equal(t, "Updated description", resp.Data.Team.Description)
-	assert.Equal(t, models.AssignmentStrategyManual, resp.Data.Team.AssignmentStrategy)
-	assert.True(t, resp.Data.Team.IsActive)
+	assert.Equal(t, "Updated Name", resp.Team.Name)
+	assert.Equal(t, "Updated description", resp.Team.Description)
+	assert.Equal(t, models.AssignmentStrategyManual, resp.Team.AssignmentStrategy)
+	assert.True(t, resp.Team.IsActive)
 
 	// Verify in DB
 	var dbTeam models.Team
@@ -423,20 +395,15 @@ func TestApp_ListTeamMembers_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Members []handlers.TeamMemberResponse `json:"members"`
-		} `json:"data"`
+		Members []handlers.TeamMemberResponse `json:"members"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Len(t, resp.Data.Members, 2)
+	assert.Len(t, resp.Members, 2)
 
 	// Collect user IDs from the response
 	memberUserIDs := make(map[uuid.UUID]bool)
-	for _, m := range resp.Data.Members {
+	for _, m := range resp.Members {
 		memberUserIDs[m.UserID] = true
 	}
 	assert.True(t, memberUserIDs[agent1.ID])
@@ -485,18 +452,13 @@ func TestApp_AddTeamMember_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			Member handlers.TeamMemberResponse `json:"member"`
-		} `json:"data"`
+		Member handlers.TeamMemberResponse `json:"member"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, newAgent.ID, resp.Data.Member.UserID)
-	assert.Equal(t, "New Agent", resp.Data.Member.FullName)
-	assert.Equal(t, models.TeamRoleAgent, resp.Data.Member.Role)
+	assert.Equal(t, newAgent.ID, resp.Member.UserID)
+	assert.Equal(t, "New Agent", resp.Member.FullName)
+	assert.Equal(t, models.TeamRoleAgent, resp.Member.Role)
 
 	// Verify in DB
 	var dbMember models.TeamMember

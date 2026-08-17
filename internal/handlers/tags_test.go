@@ -50,13 +50,11 @@ func TestApp_ListTags(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Tags []handlers.TagResponse `json:"tags"`
-			} `json:"data"`
+			Tags []handlers.TagResponse `json:"tags"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Tags, 2)
+		assert.Len(t, resp.Tags, 2)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -73,13 +71,11 @@ func TestApp_ListTags(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Tags []handlers.TagResponse `json:"tags"`
-			} `json:"data"`
+			Tags []handlers.TagResponse `json:"tags"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Empty(t, resp.Data.Tags)
+		assert.Empty(t, resp.Tags)
 	})
 
 	t.Run("sorted alphabetically", func(t *testing.T) {
@@ -100,16 +96,14 @@ func TestApp_ListTags(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Tags []handlers.TagResponse `json:"tags"`
-			} `json:"data"`
+			Tags []handlers.TagResponse `json:"tags"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		require.Len(t, resp.Data.Tags, 3)
-		assert.Equal(t, "Alpha", resp.Data.Tags[0].Name)
-		assert.Equal(t, "Middle", resp.Data.Tags[1].Name)
-		assert.Equal(t, "Zebra", resp.Data.Tags[2].Name)
+		require.Len(t, resp.Tags, 3)
+		assert.Equal(t, "Alpha", resp.Tags[0].Name)
+		assert.Equal(t, "Middle", resp.Tags[1].Name)
+		assert.Equal(t, "Zebra", resp.Tags[2].Name)
 	})
 
 	t.Run("isolates by organization", func(t *testing.T) {
@@ -132,14 +126,12 @@ func TestApp_ListTags(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Tags []handlers.TagResponse `json:"tags"`
-			} `json:"data"`
+			Tags []handlers.TagResponse `json:"tags"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.Tags, 1)
-		assert.Equal(t, "Org1Tag", resp.Data.Tags[0].Name)
+		assert.Len(t, resp.Tags, 1)
+		assert.Equal(t, "Org1Tag", resp.Tags[0].Name)
 		_ = user2
 	})
 
@@ -176,14 +168,12 @@ func TestApp_CreateTag(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.TagResponse `json:"data"`
-		}
+		var resp handlers.TagResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "New Lead", resp.Data.Name)
-		assert.Equal(t, "green", resp.Data.Color)
-		assert.NotEmpty(t, resp.Data.CreatedAt)
+		assert.Equal(t, "New Lead", resp.Name)
+		assert.Equal(t, "green", resp.Color)
+		assert.NotEmpty(t, resp.CreatedAt)
 	})
 
 	t.Run("success with default color", func(t *testing.T) {
@@ -201,13 +191,11 @@ func TestApp_CreateTag(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.TagResponse `json:"data"`
-		}
+		var resp handlers.TagResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "No Color Tag", resp.Data.Name)
-		assert.Equal(t, "", resp.Data.Color) // Empty color is allowed
+		assert.Equal(t, "No Color Tag", resp.Name)
+		assert.Equal(t, "", resp.Color) // Empty color is allowed
 	})
 
 	t.Run("validation error missing name", func(t *testing.T) {
@@ -345,13 +333,11 @@ func TestApp_UpdateTag(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.TagResponse `json:"data"`
-		}
+		var resp handlers.TagResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "ColorChange", resp.Data.Name)
-		assert.Equal(t, "red", resp.Data.Color)
+		assert.Equal(t, "ColorChange", resp.Name)
+		assert.Equal(t, "red", resp.Color)
 	})
 
 	t.Run("success rename tag", func(t *testing.T) {
@@ -373,12 +359,10 @@ func TestApp_UpdateTag(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.TagResponse `json:"data"`
-		}
+		var resp handlers.TagResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "NewName", resp.Data.Name)
+		assert.Equal(t, "NewName", resp.Name)
 
 		// Verify old tag no longer exists
 		var count int64
@@ -404,13 +388,11 @@ func TestApp_UpdateTag(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.TagResponse `json:"data"`
-		}
+		var resp handlers.TagResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "KeepColorRenamed", resp.Data.Name)
-		assert.Equal(t, "purple", resp.Data.Color)
+		assert.Equal(t, "KeepColorRenamed", resp.Name)
+		assert.Equal(t, "purple", resp.Color)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -520,12 +502,10 @@ func TestApp_UpdateTag(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.TagResponse `json:"data"`
-		}
+		var resp handlers.TagResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "green", resp.Data.Color)
+		assert.Equal(t, "green", resp.Color)
 	})
 
 	t.Run("unauthorized", func(t *testing.T) {
@@ -565,13 +545,11 @@ func TestApp_DeleteTag(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Tag deleted", resp.Data.Message)
+		assert.Equal(t, "Tag deleted", resp.Message)
 
 		// Verify it's deleted
 		var count int64
@@ -698,13 +676,11 @@ func TestApp_Tag_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(createReq))
 
-	var createResp struct {
-		Data handlers.TagResponse `json:"data"`
-	}
+	var createResp handlers.TagResponse
 	err = json.Unmarshal(testutil.GetResponseBody(createReq), &createResp)
 	require.NoError(t, err)
-	assert.Equal(t, "Lifecycle Tag", createResp.Data.Name)
-	assert.Equal(t, "blue", createResp.Data.Color)
+	assert.Equal(t, "Lifecycle Tag", createResp.Name)
+	assert.Equal(t, "blue", createResp.Color)
 
 	// 2. List and verify
 	listReq := testutil.NewGETRequest(t)
@@ -715,14 +691,12 @@ func TestApp_Tag_FullLifecycle(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(listReq))
 
 	var listResp struct {
-		Data struct {
-			Tags []handlers.TagResponse `json:"tags"`
-		} `json:"data"`
+		Tags []handlers.TagResponse `json:"tags"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(listReq), &listResp)
 	require.NoError(t, err)
-	require.Len(t, listResp.Data.Tags, 1)
-	assert.Equal(t, "Lifecycle Tag", listResp.Data.Tags[0].Name)
+	require.Len(t, listResp.Tags, 1)
+	assert.Equal(t, "Lifecycle Tag", listResp.Tags[0].Name)
 
 	// 3. Update color
 	updateReq := testutil.NewJSONRequest(t, map[string]any{
@@ -736,12 +710,10 @@ func TestApp_Tag_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(updateReq))
 
-	var updateResp struct {
-		Data handlers.TagResponse `json:"data"`
-	}
+	var updateResp handlers.TagResponse
 	err = json.Unmarshal(testutil.GetResponseBody(updateReq), &updateResp)
 	require.NoError(t, err)
-	assert.Equal(t, "green", updateResp.Data.Color)
+	assert.Equal(t, "green", updateResp.Color)
 
 	// 4. Rename
 	renameReq := testutil.NewJSONRequest(t, map[string]any{
@@ -755,12 +727,10 @@ func TestApp_Tag_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(renameReq))
 
-	var renameResp struct {
-		Data handlers.TagResponse `json:"data"`
-	}
+	var renameResp handlers.TagResponse
 	err = json.Unmarshal(testutil.GetResponseBody(renameReq), &renameResp)
 	require.NoError(t, err)
-	assert.Equal(t, "Lifecycle Tag Renamed", renameResp.Data.Name)
+	assert.Equal(t, "Lifecycle Tag Renamed", renameResp.Name)
 
 	// 5. Delete
 	deleteReq := testutil.NewGETRequest(t)
@@ -779,13 +749,11 @@ func TestApp_Tag_FullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 
 	var listResp2 struct {
-		Data struct {
-			Tags []handlers.TagResponse `json:"tags"`
-		} `json:"data"`
+		Tags []handlers.TagResponse `json:"tags"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(listReq2), &listResp2)
 	require.NoError(t, err)
-	assert.Empty(t, listResp2.Data.Tags)
+	assert.Empty(t, listResp2.Tags)
 }
 
 // --- Valid Colors Test ---
@@ -814,12 +782,10 @@ func TestApp_CreateTag_AllValidColors(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-			var resp struct {
-				Data handlers.TagResponse `json:"data"`
-			}
+			var resp handlers.TagResponse
 			err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 			require.NoError(t, err)
-			assert.Equal(t, color, resp.Data.Color)
+			assert.Equal(t, color, resp.Color)
 		})
 	}
 }

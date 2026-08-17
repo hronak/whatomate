@@ -74,13 +74,11 @@ func TestApp_ListWidgets_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Widgets []handlers.WidgetResponse `json:"widgets"`
-		} `json:"data"`
+		Widgets []handlers.WidgetResponse `json:"widgets"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Widgets, 2)
+	assert.Len(t, resp.Widgets, 2)
 }
 
 func TestApp_ListWidgets_NoPermission(t *testing.T) {
@@ -124,14 +122,12 @@ func TestApp_ListWidgets_FiltersByOrganization(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Widgets []handlers.WidgetResponse `json:"widgets"`
-		} `json:"data"`
+		Widgets []handlers.WidgetResponse `json:"widgets"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Widgets, 1)
-	assert.Equal(t, "Org1 Widget", resp.Data.Widgets[0].Name)
+	assert.Len(t, resp.Widgets, 1)
+	assert.Equal(t, "Org1 Widget", resp.Widgets[0].Name)
 }
 
 func TestApp_ListWidgets_Unauthorized(t *testing.T) {
@@ -163,13 +159,11 @@ func TestApp_GetWidget_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WidgetResponse `json:"data"`
-	}
+	var resp handlers.WidgetResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, widget.ID, resp.Data.ID)
-	assert.Equal(t, "Test Widget", resp.Data.Name)
+	assert.Equal(t, widget.ID, resp.ID)
+	assert.Equal(t, "Test Widget", resp.Name)
 }
 
 func TestApp_GetWidget_NoPermission(t *testing.T) {
@@ -246,14 +240,12 @@ func TestApp_CreateWidget_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WidgetResponse `json:"data"`
-	}
+	var resp handlers.WidgetResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "New Widget", resp.Data.Name)
-	assert.Equal(t, "messages", resp.Data.DataSource)
-	assert.Equal(t, "green", resp.Data.Color)
+	assert.Equal(t, "New Widget", resp.Name)
+	assert.Equal(t, "messages", resp.DataSource)
+	assert.Equal(t, "green", resp.Color)
 }
 
 func TestApp_CreateWidget_NoPermission(t *testing.T) {
@@ -301,12 +293,10 @@ func TestApp_CreateWidget_WithFilters(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WidgetResponse `json:"data"`
-	}
+	var resp handlers.WidgetResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Filters, 1)
+	assert.Len(t, resp.Filters, 1)
 }
 
 func TestApp_CreateWidget_InvalidDataSource(t *testing.T) {
@@ -383,13 +373,11 @@ func TestApp_UpdateWidget_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WidgetResponse `json:"data"`
-	}
+	var resp handlers.WidgetResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Updated Name", resp.Data.Name)
-	assert.Equal(t, "red", resp.Data.Color)
+	assert.Equal(t, "Updated Name", resp.Name)
+	assert.Equal(t, "red", resp.Color)
 }
 
 func TestApp_UpdateWidget_NoPermission(t *testing.T) {

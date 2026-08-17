@@ -33,21 +33,16 @@ func TestApp_Login_Success(t *testing.T) {
 
 	// Parse the response — tokens are in cookies, not body
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			ExpiresIn int `json:"expires_in"`
-			User      struct {
-				Email string `json:"email"`
-				Role  string `json:"role"`
-			} `json:"user"`
-		} `json:"data"`
+		ExpiresIn int `json:"expires_in"`
+		User      struct {
+			Email string `json:"email"`
+			Role  string `json:"role"`
+		} `json:"user"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, 15*60, resp.Data.ExpiresIn)
-	assert.Equal(t, email, resp.Data.User.Email)
+	assert.Equal(t, 15*60, resp.ExpiresIn)
+	assert.Equal(t, email, resp.User.Email)
 
 	// Tokens should be in Set-Cookie headers
 	assert.NotEmpty(t, testutil.GetResponseCookie(req, "whm_access"))
@@ -159,33 +154,28 @@ func TestApp_Register_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			ExpiresIn int `json:"expires_in"`
-			User      struct {
-				ID       string `json:"id"`
-				Email    string `json:"email"`
-				FullName string `json:"full_name"`
-				RoleID   string `json:"role_id"`
-				IsActive bool   `json:"is_active"`
-			} `json:"user"`
-		} `json:"data"`
+		ExpiresIn int `json:"expires_in"`
+		User      struct {
+			ID       string `json:"id"`
+			Email    string `json:"email"`
+			FullName string `json:"full_name"`
+			RoleID   string `json:"role_id"`
+			IsActive bool   `json:"is_active"`
+		} `json:"user"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, email, resp.Data.User.Email)
-	assert.Equal(t, "New User", resp.Data.User.FullName)
-	assert.NotEmpty(t, resp.Data.User.RoleID, "User should have a role assigned")
-	assert.True(t, resp.Data.User.IsActive)
+	assert.Equal(t, email, resp.User.Email)
+	assert.Equal(t, "New User", resp.User.FullName)
+	assert.NotEmpty(t, resp.User.RoleID, "User should have a role assigned")
+	assert.True(t, resp.User.IsActive)
 
 	// Tokens should be in cookies
 	assert.NotEmpty(t, testutil.GetResponseCookie(req, "whm_access"))
 	assert.NotEmpty(t, testutil.GetResponseCookie(req, "whm_refresh"))
 
 	// Verify the user has the default role in the database
-	userID, err := uuid.Parse(resp.Data.User.ID)
+	userID, err := uuid.Parse(resp.User.ID)
 	require.NoError(t, err)
 	var user models.User
 	require.NoError(t, app.DB.Preload("Role").Where("id = ?", userID).First(&user).Error)
@@ -273,16 +263,11 @@ func TestApp_RefreshToken_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Status string `json:"status"`
-		Data   struct {
-			ExpiresIn int `json:"expires_in"`
-		} `json:"data"`
+		ExpiresIn int `json:"expires_in"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-
-	assert.Equal(t, "success", resp.Status)
-	assert.Equal(t, 15*60, resp.Data.ExpiresIn)
+	assert.Equal(t, 15*60, resp.ExpiresIn)
 
 	// Tokens should be in cookies
 	assert.NotEmpty(t, testutil.GetResponseCookie(req, "whm_access"))

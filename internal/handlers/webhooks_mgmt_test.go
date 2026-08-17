@@ -54,21 +54,19 @@ func TestApp_ListWebhooks_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Webhooks        []handlers.WebhookResponse `json:"webhooks"`
-			AvailableEvents []map[string]string        `json:"available_events"`
-		} `json:"data"`
+		Webhooks        []handlers.WebhookResponse `json:"webhooks"`
+		AvailableEvents []map[string]string        `json:"available_events"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Webhooks, 2)
+	assert.Len(t, resp.Webhooks, 2)
 
 	// Ordered by created_at DESC, so wh2 first
-	assert.Equal(t, wh2.ID, resp.Data.Webhooks[0].ID)
-	assert.Equal(t, wh1.ID, resp.Data.Webhooks[1].ID)
+	assert.Equal(t, wh2.ID, resp.Webhooks[0].ID)
+	assert.Equal(t, wh1.ID, resp.Webhooks[1].ID)
 
 	// Verify available_events is returned
-	assert.NotEmpty(t, resp.Data.AvailableEvents)
+	assert.NotEmpty(t, resp.AvailableEvents)
 }
 
 func TestApp_ListWebhooks_Empty(t *testing.T) {
@@ -86,13 +84,11 @@ func TestApp_ListWebhooks_Empty(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Webhooks []handlers.WebhookResponse `json:"webhooks"`
-		} `json:"data"`
+		Webhooks []handlers.WebhookResponse `json:"webhooks"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Webhooks, 0)
+	assert.Len(t, resp.Webhooks, 0)
 }
 
 func TestApp_ListWebhooks_OrgIsolation(t *testing.T) {
@@ -115,13 +111,11 @@ func TestApp_ListWebhooks_OrgIsolation(t *testing.T) {
 	require.NoError(t, err)
 
 	var resp1 struct {
-		Data struct {
-			Webhooks []handlers.WebhookResponse `json:"webhooks"`
-		} `json:"data"`
+		Webhooks []handlers.WebhookResponse `json:"webhooks"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req1), &resp1)
 	require.NoError(t, err)
-	assert.Len(t, resp1.Data.Webhooks, 2)
+	assert.Len(t, resp1.Webhooks, 2)
 
 	// org2 should see 1
 	req2 := testutil.NewGETRequest(t)
@@ -130,13 +124,11 @@ func TestApp_ListWebhooks_OrgIsolation(t *testing.T) {
 	require.NoError(t, err)
 
 	var resp2 struct {
-		Data struct {
-			Webhooks []handlers.WebhookResponse `json:"webhooks"`
-		} `json:"data"`
+		Webhooks []handlers.WebhookResponse `json:"webhooks"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 	require.NoError(t, err)
-	assert.Len(t, resp2.Data.Webhooks, 1)
+	assert.Len(t, resp2.Webhooks, 1)
 }
 
 func TestApp_ListWebhooks_Unauthorized(t *testing.T) {
@@ -170,18 +162,16 @@ func TestApp_GetWebhook_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WebhookResponse `json:"data"`
-	}
+	var resp handlers.WebhookResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, wh.ID, resp.Data.ID)
-	assert.Equal(t, "My Hook", resp.Data.Name)
-	assert.Equal(t, "https://example.com/hook", resp.Data.URL)
-	assert.ElementsMatch(t, []string{"message.incoming", "message.sent"}, resp.Data.Events)
-	assert.True(t, resp.Data.IsActive)
-	assert.True(t, resp.Data.HasSecret) // webhook has a secret
-	assert.Equal(t, "value", resp.Data.Headers["X-Custom"])
+	assert.Equal(t, wh.ID, resp.ID)
+	assert.Equal(t, "My Hook", resp.Name)
+	assert.Equal(t, "https://example.com/hook", resp.URL)
+	assert.ElementsMatch(t, []string{"message.incoming", "message.sent"}, resp.Events)
+	assert.True(t, resp.IsActive)
+	assert.True(t, resp.HasSecret) // webhook has a secret
+	assert.Equal(t, "value", resp.Headers["X-Custom"])
 }
 
 func TestApp_GetWebhook_NotFound(t *testing.T) {
@@ -259,22 +249,20 @@ func TestApp_CreateWebhook_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WebhookResponse `json:"data"`
-	}
+	var resp handlers.WebhookResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Production Hook", resp.Data.Name)
-	assert.Equal(t, "https://api.example.com/webhook", resp.Data.URL)
-	assert.ElementsMatch(t, []string{"message.incoming", "contact.created"}, resp.Data.Events)
-	assert.Equal(t, "Bearer tok123", resp.Data.Headers["Authorization"])
-	assert.True(t, resp.Data.IsActive)
-	assert.True(t, resp.Data.HasSecret)
-	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
+	assert.Equal(t, "Production Hook", resp.Name)
+	assert.Equal(t, "https://api.example.com/webhook", resp.URL)
+	assert.ElementsMatch(t, []string{"message.incoming", "contact.created"}, resp.Events)
+	assert.Equal(t, "Bearer tok123", resp.Headers["Authorization"])
+	assert.True(t, resp.IsActive)
+	assert.True(t, resp.HasSecret)
+	assert.NotEqual(t, uuid.Nil, resp.ID)
 
 	// Verify persisted in database
 	var dbWebhook models.Webhook
-	require.NoError(t, app.DB.Where("id = ?", resp.Data.ID).First(&dbWebhook).Error)
+	require.NoError(t, app.DB.Where("id = ?", resp.ID).First(&dbWebhook).Error)
 	assert.Equal(t, "Production Hook", dbWebhook.Name)
 	assert.Equal(t, org.ID, dbWebhook.OrganizationID)
 	assert.Equal(t, "my-secret", dbWebhook.Secret)
@@ -394,17 +382,15 @@ func TestApp_UpdateWebhook_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WebhookResponse `json:"data"`
-	}
+	var resp handlers.WebhookResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, wh.ID, resp.Data.ID)
-	assert.Equal(t, "Updated Name", resp.Data.Name)
-	assert.Equal(t, "https://new.example.com/hook", resp.Data.URL)
-	assert.ElementsMatch(t, []string{"message.sent", "contact.created"}, resp.Data.Events)
-	assert.Equal(t, "new-value", resp.Data.Headers["X-New-Header"])
-	assert.True(t, resp.Data.IsActive)
+	assert.Equal(t, wh.ID, resp.ID)
+	assert.Equal(t, "Updated Name", resp.Name)
+	assert.Equal(t, "https://new.example.com/hook", resp.URL)
+	assert.ElementsMatch(t, []string{"message.sent", "contact.created"}, resp.Events)
+	assert.Equal(t, "new-value", resp.Headers["X-New-Header"])
+	assert.True(t, resp.IsActive)
 
 	// Verify persisted
 	var updated models.Webhook
@@ -433,15 +419,13 @@ func TestApp_UpdateWebhook_PartialUpdate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.WebhookResponse `json:"data"`
-	}
+	var resp handlers.WebhookResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Only Name Changed", resp.Data.Name)
+	assert.Equal(t, "Only Name Changed", resp.Name)
 	// Original values preserved
-	assert.Equal(t, "https://original.example.com", resp.Data.URL)
-	assert.ElementsMatch(t, []string{"message.incoming"}, resp.Data.Events)
+	assert.Equal(t, "https://original.example.com", resp.URL)
+	assert.ElementsMatch(t, []string{"message.incoming"}, resp.Events)
 }
 
 func TestApp_UpdateWebhook_NotFound(t *testing.T) {
@@ -501,13 +485,11 @@ func TestApp_DeleteWebhook_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Webhook deleted successfully", resp.Data.Message)
+	assert.Equal(t, "Webhook deleted successfully", resp.Message)
 
 	// Verify soft-deleted
 	var count int64
@@ -603,13 +585,11 @@ func TestApp_TestWebhook_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Test webhook sent successfully", resp.Data.Message)
+	assert.Equal(t, "Test webhook sent successfully", resp.Message)
 
 	// Verify the mock server received the request
 	require.NotNil(t, receivedHeaders)
@@ -700,12 +680,10 @@ func TestWebhookToResponse_HasSecretTrue(t *testing.T) {
 	err := app.GetWebhook(req)
 	require.NoError(t, err)
 
-	var resp struct {
-		Data handlers.WebhookResponse `json:"data"`
-	}
+	var resp handlers.WebhookResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.True(t, resp.Data.HasSecret, "webhook with secret should have has_secret=true")
+	assert.True(t, resp.HasSecret, "webhook with secret should have has_secret=true")
 }
 
 func TestWebhookToResponse_HasSecretFalse(t *testing.T) {
@@ -735,10 +713,8 @@ func TestWebhookToResponse_HasSecretFalse(t *testing.T) {
 	err := app.GetWebhook(req)
 	require.NoError(t, err)
 
-	var resp struct {
-		Data handlers.WebhookResponse `json:"data"`
-	}
+	var resp handlers.WebhookResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.False(t, resp.Data.HasSecret, "webhook without secret should have has_secret=false")
+	assert.False(t, resp.HasSecret, "webhook without secret should have has_secret=false")
 }

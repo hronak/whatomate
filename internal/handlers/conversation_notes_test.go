@@ -46,16 +46,14 @@ func TestApp_ListConversationNotes_Success(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Notes   []handlers.ConversationNoteResponse `json:"notes"`
-			Total   int                                 `json:"total"`
-			HasMore bool                                `json:"has_more"`
-		} `json:"data"`
+		Notes   []handlers.ConversationNoteResponse `json:"notes"`
+		Total   int                                 `json:"total"`
+		HasMore bool                                `json:"has_more"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 3, resp.Data.Total)
-	assert.Len(t, resp.Data.Notes, 3)
-	assert.False(t, resp.Data.HasMore)
+	assert.Equal(t, 3, resp.Total)
+	assert.Len(t, resp.Notes, 3)
+	assert.False(t, resp.HasMore)
 }
 
 func TestApp_ListConversationNotes_CrossOrgIsolation(t *testing.T) {
@@ -81,14 +79,12 @@ func TestApp_ListConversationNotes_CrossOrgIsolation(t *testing.T) {
 
 	require.NoError(t, app.ListConversationNotes(req))
 	var resp struct {
-		Data struct {
-			Notes []handlers.ConversationNoteResponse `json:"notes"`
-			Total int                                 `json:"total"`
-		} `json:"data"`
+		Notes []handlers.ConversationNoteResponse `json:"notes"`
+		Total int                                 `json:"total"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 0, resp.Data.Total)
-	assert.Empty(t, resp.Data.Notes)
+	assert.Equal(t, 0, resp.Total)
+	assert.Empty(t, resp.Notes)
 }
 
 func TestApp_ListConversationNotes_PermissionDenied(t *testing.T) {
@@ -122,16 +118,14 @@ func TestApp_CreateConversationNote_Success(t *testing.T) {
 	require.NoError(t, app.CreateConversationNote(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.ConversationNoteResponse `json:"data"`
-	}
+	var resp handlers.ConversationNoteResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "follow up tomorrow", resp.Data.Content)
-	assert.Equal(t, contact.ID, resp.Data.ContactID)
-	assert.Equal(t, user.ID, resp.Data.CreatedByID)
+	assert.Equal(t, "follow up tomorrow", resp.Content)
+	assert.Equal(t, contact.ID, resp.ContactID)
+	assert.Equal(t, user.ID, resp.CreatedByID)
 
 	var got models.ConversationNote
-	require.NoError(t, app.DB.Where("id = ?", resp.Data.ID).First(&got).Error)
+	require.NoError(t, app.DB.Where("id = ?", resp.ID).First(&got).Error)
 	assert.Equal(t, "follow up tomorrow", got.Content)
 	assert.Equal(t, org.ID, got.OrganizationID)
 }

@@ -32,12 +32,10 @@ func TestApp_GetAPIKey_Success(t *testing.T) {
 	require.NoError(t, app.GetAPIKey(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.APIKeyResponse `json:"data"`
-	}
+	var resp handlers.APIKeyResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, key.ID, resp.Data.ID)
-	assert.Equal(t, "fetched key", resp.Data.Name)
+	assert.Equal(t, key.ID, resp.ID)
+	assert.Equal(t, "fetched key", resp.Name)
 }
 
 func TestApp_GetAPIKey_NotFound(t *testing.T) {
@@ -254,17 +252,15 @@ func TestApp_CreateAPIKey_ExpiresAtParsedAndStored(t *testing.T) {
 	require.NoError(t, app.CreateAPIKey(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.APIKeyCreateResponse `json:"data"`
-	}
+	var resp handlers.APIKeyCreateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	require.NotNil(t, resp.Data.ExpiresAt, "expires_at should be persisted and returned")
+	require.NotNil(t, resp.ExpiresAt, "expires_at should be persisted and returned")
 
 	// Round-trip through DB to confirm storage.
 	var got models.APIKey
-	require.NoError(t, app.DB.Where("id = ?", resp.Data.ID).First(&got).Error)
+	require.NoError(t, app.DB.Where("id = ?", resp.ID).First(&got).Error)
 	require.NotNil(t, got.ExpiresAt)
-	assert.WithinDuration(t, resp.Data.ExpiresAt.UTC(), got.ExpiresAt.UTC(), time.Second)
+	assert.WithinDuration(t, resp.ExpiresAt.UTC(), got.ExpiresAt.UTC(), time.Second)
 }
 
 func TestApp_CreateAPIKey_InvalidExpiresAtFormat(t *testing.T) {
@@ -297,17 +293,15 @@ func TestApp_CreateAPIKey_HashIsBcryptOfFullKey(t *testing.T) {
 	require.NoError(t, app.CreateAPIKey(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.APIKeyCreateResponse `json:"data"`
-	}
+	var resp handlers.APIKeyCreateResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 
 	var got models.APIKey
-	require.NoError(t, app.DB.Where("id = ?", resp.Data.ID).First(&got).Error)
-	assert.NotEqual(t, resp.Data.Key, got.KeyHash, "stored hash must not be the plaintext key")
+	require.NoError(t, app.DB.Where("id = ?", resp.ID).First(&got).Error)
+	assert.NotEqual(t, resp.Key, got.KeyHash, "stored hash must not be the plaintext key")
 	assert.Greater(t, len(got.KeyHash), 50, "stored hash should look like a bcrypt hash")
 	// Stored prefix is the first 16 chars after "whm_" — 4..20 in the full key.
-	assert.Equal(t, resp.Data.Key[4:20], got.KeyPrefix)
+	assert.Equal(t, resp.Key[4:20], got.KeyPrefix)
 }
 
 func TestApp_CreateAPIKey_PermissionDenied(t *testing.T) {
@@ -344,14 +338,12 @@ func TestApp_ListAPIKeys_SearchFilter(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			APIKeys []handlers.APIKeyResponse `json:"api_keys"`
-			Total   int                       `json:"total"`
-		} `json:"data"`
+		APIKeys []handlers.APIKeyResponse `json:"api_keys"`
+		Total   int                       `json:"total"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, 2, resp.Data.Total, "search 'prod' should match alpha-prod + gamma-prod only")
-	for _, k := range resp.Data.APIKeys {
+	assert.Equal(t, 2, resp.Total, "search 'prod' should match alpha-prod + gamma-prod only")
+	for _, k := range resp.APIKeys {
 		assert.Contains(t, k.Name, "prod")
 	}
 }

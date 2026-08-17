@@ -39,18 +39,16 @@ func TestApp_GetOrganizationSettings_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Settings handlers.OrganizationSettings `json:"settings"`
-			Name     string                        `json:"name"`
-		} `json:"data"`
+		Settings handlers.OrganizationSettings `json:"settings"`
+		Name     string                        `json:"name"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, true, resp.Data.Settings.MaskPhoneNumbers)
-	assert.Equal(t, "Asia/Kolkata", resp.Data.Settings.Timezone)
-	assert.Equal(t, "DD/MM/YYYY", resp.Data.Settings.DateFormat)
-	assert.Equal(t, org.Name, resp.Data.Name)
+	assert.Equal(t, true, resp.Settings.MaskPhoneNumbers)
+	assert.Equal(t, "Asia/Kolkata", resp.Settings.Timezone)
+	assert.Equal(t, "DD/MM/YYYY", resp.Settings.DateFormat)
+	assert.Equal(t, org.Name, resp.Name)
 }
 
 func TestApp_GetOrganizationSettings_Defaults(t *testing.T) {
@@ -69,17 +67,15 @@ func TestApp_GetOrganizationSettings_Defaults(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Settings handlers.OrganizationSettings `json:"settings"`
-			Name     string                        `json:"name"`
-		} `json:"data"`
+		Settings handlers.OrganizationSettings `json:"settings"`
+		Name     string                        `json:"name"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, false, resp.Data.Settings.MaskPhoneNumbers)
-	assert.Equal(t, "UTC", resp.Data.Settings.Timezone)
-	assert.Equal(t, "YYYY-MM-DD", resp.Data.Settings.DateFormat)
+	assert.Equal(t, false, resp.Settings.MaskPhoneNumbers)
+	assert.Equal(t, "UTC", resp.Settings.Timezone)
+	assert.Equal(t, "YYYY-MM-DD", resp.Settings.DateFormat)
 }
 
 func TestApp_GetOrganizationSettings_Unauthorized(t *testing.T) {
@@ -122,13 +118,11 @@ func TestApp_UpdateOrganizationSettings_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Settings updated successfully", resp.Data.Message)
+	assert.Equal(t, "Settings updated successfully", resp.Message)
 
 	// Verify the settings were actually persisted
 	var updatedOrg models.Organization
@@ -250,16 +244,14 @@ func TestApp_GetCurrentOrganization_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.OrganizationResponse `json:"data"`
-	}
+	var resp handlers.OrganizationResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, org.ID, resp.Data.ID)
-	assert.Equal(t, org.Name, resp.Data.Name)
-	assert.Equal(t, org.Slug, resp.Data.Slug)
-	assert.NotEmpty(t, resp.Data.CreatedAt)
+	assert.Equal(t, org.ID, resp.ID)
+	assert.Equal(t, org.Name, resp.Name)
+	assert.Equal(t, org.Slug, resp.Slug)
+	assert.NotEmpty(t, resp.CreatedAt)
 }
 
 func TestApp_GetCurrentOrganization_Unauthorized(t *testing.T) {
@@ -312,17 +304,15 @@ func TestApp_GetOrganizationSettings_CallingDefaults(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Settings handlers.OrganizationSettings `json:"settings"`
-		} `json:"data"`
+		Settings handlers.OrganizationSettings `json:"settings"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Calling should be disabled by default, with global config fallbacks
-	assert.Equal(t, false, resp.Data.Settings.CallingEnabled)
-	assert.Equal(t, 3600, resp.Data.Settings.MaxCallDuration)
-	assert.Equal(t, 60, resp.Data.Settings.TransferTimeoutSecs)
+	assert.Equal(t, false, resp.Settings.CallingEnabled)
+	assert.Equal(t, 3600, resp.Settings.MaxCallDuration)
+	assert.Equal(t, 60, resp.Settings.TransferTimeoutSecs)
 }
 
 func TestApp_GetOrganizationSettings_CallingOverrides(t *testing.T) {
@@ -351,16 +341,14 @@ func TestApp_GetOrganizationSettings_CallingOverrides(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Settings handlers.OrganizationSettings `json:"settings"`
-		} `json:"data"`
+		Settings handlers.OrganizationSettings `json:"settings"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, true, resp.Data.Settings.CallingEnabled)
-	assert.Equal(t, 1800, resp.Data.Settings.MaxCallDuration)
-	assert.Equal(t, 90, resp.Data.Settings.TransferTimeoutSecs)
+	assert.Equal(t, true, resp.Settings.CallingEnabled)
+	assert.Equal(t, 1800, resp.Settings.MaxCallDuration)
+	assert.Equal(t, 90, resp.Settings.TransferTimeoutSecs)
 }
 
 func TestApp_UpdateOrganizationSettings_CallingFields(t *testing.T) {

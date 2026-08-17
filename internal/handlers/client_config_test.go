@@ -35,17 +35,15 @@ func TestGetEmbeddedSignupConfig(t *testing.T) {
 
 	// Parse response body
 	var resp struct {
-		Data struct {
-			WhatsAppAppID      string `json:"whatsapp_app_id"`
-			WhatsAppConfigID   string `json:"whatsapp_config_id"`
-			WhatsAppAPIVersion string `json:"whatsapp_api_version"`
-		} `json:"data"`
+		WhatsAppAppID      string `json:"whatsapp_app_id"`
+		WhatsAppConfigID   string `json:"whatsapp_config_id"`
+		WhatsAppAPIVersion string `json:"whatsapp_api_version"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "test-app-id-123", resp.Data.WhatsAppAppID)
-	assert.Equal(t, "test-config-id-456", resp.Data.WhatsAppConfigID)
-	assert.Equal(t, "v21.0", resp.Data.WhatsAppAPIVersion)
+	assert.Equal(t, "test-app-id-123", resp.WhatsAppAppID)
+	assert.Equal(t, "test-config-id-456", resp.WhatsAppConfigID)
+	assert.Equal(t, "v21.0", resp.WhatsAppAPIVersion)
 }
 
 func TestGetEmbeddedSignupConfig_EmptyValues(t *testing.T) {
@@ -77,14 +75,12 @@ func TestGetEmbeddedSignupConfig_EmptyValues(t *testing.T) {
 
 	// Parse response body - should still default to empty strings in the struct
 	var resp struct {
-		Data struct {
-			WhatsAppAppID      string `json:"whatsapp_app_id"`
-			WhatsAppConfigID   string `json:"whatsapp_config_id"`
-			WhatsAppAPIVersion string `json:"whatsapp_api_version"`
-		} `json:"data"`
+		WhatsAppAppID      string `json:"whatsapp_app_id"`
+		WhatsAppConfigID   string `json:"whatsapp_config_id"`
+		WhatsAppAPIVersion string `json:"whatsapp_api_version"`
 	}
 	err = json.Unmarshal([]byte(body), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "", resp.Data.WhatsAppAppID)
-	assert.Equal(t, "", resp.Data.WhatsAppConfigID)
+	assert.Equal(t, "", resp.WhatsAppAppID)
+	assert.Equal(t, "", resp.WhatsAppConfigID)
 }

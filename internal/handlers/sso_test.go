@@ -133,19 +133,17 @@ func TestApp_GetPublicSSOProviders_DedupsByType(t *testing.T) {
 	require.NoError(t, app.GetPublicSSOProviders(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data []handlers.SSOProviderPublic `json:"data"`
-	}
+	var resp []handlers.SSOProviderPublic
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 
 	got := make(map[string]bool)
-	for _, p := range resp.Data {
+	for _, p := range resp {
 		got[p.Provider] = true
 	}
 	assert.True(t, got["google"])
 	assert.True(t, got["github"])
 	assert.False(t, got["microsoft"], "disabled provider must not be exposed")
-	assert.Len(t, resp.Data, 2, "two providers across 3 enabled rows")
+	assert.Len(t, resp, 2, "two providers across 3 enabled rows")
 }
 
 // --- GetSSOSettings (admin) ---
@@ -164,13 +162,11 @@ func TestApp_GetSSOSettings_HidesSecretButReportsHasSecret(t *testing.T) {
 	require.NoError(t, app.GetSSOSettings(req))
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data []handlers.SSOProviderResponse `json:"data"`
-	}
+	var resp []handlers.SSOProviderResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	require.Len(t, resp.Data, 1)
-	assert.Equal(t, "id", resp.Data[0].ClientID)
-	assert.True(t, resp.Data[0].HasSecret)
+	require.Len(t, resp, 1)
+	assert.Equal(t, "id", resp[0].ClientID)
+	assert.True(t, resp[0].HasSecret)
 	// Marshal whole response to ensure no field carries the secret value.
 	raw := string(testutil.GetResponseBody(req))
 	assert.NotContains(t, raw, "the-secret", "client secret must never appear in admin response")

@@ -79,18 +79,16 @@ func TestApp_ExchangeToken_Success_AutoRegistration(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	var resp map[string]any
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	accountMap, ok := resp.Data["account"].(map[string]any)
+	accountMap, ok := resp["account"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "active", accountMap["status"])
 	assert.Equal(t, phoneID, accountMap["phone_id"])
 	assert.Equal(t, wabaID, accountMap["business_id"])
-	assert.NotEmpty(t, resp.Data["pin"]) // PIN should be returned
+	assert.NotEmpty(t, resp["pin"]) // PIN should be returned
 
 	// Verify account was created in database
 	var account models.WhatsAppAccount
@@ -170,16 +168,14 @@ func TestApp_ExchangeToken_Success_PendingRegistration(t *testing.T) {
 	err := app.ExchangeToken(req)
 	require.NoError(t, err)
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	var resp map[string]any
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	accountMap, ok := resp.Data["account"].(map[string]any)
+	accountMap, ok := resp["account"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "pending_registration", accountMap["status"])
-	assert.Nil(t, resp.Data["pin"]) // No PIN when pending
+	assert.Nil(t, resp["pin"]) // No PIN when pending
 }
 
 func TestApp_ExchangeToken_InvalidCode(t *testing.T) {
@@ -304,13 +300,11 @@ func TestApp_ExchangeToken_Success_CodeOnly_Discovery(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	var resp map[string]any
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	accountMap, ok := resp.Data["account"].(map[string]any)
+	accountMap, ok := resp["account"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "active", accountMap["status"])
 	assert.Equal(t, phoneID, accountMap["phone_id"])
@@ -410,13 +404,11 @@ func TestApp_RegisterPhoneNumber_Success_WithPIN(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	var resp map[string]any
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.True(t, resp.Data["success"].(bool))
-	assert.Equal(t, "654321", resp.Data["pin"])
+	assert.True(t, resp["success"].(bool))
+	assert.Equal(t, "654321", resp["pin"])
 
 	// Verify account status updated
 	var updated models.WhatsAppAccount
@@ -484,14 +476,12 @@ func TestApp_RegisterPhoneNumber_Success_GeneratedPIN(t *testing.T) {
 	err := app.RegisterPhoneNumber(req)
 	require.NoError(t, err)
 
-	var resp struct {
-		Data map[string]any `json:"data"`
-	}
+	var resp map[string]any
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.True(t, resp.Data["success"].(bool))
-	assert.NotEmpty(t, resp.Data["pin"])
-	assert.Len(t, resp.Data["pin"].(string), 6)
+	assert.True(t, resp["success"].(bool))
+	assert.NotEmpty(t, resp["pin"])
+	assert.Len(t, resp["pin"].(string), 6)
 
 	// Verify account status updated
 	var updated models.WhatsAppAccount

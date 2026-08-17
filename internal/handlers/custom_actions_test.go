@@ -65,16 +65,14 @@ func TestApp_ListCustomActions(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
-			} `json:"data"`
+			CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.CustomActions, 2)
+		assert.Len(t, resp.CustomActions, 2)
 		// Ordered by display_order ASC
-		assert.Equal(t, "Action B", resp.Data.CustomActions[0].Name)
-		assert.Equal(t, "Action A", resp.Data.CustomActions[1].Name)
+		assert.Equal(t, "Action B", resp.CustomActions[0].Name)
+		assert.Equal(t, "Action A", resp.CustomActions[1].Name)
 	})
 
 	t.Run("EmptyList", func(t *testing.T) {
@@ -90,13 +88,11 @@ func TestApp_ListCustomActions(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
-			} `json:"data"`
+			CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Empty(t, resp.Data.CustomActions)
+		assert.Empty(t, resp.CustomActions)
 	})
 }
 
@@ -121,16 +117,14 @@ func TestApp_GetCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CustomActionResponse `json:"data"`
-		}
+		var resp handlers.CustomActionResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, action.ID, resp.Data.ID)
-		assert.Equal(t, "My Webhook", resp.Data.Name)
-		assert.Equal(t, models.ActionTypeWebhook, resp.Data.ActionType)
-		assert.Equal(t, "zap", resp.Data.Icon)
-		assert.True(t, resp.Data.IsActive)
+		assert.Equal(t, action.ID, resp.ID)
+		assert.Equal(t, "My Webhook", resp.Name)
+		assert.Equal(t, models.ActionTypeWebhook, resp.ActionType)
+		assert.Equal(t, "zap", resp.Icon)
+		assert.True(t, resp.IsActive)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
@@ -175,22 +169,20 @@ func TestApp_CreateCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CustomActionResponse `json:"data"`
-		}
+		var resp handlers.CustomActionResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Send to CRM", resp.Data.Name)
-		assert.Equal(t, "send", resp.Data.Icon)
-		assert.Equal(t, models.ActionTypeWebhook, resp.Data.ActionType)
-		assert.True(t, resp.Data.IsActive)
-		assert.Equal(t, 1, resp.Data.DisplayOrder)
-		assert.NotEqual(t, uuid.Nil, resp.Data.ID)
-		assert.NotEmpty(t, resp.Data.CreatedAt)
+		assert.Equal(t, "Send to CRM", resp.Name)
+		assert.Equal(t, "send", resp.Icon)
+		assert.Equal(t, models.ActionTypeWebhook, resp.ActionType)
+		assert.True(t, resp.IsActive)
+		assert.Equal(t, 1, resp.DisplayOrder)
+		assert.NotEqual(t, uuid.Nil, resp.ID)
+		assert.NotEmpty(t, resp.CreatedAt)
 
 		// Verify persisted in DB
 		var count int64
-		app.DB.Model(&models.CustomAction{}).Where("id = ?", resp.Data.ID).Count(&count)
+		app.DB.Model(&models.CustomAction{}).Where("id = ?", resp.ID).Count(&count)
 		assert.Equal(t, int64(1), count)
 	})
 
@@ -214,12 +206,10 @@ func TestApp_CreateCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CustomActionResponse `json:"data"`
-		}
+		var resp handlers.CustomActionResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, models.ActionTypeURL, resp.Data.ActionType)
+		assert.Equal(t, models.ActionTypeURL, resp.ActionType)
 	})
 
 	t.Run("Success_JavaScript", func(t *testing.T) {
@@ -241,12 +231,10 @@ func TestApp_CreateCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CustomActionResponse `json:"data"`
-		}
+		var resp handlers.CustomActionResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, models.ActionTypeJavascript, resp.Data.ActionType)
+		assert.Equal(t, models.ActionTypeJavascript, resp.ActionType)
 	})
 
 	t.Run("ValidationError_MissingName", func(t *testing.T) {
@@ -405,16 +393,14 @@ func TestApp_UpdateCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CustomActionResponse `json:"data"`
-		}
+		var resp handlers.CustomActionResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, action.ID, resp.Data.ID)
-		assert.Equal(t, "Updated Name", resp.Data.Name)
-		assert.Equal(t, "star", resp.Data.Icon)
-		assert.False(t, resp.Data.IsActive)
-		assert.Equal(t, 5, resp.Data.DisplayOrder)
+		assert.Equal(t, action.ID, resp.ID)
+		assert.Equal(t, "Updated Name", resp.Name)
+		assert.Equal(t, "star", resp.Icon)
+		assert.False(t, resp.IsActive)
+		assert.Equal(t, 5, resp.DisplayOrder)
 	})
 
 	t.Run("Success_UpdateConfig", func(t *testing.T) {
@@ -439,12 +425,10 @@ func TestApp_UpdateCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.CustomActionResponse `json:"data"`
-		}
+		var resp handlers.CustomActionResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "https://new.example.com/hook", resp.Data.Config["url"])
+		assert.Equal(t, "https://new.example.com/hook", resp.Config["url"])
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
@@ -510,13 +494,11 @@ func TestApp_DeleteCustomAction(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Status string `json:"status"`
-			} `json:"data"`
+			Status string `json:"status"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "deleted", resp.Data.Status)
+		assert.Equal(t, "deleted", resp.Status)
 
 		// Verify removed from DB
 		var count int64
@@ -590,14 +572,12 @@ func TestApp_ListCustomActions_CrossOrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req1))
 
 	var resp1 struct {
-		Data struct {
-			CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
-		} `json:"data"`
+		CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req1), &resp1)
 	require.NoError(t, err)
-	assert.Len(t, resp1.Data.CustomActions, 1)
-	assert.Equal(t, "Org1 Action", resp1.Data.CustomActions[0].Name)
+	assert.Len(t, resp1.CustomActions, 1)
+	assert.Equal(t, "Org1 Action", resp1.CustomActions[0].Name)
 
 	// User2 should only see org2's action
 	req2 := testutil.NewGETRequest(t)
@@ -608,14 +588,12 @@ func TestApp_ListCustomActions_CrossOrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req2))
 
 	var resp2 struct {
-		Data struct {
-			CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
-		} `json:"data"`
+		CustomActions []handlers.CustomActionResponse `json:"custom_actions"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req2), &resp2)
 	require.NoError(t, err)
-	assert.Len(t, resp2.Data.CustomActions, 1)
-	assert.Equal(t, "Org2 Action", resp2.Data.CustomActions[0].Name)
+	assert.Len(t, resp2.CustomActions, 1)
+	assert.Equal(t, "Org2 Action", resp2.CustomActions[0].Name)
 }
 
 // --- GetCustomAction Cross-Org Isolation ---
@@ -747,15 +725,13 @@ func TestApp_ExecuteCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var resp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.True(t, resp.Data.Success)
-		assert.Contains(t, resp.Data.Message, "successfully")
-		assert.NotNil(t, resp.Data.Toast)
-		assert.Equal(t, "success", resp.Data.Toast.Type)
+		assert.True(t, resp.Success)
+		assert.Contains(t, resp.Message, "successfully")
+		assert.NotNil(t, resp.Toast)
+		assert.Equal(t, "success", resp.Toast.Type)
 
 		// Verify webhook received data
 		assert.NotEmpty(t, receivedBody)
@@ -785,15 +761,13 @@ func TestApp_ExecuteCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var resp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.True(t, resp.Data.Success)
-		assert.Equal(t, "Opening URL", resp.Data.Message)
-		assert.NotEmpty(t, resp.Data.RedirectURL)
-		assert.Contains(t, resp.Data.RedirectURL, "/api/custom-actions/redirect/")
+		assert.True(t, resp.Success)
+		assert.Equal(t, "Opening URL", resp.Message)
+		assert.NotEmpty(t, resp.RedirectURL)
+		assert.Contains(t, resp.RedirectURL, "/api/custom-actions/redirect/")
 	})
 
 	t.Run("Success_JavaScript", func(t *testing.T) {
@@ -819,16 +793,14 @@ func TestApp_ExecuteCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var resp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.True(t, resp.Data.Success)
-		assert.Equal(t, "JavaScript action executed", resp.Data.Message)
-		assert.NotEmpty(t, resp.Data.Clipboard)
-		assert.NotNil(t, resp.Data.Toast)
-		assert.Equal(t, "success", resp.Data.Toast.Type)
+		assert.True(t, resp.Success)
+		assert.Equal(t, "JavaScript action executed", resp.Message)
+		assert.NotEmpty(t, resp.Clipboard)
+		assert.NotNil(t, resp.Toast)
+		assert.Equal(t, "success", resp.Toast.Type)
 	})
 
 	t.Run("JavaScript_URL_WrappedInRedirectToken", func(t *testing.T) {
@@ -854,15 +826,13 @@ func TestApp_ExecuteCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var resp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.True(t, resp.Data.Success)
+		assert.True(t, resp.Success)
 		// URL must be wrapped in a redirect token, never returned raw
-		assert.Contains(t, resp.Data.RedirectURL, "/api/custom-actions/redirect/")
-		assert.NotContains(t, resp.Data.RedirectURL, "evil.example.com",
+		assert.Contains(t, resp.RedirectURL, "/api/custom-actions/redirect/")
+		assert.NotContains(t, resp.RedirectURL, "evil.example.com",
 			"raw external URL must not be returned to the client")
 	})
 
@@ -1019,16 +989,14 @@ func TestApp_ExecuteCustomAction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var resp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 		// Webhook returns non-2xx but handler still returns 200 with success=false
-		assert.False(t, resp.Data.Success)
-		assert.Contains(t, resp.Data.Message, "500")
-		assert.NotNil(t, resp.Data.Toast)
-		assert.Equal(t, "error", resp.Data.Toast.Type)
+		assert.False(t, resp.Success)
+		assert.Contains(t, resp.Message, "500")
+		assert.NotNil(t, resp.Toast)
+		assert.Equal(t, "error", resp.Toast.Type)
 	})
 
 	t.Run("WebhookWithVariableReplacement", func(t *testing.T) {
@@ -1098,18 +1066,16 @@ func TestApp_CustomActionRedirect(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(execReq))
 
-		var execResp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var execResp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(execReq), &execResp)
 		require.NoError(t, err)
-		require.NotEmpty(t, execResp.Data.RedirectURL)
+		require.NotEmpty(t, execResp.RedirectURL)
 
 		// Extract the token from the redirect URL
 		// Format: /api/custom-actions/redirect/<token>
 		tokenStart := len("/api/custom-actions/redirect/")
-		require.Greater(t, len(execResp.Data.RedirectURL), tokenStart)
-		token := execResp.Data.RedirectURL[tokenStart:]
+		require.Greater(t, len(execResp.RedirectURL), tokenStart)
+		token := execResp.RedirectURL[tokenStart:]
 
 		// Now use the token with CustomActionRedirect
 		redirectReq := testutil.NewGETRequest(t)
@@ -1160,12 +1126,10 @@ func TestApp_CustomActionRedirect(t *testing.T) {
 		err := app.ExecuteCustomAction(execReq)
 		require.NoError(t, err)
 
-		var execResp struct {
-			Data handlers.ActionResult `json:"data"`
-		}
+		var execResp handlers.ActionResult
 		err = json.Unmarshal(testutil.GetResponseBody(execReq), &execResp)
 		require.NoError(t, err)
-		token := execResp.Data.RedirectURL[len("/api/custom-actions/redirect/"):]
+		token := execResp.RedirectURL[len("/api/custom-actions/redirect/"):]
 
 		// First use should succeed
 		req1 := testutil.NewGETRequest(t)
@@ -1264,13 +1228,11 @@ func TestApp_UpdateCustomAction_ChangeActionType(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CustomActionResponse `json:"data"`
-	}
+	var resp handlers.CustomActionResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, models.ActionTypeJavascript, resp.Data.ActionType)
-	assert.Equal(t, "console.log('hello')", resp.Data.Config["code"])
+	assert.Equal(t, models.ActionTypeJavascript, resp.ActionType)
+	assert.Equal(t, "console.log('hello')", resp.Config["code"])
 }
 
 // --- ListCustomActions Unauthorized ---

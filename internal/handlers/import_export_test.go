@@ -35,20 +35,18 @@ func TestApp_GetExportConfig_Contacts(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Table          string              `json:"table"`
-			Columns        []map[string]string `json:"columns"`
-			DefaultColumns []string            `json:"default_columns"`
-		} `json:"data"`
+		Table          string              `json:"table"`
+		Columns        []map[string]string `json:"columns"`
+		DefaultColumns []string            `json:"default_columns"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "contacts", resp.Data.Table)
-	assert.NotEmpty(t, resp.Data.Columns, "columns must be returned")
-	assert.NotEmpty(t, resp.Data.DefaultColumns)
+	assert.Equal(t, "contacts", resp.Table)
+	assert.NotEmpty(t, resp.Columns, "columns must be returned")
+	assert.NotEmpty(t, resp.DefaultColumns)
 
 	// Sanity: column entries have key + label.
-	got := make(map[string]string, len(resp.Data.Columns))
-	for _, c := range resp.Data.Columns {
+	got := make(map[string]string, len(resp.Columns))
+	for _, c := range resp.Columns {
 		got[c["key"]] = c["label"]
 	}
 	assert.Equal(t, "Phone Number", got["phone_number"])
@@ -99,19 +97,17 @@ func TestApp_GetImportConfig_Contacts(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Table           string              `json:"table"`
-			RequiredColumns []map[string]string `json:"required_columns"`
-			OptionalColumns []map[string]string `json:"optional_columns"`
-			UniqueColumn    string              `json:"unique_column"`
-		} `json:"data"`
+		Table           string              `json:"table"`
+		RequiredColumns []map[string]string `json:"required_columns"`
+		OptionalColumns []map[string]string `json:"optional_columns"`
+		UniqueColumn    string              `json:"unique_column"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "contacts", resp.Data.Table)
-	assert.Equal(t, "phone_number", resp.Data.UniqueColumn)
-	require.Len(t, resp.Data.RequiredColumns, 1)
-	assert.Equal(t, "phone_number", resp.Data.RequiredColumns[0]["key"])
-	assert.NotEmpty(t, resp.Data.OptionalColumns)
+	assert.Equal(t, "contacts", resp.Table)
+	assert.Equal(t, "phone_number", resp.UniqueColumn)
+	require.Len(t, resp.RequiredColumns, 1)
+	assert.Equal(t, "phone_number", resp.RequiredColumns[0]["key"])
+	assert.NotEmpty(t, resp.OptionalColumns)
 }
 
 func TestApp_GetImportConfig_InvalidTable(t *testing.T) {

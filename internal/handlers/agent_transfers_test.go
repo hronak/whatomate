@@ -94,23 +94,20 @@ func TestApp_ListAgentTransfers_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
+	// The handler returns the payload unwrapped — no "status"/"data" envelope.
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfers         []handlers.AgentTransferResponse `json:"transfers"`
-			GeneralQueueCount int64                            `json:"general_queue_count"`
-			TotalCount        int64                            `json:"total_count"`
-		} `json:"data"`
+		Transfers         []handlers.AgentTransferResponse `json:"transfers"`
+		GeneralQueueCount int64                            `json:"general_queue_count"`
+		TotalCount        int64                            `json:"total_count"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
 
-	assert.Equal(t, "success", result.Status)
-	assert.Equal(t, int64(2), result.Data.TotalCount)
-	assert.Len(t, result.Data.Transfers, 2)
+	assert.Equal(t, int64(2), result.TotalCount)
+	require.Len(t, result.Transfers, 2)
 
 	// First transfer should be the active unassigned one (FIFO)
-	assert.Equal(t, transfer1.ID.String(), result.Data.Transfers[0].ID)
-	assert.Equal(t, models.TransferStatusActive, result.Data.Transfers[0].Status)
+	assert.Equal(t, transfer1.ID.String(), result.Transfers[0].ID)
+	assert.Equal(t, models.TransferStatusActive, result.Transfers[0].Status)
 }
 
 func TestApp_ListAgentTransfers_FilterByStatus(t *testing.T) {
@@ -136,17 +133,12 @@ func TestApp_ListAgentTransfers_FilterByStatus(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfers  []handlers.AgentTransferResponse `json:"transfers"`
-			TotalCount int64                            `json:"total_count"`
-		} `json:"data"`
+		Transfers  []handlers.AgentTransferResponse `json:"transfers"`
+		TotalCount int64                            `json:"total_count"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.Len(t, result.Data.Transfers, 1)
-	assert.Equal(t, models.TransferStatusActive, result.Data.Transfers[0].Status)
+	assert.Len(t, result.Transfers, 1)
+	assert.Equal(t, models.TransferStatusActive, result.Transfers[0].Status)
 }
 
 func TestApp_ListAgentTransfers_AgentRoleFiltering(t *testing.T) {
@@ -174,16 +166,13 @@ func TestApp_ListAgentTransfers_AgentRoleFiltering(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfers  []handlers.AgentTransferResponse `json:"transfers"`
-			TotalCount int64                            `json:"total_count"`
-		} `json:"data"`
+		Transfers  []handlers.AgentTransferResponse `json:"transfers"`
+		TotalCount int64                            `json:"total_count"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
 
 	// Agent sees their transfer + general queue (2), not the other agent's transfer
-	assert.Equal(t, int64(2), result.Data.TotalCount)
+	assert.Equal(t, int64(2), result.TotalCount)
 }
 
 func TestApp_ListAgentTransfers_Pagination(t *testing.T) {
@@ -211,20 +200,17 @@ func TestApp_ListAgentTransfers_Pagination(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfers  []handlers.AgentTransferResponse `json:"transfers"`
-			TotalCount int64                            `json:"total_count"`
-			Limit      int                              `json:"limit"`
-			Offset     int                              `json:"offset"`
-		} `json:"data"`
+		Transfers  []handlers.AgentTransferResponse `json:"transfers"`
+		TotalCount int64                            `json:"total_count"`
+		Limit      int                              `json:"limit"`
+		Offset     int                              `json:"offset"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
 
-	assert.Equal(t, int64(5), result.Data.TotalCount)
-	assert.Len(t, result.Data.Transfers, 2)
-	assert.Equal(t, 2, result.Data.Limit)
-	assert.Equal(t, 1, result.Data.Offset)
+	assert.Equal(t, int64(5), result.TotalCount)
+	assert.Len(t, result.Transfers, 2)
+	assert.Equal(t, 2, result.Limit)
+	assert.Equal(t, 1, result.Offset)
 }
 
 // --- CreateAgentTransfer Tests ---
@@ -239,10 +225,10 @@ func TestApp_CreateAgentTransfer_Success(t *testing.T) {
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"contact_id":       contact.ID.String(),
-		"whatsapp_account": account.Name,
-		"notes":            "Test transfer",
-		"source":           models.TransferSourceManual,
+		"contact_id":          contact.ID.String(),
+		"whatsapp_account_id": account.ID.String(),
+		"notes":               "Test transfer",
+		"source":              models.TransferSourceManual,
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -251,19 +237,14 @@ func TestApp_CreateAgentTransfer_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfer handlers.AgentTransferResponse `json:"transfer"`
-			Message  string                         `json:"message"`
-		} `json:"data"`
+		Transfer handlers.AgentTransferResponse `json:"transfer"`
+		Message  string                         `json:"message"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.Equal(t, "Transfer created successfully", result.Data.Message)
-	assert.Equal(t, contact.ID.String(), result.Data.Transfer.ContactID)
-	assert.Equal(t, models.TransferStatusActive, result.Data.Transfer.Status)
-	assert.Equal(t, models.TransferSourceManual, result.Data.Transfer.Source)
+	assert.Equal(t, "Transfer created successfully", result.Message)
+	assert.Equal(t, contact.ID.String(), result.Transfer.ContactID)
+	assert.Equal(t, models.TransferStatusActive, result.Transfer.Status)
+	assert.Equal(t, models.TransferSourceManual, result.Transfer.Source)
 }
 
 func TestApp_CreateAgentTransfer_WithAgent(t *testing.T) {
@@ -277,10 +258,10 @@ func TestApp_CreateAgentTransfer_WithAgent(t *testing.T) {
 	agent := createTestAgent(t, app, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"contact_id":       contact.ID.String(),
-		"whatsapp_account": account.Name,
-		"agent_id":         agent.ID.String(),
-		"notes":            "Assigned to specific agent",
+		"contact_id":          contact.ID.String(),
+		"whatsapp_account_id": account.ID.String(),
+		"agent_id":            agent.ID.String(),
+		"notes":               "Assigned to specific agent",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -289,16 +270,11 @@ func TestApp_CreateAgentTransfer_WithAgent(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfer handlers.AgentTransferResponse `json:"transfer"`
-		} `json:"data"`
+		Transfer handlers.AgentTransferResponse `json:"transfer"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.NotNil(t, result.Data.Transfer.AgentID)
-	assert.Equal(t, agent.ID.String(), *result.Data.Transfer.AgentID)
+	assert.NotNil(t, result.Transfer.AgentID)
+	assert.Equal(t, agent.ID.String(), *result.Transfer.AgentID)
 }
 
 func TestApp_CreateAgentTransfer_ContactNotFound(t *testing.T) {
@@ -309,8 +285,8 @@ func TestApp_CreateAgentTransfer_ContactNotFound(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"contact_id":       uuid.New().String(), // Non-existent contact
-		"whatsapp_account": account.Name,
+		"contact_id":          uuid.New().String(), // Non-existent contact
+		"whatsapp_account_id": account.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -336,8 +312,8 @@ func TestApp_CreateAgentTransfer_DuplicateTransfer(t *testing.T) {
 	createTestTransfer(t, app, org.ID, contact.ID, &account.ID, models.TransferStatusActive, nil)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"contact_id":       contact.ID.String(),
-		"whatsapp_account": account.Name,
+		"contact_id":          contact.ID.String(),
+		"whatsapp_account_id": account.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -358,7 +334,7 @@ func TestApp_CreateAgentTransfer_MissingContactID(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"whatsapp_account": account.Name,
+		"whatsapp_account_id": account.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -385,9 +361,9 @@ func TestApp_CreateAgentTransfer_AgentUnavailable(t *testing.T) {
 	require.NoError(t, app.DB.Model(agent).Update("is_available", false).Error)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"contact_id":       contact.ID.String(),
-		"whatsapp_account": account.Name,
-		"agent_id":         agent.ID.String(),
+		"contact_id":          contact.ID.String(),
+		"whatsapp_account_id": account.ID.String(),
+		"agent_id":            agent.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -421,15 +397,10 @@ func TestApp_ResumeFromTransfer_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.Contains(t, result.Data.Message, "resumed")
+	assert.Contains(t, result.Message, "resumed")
 
 	// Verify transfer status updated
 	var updatedTransfer models.AgentTransfer
@@ -505,17 +476,12 @@ func TestApp_AssignAgentTransfer_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Message string     `json:"message"`
-			AgentID *uuid.UUID `json:"agent_id"`
-		} `json:"data"`
+		Message string     `json:"message"`
+		AgentID *uuid.UUID `json:"agent_id"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.Equal(t, "Transfer assigned successfully", result.Data.Message)
-	assert.Equal(t, agent.ID, *result.Data.AgentID)
+	assert.Equal(t, "Transfer assigned successfully", result.Message)
+	assert.Equal(t, agent.ID, *result.AgentID)
 
 	// Verify transfer updated
 	var updatedTransfer models.AgentTransfer
@@ -620,19 +586,14 @@ func TestApp_PickNextTransfer_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Message  string                          `json:"message"`
-			Transfer *handlers.AgentTransferResponse `json:"transfer"`
-		} `json:"data"`
+		Message  string                          `json:"message"`
+		Transfer *handlers.AgentTransferResponse `json:"transfer"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.Equal(t, "Transfer picked successfully", result.Data.Message)
-	assert.NotNil(t, result.Data.Transfer)
-	assert.Equal(t, transfer.ID.String(), result.Data.Transfer.ID)
-	assert.Equal(t, agent.ID.String(), *result.Data.Transfer.AgentID)
+	assert.Equal(t, "Transfer picked successfully", result.Message)
+	assert.NotNil(t, result.Transfer)
+	assert.Equal(t, transfer.ID.String(), result.Transfer.ID)
+	assert.Equal(t, agent.ID.String(), *result.Transfer.AgentID)
 
 	// Verify transfer updated in DB
 	var updatedTransfer models.AgentTransfer
@@ -655,17 +616,12 @@ func TestApp_PickNextTransfer_EmptyQueue(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Message  string `json:"message"`
-			Transfer any    `json:"transfer"`
-		} `json:"data"`
+		Message  string `json:"message"`
+		Transfer any    `json:"transfer"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
-
-	assert.Equal(t, "success", result.Status)
-	assert.Equal(t, "No transfers in queue", result.Data.Message)
-	assert.Nil(t, result.Data.Transfer)
+	assert.Equal(t, "No transfers in queue", result.Message)
+	assert.Nil(t, result.Transfer)
 }
 
 func TestApp_PickNextTransfer_FIFO(t *testing.T) {
@@ -707,15 +663,12 @@ func TestApp_PickNextTransfer_FIFO(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfer *handlers.AgentTransferResponse `json:"transfer"`
-		} `json:"data"`
+		Transfer *handlers.AgentTransferResponse `json:"transfer"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
 
 	// Should pick the oldest transfer (FIFO)
-	assert.Equal(t, transfer1.ID.String(), result.Data.Transfer.ID)
+	assert.Equal(t, transfer1.ID.String(), result.Transfer.ID)
 }
 
 func TestApp_PickNextTransfer_TeamFiltering(t *testing.T) {
@@ -755,16 +708,13 @@ func TestApp_PickNextTransfer_TeamFiltering(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var result struct {
-		Status string `json:"status"`
-		Data   struct {
-			Transfer *handlers.AgentTransferResponse `json:"transfer"`
-		} `json:"data"`
+		Transfer *handlers.AgentTransferResponse `json:"transfer"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &result))
 
 	// Should pick from team queue, not general queue
-	assert.Equal(t, teamTransfer.ID.String(), result.Data.Transfer.ID)
-	assert.NotEqual(t, generalTransfer.ID.String(), result.Data.Transfer.ID)
+	assert.Equal(t, teamTransfer.ID.String(), result.Transfer.ID)
+	assert.NotEqual(t, generalTransfer.ID.String(), result.Transfer.ID)
 }
 
 // --- Cross-Organization Isolation Tests ---
@@ -800,14 +750,12 @@ func TestApp_AgentTransfers_CrossOrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req1))
 
 	var result1 struct {
-		Data struct {
-			Transfers []handlers.AgentTransferResponse `json:"transfers"`
-		} `json:"data"`
+		Transfers []handlers.AgentTransferResponse `json:"transfers"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req1), &result1))
 
-	assert.Len(t, result1.Data.Transfers, 1)
-	assert.Equal(t, transfer1.ID.String(), result1.Data.Transfers[0].ID)
+	assert.Len(t, result1.Transfers, 1)
+	assert.Equal(t, transfer1.ID.String(), result1.Transfers[0].ID)
 
 	// User2 should only see org2's transfers
 	req2 := testutil.NewGETRequest(t)
@@ -818,14 +766,12 @@ func TestApp_AgentTransfers_CrossOrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req2))
 
 	var result2 struct {
-		Data struct {
-			Transfers []handlers.AgentTransferResponse `json:"transfers"`
-		} `json:"data"`
+		Transfers []handlers.AgentTransferResponse `json:"transfers"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req2), &result2))
 
-	assert.Len(t, result2.Data.Transfers, 1)
-	assert.Equal(t, transfer2.ID.String(), result2.Data.Transfers[0].ID)
+	assert.Len(t, result2.Transfers, 1)
+	assert.Equal(t, transfer2.ID.String(), result2.Transfers[0].ID)
 
 	// User1 cannot resume org2's transfer
 	req3 := testutil.NewJSONRequest(t, nil)

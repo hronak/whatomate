@@ -150,18 +150,16 @@ func TestApp_GetDashboardStats_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Stats          handlers.DashboardStats          `json:"stats"`
-			RecentMessages []handlers.RecentMessageResponse `json:"recent_messages"`
-		} `json:"data"`
+		Stats          handlers.DashboardStats          `json:"stats"`
+		RecentMessages []handlers.RecentMessageResponse `json:"recent_messages"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, int64(2), resp.Data.Stats.TotalMessages)
-	assert.Equal(t, int64(1), resp.Data.Stats.ChatbotSessions)
-	assert.Equal(t, int64(1), resp.Data.Stats.CampaignsSent)
-	assert.Len(t, resp.Data.RecentMessages, 2)
+	assert.Equal(t, int64(2), resp.Stats.TotalMessages)
+	assert.Equal(t, int64(1), resp.Stats.ChatbotSessions)
+	assert.Equal(t, int64(1), resp.Stats.CampaignsSent)
+	assert.Len(t, resp.RecentMessages, 2)
 }
 
 func TestApp_GetDashboardStats_WithDateFilters(t *testing.T) {
@@ -191,15 +189,13 @@ func TestApp_GetDashboardStats_WithDateFilters(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Stats handlers.DashboardStats `json:"stats"`
-		} `json:"data"`
+		Stats handlers.DashboardStats `json:"stats"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Only 2 messages fall within the Jan 1-31 range
-	assert.Equal(t, int64(2), resp.Data.Stats.TotalMessages)
+	assert.Equal(t, int64(2), resp.Stats.TotalMessages)
 }
 
 func TestApp_GetDashboardStats_InvalidFromDate(t *testing.T) {
@@ -256,20 +252,18 @@ func TestApp_GetDashboardStats_EmptyData(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Stats          handlers.DashboardStats          `json:"stats"`
-			RecentMessages []handlers.RecentMessageResponse `json:"recent_messages"`
-		} `json:"data"`
+		Stats          handlers.DashboardStats          `json:"stats"`
+		RecentMessages []handlers.RecentMessageResponse `json:"recent_messages"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, int64(0), resp.Data.Stats.TotalMessages)
-	assert.Equal(t, int64(0), resp.Data.Stats.TotalContacts)
-	assert.Equal(t, int64(0), resp.Data.Stats.ChatbotSessions)
-	assert.Equal(t, int64(0), resp.Data.Stats.CampaignsSent)
-	assert.Equal(t, float64(0), resp.Data.Stats.MessagesChange)
-	assert.Empty(t, resp.Data.RecentMessages)
+	assert.Equal(t, int64(0), resp.Stats.TotalMessages)
+	assert.Equal(t, int64(0), resp.Stats.TotalContacts)
+	assert.Equal(t, int64(0), resp.Stats.ChatbotSessions)
+	assert.Equal(t, int64(0), resp.Stats.CampaignsSent)
+	assert.Equal(t, float64(0), resp.Stats.MessagesChange)
+	assert.Empty(t, resp.RecentMessages)
 }
 
 // --- GetAgentAnalytics Tests ---
@@ -306,15 +300,13 @@ func TestApp_GetAgentAnalytics_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AgentAnalyticsResponse `json:"data"`
-	}
+	var resp handlers.AgentAnalyticsResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// User has analytics permission so sees summary + all agent stats + my_stats
-	assert.NotNil(t, resp.Data.MyStats)
-	assert.NotNil(t, resp.Data.AgentStats)
+	assert.NotNil(t, resp.MyStats)
+	assert.NotNil(t, resp.AgentStats)
 }
 
 func TestApp_GetAgentAnalytics_EmptyData(t *testing.T) {
@@ -335,16 +327,14 @@ func TestApp_GetAgentAnalytics_EmptyData(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AgentAnalyticsResponse `json:"data"`
-	}
+	var resp handlers.AgentAnalyticsResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, int64(0), resp.Data.Summary.TotalTransfersHandled)
-	assert.Equal(t, int64(0), resp.Data.Summary.ActiveTransfers)
-	assert.NotNil(t, resp.Data.TrendData)
-	assert.Empty(t, resp.Data.TrendData)
+	assert.Equal(t, int64(0), resp.Summary.TotalTransfersHandled)
+	assert.Equal(t, int64(0), resp.Summary.ActiveTransfers)
+	assert.NotNil(t, resp.TrendData)
+	assert.Empty(t, resp.TrendData)
 }
 
 func TestApp_GetAgentAnalytics_Unauthorized(t *testing.T) {
@@ -383,16 +373,14 @@ func TestApp_GetAgentAnalytics_AgentSeesOwnStats(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.AgentAnalyticsResponse `json:"data"`
-	}
+	var resp handlers.AgentAnalyticsResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// User without analytics permission sees only their own stats
-	assert.NotNil(t, resp.Data.MyStats)
-	assert.Nil(t, resp.Data.AgentStats)
-	assert.Equal(t, user.ID.String(), resp.Data.MyStats.AgentID)
+	assert.NotNil(t, resp.MyStats)
+	assert.Nil(t, resp.AgentStats)
+	assert.Equal(t, user.ID.String(), resp.MyStats.AgentID)
 }
 
 // --- GetAgentDetails Tests ---
@@ -431,17 +419,15 @@ func TestApp_GetAgentDetails_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Agent     handlers.AgentPerformanceStats `json:"agent"`
-			TrendData []handlers.TrendPoint          `json:"trend_data"`
-		} `json:"data"`
+		Agent     handlers.AgentPerformanceStats `json:"agent"`
+		TrendData []handlers.TrendPoint          `json:"trend_data"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, agentUser.ID.String(), resp.Data.Agent.AgentID)
-	assert.Equal(t, "Agent Smith", resp.Data.Agent.AgentName)
-	assert.Equal(t, int64(1), resp.Data.Agent.TransfersHandled)
+	assert.Equal(t, agentUser.ID.String(), resp.Agent.AgentID)
+	assert.Equal(t, "Agent Smith", resp.Agent.AgentName)
+	assert.Equal(t, int64(1), resp.Agent.TransfersHandled)
 }
 
 func TestApp_GetAgentDetails_NotFound(t *testing.T) {
@@ -561,14 +547,12 @@ func TestApp_GetAgentComparison_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Agents []handlers.AgentPerformanceStats `json:"agents"`
-		} `json:"data"`
+		Agents []handlers.AgentPerformanceStats `json:"agents"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Len(t, resp.Data.Agents, 2)
+	assert.Len(t, resp.Agents, 2)
 }
 
 func TestApp_GetAgentComparison_NoPermission(t *testing.T) {
@@ -618,12 +602,10 @@ func TestApp_GetAgentComparison_EmptyAgents(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Agents []handlers.AgentPerformanceStats `json:"agents"`
-		} `json:"data"`
+		Agents []handlers.AgentPerformanceStats `json:"agents"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Empty(t, resp.Data.Agents)
+	assert.Empty(t, resp.Agents)
 }

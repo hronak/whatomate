@@ -70,21 +70,19 @@ func TestApp_ListAPIKeys(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				APIKeys []handlers.APIKeyResponse `json:"api_keys"`
-				Total   int                       `json:"total"`
-				Page    int                       `json:"page"`
-				Limit   int                       `json:"limit"`
-			} `json:"data"`
+			APIKeys []handlers.APIKeyResponse `json:"api_keys"`
+			Total   int                       `json:"total"`
+			Page    int                       `json:"page"`
+			Limit   int                       `json:"limit"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Len(t, resp.Data.APIKeys, 2)
-		assert.Equal(t, 2, resp.Data.Total)
+		assert.Len(t, resp.APIKeys, 2)
+		assert.Equal(t, 2, resp.Total)
 
 		// Verify ordering is by created_at DESC (most recent first)
-		assert.Equal(t, "Key Two", resp.Data.APIKeys[0].Name)
-		assert.Equal(t, "Key One", resp.Data.APIKeys[1].Name)
+		assert.Equal(t, "Key Two", resp.APIKeys[0].Name)
+		assert.Equal(t, "Key One", resp.APIKeys[1].Name)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -102,17 +100,15 @@ func TestApp_ListAPIKeys(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				APIKeys []handlers.APIKeyResponse `json:"api_keys"`
-				Total   int                       `json:"total"`
-				Page    int                       `json:"page"`
-				Limit   int                       `json:"limit"`
-			} `json:"data"`
+			APIKeys []handlers.APIKeyResponse `json:"api_keys"`
+			Total   int                       `json:"total"`
+			Page    int                       `json:"page"`
+			Limit   int                       `json:"limit"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Empty(t, resp.Data.APIKeys)
-		assert.Equal(t, 0, resp.Data.Total)
+		assert.Empty(t, resp.APIKeys)
+		assert.Equal(t, 0, resp.Total)
 	})
 }
 
@@ -137,24 +133,22 @@ func TestApp_CreateAPIKey(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.APIKeyCreateResponse `json:"data"`
-		}
+		var resp handlers.APIKeyCreateResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, "My API Key", resp.Data.Name)
-		assert.NotEmpty(t, resp.Data.ID)
-		assert.NotEmpty(t, resp.Data.Key)
-		assert.True(t, len(resp.Data.Key) > 4, "key should have whm_ prefix plus random bytes")
-		assert.Equal(t, "whm_", resp.Data.Key[:4])
-		assert.NotEmpty(t, resp.Data.KeyPrefix)
-		assert.Equal(t, resp.Data.Key[4:20], resp.Data.KeyPrefix)
-		assert.NotEmpty(t, resp.Data.CreatedAt)
+		assert.Equal(t, "My API Key", resp.Name)
+		assert.NotEmpty(t, resp.ID)
+		assert.NotEmpty(t, resp.Key)
+		assert.True(t, len(resp.Key) > 4, "key should have whm_ prefix plus random bytes")
+		assert.Equal(t, "whm_", resp.Key[:4])
+		assert.NotEmpty(t, resp.KeyPrefix)
+		assert.Equal(t, resp.Key[4:20], resp.KeyPrefix)
+		assert.NotEmpty(t, resp.CreatedAt)
 
 		// Verify the key was persisted in the database
 		var dbKey models.APIKey
-		err = app.DB.Where("id = ?", resp.Data.ID).First(&dbKey).Error
+		err = app.DB.Where("id = ?", resp.ID).First(&dbKey).Error
 		require.NoError(t, err)
 		assert.Equal(t, org.ID, dbKey.OrganizationID)
 		assert.Equal(t, user.ID, dbKey.UserID)
@@ -179,14 +173,12 @@ func TestApp_CreateAPIKey(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.APIKeyCreateResponse `json:"data"`
-		}
+		var resp handlers.APIKeyCreateResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, "Expiring Key", resp.Data.Name)
-		assert.NotNil(t, resp.Data.ExpiresAt)
+		assert.Equal(t, "Expiring Key", resp.Name)
+		assert.NotNil(t, resp.ExpiresAt)
 	})
 
 	t.Run("validation error missing name", func(t *testing.T) {
@@ -279,17 +271,15 @@ func TestApp_ListAPIKeys_CrossOrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			APIKeys []handlers.APIKeyResponse `json:"api_keys"`
-			Total   int                       `json:"total"`
-			Page    int                       `json:"page"`
-			Limit   int                       `json:"limit"`
-		} `json:"data"`
+		APIKeys []handlers.APIKeyResponse `json:"api_keys"`
+		Total   int                       `json:"total"`
+		Page    int                       `json:"page"`
+		Limit   int                       `json:"limit"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.APIKeys, 1)
-	assert.Equal(t, "Org2 Key C", resp.Data.APIKeys[0].Name)
+	assert.Len(t, resp.APIKeys, 1)
+	assert.Equal(t, "Org2 Key C", resp.APIKeys[0].Name)
 }
 
 func TestApp_ListAPIKeys_ResponseFields(t *testing.T) {
@@ -311,18 +301,16 @@ func TestApp_ListAPIKeys_ResponseFields(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			APIKeys []handlers.APIKeyResponse `json:"api_keys"`
-			Total   int                       `json:"total"`
-			Page    int                       `json:"page"`
-			Limit   int                       `json:"limit"`
-		} `json:"data"`
+		APIKeys []handlers.APIKeyResponse `json:"api_keys"`
+		Total   int                       `json:"total"`
+		Page    int                       `json:"page"`
+		Limit   int                       `json:"limit"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	require.Len(t, resp.Data.APIKeys, 1)
+	require.Len(t, resp.APIKeys, 1)
 
-	item := resp.Data.APIKeys[0]
+	item := resp.APIKeys[0]
 	assert.Equal(t, apiKey.ID, item.ID)
 	assert.Equal(t, "Field Check Key", item.Name)
 	assert.Equal(t, "abcd1234", item.KeyPrefix)
@@ -357,17 +345,15 @@ func TestApp_ListAPIKeys_ExcludesDeletedKeys(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			APIKeys []handlers.APIKeyResponse `json:"api_keys"`
-			Total   int                       `json:"total"`
-			Page    int                       `json:"page"`
-			Limit   int                       `json:"limit"`
-		} `json:"data"`
+		APIKeys []handlers.APIKeyResponse `json:"api_keys"`
+		Total   int                       `json:"total"`
+		Page    int                       `json:"page"`
+		Limit   int                       `json:"limit"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.APIKeys, 1)
-	assert.Equal(t, keyToKeep.ID, resp.Data.APIKeys[0].ID)
+	assert.Len(t, resp.APIKeys, 1)
+	assert.Equal(t, keyToKeep.ID, resp.APIKeys[0].ID)
 }
 
 // --- CreateAPIKey Additional Tests ---
@@ -390,13 +376,11 @@ func TestApp_CreateAPIKey_KeyFormat(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.APIKeyCreateResponse `json:"data"`
-	}
+	var resp handlers.APIKeyCreateResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	key := resp.Data.Key
+	key := resp.Key
 	// Key must start with "whm_"
 	assert.True(t, len(key) > 4, "key must be longer than prefix")
 	assert.Equal(t, "whm_", key[:4])
@@ -412,7 +396,7 @@ func TestApp_CreateAPIKey_KeyFormat(t *testing.T) {
 	}
 
 	// KeyPrefix should be the first 16 chars of the hex part
-	assert.Equal(t, hexPart[:16], resp.Data.KeyPrefix)
+	assert.Equal(t, hexPart[:16], resp.KeyPrefix)
 }
 
 func TestApp_CreateAPIKey_UniqueKeys(t *testing.T) {
@@ -435,14 +419,12 @@ func TestApp_CreateAPIKey_UniqueKeys(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.APIKeyCreateResponse `json:"data"`
-		}
+		var resp handlers.APIKeyCreateResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.False(t, keys[resp.Data.Key], "key should be unique, got duplicate: %s", resp.Data.Key)
-		keys[resp.Data.Key] = true
+		assert.False(t, keys[resp.Key], "key should be unique, got duplicate: %s", resp.Key)
+		keys[resp.Key] = true
 	}
 	assert.Len(t, keys, 5)
 }
@@ -465,25 +447,23 @@ func TestApp_CreateAPIKey_DatabasePersistence(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.APIKeyCreateResponse `json:"data"`
-	}
+	var resp handlers.APIKeyCreateResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Verify the key was persisted with the correct org and user
 	var dbKey models.APIKey
-	err = app.DB.Where("id = ?", resp.Data.ID).First(&dbKey).Error
+	err = app.DB.Where("id = ?", resp.ID).First(&dbKey).Error
 	require.NoError(t, err)
 	assert.Equal(t, org.ID, dbKey.OrganizationID)
 	assert.Equal(t, user.ID, dbKey.UserID)
 	assert.Equal(t, "Persisted Key", dbKey.Name)
 	assert.True(t, dbKey.IsActive)
-	assert.Equal(t, resp.Data.KeyPrefix, dbKey.KeyPrefix)
+	assert.Equal(t, resp.KeyPrefix, dbKey.KeyPrefix)
 	// The hash should not be empty
 	assert.NotEmpty(t, dbKey.KeyHash)
 	// The hash should NOT be the plaintext key
-	assert.NotEqual(t, resp.Data.Key, dbKey.KeyHash)
+	assert.NotEqual(t, resp.Key, dbKey.KeyHash)
 }
 
 func TestApp_CreateAPIKey_InvalidJSONBody(t *testing.T) {

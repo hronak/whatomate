@@ -177,18 +177,16 @@ func TestApp_ListCatalogs_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Catalogs []handlers.CatalogResponse `json:"catalogs"`
-		} `json:"data"`
+		Catalogs []handlers.CatalogResponse `json:"catalogs"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Catalogs, 2)
+	assert.Len(t, resp.Catalogs, 2)
 
 	// Catalogs are ordered by name ASC
-	assert.Equal(t, "Catalog A", resp.Data.Catalogs[0].Name)
-	assert.Equal(t, "Catalog B", resp.Data.Catalogs[1].Name)
-	assert.True(t, resp.Data.Catalogs[0].IsActive)
+	assert.Equal(t, "Catalog A", resp.Catalogs[0].Name)
+	assert.Equal(t, "Catalog B", resp.Catalogs[1].Name)
+	assert.True(t, resp.Catalogs[0].IsActive)
 }
 
 func TestApp_ListCatalogs_Empty(t *testing.T) {
@@ -206,13 +204,11 @@ func TestApp_ListCatalogs_Empty(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Catalogs []handlers.CatalogResponse `json:"catalogs"`
-		} `json:"data"`
+		Catalogs []handlers.CatalogResponse `json:"catalogs"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Catalogs, 0)
+	assert.Len(t, resp.Catalogs, 0)
 }
 
 func TestApp_ListCatalogs_FilterByWhatsAppAccount(t *testing.T) {
@@ -229,21 +225,19 @@ func TestApp_ListCatalogs_FilterByWhatsAppAccount(t *testing.T) {
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
-	testutil.SetQueryParam(req, "whatsapp_account", account1.Name)
+	testutil.SetQueryParam(req, "whatsapp_account", account1.ID.String())
 
 	err := app.ListCatalogs(req)
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Catalogs []handlers.CatalogResponse `json:"catalogs"`
-		} `json:"data"`
+		Catalogs []handlers.CatalogResponse `json:"catalogs"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Catalogs, 1)
-	assert.Equal(t, account1.Name, resp.Data.Catalogs[0].WhatsAppAccountID)
+	assert.Len(t, resp.Catalogs, 1)
+	assert.Equal(t, account1.ID.String(), resp.Catalogs[0].WhatsAppAccountID)
 }
 
 func TestApp_ListCatalogs_WithProductCount(t *testing.T) {
@@ -266,14 +260,12 @@ func TestApp_ListCatalogs_WithProductCount(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Catalogs []handlers.CatalogResponse `json:"catalogs"`
-		} `json:"data"`
+		Catalogs []handlers.CatalogResponse `json:"catalogs"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	require.Len(t, resp.Data.Catalogs, 1)
-	assert.Equal(t, 2, resp.Data.Catalogs[0].ProductCount)
+	require.Len(t, resp.Catalogs, 1)
+	assert.Equal(t, 2, resp.Catalogs[0].ProductCount)
 }
 
 func TestApp_ListCatalogs_OrgIsolation(t *testing.T) {
@@ -296,13 +288,11 @@ func TestApp_ListCatalogs_OrgIsolation(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Catalogs []handlers.CatalogResponse `json:"catalogs"`
-		} `json:"data"`
+		Catalogs []handlers.CatalogResponse `json:"catalogs"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Catalogs, 0)
+	assert.Len(t, resp.Catalogs, 0)
 }
 
 // --- CreateCatalog Tests ---
@@ -317,8 +307,8 @@ func TestApp_CreateCatalog_Success(t *testing.T) {
 	account := createCatalogTestAccount(t, app, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"name":             "My Test Catalog",
-		"whatsapp_account": account.Name,
+		"name":                "My Test Catalog",
+		"whatsapp_account_id": account.ID.String(),
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -326,21 +316,19 @@ func TestApp_CreateCatalog_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogResponse `json:"data"`
-	}
+	var resp handlers.CatalogResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "My Test Catalog", resp.Data.Name)
-	assert.Equal(t, &account.ID, resp.Data.WhatsAppAccountID)
-	assert.Equal(t, mockServer.nextCatalogID, resp.Data.MetaCatalogID)
-	assert.True(t, resp.Data.IsActive)
-	assert.Equal(t, 0, resp.Data.ProductCount)
-	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
+	assert.Equal(t, "My Test Catalog", resp.Name)
+	assert.Equal(t, account.ID.String(), resp.WhatsAppAccountID)
+	assert.Equal(t, mockServer.nextCatalogID, resp.MetaCatalogID)
+	assert.True(t, resp.IsActive)
+	assert.Equal(t, 0, resp.ProductCount)
+	assert.NotEqual(t, uuid.Nil, resp.ID)
 
 	// Verify catalog was persisted in the database
 	var dbCatalog models.Catalog
-	require.NoError(t, app.DB.Where("id = ?", resp.Data.ID).First(&dbCatalog).Error)
+	require.NoError(t, app.DB.Where("id = ?", resp.ID).First(&dbCatalog).Error)
 	assert.Equal(t, "My Test Catalog", dbCatalog.Name)
 	assert.Equal(t, mockServer.nextCatalogID, dbCatalog.MetaCatalogID)
 }
@@ -359,7 +347,7 @@ func TestApp_CreateCatalog_MissingFields(t *testing.T) {
 		{
 			name: "missing_name",
 			body: map[string]any{
-				"whatsapp_account": "some-account",
+				"whatsapp_account_id": "some-account",
 			},
 		},
 		{
@@ -394,8 +382,8 @@ func TestApp_CreateCatalog_AccountNotFound(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"name":             "My Catalog",
-		"whatsapp_account": "nonexistent-account",
+		"name":                "My Catalog",
+		"whatsapp_account_id": "nonexistent-account",
 	})
 	testutil.SetAuthContext(req, org.ID, user.ID)
 
@@ -410,8 +398,8 @@ func TestApp_CreateCatalog_Unauthorized(t *testing.T) {
 	app := newTestApp(t)
 
 	req := testutil.NewJSONRequest(t, map[string]any{
-		"name":             "My Catalog",
-		"whatsapp_account": "some-account",
+		"name":                "My Catalog",
+		"whatsapp_account_id": "some-account",
 	})
 	// No auth context
 
@@ -441,23 +429,21 @@ func TestApp_GetCatalog_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogResponse `json:"data"`
-	}
+	var resp handlers.CatalogResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, catalog.ID, resp.Data.ID)
-	assert.Equal(t, "Test Catalog", resp.Data.Name)
-	assert.Equal(t, &account.ID, resp.Data.WhatsAppAccountID)
-	assert.True(t, resp.Data.IsActive)
-	assert.Equal(t, 1, resp.Data.ProductCount)
+	assert.Equal(t, catalog.ID, resp.ID)
+	assert.Equal(t, "Test Catalog", resp.Name)
+	assert.Equal(t, account.ID.String(), resp.WhatsAppAccountID)
+	assert.True(t, resp.IsActive)
+	assert.Equal(t, 1, resp.ProductCount)
 
 	// Verify products are included
-	require.Len(t, resp.Data.Products, 1)
-	assert.Equal(t, product.ID, resp.Data.Products[0].ID)
-	assert.Equal(t, "Test Product", resp.Data.Products[0].Name)
-	assert.Equal(t, int64(1500), resp.Data.Products[0].Price)
-	assert.Equal(t, "USD", resp.Data.Products[0].Currency)
+	require.Len(t, resp.Products, 1)
+	assert.Equal(t, product.ID, resp.Products[0].ID)
+	assert.Equal(t, "Test Product", resp.Products[0].Name)
+	assert.Equal(t, int64(1500), resp.Products[0].Price)
+	assert.Equal(t, "USD", resp.Products[0].Currency)
 }
 
 func TestApp_GetCatalog_NotFound(t *testing.T) {
@@ -537,13 +523,11 @@ func TestApp_DeleteCatalog_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Catalog deleted", resp.Data.Message)
+	assert.Equal(t, "Catalog deleted", resp.Message)
 
 	// Verify catalog is deleted from DB
 	var catalogCount int64
@@ -637,19 +621,17 @@ func TestApp_ListCatalogProducts_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Products []handlers.CatalogProductResponse `json:"products"`
-		} `json:"data"`
+		Products []handlers.CatalogProductResponse `json:"products"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Products, 2)
+	assert.Len(t, resp.Products, 2)
 
 	// Products are ordered by name ASC
-	assert.Equal(t, "Alpha Product", resp.Data.Products[0].Name)
-	assert.Equal(t, "Beta Product", resp.Data.Products[1].Name)
-	assert.Equal(t, int64(1000), resp.Data.Products[0].Price)
-	assert.Equal(t, int64(2000), resp.Data.Products[1].Price)
+	assert.Equal(t, "Alpha Product", resp.Products[0].Name)
+	assert.Equal(t, "Beta Product", resp.Products[1].Name)
+	assert.Equal(t, int64(1000), resp.Products[0].Price)
+	assert.Equal(t, int64(2000), resp.Products[1].Price)
 }
 
 func TestApp_ListCatalogProducts_Empty(t *testing.T) {
@@ -671,13 +653,11 @@ func TestApp_ListCatalogProducts_Empty(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Products []handlers.CatalogProductResponse `json:"products"`
-		} `json:"data"`
+		Products []handlers.CatalogProductResponse `json:"products"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Len(t, resp.Data.Products, 0)
+	assert.Len(t, resp.Products, 0)
 }
 
 func TestApp_ListCatalogProducts_CatalogNotFound(t *testing.T) {
@@ -720,14 +700,12 @@ func TestApp_ListCatalogProducts_OnlyShowsProductsForCatalog(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Products []handlers.CatalogProductResponse `json:"products"`
-		} `json:"data"`
+		Products []handlers.CatalogProductResponse `json:"products"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	require.Len(t, resp.Data.Products, 1)
-	assert.Equal(t, "Product in Catalog 1", resp.Data.Products[0].Name)
+	require.Len(t, resp.Products, 1)
+	assert.Equal(t, "Product in Catalog 1", resp.Products[0].Name)
 }
 
 // --- CreateCatalogProduct Tests ---
@@ -762,24 +740,22 @@ func TestApp_CreateCatalogProduct_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogProductResponse `json:"data"`
-	}
+	var resp handlers.CatalogProductResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "New Product", resp.Data.Name)
-	assert.Equal(t, "A great product", resp.Data.Description)
-	assert.Equal(t, int64(2500), resp.Data.Price)
-	assert.Equal(t, "EUR", resp.Data.Currency)
-	assert.Equal(t, "https://example.com/product/1", resp.Data.URL)
-	assert.Equal(t, "https://example.com/image/1.jpg", resp.Data.ImageURL)
-	assert.Equal(t, "SKU-001", resp.Data.RetailerID)
-	assert.True(t, resp.Data.IsActive)
-	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
+	assert.Equal(t, "New Product", resp.Name)
+	assert.Equal(t, "A great product", resp.Description)
+	assert.Equal(t, int64(2500), resp.Price)
+	assert.Equal(t, "EUR", resp.Currency)
+	assert.Equal(t, "https://example.com/product/1", resp.URL)
+	assert.Equal(t, "https://example.com/image/1.jpg", resp.ImageURL)
+	assert.Equal(t, "SKU-001", resp.RetailerID)
+	assert.True(t, resp.IsActive)
+	assert.NotEqual(t, uuid.Nil, resp.ID)
 
 	// Verify product was persisted in the database
 	var dbProduct models.CatalogProduct
-	require.NoError(t, app.DB.Where("id = ?", resp.Data.ID).First(&dbProduct).Error)
+	require.NoError(t, app.DB.Where("id = ?", resp.ID).First(&dbProduct).Error)
 	assert.Equal(t, "New Product", dbProduct.Name)
 	assert.Equal(t, catalog.ID, dbProduct.CatalogID)
 	assert.Equal(t, org.ID, dbProduct.OrganizationID)
@@ -808,12 +784,10 @@ func TestApp_CreateCatalogProduct_DefaultCurrency(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogProductResponse `json:"data"`
-	}
+	var resp handlers.CatalogProductResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "USD", resp.Data.Currency)
+	assert.Equal(t, "USD", resp.Currency)
 }
 
 func TestApp_CreateCatalogProduct_MissingFields(t *testing.T) {
@@ -911,19 +885,17 @@ func TestApp_GetCatalogProduct_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogProductResponse `json:"data"`
-	}
+	var resp handlers.CatalogProductResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, product.ID, resp.Data.ID)
-	assert.Equal(t, "Test Product", resp.Data.Name)
-	assert.Equal(t, int64(3000), resp.Data.Price)
-	assert.Equal(t, "USD", resp.Data.Currency)
-	assert.Equal(t, product.RetailerID, resp.Data.RetailerID)
-	assert.True(t, resp.Data.IsActive)
-	assert.NotEmpty(t, resp.Data.CreatedAt)
-	assert.NotEmpty(t, resp.Data.UpdatedAt)
+	assert.Equal(t, product.ID, resp.ID)
+	assert.Equal(t, "Test Product", resp.Name)
+	assert.Equal(t, int64(3000), resp.Price)
+	assert.Equal(t, "USD", resp.Currency)
+	assert.Equal(t, product.RetailerID, resp.RetailerID)
+	assert.True(t, resp.IsActive)
+	assert.NotEmpty(t, resp.CreatedAt)
+	assert.NotEmpty(t, resp.UpdatedAt)
 }
 
 func TestApp_GetCatalogProduct_NotFound(t *testing.T) {
@@ -1010,19 +982,17 @@ func TestApp_UpdateCatalogProduct_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogProductResponse `json:"data"`
-	}
+	var resp handlers.CatalogProductResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, product.ID, resp.Data.ID)
-	assert.Equal(t, "Updated Product", resp.Data.Name)
-	assert.Equal(t, "Updated description", resp.Data.Description)
-	assert.Equal(t, int64(2500), resp.Data.Price)
-	assert.Equal(t, "EUR", resp.Data.Currency)
-	assert.Equal(t, "https://example.com/updated", resp.Data.URL)
-	assert.Equal(t, "https://example.com/updated-image.jpg", resp.Data.ImageURL)
-	assert.Equal(t, "SKU-UPDATED", resp.Data.RetailerID)
+	assert.Equal(t, product.ID, resp.ID)
+	assert.Equal(t, "Updated Product", resp.Name)
+	assert.Equal(t, "Updated description", resp.Description)
+	assert.Equal(t, int64(2500), resp.Price)
+	assert.Equal(t, "EUR", resp.Currency)
+	assert.Equal(t, "https://example.com/updated", resp.URL)
+	assert.Equal(t, "https://example.com/updated-image.jpg", resp.ImageURL)
+	assert.Equal(t, "SKU-UPDATED", resp.RetailerID)
 
 	// Verify changes persisted in database
 	var dbProduct models.CatalogProduct
@@ -1055,16 +1025,14 @@ func TestApp_UpdateCatalogProduct_PartialUpdate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.CatalogProductResponse `json:"data"`
-	}
+	var resp handlers.CatalogProductResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Only Name Changed", resp.Data.Name)
+	assert.Equal(t, "Only Name Changed", resp.Name)
 	// Original values should be preserved
-	assert.Equal(t, product.Price, resp.Data.Price)
-	assert.Equal(t, product.Currency, resp.Data.Currency)
-	assert.Equal(t, product.Description, resp.Data.Description)
+	assert.Equal(t, product.Price, resp.Price)
+	assert.Equal(t, product.Currency, resp.Currency)
+	assert.Equal(t, product.Description, resp.Description)
 }
 
 func TestApp_UpdateCatalogProduct_NotFound(t *testing.T) {
@@ -1126,13 +1094,11 @@ func TestApp_DeleteCatalogProduct_Success(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Message string `json:"message"`
-		} `json:"data"`
+		Message string `json:"message"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.Equal(t, "Product deleted", resp.Data.Message)
+	assert.Equal(t, "Product deleted", resp.Message)
 
 	// Verify product is deleted from DB
 	var count int64

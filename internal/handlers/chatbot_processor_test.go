@@ -75,19 +75,19 @@ func TestMatchKeywordRules_ExactMatch(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "hello")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "hello")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, "Hello response", resp.Body)
 
 	// Different case should also match (case insensitive by default)
-	resp2, matched2 := app.matchKeywordRules(org.ID, account.Name, "HELLO")
+	resp2, matched2 := app.matchKeywordRules(org.ID, &account.ID, "HELLO")
 	assert.True(t, matched2)
 	require.NotNil(t, resp2)
 	assert.Equal(t, "Hello response", resp2.Body)
 
 	// Partial should NOT match exact
-	_, matched3 := app.matchKeywordRules(org.ID, account.Name, "hello world")
+	_, matched3 := app.matchKeywordRules(org.ID, &account.ID, "hello world")
 	assert.False(t, matched3)
 }
 
@@ -110,10 +110,10 @@ func TestMatchKeywordRules_ExactMatch_CaseSensitive(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	_, matched := app.matchKeywordRules(org.ID, account.Name, "Hello")
+	_, matched := app.matchKeywordRules(org.ID, &account.ID, "Hello")
 	assert.True(t, matched)
 
-	_, matched2 := app.matchKeywordRules(org.ID, account.Name, "hello")
+	_, matched2 := app.matchKeywordRules(org.ID, &account.ID, "hello")
 	assert.False(t, matched2)
 }
 
@@ -135,15 +135,15 @@ func TestMatchKeywordRules_ContainsMatch(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "I need help please")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "I need help please")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, "Help response", resp.Body)
 
-	_, matched2 := app.matchKeywordRules(org.ID, account.Name, "HELP ME")
+	_, matched2 := app.matchKeywordRules(org.ID, &account.ID, "HELP ME")
 	assert.True(t, matched2)
 
-	_, matched3 := app.matchKeywordRules(org.ID, account.Name, "goodbye")
+	_, matched3 := app.matchKeywordRules(org.ID, &account.ID, "goodbye")
 	assert.False(t, matched3)
 }
 
@@ -165,12 +165,12 @@ func TestMatchKeywordRules_StartsWithMatch(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "hi there")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "hi there")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, "Hi response", resp.Body)
 
-	_, matched2 := app.matchKeywordRules(org.ID, account.Name, "say hi")
+	_, matched2 := app.matchKeywordRules(org.ID, &account.ID, "say hi")
 	assert.False(t, matched2)
 }
 
@@ -192,12 +192,12 @@ func TestMatchKeywordRules_RegexMatch(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "I have order #12345")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "I have order #12345")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, "Order lookup", resp.Body)
 
-	_, matched2 := app.matchKeywordRules(org.ID, account.Name, "where is my package")
+	_, matched2 := app.matchKeywordRules(org.ID, &account.ID, "where is my package")
 	assert.False(t, matched2)
 }
 
@@ -219,7 +219,7 @@ func TestMatchKeywordRules_NoMatch(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "random message")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "random message")
 	assert.False(t, matched)
 	assert.Nil(t, resp)
 }
@@ -259,7 +259,7 @@ func TestMatchKeywordRules_Priority(t *testing.T) {
 	require.NoError(t, app.DB.Create(highRule).Error)
 
 	// The higher priority rule should be returned (rules are ORDER BY priority DESC)
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "this is a test")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "this is a test")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, "High priority", resp.Body)
@@ -285,7 +285,7 @@ func TestMatchKeywordRules_DisabledRuleIgnored(t *testing.T) {
 	// Explicitly disable: GORM skips zero-value bools with default:true on INSERT.
 	require.NoError(t, app.DB.Model(rule).Update("is_enabled", false).Error)
 
-	_, matched := app.matchKeywordRules(org.ID, account.Name, "disabled")
+	_, matched := app.matchKeywordRules(org.ID, &account.ID, "disabled")
 	assert.False(t, matched)
 }
 
@@ -307,7 +307,7 @@ func TestMatchKeywordRules_TransferType(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "agent")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "agent")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, models.ResponseTypeTransfer, resp.ResponseType)
@@ -338,7 +338,7 @@ func TestMatchKeywordRules_WithButtons(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
-	resp, matched := app.matchKeywordRules(org.ID, account.Name, "menu")
+	resp, matched := app.matchKeywordRules(org.ID, &account.ID, "menu")
 	assert.True(t, matched)
 	require.NotNil(t, resp)
 	assert.Equal(t, "Choose an option:", resp.Body)
@@ -354,7 +354,7 @@ func TestGetOrCreateSession_NewSession(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
-	session, isNew := app.getOrCreateSession(org.ID, contact.ID, account.Name, contact.PhoneNumber, 30)
+	session, isNew := app.getOrCreateSession(org.ID, contact.ID, &account.ID, contact.PhoneNumber, 30)
 	assert.True(t, isNew)
 	require.NotNil(t, session)
 	assert.Equal(t, models.SessionStatusActive, session.Status)
@@ -387,7 +387,7 @@ func TestGetOrCreateSession_ExistingSession(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(&existing).Error)
 
-	session, isNew := app.getOrCreateSession(org.ID, contact.ID, account.Name, contact.PhoneNumber, 30)
+	session, isNew := app.getOrCreateSession(org.ID, contact.ID, &account.ID, contact.PhoneNumber, 30)
 	assert.False(t, isNew)
 	require.NotNil(t, session)
 	assert.Equal(t, existing.ID, session.ID)
@@ -412,7 +412,7 @@ func TestGetOrCreateSession_ExpiredSession(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(&expired).Error)
 
-	session, isNew := app.getOrCreateSession(org.ID, contact.ID, account.Name, contact.PhoneNumber, 30)
+	session, isNew := app.getOrCreateSession(org.ID, contact.ID, &account.ID, contact.PhoneNumber, 30)
 	assert.True(t, isNew)
 	require.NotNil(t, session)
 	assert.NotEqual(t, expired.ID, session.ID, "should create a new session, not return expired one")

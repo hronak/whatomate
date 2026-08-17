@@ -42,18 +42,16 @@ func TestApp_ListContacts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contacts []handlers.ContactResponse `json:"contacts"`
-				Total    int64                      `json:"total"`
-				Page     int                        `json:"page"`
-				Limit    int                        `json:"limit"`
-			} `json:"data"`
+			Contacts []handlers.ContactResponse `json:"contacts"`
+			Total    int64                      `json:"total"`
+			Page     int                        `json:"page"`
+			Limit    int                        `json:"limit"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, int64(3), resp.Data.Total)
-		assert.Len(t, resp.Data.Contacts, 2)
-		assert.Equal(t, 1, resp.Data.Page)
-		assert.Equal(t, 2, resp.Data.Limit)
+		assert.Equal(t, int64(3), resp.Total)
+		assert.Len(t, resp.Contacts, 2)
+		assert.Equal(t, 1, resp.Page)
+		assert.Equal(t, 2, resp.Limit)
 	})
 
 	t.Run("empty list", func(t *testing.T) {
@@ -70,14 +68,12 @@ func TestApp_ListContacts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contacts []handlers.ContactResponse `json:"contacts"`
-				Total    int64                      `json:"total"`
-			} `json:"data"`
+			Contacts []handlers.ContactResponse `json:"contacts"`
+			Total    int64                      `json:"total"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, int64(0), resp.Data.Total)
-		assert.Empty(t, resp.Data.Contacts)
+		assert.Equal(t, int64(0), resp.Total)
+		assert.Empty(t, resp.Contacts)
 	})
 
 	t.Run("filter by search on phone number", func(t *testing.T) {
@@ -100,15 +96,13 @@ func TestApp_ListContacts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contacts []handlers.ContactResponse `json:"contacts"`
-				Total    int64                      `json:"total"`
-			} `json:"data"`
+			Contacts []handlers.ContactResponse `json:"contacts"`
+			Total    int64                      `json:"total"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, int64(1), resp.Data.Total)
-		assert.Len(t, resp.Data.Contacts, 1)
-		assert.Equal(t, uniquePhone, resp.Data.Contacts[0].PhoneNumber)
+		assert.Equal(t, int64(1), resp.Total)
+		assert.Len(t, resp.Contacts, 1)
+		assert.Equal(t, uniquePhone, resp.Contacts[0].PhoneNumber)
 	})
 
 	t.Run("cross-org isolation", func(t *testing.T) {
@@ -130,14 +124,12 @@ func TestApp_ListContacts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contacts []handlers.ContactResponse `json:"contacts"`
-				Total    int64                      `json:"total"`
-			} `json:"data"`
+			Contacts []handlers.ContactResponse `json:"contacts"`
+			Total    int64                      `json:"total"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, int64(0), resp.Data.Total)
-		assert.Empty(t, resp.Data.Contacts)
+		assert.Equal(t, int64(0), resp.Total)
+		assert.Empty(t, resp.Contacts)
 	})
 
 	t.Run("returns contact fields correctly", func(t *testing.T) {
@@ -156,18 +148,16 @@ func TestApp_ListContacts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contacts []handlers.ContactResponse `json:"contacts"`
-				Total    int64                      `json:"total"`
-			} `json:"data"`
+			Contacts []handlers.ContactResponse `json:"contacts"`
+			Total    int64                      `json:"total"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		require.Len(t, resp.Data.Contacts, 1)
-		assert.Equal(t, contact.ID, resp.Data.Contacts[0].ID)
-		assert.Equal(t, contact.PhoneNumber, resp.Data.Contacts[0].PhoneNumber)
-		assert.Equal(t, contact.ProfileName, resp.Data.Contacts[0].ProfileName)
-		assert.Equal(t, "active", resp.Data.Contacts[0].Status)
-		assert.NotNil(t, resp.Data.Contacts[0].Tags)
+		require.Len(t, resp.Contacts, 1)
+		assert.Equal(t, contact.ID, resp.Contacts[0].ID)
+		assert.Equal(t, contact.PhoneNumber, resp.Contacts[0].PhoneNumber)
+		assert.Equal(t, contact.ProfileName, resp.Contacts[0].ProfileName)
+		assert.Equal(t, "active", resp.Contacts[0].Status)
+		assert.NotNil(t, resp.Contacts[0].Tags)
 	})
 
 	t.Run("default pagination with no params", func(t *testing.T) {
@@ -186,17 +176,15 @@ func TestApp_ListContacts(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Contacts []handlers.ContactResponse `json:"contacts"`
-				Total    int64                      `json:"total"`
-				Page     int                        `json:"page"`
-				Limit    int                        `json:"limit"`
-			} `json:"data"`
+			Contacts []handlers.ContactResponse `json:"contacts"`
+			Total    int64                      `json:"total"`
+			Page     int                        `json:"page"`
+			Limit    int                        `json:"limit"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 		// Default pagination: page=1, limit=50
-		assert.Equal(t, 1, resp.Data.Page)
-		assert.Equal(t, 50, resp.Data.Limit)
+		assert.Equal(t, 1, resp.Page)
+		assert.Equal(t, 50, resp.Limit)
 	})
 }
 
@@ -220,16 +208,14 @@ func TestApp_GetContact(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ContactResponse `json:"data"`
-		}
+		var resp handlers.ContactResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, contact.ID, resp.Data.ID)
-		assert.Equal(t, contact.PhoneNumber, resp.Data.PhoneNumber)
-		assert.Equal(t, contact.ProfileName, resp.Data.ProfileName)
-		assert.Equal(t, "active", resp.Data.Status)
-		assert.NotNil(t, resp.Data.Tags)
-		assert.Equal(t, 0, resp.Data.UnreadCount)
+		assert.Equal(t, contact.ID, resp.ID)
+		assert.Equal(t, contact.PhoneNumber, resp.PhoneNumber)
+		assert.Equal(t, contact.ProfileName, resp.ProfileName)
+		assert.Equal(t, "active", resp.Status)
+		assert.NotNil(t, resp.Tags)
+		assert.Equal(t, 0, resp.UnreadCount)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -311,11 +297,9 @@ func TestApp_GetContact(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ContactResponse `json:"data"`
-		}
+		var resp handlers.ContactResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, 1, resp.Data.UnreadCount)
+		assert.Equal(t, 1, resp.UnreadCount)
 	})
 }
 
@@ -339,13 +323,11 @@ func TestApp_GetContactSessionData(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ContactSessionDataResponse `json:"data"`
-		}
+		var resp handlers.ContactSessionDataResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Nil(t, resp.Data.SessionID)
-		assert.NotNil(t, resp.Data.SessionData)
-		assert.NotNil(t, resp.Data.PanelConfig)
+		assert.Nil(t, resp.SessionID)
+		assert.NotNil(t, resp.SessionData)
+		assert.NotNil(t, resp.PanelConfig)
 	})
 
 	t.Run("success with active session", func(t *testing.T) {
@@ -378,12 +360,10 @@ func TestApp_GetContactSessionData(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.ContactSessionDataResponse `json:"data"`
-		}
+		var resp handlers.ContactSessionDataResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.NotNil(t, resp.Data.SessionID)
-		assert.Equal(t, session.ID, *resp.Data.SessionID)
+		assert.NotNil(t, resp.SessionID)
+		assert.Equal(t, session.ID, *resp.SessionID)
 	})
 
 	t.Run("not found - contact does not exist", func(t *testing.T) {
@@ -460,15 +440,13 @@ func TestApp_AssignContact(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message        string     `json:"message"`
-				AssignedUserID *uuid.UUID `json:"assigned_user_id"`
-			} `json:"data"`
+			Message        string     `json:"message"`
+			AssignedUserID *uuid.UUID `json:"assigned_user_id"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Contains(t, resp.Data.Message, "assigned successfully")
-		assert.NotNil(t, resp.Data.AssignedUserID)
-		assert.Equal(t, assignee.ID, *resp.Data.AssignedUserID)
+		assert.Contains(t, resp.Message, "assigned successfully")
+		assert.NotNil(t, resp.AssignedUserID)
+		assert.Equal(t, assignee.ID, *resp.AssignedUserID)
 
 		// Verify in database
 		var updatedContact models.Contact
@@ -499,14 +477,12 @@ func TestApp_AssignContact(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message        string     `json:"message"`
-				AssignedUserID *uuid.UUID `json:"assigned_user_id"`
-			} `json:"data"`
+			Message        string     `json:"message"`
+			AssignedUserID *uuid.UUID `json:"assigned_user_id"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Contains(t, resp.Data.Message, "assigned successfully")
-		assert.Nil(t, resp.Data.AssignedUserID)
+		assert.Contains(t, resp.Message, "assigned successfully")
+		assert.Nil(t, resp.AssignedUserID)
 
 		// Verify in database
 		var updatedContact models.Contact
@@ -653,16 +629,14 @@ func TestApp_GetMessages(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Messages []handlers.MessageResponse `json:"messages"`
-				Total    int64                      `json:"total"`
-				HasMore  bool                       `json:"has_more"`
-			} `json:"data"`
+			Messages []handlers.MessageResponse `json:"messages"`
+			Total    int64                      `json:"total"`
+			HasMore  bool                       `json:"has_more"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, int64(3), resp.Data.Total)
-		assert.Len(t, resp.Data.Messages, 3)
-		assert.False(t, resp.Data.HasMore)
+		assert.Equal(t, int64(3), resp.Total)
+		assert.Len(t, resp.Messages, 3)
+		assert.False(t, resp.HasMore)
 	})
 
 	t.Run("empty messages", func(t *testing.T) {
@@ -682,14 +656,12 @@ func TestApp_GetMessages(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Messages []handlers.MessageResponse `json:"messages"`
-				Total    int64                      `json:"total"`
-			} `json:"data"`
+			Messages []handlers.MessageResponse `json:"messages"`
+			Total    int64                      `json:"total"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, int64(0), resp.Data.Total)
-		assert.Empty(t, resp.Data.Messages)
+		assert.Equal(t, int64(0), resp.Total)
+		assert.Empty(t, resp.Messages)
 	})
 
 	t.Run("contact not found", func(t *testing.T) {
@@ -762,16 +734,14 @@ func TestApp_GetMessages(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Messages []handlers.MessageResponse `json:"messages"`
-				Total    int64                      `json:"total"`
-				Page     int                        `json:"page"`
-				Limit    int                        `json:"limit"`
-			} `json:"data"`
+			Messages []handlers.MessageResponse `json:"messages"`
+			Total    int64                      `json:"total"`
+			Page     int                        `json:"page"`
+			Limit    int                        `json:"limit"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, 1, resp.Data.Page)
-		assert.Equal(t, 50, resp.Data.Limit)
+		assert.Equal(t, 1, resp.Page)
+		assert.Equal(t, 50, resp.Limit)
 	})
 
 	t.Run("cursor-based pagination with before_id", func(t *testing.T) {
@@ -813,16 +783,14 @@ func TestApp_GetMessages(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Messages []handlers.MessageResponse `json:"messages"`
-				Total    int64                      `json:"total"`
-				HasMore  bool                       `json:"has_more"`
-			} `json:"data"`
+			Messages []handlers.MessageResponse `json:"messages"`
+			Total    int64                      `json:"total"`
+			HasMore  bool                       `json:"has_more"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 		// Should return messages before the 4th (so messages at index 1,2)
-		assert.Len(t, resp.Data.Messages, 2)
-		assert.True(t, resp.Data.HasMore)
+		assert.Len(t, resp.Messages, 2)
+		assert.True(t, resp.HasMore)
 	})
 
 	t.Run("marks messages as read on page-based fetch", func(t *testing.T) {
@@ -892,14 +860,12 @@ func TestApp_GetMessages(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Messages []handlers.MessageResponse `json:"messages"`
-			} `json:"data"`
+			Messages []handlers.MessageResponse `json:"messages"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		require.Len(t, resp.Data.Messages, 1)
+		require.Len(t, resp.Messages, 1)
 
-		m := resp.Data.Messages[0]
+		m := resp.Messages[0]
 		assert.Equal(t, msg.ID, m.ID)
 		assert.Equal(t, contact.ID, m.ContactID)
 		assert.Equal(t, models.DirectionIncoming, m.Direction)
@@ -939,13 +905,11 @@ func TestApp_SendMessage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.MessageResponse `json:"data"`
-		}
+		var resp handlers.MessageResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, contact.ID, resp.Data.ContactID)
-		assert.Equal(t, models.DirectionOutgoing, resp.Data.Direction)
-		assert.Equal(t, models.MessageTypeText, resp.Data.MessageType)
+		assert.Equal(t, contact.ID, resp.ContactID)
+		assert.Equal(t, models.DirectionOutgoing, resp.Direction)
+		assert.Equal(t, models.MessageTypeText, resp.MessageType)
 	})
 
 	t.Run("invalid request body", func(t *testing.T) {
@@ -1109,13 +1073,11 @@ func TestApp_SendMessage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.MessageResponse `json:"data"`
-		}
+		var resp handlers.MessageResponse
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.True(t, resp.Data.IsReply)
-		assert.NotNil(t, resp.Data.ReplyToMessageID)
-		assert.NotNil(t, resp.Data.ReplyToMessage)
+		assert.True(t, resp.IsReply)
+		assert.NotNil(t, resp.ReplyToMessageID)
+		assert.NotNil(t, resp.ReplyToMessage)
 	})
 }
 
@@ -1158,19 +1120,17 @@ func TestApp_SendReaction(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				MessageID string `json:"message_id"`
-				Reactions []struct {
-					Emoji    string `json:"emoji"`
-					FromUser string `json:"from_user"`
-				} `json:"reactions"`
-			} `json:"data"`
+			MessageID string `json:"message_id"`
+			Reactions []struct {
+				Emoji    string `json:"emoji"`
+				FromUser string `json:"from_user"`
+			} `json:"reactions"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, msg.ID.String(), resp.Data.MessageID)
-		require.Len(t, resp.Data.Reactions, 1)
-		assert.Equal(t, "\U0001F44D", resp.Data.Reactions[0].Emoji)
-		assert.Equal(t, user.ID.String(), resp.Data.Reactions[0].FromUser)
+		assert.Equal(t, msg.ID.String(), resp.MessageID)
+		require.Len(t, resp.Reactions, 1)
+		assert.Equal(t, "\U0001F44D", resp.Reactions[0].Emoji)
+		assert.Equal(t, user.ID.String(), resp.Reactions[0].FromUser)
 	})
 
 	t.Run("success - remove reaction", func(t *testing.T) {
@@ -1217,13 +1177,11 @@ func TestApp_SendReaction(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Reactions []any `json:"reactions"`
-			} `json:"data"`
+			Reactions []any `json:"reactions"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 		// Reaction should be removed (empty or nil)
-		assert.Empty(t, resp.Data.Reactions)
+		assert.Empty(t, resp.Reactions)
 	})
 
 	t.Run("contact not found", func(t *testing.T) {
@@ -1372,15 +1330,13 @@ func TestApp_ListContacts_SearchByProfileName(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Contacts []handlers.ContactResponse `json:"contacts"`
-			Total    int64                      `json:"total"`
-		} `json:"data"`
+		Contacts []handlers.ContactResponse `json:"contacts"`
+		Total    int64                      `json:"total"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, int64(1), resp.Data.Total)
-	require.Len(t, resp.Data.Contacts, 1)
-	assert.Equal(t, "UniqueAlphaName", resp.Data.Contacts[0].ProfileName)
+	assert.Equal(t, int64(1), resp.Total)
+	require.Len(t, resp.Contacts, 1)
+	assert.Equal(t, "UniqueAlphaName", resp.Contacts[0].ProfileName)
 }
 
 func TestApp_ListContacts_Page2(t *testing.T) {
@@ -1406,18 +1362,16 @@ func TestApp_ListContacts_Page2(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Contacts []handlers.ContactResponse `json:"contacts"`
-			Total    int64                      `json:"total"`
-			Page     int                        `json:"page"`
-			Limit    int                        `json:"limit"`
-		} `json:"data"`
+		Contacts []handlers.ContactResponse `json:"contacts"`
+		Total    int64                      `json:"total"`
+		Page     int                        `json:"page"`
+		Limit    int                        `json:"limit"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, int64(5), resp.Data.Total)
-	assert.Len(t, resp.Data.Contacts, 2)
-	assert.Equal(t, 2, resp.Data.Page)
-	assert.Equal(t, 2, resp.Data.Limit)
+	assert.Equal(t, int64(5), resp.Total)
+	assert.Len(t, resp.Contacts, 2)
+	assert.Equal(t, 2, resp.Page)
+	assert.Equal(t, 2, resp.Limit)
 }
 
 // --- GetContact additional tests ---
@@ -1500,12 +1454,10 @@ func TestApp_GetContact_WithAssignedUser(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.ContactResponse `json:"data"`
-	}
+	var resp handlers.ContactResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.NotNil(t, resp.Data.AssignedUserID)
-	assert.Equal(t, assignee.ID, *resp.Data.AssignedUserID)
+	assert.NotNil(t, resp.AssignedUserID)
+	assert.Equal(t, assignee.ID, *resp.AssignedUserID)
 }
 
 func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
@@ -1567,12 +1519,10 @@ func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.ContactResponse `json:"data"`
-	}
+	var resp handlers.ContactResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 	// Only 3 incoming delivered (not read) messages should be counted
-	assert.Equal(t, 3, resp.Data.UnreadCount)
+	assert.Equal(t, 3, resp.UnreadCount)
 }
 
 // --- GetContactSessionData additional tests ---
@@ -1610,12 +1560,10 @@ func TestApp_GetContactSessionData_CompletedSession(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.ContactSessionDataResponse `json:"data"`
-	}
+	var resp handlers.ContactSessionDataResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.NotNil(t, resp.Data.SessionID)
-	assert.Equal(t, session.ID, *resp.Data.SessionID)
+	assert.NotNil(t, resp.SessionID)
+	assert.Equal(t, session.ID, *resp.SessionID)
 }
 
 func TestApp_GetContactSessionData_MostRecentSessionReturned(t *testing.T) {
@@ -1664,13 +1612,11 @@ func TestApp_GetContactSessionData_MostRecentSessionReturned(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.ContactSessionDataResponse `json:"data"`
-	}
+	var resp handlers.ContactSessionDataResponse
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 	// Should return the most recent session
-	require.NotNil(t, resp.Data.SessionID)
-	assert.Equal(t, newSession.ID, *resp.Data.SessionID)
+	require.NotNil(t, resp.SessionID)
+	assert.Equal(t, newSession.ID, *resp.SessionID)
 }
 
 // --- AssignContact additional tests ---
@@ -1701,13 +1647,11 @@ func TestApp_AssignContact_ReassignToAnotherUser(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			AssignedUserID *uuid.UUID `json:"assigned_user_id"`
-		} `json:"data"`
+		AssignedUserID *uuid.UUID `json:"assigned_user_id"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	require.NotNil(t, resp.Data.AssignedUserID)
-	assert.Equal(t, assignee2.ID, *resp.Data.AssignedUserID)
+	require.NotNil(t, resp.AssignedUserID)
+	assert.Equal(t, assignee2.ID, *resp.AssignedUserID)
 
 	// Verify in database
 	var updatedContact models.Contact

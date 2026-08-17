@@ -40,16 +40,11 @@ func TestApp_ListUsers(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Status string `json:"status"`
-			Data   struct {
-				Users []handlers.UserResponse `json:"users"`
-			} `json:"data"`
+			Users []handlers.UserResponse `json:"users"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-
-		assert.Equal(t, "success", resp.Status)
-		assert.Len(t, resp.Data.Users, 2)
+		assert.Len(t, resp.Users, 2)
 	})
 
 	t.Run("empty list for new org", func(t *testing.T) {
@@ -72,13 +67,11 @@ func TestApp_ListUsers(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Users []handlers.UserResponse `json:"users"`
-			} `json:"data"`
+			Users []handlers.UserResponse `json:"users"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Empty(t, resp.Data.Users)
+		assert.Empty(t, resp.Users)
 	})
 
 	t.Run("forbidden without users:read permission", func(t *testing.T) {
@@ -120,19 +113,14 @@ func TestApp_GetUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Status string                `json:"status"`
-			Data   handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-
-		assert.Equal(t, "success", resp.Status)
-		assert.Equal(t, target.ID, resp.Data.ID)
-		assert.Equal(t, targetEmail, resp.Data.Email)
-		assert.Equal(t, "Target User", resp.Data.FullName)
-		assert.True(t, resp.Data.IsActive)
-		assert.Equal(t, org.ID, resp.Data.OrganizationID)
+		assert.Equal(t, target.ID, resp.ID)
+		assert.Equal(t, targetEmail, resp.Email)
+		assert.Equal(t, "Target User", resp.FullName)
+		assert.True(t, resp.IsActive)
+		assert.Equal(t, org.ID, resp.OrganizationID)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -190,18 +178,13 @@ func TestApp_CreateUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Status string                `json:"status"`
-			Data   handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-
-		assert.Equal(t, "success", resp.Status)
-		assert.Equal(t, newEmail, resp.Data.Email)
-		assert.Equal(t, "New User", resp.Data.FullName)
-		assert.True(t, resp.Data.IsActive)
-		assert.Equal(t, org.ID, resp.Data.OrganizationID)
+		assert.Equal(t, newEmail, resp.Email)
+		assert.Equal(t, "New User", resp.FullName)
+		assert.True(t, resp.IsActive)
+		assert.Equal(t, org.ID, resp.OrganizationID)
 	})
 
 	t.Run("success with role_id", func(t *testing.T) {
@@ -229,15 +212,13 @@ func TestApp_CreateUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, newEmail, resp.Data.Email)
-		assert.NotNil(t, resp.Data.RoleID)
-		assert.Equal(t, agentRole.ID, *resp.Data.RoleID)
+		assert.Equal(t, newEmail, resp.Email)
+		assert.NotNil(t, resp.RoleID)
+		assert.Equal(t, agentRole.ID, *resp.RoleID)
 	})
 
 	t.Run("duplicate email", func(t *testing.T) {
@@ -363,16 +344,11 @@ func TestApp_UpdateUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Status string                `json:"status"`
-			Data   handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-
-		assert.Equal(t, "success", resp.Status)
-		assert.Equal(t, updatedName, resp.Data.FullName)
-		assert.Equal(t, target.ID, resp.Data.ID)
+		assert.Equal(t, updatedName, resp.FullName)
+		assert.Equal(t, target.ID, resp.ID)
 	})
 
 	t.Run("self update allowed", func(t *testing.T) {
@@ -395,13 +371,11 @@ func TestApp_UpdateUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, "Self Updated Name", resp.Data.FullName)
+		assert.Equal(t, "Self Updated Name", resp.FullName)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -446,13 +420,11 @@ func TestApp_UpdateUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, newEmail, resp.Data.Email)
+		assert.Equal(t, newEmail, resp.Email)
 	})
 
 	t.Run("duplicate email conflict", func(t *testing.T) {
@@ -600,19 +572,14 @@ func TestApp_GetCurrentUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Status string                `json:"status"`
-			Data   handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-
-		assert.Equal(t, "success", resp.Status)
-		assert.Equal(t, user.ID, resp.Data.ID)
-		assert.Equal(t, email, resp.Data.Email)
-		assert.Equal(t, "Current User", resp.Data.FullName)
-		assert.True(t, resp.Data.IsActive)
-		assert.Equal(t, org.ID, resp.Data.OrganizationID)
+		assert.Equal(t, user.ID, resp.ID)
+		assert.Equal(t, email, resp.Email)
+		assert.Equal(t, "Current User", resp.FullName)
+		assert.True(t, resp.IsActive)
+		assert.Equal(t, org.ID, resp.OrganizationID)
 	})
 
 	t.Run("success with role info", func(t *testing.T) {
@@ -631,15 +598,13 @@ func TestApp_GetCurrentUser(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-		var resp struct {
-			Data handlers.UserResponse `json:"data"`
-		}
+		var resp handlers.UserResponse
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.NotNil(t, resp.Data.Role)
-		assert.NotNil(t, resp.Data.RoleID)
-		assert.Equal(t, adminRole.ID, *resp.Data.RoleID)
+		assert.NotNil(t, resp.Role)
+		assert.NotNil(t, resp.RoleID)
+		assert.Equal(t, adminRole.ID, *resp.RoleID)
 	})
 
 	t.Run("unauthorized without user_id", func(t *testing.T) {
@@ -681,18 +646,16 @@ func TestApp_UpdateAvailability(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message     string `json:"message"`
-				IsAvailable bool   `json:"is_available"`
-				Status      string `json:"status"`
-			} `json:"data"`
+			Message     string `json:"message"`
+			IsAvailable bool   `json:"is_available"`
+			Status      string `json:"status"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, "Availability updated successfully", resp.Data.Message)
-		assert.False(t, resp.Data.IsAvailable)
-		assert.Equal(t, "away", resp.Data.Status)
+		assert.Equal(t, "Availability updated successfully", resp.Message)
+		assert.False(t, resp.IsAvailable)
+		assert.Equal(t, "away", resp.Status)
 
 		// Verify in DB
 		var dbUser models.User
@@ -722,18 +685,16 @@ func TestApp_UpdateAvailability(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message     string `json:"message"`
-				IsAvailable bool   `json:"is_available"`
-				Status      string `json:"status"`
-			} `json:"data"`
+			Message     string `json:"message"`
+			IsAvailable bool   `json:"is_available"`
+			Status      string `json:"status"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, "Availability updated successfully", resp.Data.Message)
-		assert.True(t, resp.Data.IsAvailable)
-		assert.Equal(t, "available", resp.Data.Status)
+		assert.Equal(t, "Availability updated successfully", resp.Message)
+		assert.True(t, resp.IsAvailable)
+		assert.Equal(t, "available", resp.Status)
 
 		// Verify in DB
 		var dbUser models.User
@@ -810,13 +771,11 @@ func TestApp_ChangePassword(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message string `json:"message"`
-			} `json:"data"`
+			Message string `json:"message"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
-		assert.Equal(t, "Password changed successfully", resp.Data.Message)
+		assert.Equal(t, "Password changed successfully", resp.Message)
 
 		// Verify new password works by loading user and checking hash
 		var dbUser models.User
@@ -954,18 +913,16 @@ func TestApp_UpdateCurrentUserSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Message  string         `json:"message"`
-				Settings map[string]any `json:"settings"`
-			} `json:"data"`
+			Message  string         `json:"message"`
+			Settings map[string]any `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, "Settings updated successfully", resp.Data.Message)
-		assert.Equal(t, true, resp.Data.Settings["email_notifications"])
-		assert.Equal(t, true, resp.Data.Settings["new_message_alerts"])
-		assert.Equal(t, false, resp.Data.Settings["campaign_updates"])
+		assert.Equal(t, "Settings updated successfully", resp.Message)
+		assert.Equal(t, true, resp.Settings["email_notifications"])
+		assert.Equal(t, true, resp.Settings["new_message_alerts"])
+		assert.Equal(t, false, resp.Settings["campaign_updates"])
 	})
 
 	t.Run("settings persist in database", func(t *testing.T) {
@@ -1030,16 +987,14 @@ func TestApp_UpdateCurrentUserSettings(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req2))
 
 		var resp struct {
-			Data struct {
-				Settings map[string]any `json:"settings"`
-			} `json:"data"`
+			Settings map[string]any `json:"settings"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req2), &resp)
 		require.NoError(t, err)
 
-		assert.Equal(t, false, resp.Data.Settings["email_notifications"])
-		assert.Equal(t, false, resp.Data.Settings["new_message_alerts"])
-		assert.Equal(t, false, resp.Data.Settings["campaign_updates"])
+		assert.Equal(t, false, resp.Settings["email_notifications"])
+		assert.Equal(t, false, resp.Settings["new_message_alerts"])
+		assert.Equal(t, false, resp.Settings["campaign_updates"])
 	})
 
 	t.Run("unauthorized without user_id", func(t *testing.T) {
@@ -1095,16 +1050,14 @@ func TestApp_CrossOrgIsolation(t *testing.T) {
 		assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 		var resp struct {
-			Data struct {
-				Users []handlers.UserResponse `json:"users"`
-			} `json:"data"`
+			Users []handlers.UserResponse `json:"users"`
 		}
 		err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 		require.NoError(t, err)
 
 		// Should only see org1 users
-		assert.Len(t, resp.Data.Users, 2)
-		for _, u := range resp.Data.Users {
+		assert.Len(t, resp.Users, 2)
+		for _, u := range resp.Users {
 			assert.Equal(t, org1.ID, u.OrganizationID)
 		}
 	})
@@ -1363,12 +1316,10 @@ func TestApp_UpdateUser_DeactivateOtherUser(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.UserResponse `json:"data"`
-	}
+	var resp handlers.UserResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
-	assert.False(t, resp.Data.IsActive)
+	assert.False(t, resp.IsActive)
 }
 
 func TestApp_UpdateUser_ChangeRole(t *testing.T) {
@@ -1399,14 +1350,12 @@ func TestApp_UpdateUser_ChangeRole(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.UserResponse `json:"data"`
-	}
+	var resp handlers.UserResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.NotNil(t, resp.Data.RoleID)
-	assert.Equal(t, agentRole.ID, *resp.Data.RoleID)
+	assert.NotNil(t, resp.RoleID)
+	assert.Equal(t, agentRole.ID, *resp.RoleID)
 }
 
 func TestApp_UpdateUser_RoleChangeWithoutPermission(t *testing.T) {
@@ -1561,16 +1510,14 @@ func TestApp_ListUsers_CrossOrgExclusion(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Users []handlers.UserResponse `json:"users"`
-		} `json:"data"`
+		Users []handlers.UserResponse `json:"users"`
 	}
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
 	// Should only see orgA's user
-	assert.Len(t, resp.Data.Users, 1)
-	assert.Equal(t, adminA.ID, resp.Data.Users[0].ID)
+	assert.Len(t, resp.Users, 1)
+	assert.Equal(t, adminA.ID, resp.Users[0].ID)
 }
 
 func TestApp_ChangePassword_OldPasswordStopsWorking(t *testing.T) {
@@ -1630,23 +1577,21 @@ func TestApp_GetUser_VerifyResponseFields(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.UserResponse `json:"data"`
-	}
+	var resp handlers.UserResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.Equal(t, user.ID, resp.Data.ID)
-	assert.Equal(t, "Field Check User", resp.Data.FullName)
-	assert.True(t, resp.Data.IsActive)
-	assert.True(t, resp.Data.IsAvailable)
-	assert.False(t, resp.Data.IsSuperAdmin)
-	assert.Equal(t, org.ID, resp.Data.OrganizationID)
-	assert.NotNil(t, resp.Data.RoleID)
-	assert.Equal(t, adminRole.ID, *resp.Data.RoleID)
-	assert.NotNil(t, resp.Data.Role)
-	assert.NotEmpty(t, resp.Data.CreatedAt)
-	assert.NotEmpty(t, resp.Data.UpdatedAt)
+	assert.Equal(t, user.ID, resp.ID)
+	assert.Equal(t, "Field Check User", resp.FullName)
+	assert.True(t, resp.IsActive)
+	assert.True(t, resp.IsAvailable)
+	assert.False(t, resp.IsSuperAdmin)
+	assert.Equal(t, org.ID, resp.OrganizationID)
+	assert.NotNil(t, resp.RoleID)
+	assert.Equal(t, adminRole.ID, *resp.RoleID)
+	assert.NotNil(t, resp.Role)
+	assert.NotEmpty(t, resp.CreatedAt)
+	assert.NotEmpty(t, resp.UpdatedAt)
 }
 
 func TestApp_CreateUser_CreatedUserIsActive(t *testing.T) {
@@ -1674,14 +1619,12 @@ func TestApp_CreateUser_CreatedUserIsActive(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
-	var resp struct {
-		Data handlers.UserResponse `json:"data"`
-	}
+	var resp handlers.UserResponse
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 
-	assert.True(t, resp.Data.IsActive)
-	assert.Equal(t, org.ID, resp.Data.OrganizationID)
+	assert.True(t, resp.IsActive)
+	assert.Equal(t, org.ID, resp.OrganizationID)
 
 	// Verify password was hashed (not stored as plaintext)
 	var dbUser models.User

@@ -199,14 +199,12 @@ func TestApp_GetMetaAnalytics_NoAccountsReturnsEmptyList(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Accounts []map[string]any `json:"accounts"`
-			Message  string           `json:"message"`
-		} `json:"data"`
+		Accounts []map[string]any `json:"accounts"`
+		Message  string           `json:"message"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Empty(t, resp.Data.Accounts)
-	assert.Contains(t, resp.Data.Message, "No WhatsApp accounts")
+	assert.Empty(t, resp.Accounts)
+	assert.Contains(t, resp.Message, "No WhatsApp accounts")
 	assert.Equal(t, int64(0), srv.Hits(), "Meta must not be called when no accounts exist")
 }
 
@@ -262,9 +260,7 @@ func TestApp_GetMetaAnalytics_CacheHitSkipsMetaCall(t *testing.T) {
 
 	from, to := dateRange()
 	doRequest := func() *struct {
-		Data struct {
-			Cached bool `json:"cached"`
-		} `json:"data"`
+		Cached bool `json:"cached"`
 	} {
 		req := testutil.NewGETRequest(t)
 		testutil.SetAuthContext(req, org.ID, user.ID)
@@ -275,9 +271,7 @@ func TestApp_GetMetaAnalytics_CacheHitSkipsMetaCall(t *testing.T) {
 		require.NoError(t, app.GetMetaAnalytics(req))
 		require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 		var resp struct {
-			Data struct {
-				Cached bool `json:"cached"`
-			} `json:"data"`
+			Cached bool `json:"cached"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 		return &resp
@@ -285,13 +279,13 @@ func TestApp_GetMetaAnalytics_CacheHitSkipsMetaCall(t *testing.T) {
 
 	// First call: cache miss → Meta hit.
 	r1 := doRequest()
-	assert.False(t, r1.Data.Cached, "first call must be a cache miss")
+	assert.False(t, r1.Cached, "first call must be a cache miss")
 	hitsAfterFirst := srv.Hits()
 	assert.Greater(t, hitsAfterFirst, int64(0), "Meta must have been called on cache miss")
 
 	// Second call with same params: cache hit, Meta NOT called again.
 	r2 := doRequest()
-	assert.True(t, r2.Data.Cached, "second identical call must be a cache hit")
+	assert.True(t, r2.Cached, "second identical call must be a cache hit")
 	assert.Equal(t, hitsAfterFirst, srv.Hits(), "Meta must NOT be called on cache hit")
 }
 
@@ -316,14 +310,12 @@ func TestApp_GetMetaAnalytics_AdjustedGranularityReportedWhenChanged(t *testing.
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			AdjustedGranularity string `json:"adjusted_granularity"`
-			OriginalGranularity string `json:"original_granularity"`
-		} `json:"data"`
+		AdjustedGranularity string `json:"adjusted_granularity"`
+		OriginalGranularity string `json:"original_granularity"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	assert.Equal(t, "DAY", resp.Data.AdjustedGranularity)
-	assert.Equal(t, "MONTH", resp.Data.OriginalGranularity)
+	assert.Equal(t, "DAY", resp.AdjustedGranularity)
+	assert.Equal(t, "MONTH", resp.OriginalGranularity)
 }
 
 // --- ListMetaAccountsForAnalytics ---
@@ -345,16 +337,14 @@ func TestApp_ListMetaAccountsForAnalytics_OnlyOwnOrg(t *testing.T) {
 	require.Equal(t, fasthttp.StatusOK, testutil.GetResponseStatusCode(req))
 
 	var resp struct {
-		Data struct {
-			Accounts []struct {
-				ID   string `json:"id"`
-				Name string `json:"name"`
-			} `json:"accounts"`
-		} `json:"data"`
+		Accounts []struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+		} `json:"accounts"`
 	}
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-	require.Len(t, resp.Data.Accounts, 1)
-	assert.Equal(t, accA.ID.String(), resp.Data.Accounts[0].ID)
+	require.Len(t, resp.Accounts, 1)
+	assert.Equal(t, accA.ID.String(), resp.Accounts[0].ID)
 }
 
 func TestApp_ListMetaAccountsForAnalytics_PermissionDenied(t *testing.T) {
