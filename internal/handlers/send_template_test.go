@@ -14,12 +14,12 @@ import (
 )
 
 // createTestTemplate creates an approved template in the database.
-func createTestTemplate(t *testing.T, app *handlers.App, orgID uuid.UUID, accountName string) *models.Template {
+func createTestTemplate(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID *uuid.UUID) *models.Template {
 	t.Helper()
 	tpl := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountID,
 		Name:            "order_confirm_" + uuid.New().String()[:8],
 		DisplayName:     "Order Confirmation",
 		MetaTemplateID:  "meta-" + uuid.New().String()[:8],
@@ -45,8 +45,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplate(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplate(t, app, org.ID, &account.ID)
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":    contact.ID.String(),
@@ -70,7 +70,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		assert.Equal(t, contact.ID, resp.Data.ContactID)
 		assert.Equal(t, models.DirectionOutgoing, resp.Data.Direction)
 		assert.Equal(t, models.MessageTypeTemplate, resp.Data.MessageType)
-		assert.Equal(t, account.Name, resp.Data.WhatsAppAccount)
+		assert.Equal(t, account.Name, resp.Data.WhatsAppAccountID)
 
 		// Verify rendered body content
 		contentMap, ok := resp.Data.Content.(map[string]any)
@@ -102,13 +102,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Template with no params
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			Name:            "simple_greeting_" + uuid.New().String()[:8],
 			DisplayName:     "Simple Greeting",
 			Language:        "en",
@@ -147,8 +147,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplate(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplate(t, app, org.ID, &account.ID)
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":  contact.ID.String(),
@@ -185,8 +185,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplate(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplate(t, app, org.ID, &account.ID)
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":    contact.ID.String(),
@@ -207,7 +207,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 			Data handlers.MessageResponse `json:"data"`
 		}
 		require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
-		assert.Equal(t, account.Name, resp.Data.WhatsAppAccount)
+		assert.Equal(t, account.Name, resp.Data.WhatsAppAccountID)
 	})
 
 	t.Run("missing contact_id and phone_number", func(t *testing.T) {
@@ -275,7 +275,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: "test-account",
+			WhatsAppAccountID: nil,
 			Name:            "pending_template_" + uuid.New().String()[:8],
 			Language:        "en",
 			Status:          string(models.TemplateStatusPending),
@@ -304,7 +304,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		tpl := createTestTemplate(t, app, org.ID, account.Name)
+		tpl := createTestTemplate(t, app, org.ID, &account.ID)
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":    uuid.New().String(),
@@ -327,8 +327,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplate(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplate(t, app, org.ID, &account.ID)
 
 		// Send without required params — template has {{name}} and {{order_id}}
 		req := testutil.NewJSONRequest(t, map[string]any{
@@ -372,7 +372,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: "test-account",
+			WhatsAppAccountID: nil,
 			Name:            "test_tpl_" + uuid.New().String()[:8],
 			Language:        "en",
 			Status:          string(models.TemplateStatusApproved),
@@ -404,7 +404,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org2.ID,
-			WhatsAppAccount: "other-account",
+			WhatsAppAccountID: nil,
 			Name:            "other_org_tpl_" + uuid.New().String()[:8],
 			Language:        "en",
 			Status:          string(models.TemplateStatusApproved),
@@ -434,7 +434,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org1.ID)
 		user := testutil.CreateTestUser(t, app.DB, org1.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org1.ID)
-		tpl := createTestTemplate(t, app, org1.ID, account.Name)
+		tpl := createTestTemplate(t, app, org1.ID, &account.ID)
 
 		// Contact belongs to org2
 		contact := testutil.CreateTestContact(t, app.DB, org2.ID)
@@ -461,7 +461,7 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: "some-account",
+			WhatsAppAccountID: nil,
 			Name:            "tpl_" + uuid.New().String()[:8],
 			Language:        "en",
 			Status:          string(models.TemplateStatusApproved),
@@ -491,12 +491,12 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			Name:            "shape_test_" + uuid.New().String()[:8],
 			Language:        "en",
 			Status:          string(models.TemplateStatusApproved),
@@ -538,13 +538,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Create template with buttons
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			Name:            "btn_tpl_" + uuid.New().String()[:8],
 			DisplayName:     "Button Template",
 			Language:        "en",
@@ -599,12 +599,12 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 	// createTestTemplateWithHeader builds an approved template with a TEXT
 	// header that has a {{var}} (named for clarity; positional is exercised
 	// separately by the unit tests on BuildTemplateComponents).
-	createTestTemplateWithHeader := func(t *testing.T, app *handlers.App, orgID uuid.UUID, accountName string) *models.Template {
+	createTestTemplateWithHeader := func(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID *uuid.UUID) *models.Template {
 		t.Helper()
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  orgID,
-			WhatsAppAccount: accountName,
+			WhatsAppAccountID: accountID,
 			Name:            "seasonal_" + uuid.New().String()[:8],
 			DisplayName:     "Seasonal Promo",
 			MetaTemplateID:  "meta-" + uuid.New().String()[:8],
@@ -629,8 +629,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplateWithHeader(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplateWithHeader(t, app, org.ID, &account.ID)
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":    contact.ID.String(),
@@ -680,8 +680,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplateWithHeader(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplateWithHeader(t, app, org.ID, &account.ID)
 
 		// header_params omitted entirely — value supplied in template_params
 		// under the same variable name. Convenient for named templates where
@@ -727,8 +727,8 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
-		tpl := createTestTemplateWithHeader(t, app, org.ID, account.Name)
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
+		tpl := createTestTemplateWithHeader(t, app, org.ID, &account.ID)
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"contact_id":    contact.ID.String(),
@@ -756,12 +756,12 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		tpl := &models.Template{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			Name:            "no_btn_tpl_" + uuid.New().String()[:8],
 			Language:        "en",
 			Status:          string(models.TemplateStatusApproved),

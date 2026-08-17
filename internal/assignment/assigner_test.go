@@ -451,7 +451,6 @@ func TestCallLoadCounter_OnlyWaitingAndConnected(t *testing.T) {
 			ContactID:       contact.ID,
 			WhatsAppCallID:  "wa-" + uuid.New().String()[:8],
 			CallerPhone:     contact.PhoneNumber,
-			WhatsAppAccount: "test-account",
 			AgentID:         &agent.ID,
 			Status:          status,
 		}).Error)

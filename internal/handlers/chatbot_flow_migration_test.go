@@ -275,7 +275,7 @@ func TestBackfillChatbotFlowGraph_FillsNullGraphsAndLeavesOthersAlone(t *testing
 	v2flow := &models.ChatbotFlow{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "already-v2",
 		IsEnabled:       true,
 		Graph:           preExisting,

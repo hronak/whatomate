@@ -246,19 +246,23 @@ func TestGetSLAEnabledSettingsCached_OnlySLAEnabledRows(t *testing.T) {
 	require.NoError(t, app.DB.Exec("DELETE FROM chatbot_settings").Error)
 	app.InvalidateSLASettingsCache()
 
+	accA := testutil.CreateTestWhatsAppAccount(t, app.DB, orgA.ID)
+	accB := testutil.CreateTestWhatsAppAccount(t, app.DB, orgB.ID)
+	accA2 := testutil.CreateTestWhatsAppAccount(t, app.DB, orgA.ID)
+
 	require.NoError(t, app.DB.Create(&models.ChatbotSettings{
 		BaseModel: models.BaseModel{ID: uuid.New()}, OrganizationID: orgA.ID,
-		WhatsAppAccount: "acc-A", IsEnabled: true,
+		WhatsAppAccountID: &accA.ID, IsEnabled: true,
 		SLA: models.SLAConfig{Enabled: true},
 	}).Error)
 	require.NoError(t, app.DB.Create(&models.ChatbotSettings{
 		BaseModel: models.BaseModel{ID: uuid.New()}, OrganizationID: orgB.ID,
-		WhatsAppAccount: "acc-B", IsEnabled: true,
+		WhatsAppAccountID: &accB.ID, IsEnabled: true,
 		SLA: models.SLAConfig{Enabled: true},
 	}).Error)
 	require.NoError(t, app.DB.Create(&models.ChatbotSettings{
 		BaseModel: models.BaseModel{ID: uuid.New()}, OrganizationID: orgA.ID,
-		WhatsAppAccount: "acc-A2", IsEnabled: true,
+		WhatsAppAccountID: &accA2.ID, IsEnabled: true,
 		SLA: models.SLAConfig{Enabled: false},
 	}).Error)
 

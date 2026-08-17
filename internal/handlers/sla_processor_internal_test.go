@@ -32,14 +32,14 @@ func newSLATestApp(t *testing.T) *App {
 }
 
 // createSLATestTransfer creates an active agent transfer in the DB with the given SLA fields.
-func createSLATestTransfer(t *testing.T, app *App, orgID, contactID, agentID uuid.UUID, accountName string, sla models.SLATracking) *models.AgentTransfer {
+func createSLATestTransfer(t *testing.T, app *App, orgID, contactID, agentID uuid.UUID, accountID *uuid.UUID, sla models.SLATracking) *models.AgentTransfer {
 	t.Helper()
 	transfer := &models.AgentTransfer{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
 		ContactID:       contactID,
 		AgentID:         &agentID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountID,
 		PhoneNumber:     "+1234567890",
 		Status:          models.TransferStatusActive,
 		SLA:             sla,
@@ -49,13 +49,13 @@ func createSLATestTransfer(t *testing.T, app *App, orgID, contactID, agentID uui
 }
 
 // createTestAgentMessage creates an outgoing message from the given agent for the given contact.
-func createTestAgentMessage(t *testing.T, app *App, orgID, contactID, agentID uuid.UUID, accountName string, sentAt time.Time) {
+func createTestAgentMessage(t *testing.T, app *App, orgID, contactID, agentID uuid.UUID, accountID *uuid.UUID, sentAt time.Time) {
 	t.Helper()
 	msg := &models.Message{
 		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: sentAt},
 		OrganizationID:  orgID,
 		ContactID:       contactID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountID,
 		Direction:       models.DirectionOutgoing,
 		MessageType:     models.MessageTypeText,
 		Content:         "agent reply",
@@ -76,7 +76,7 @@ func TestAgentRespondedSince_TrueWhenMessageAfterTimestamp(t *testing.T) {
 
 	since := time.Now().Add(-10 * time.Minute)
 	// Agent sent a message 5 minutes ago (after since)
-	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, account.Name, time.Now().Add(-5*time.Minute))
+	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, &account.ID, time.Now().Add(-5*time.Minute))
 
 	proc := NewSLAProcessor(app, time.Minute)
 	transfer := models.AgentTransfer{
@@ -122,7 +122,7 @@ func TestAgentRespondedSince_FalseWhenMessageBeforeTimestamp(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	// Agent sent a message 20 minutes ago
-	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, account.Name, time.Now().Add(-20*time.Minute))
+	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, &account.ID, time.Now().Add(-20*time.Minute))
 
 	proc := NewSLAProcessor(app, time.Minute)
 	transfer := models.AgentTransfer{
@@ -146,12 +146,12 @@ func TestSLAAutoCloseSkippedWhenAgentActive(t *testing.T) {
 	autoCloseHours := 2
 	// Transfer created 3 hours ago, expired 1 hour ago
 	expiresAt := time.Now().Add(-1 * time.Hour)
-	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, account.Name, models.SLATracking{
+	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, &account.ID, models.SLATracking{
 		ExpiresAt: &expiresAt,
 	})
 
 	// Agent sent a message 30 minutes ago (after transfer was created)
-	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, account.Name, time.Now().Add(-30*time.Minute))
+	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, &account.ID, time.Now().Add(-30*time.Minute))
 
 	settings := models.ChatbotSettings{
 		OrganizationID: org.ID,
@@ -185,7 +185,7 @@ func TestSLAAutoCloseFiresWhenNoAgentResponse(t *testing.T) {
 
 	// Transfer expired 1 hour ago, no agent messages at all
 	expiresAt := time.Now().Add(-1 * time.Hour)
-	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, account.Name, models.SLATracking{
+	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, &account.ID, models.SLATracking{
 		ExpiresAt: &expiresAt,
 	})
 
@@ -224,14 +224,14 @@ func TestSLAEscalationSkippedWhenAgentActive(t *testing.T) {
 	// correctly treats as "not a response to this transfer."
 	escalationAt := time.Now().Add(-5 * time.Minute)
 	transferredAt := time.Now().Add(-35 * time.Minute)
-	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, account.Name, models.SLATracking{
+	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, &account.ID, models.SLATracking{
 		EscalationAt:    &escalationAt,
 		EscalationLevel: 0,
 	})
 	require.NoError(t, app.DB.Model(transfer).Update("transferred_at", transferredAt).Error)
 
 	// Agent sent a message 10 minutes ago (after the transfer started)
-	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, account.Name, time.Now().Add(-10*time.Minute))
+	createTestAgentMessage(t, app, org.ID, contact.ID, agent.ID, &account.ID, time.Now().Add(-10*time.Minute))
 
 	settings := models.ChatbotSettings{
 		OrganizationID: org.ID,
@@ -265,7 +265,7 @@ func TestSLAEscalationFiresWhenNoAgentResponse(t *testing.T) {
 
 	// Escalation was due 5 minutes ago, no agent messages
 	escalationAt := time.Now().Add(-5 * time.Minute)
-	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, account.Name, models.SLATracking{
+	transfer := createSLATestTransfer(t, app, org.ID, contact.ID, agent.ID, &account.ID, models.SLATracking{
 		EscalationAt:    &escalationAt,
 		EscalationLevel: 0,
 	})

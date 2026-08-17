@@ -113,7 +113,7 @@ func TestRouteTable_MatchesFrontendPermissions(t *testing.T) {
 		t.Skipf("frontend router not readable: %v", err)
 	}
 
-	re := regexp.MustCompile(`permission:\s*'([^']+)'`)
+	re := regexp.MustCompile(`permission:\s*["']([^"']+)["']`)
 	frontend := make(map[string]bool)
 	for _, m := range re.FindAllStringSubmatch(string(src), -1) {
 		frontend[m[1]] = true

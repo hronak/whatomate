@@ -66,13 +66,13 @@ func TestExtParamNames_UnderscoreParams(t *testing.T) {
 // --- Template handler test helpers ---
 
 // createTestTemplateInDB creates a template directly in the database for testing.
-func createTestTemplateInDB(t *testing.T, app *handlers.App, orgID uuid.UUID, accountName, name, status string) *models.Template {
+func createTestTemplateInDB(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID *uuid.UUID, name, status string) *models.Template {
 	t.Helper()
 
 	tmpl := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountID,
 		Name:            name,
 		DisplayName:     name,
 		Language:        "en",
@@ -166,8 +166,8 @@ func TestApp_ListTemplates_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	createTestTemplateInDB(t, app, org.ID, account.Name, "template_one", "APPROVED")
-	createTestTemplateInDB(t, app, org.ID, account.Name, "template_two", "DRAFT")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "template_one", "APPROVED")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "template_two", "DRAFT")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -217,9 +217,9 @@ func TestApp_ListTemplates_FilterByAccount(t *testing.T) {
 	account1 := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	createTestTemplateInDB(t, app, org.ID, account1.Name, "tmpl_a1", "APPROVED")
-	createTestTemplateInDB(t, app, org.ID, account1.Name, "tmpl_a2", "APPROVED")
-	createTestTemplateInDB(t, app, org.ID, account2.Name, "tmpl_b1", "APPROVED")
+	createTestTemplateInDB(t, app, org.ID, &account1.ID, "tmpl_a1", "APPROVED")
+	createTestTemplateInDB(t, app, org.ID, &account1.ID, "tmpl_a2", "APPROVED")
+	createTestTemplateInDB(t, app, org.ID, &account2.ID, "tmpl_b1", "APPROVED")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -237,7 +237,7 @@ func TestApp_ListTemplates_FilterByAccount(t *testing.T) {
 	require.NoError(t, json.Unmarshal(testutil.GetResponseBody(req), &resp))
 	assert.Len(t, resp.Data.Templates, 2)
 	for _, tmpl := range resp.Data.Templates {
-		assert.Equal(t, account1.Name, tmpl.WhatsAppAccount)
+		assert.Equal(t, account1.Name, tmpl.WhatsAppAccountID)
 	}
 }
 
@@ -249,9 +249,9 @@ func TestApp_ListTemplates_FilterByStatus(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	createTestTemplateInDB(t, app, org.ID, account.Name, "approved_tmpl", "APPROVED")
-	createTestTemplateInDB(t, app, org.ID, account.Name, "draft_tmpl", "DRAFT")
-	createTestTemplateInDB(t, app, org.ID, account.Name, "pending_tmpl", "PENDING")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "approved_tmpl", "APPROVED")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "draft_tmpl", "DRAFT")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "pending_tmpl", "PENDING")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -279,13 +279,13 @@ func TestApp_ListTemplates_FilterByCategory(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	createTestTemplateInDB(t, app, org.ID, account.Name, "marketing_tmpl", "APPROVED")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "marketing_tmpl", "APPROVED")
 
 	// Create a UTILITY template directly
 	utilTmpl := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "utility_tmpl",
 		DisplayName:     "utility_tmpl",
 		Language:        "en",
@@ -323,8 +323,8 @@ func TestApp_ListTemplates_CrossOrgIsolation(t *testing.T) {
 	account1 := testutil.CreateTestWhatsAppAccount(t, app.DB, org1.ID)
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org2.ID)
 
-	createTestTemplateInDB(t, app, org1.ID, account1.Name, "org1_tmpl", "APPROVED")
-	createTestTemplateInDB(t, app, org2.ID, account2.Name, "org2_tmpl", "APPROVED")
+	createTestTemplateInDB(t, app, org1.ID, &account1.ID, "org1_tmpl", "APPROVED")
+	createTestTemplateInDB(t, app, org2.ID, &account2.ID, "org2_tmpl", "APPROVED")
 
 	// User from org1 should only see org1 templates
 	req := testutil.NewGETRequest(t)
@@ -385,7 +385,7 @@ func TestApp_CreateTemplate_Success(t *testing.T) {
 	assert.Equal(t, "Order Update", resp.Data.HeaderContent)
 	assert.Equal(t, "Hello {{1}}, your order is ready!", resp.Data.BodyContent)
 	assert.Equal(t, "Reply STOP to unsubscribe", resp.Data.FooterContent)
-	assert.Equal(t, account.Name, resp.Data.WhatsAppAccount)
+	assert.Equal(t, &account.ID, resp.Data.WhatsAppAccountID)
 	assert.NotEqual(t, uuid.Nil, resp.Data.ID)
 	assert.Equal(t, "UNKNOWN", resp.Data.QualityRating)
 }
@@ -466,7 +466,7 @@ func TestApp_CreateTemplate_DuplicateName(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	// Create first template
-	createTestTemplateInDB(t, app, org.ID, account.Name, "duplicate_name", "DRAFT")
+	createTestTemplateInDB(t, app, org.ID, &account.ID, "duplicate_name", "DRAFT")
 
 	// Try to create another with the same name
 	body := map[string]any{
@@ -569,7 +569,7 @@ func TestApp_UpdateTemplate_RejectsTooManyHeaderVariables(t *testing.T) {
 	tpl := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "single_var_header",
 		DisplayName:     "Single Var Header",
 		Language:        "en",
@@ -636,7 +636,7 @@ func TestApp_GetTemplate_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "get_me", "APPROVED")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "get_me", "APPROVED")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -653,7 +653,7 @@ func TestApp_GetTemplate_Success(t *testing.T) {
 	assert.Equal(t, tmpl.ID, resp.Data.ID)
 	assert.Equal(t, "get_me", resp.Data.Name)
 	assert.Equal(t, "APPROVED", resp.Data.Status)
-	assert.Equal(t, account.Name, resp.Data.WhatsAppAccount)
+	assert.Equal(t, &account.ID, resp.Data.WhatsAppAccountID)
 }
 
 func TestApp_GetTemplate_NotFound(t *testing.T) {
@@ -697,7 +697,7 @@ func TestApp_GetTemplate_CrossOrgIsolation(t *testing.T) {
 	user1 := testutil.CreateTestUser(t, app.DB, org1.ID)
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org2.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org2.ID, account2.Name, "org2_private", "APPROVED")
+	tmpl := createTestTemplateInDB(t, app, org2.ID, &account2.ID, "org2_private", "APPROVED")
 
 	// User from org1 should not be able to access org2 template
 	req := testutil.NewGETRequest(t)
@@ -719,7 +719,7 @@ func TestApp_UpdateTemplate_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "update_me", "DRAFT")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "update_me", "DRAFT")
 
 	body := map[string]any{
 		"display_name": "Updated Display Name",
@@ -755,7 +755,7 @@ func TestApp_UpdateTemplate_ApprovedToDraft(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	// Create an approved template
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "approved_tmpl", "APPROVED")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "approved_tmpl", "APPROVED")
 
 	body := map[string]any{
 		"body_content": "Updated body content",
@@ -786,7 +786,7 @@ func TestApp_UpdateTemplate_RejectedToDraft(t *testing.T) {
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
 	// Create a rejected template
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "rejected_tmpl", "REJECTED")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "rejected_tmpl", "REJECTED")
 
 	body := map[string]any{
 		"body_content": "Fixed body content",
@@ -857,7 +857,7 @@ func TestApp_UpdateTemplate_CrossOrgIsolation(t *testing.T) {
 	user1 := testutil.CreateTestUser(t, app.DB, org1.ID)
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org2.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org2.ID, account2.Name, "org2_tmpl", "DRAFT")
+	tmpl := createTestTemplateInDB(t, app, org2.ID, &account2.ID, "org2_tmpl", "DRAFT")
 
 	body := map[string]any{
 		"body_content": "Trying to update other org's template",
@@ -880,7 +880,7 @@ func TestApp_UpdateTemplate_RejectedTemplateEditable(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "rejected_tmpl", "REJECTED")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "rejected_tmpl", "REJECTED")
 
 	body := map[string]any{
 		"body_content": "Fixed content after rejection",
@@ -911,7 +911,7 @@ func TestApp_DeleteTemplate_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "delete_me", "DRAFT")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "delete_me", "DRAFT")
 
 	req := testutil.NewJSONRequest(t, nil)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -976,7 +976,7 @@ func TestApp_DeleteTemplate_CrossOrgIsolation(t *testing.T) {
 	user1 := testutil.CreateTestUser(t, app.DB, org1.ID)
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org2.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org2.ID, account2.Name, "org2_tmpl", "DRAFT")
+	tmpl := createTestTemplateInDB(t, app, org2.ID, &account2.ID, "org2_tmpl", "DRAFT")
 
 	req := testutil.NewJSONRequest(t, nil)
 	testutil.SetAuthContext(req, org1.ID, user1.ID)
@@ -1005,7 +1005,7 @@ func TestApp_SubmitTemplate_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	tmpl := createTestTemplateInDB(t, app, org.ID, account.Name, "submit_me", "DRAFT")
+	tmpl := createTestTemplateInDB(t, app, org.ID, &account.ID, "submit_me", "DRAFT")
 
 	// Add sample values so the WhatsApp API submission includes required examples
 	tmpl.SampleValues = models.JSONBArray{
@@ -1048,7 +1048,7 @@ func TestApp_SubmitTemplate_AlreadySubmitted(t *testing.T) {
 	tmpl := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "already_submitted",
 		DisplayName:     "already_submitted",
 		Language:        "en",

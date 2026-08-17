@@ -294,7 +294,7 @@ func TestApp_GetContact(t *testing.T) {
 		msg := &models.Message{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:       contact.ID,
 			Direction:       models.DirectionIncoming,
 			MessageType:     models.MessageTypeText,
@@ -361,7 +361,7 @@ func TestApp_GetContactSessionData(t *testing.T) {
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
 			ContactID:       contact.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			PhoneNumber:     contact.PhoneNumber,
 			Status:          models.SessionStatusActive,
 			SessionData:     models.JSONB{"name": "Test User", "email": "test@example.com"},
@@ -625,7 +625,7 @@ func TestApp_GetMessages(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Create messages with staggered timestamps
 		now := time.Now()
@@ -633,7 +633,7 @@ func TestApp_GetMessages(t *testing.T) {
 			msg := &models.Message{
 				BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
 				OrganizationID:  org.ID,
-				WhatsAppAccount: account.Name,
+				WhatsAppAccountID: &account.ID,
 				ContactID:       contact.ID,
 				Direction:       models.DirectionIncoming,
 				MessageType:     models.MessageTypeText,
@@ -781,7 +781,7 @@ func TestApp_GetMessages(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Create messages with staggered timestamps
 		now := time.Now()
@@ -790,7 +790,7 @@ func TestApp_GetMessages(t *testing.T) {
 			msg := &models.Message{
 				BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
 				OrganizationID:  org.ID,
-				WhatsAppAccount: account.Name,
+				WhatsAppAccountID: &account.ID,
 				ContactID:       contact.ID,
 				Direction:       models.DirectionIncoming,
 				MessageType:     models.MessageTypeText,
@@ -832,13 +832,13 @@ func TestApp_GetMessages(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Create an unread incoming message
 		msg := &models.Message{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:       contact.ID,
 			Direction:       models.DirectionIncoming,
 			MessageType:     models.MessageTypeText,
@@ -868,12 +868,12 @@ func TestApp_GetMessages(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		msg := &models.Message{
 			BaseModel:         models.BaseModel{ID: uuid.New()},
 			OrganizationID:    org.ID,
-			WhatsAppAccount:   account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:         contact.ID,
 			WhatsAppMessageID: "wamid.test123",
 			Direction:         models.DirectionIncoming,
@@ -924,7 +924,7 @@ func TestApp_SendMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		req := testutil.NewJSONRequest(t, map[string]any{
 			"type": "text",
@@ -1079,13 +1079,13 @@ func TestApp_SendMessage(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := createTestAccount(t, app, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Create an original message to reply to
 		origMsg := &models.Message{
 			BaseModel:         models.BaseModel{ID: uuid.New()},
 			OrganizationID:    org.ID,
-			WhatsAppAccount:   account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:         contact.ID,
 			WhatsAppMessageID: "wamid.original123",
 			Direction:         models.DirectionIncoming,
@@ -1131,12 +1131,12 @@ func TestApp_SendReaction(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		msg := &models.Message{
 			BaseModel:         models.BaseModel{ID: uuid.New()},
 			OrganizationID:    org.ID,
-			WhatsAppAccount:   account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:         contact.ID,
 			WhatsAppMessageID: "wamid.react123",
 			Direction:         models.DirectionIncoming,
@@ -1180,13 +1180,13 @@ func TestApp_SendReaction(t *testing.T) {
 		adminRole := testutil.CreateAdminRole(t, app.DB, org.ID)
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 		account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		// Create message with an existing reaction
 		msg := &models.Message{
 			BaseModel:         models.BaseModel{ID: uuid.New()},
 			OrganizationID:    org.ID,
-			WhatsAppAccount:   account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:         contact.ID,
 			WhatsAppMessageID: "wamid.remove-react",
 			Direction:         models.DirectionIncoming,
@@ -1318,7 +1318,7 @@ func TestApp_SendReaction(t *testing.T) {
 		msg := &models.Message{
 			BaseModel:         models.BaseModel{ID: uuid.New()},
 			OrganizationID:    org2.ID,
-			WhatsAppAccount:   account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:         contact.ID,
 			WhatsAppMessageID: "wamid.cross-org",
 			Direction:         models.DirectionIncoming,
@@ -1439,13 +1439,13 @@ func TestApp_GetMessages_AssignedViaActiveTransfer(t *testing.T) {
 	agent := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&role.ID))
 
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 	// assigned_user_id intentionally nil — assignment is via the transfer only.
 
 	msg := &models.Message{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		ContactID:       contact.ID,
 		Direction:       models.DirectionIncoming,
 		MessageType:     models.MessageTypeText,
@@ -1454,7 +1454,7 @@ func TestApp_GetMessages_AssignedViaActiveTransfer(t *testing.T) {
 	}
 	require.NoError(t, app.DB.Create(msg).Error)
 
-	transfer := createTestTransfer(t, app, org.ID, contact.ID, account.Name, models.TransferStatusActive, &agent.ID)
+	transfer := createTestTransfer(t, app, org.ID, contact.ID, &account.ID, models.TransferStatusActive, &agent.ID)
 
 	getMessagesStatus := func() int {
 		req := testutil.NewGETRequest(t)
@@ -1523,7 +1523,7 @@ func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
 		msg := &models.Message{
 			BaseModel:       models.BaseModel{ID: uuid.New()},
 			OrganizationID:  org.ID,
-			WhatsAppAccount: account.Name,
+			WhatsAppAccountID: &account.ID,
 			ContactID:       contact.ID,
 			Direction:       models.DirectionIncoming,
 			MessageType:     models.MessageTypeText,
@@ -1537,7 +1537,7 @@ func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
 	readMsg := &models.Message{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		ContactID:       contact.ID,
 		Direction:       models.DirectionIncoming,
 		MessageType:     models.MessageTypeText,
@@ -1550,7 +1550,7 @@ func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
 	outMsg := &models.Message{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		ContactID:       contact.ID,
 		Direction:       models.DirectionOutgoing,
 		MessageType:     models.MessageTypeText,
@@ -1592,7 +1592,7 @@ func TestApp_GetContactSessionData_CompletedSession(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusCompleted,
 		SessionData:     models.JSONB{"order_id": "ORD-123", "amount": 99.99},
@@ -1633,7 +1633,7 @@ func TestApp_GetContactSessionData_MostRecentSessionReturned(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: time.Now().Add(-2 * time.Hour)},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusCompleted,
 		SessionData:     models.JSONB{"key": "old"},
@@ -1647,7 +1647,7 @@ func TestApp_GetContactSessionData_MostRecentSessionReturned(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: time.Now()},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusActive,
 		SessionData:     models.JSONB{"key": "new"},

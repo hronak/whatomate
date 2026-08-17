@@ -64,7 +64,7 @@ func TestMatchKeywordRules_ExactMatch(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "exact-hello",
 		Keywords:        models.StringArray{"hello"},
 		MatchType:       models.MatchTypeExact,
@@ -98,7 +98,7 @@ func TestMatchKeywordRules_ExactMatch_CaseSensitive(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "exact-case",
 		Keywords:        models.StringArray{"Hello"},
 		MatchType:       models.MatchTypeExact,
@@ -124,7 +124,7 @@ func TestMatchKeywordRules_ContainsMatch(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "contains-help",
 		Keywords:        models.StringArray{"help"},
 		MatchType:       models.MatchTypeContains,
@@ -154,7 +154,7 @@ func TestMatchKeywordRules_StartsWithMatch(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "starts-with-hi",
 		Keywords:        models.StringArray{"hi"},
 		MatchType:       models.MatchTypeStartsWith,
@@ -181,7 +181,7 @@ func TestMatchKeywordRules_RegexMatch(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "regex-order",
 		Keywords:        models.StringArray{`order\s*#?\d+`},
 		MatchType:       models.MatchTypeRegex,
@@ -208,7 +208,7 @@ func TestMatchKeywordRules_NoMatch(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "nope",
 		Keywords:        models.StringArray{"specific-keyword"},
 		MatchType:       models.MatchTypeExact,
@@ -232,7 +232,7 @@ func TestMatchKeywordRules_Priority(t *testing.T) {
 	lowRule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "low-priority",
 		Keywords:        models.StringArray{"test"},
 		MatchType:       models.MatchTypeContains,
@@ -247,7 +247,7 @@ func TestMatchKeywordRules_Priority(t *testing.T) {
 	highRule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "high-priority",
 		Keywords:        models.StringArray{"test"},
 		MatchType:       models.MatchTypeContains,
@@ -272,7 +272,7 @@ func TestMatchKeywordRules_DisabledRuleIgnored(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "disabled",
 		Keywords:        models.StringArray{"disabled"},
 		MatchType:       models.MatchTypeExact,
@@ -296,7 +296,7 @@ func TestMatchKeywordRules_TransferType(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "agent",
 		Keywords:        models.StringArray{"agent"},
 		MatchType:       models.MatchTypeExact,
@@ -321,7 +321,7 @@ func TestMatchKeywordRules_WithButtons(t *testing.T) {
 	rule := &models.KeywordRule{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "menu",
 		Keywords:        models.StringArray{"menu"},
 		MatchType:       models.MatchTypeExact,
@@ -360,7 +360,7 @@ func TestGetOrCreateSession_NewSession(t *testing.T) {
 	assert.Equal(t, models.SessionStatusActive, session.Status)
 	assert.Equal(t, org.ID, session.OrganizationID)
 	assert.Equal(t, contact.ID, session.ContactID)
-	assert.Equal(t, account.Name, session.WhatsAppAccount)
+	assert.Equal(t, &account.ID, session.WhatsAppAccountID)
 
 	// Verify it was persisted
 	var dbSession models.ChatbotSession
@@ -378,7 +378,7 @@ func TestGetOrCreateSession_ExistingSession(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusActive,
 		SessionData:     models.JSONB{"key": "value"},
@@ -403,7 +403,7 @@ func TestGetOrCreateSession_ExpiredSession(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusActive,
 		SessionData:     models.JSONB{},
@@ -520,7 +520,7 @@ func TestExitFlow_UpdatesSession(t *testing.T) {
 	flow := &models.ChatbotFlow{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "Exit Test Flow",
 		IsEnabled:       true,
 	}
@@ -530,7 +530,7 @@ func TestExitFlow_UpdatesSession(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusActive,
 		CurrentFlowID:   &flow.ID,
@@ -571,7 +571,7 @@ func TestSaveIncomingMessage_TextMessage(t *testing.T) {
 	assert.Equal(t, models.MessageTypeText, msg.MessageType)
 	assert.Equal(t, "Hello from test", msg.Content)
 	assert.Equal(t, contact.ID, msg.ContactID)
-	assert.Equal(t, account.Name, msg.WhatsAppAccount)
+	assert.Equal(t, &account.ID, msg.WhatsAppAccountID)
 	assert.Equal(t, models.MessageStatusReceived, msg.Status)
 
 	// Verify contact was updated
@@ -617,7 +617,7 @@ func TestSaveIncomingMessage_WithReplyContext(t *testing.T) {
 	originalMsg := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    org.ID,
-		WhatsAppAccount:   account.Name,
+		WhatsAppAccountID: &account.ID,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: originalWAMID,
 		Direction:         models.DirectionOutgoing,
@@ -695,7 +695,7 @@ func TestLogSessionMessage(t *testing.T) {
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
 		ContactID:       contact.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		PhoneNumber:     contact.PhoneNumber,
 		Status:          models.SessionStatusActive,
 		SessionData:     models.JSONB{},
@@ -725,7 +725,7 @@ func TestMatchFlowTrigger_Match(t *testing.T) {
 	flow := &models.ChatbotFlow{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "Order Flow",
 		TriggerKeywords: models.StringArray{"order", "buy"},
 		IsEnabled:       true,

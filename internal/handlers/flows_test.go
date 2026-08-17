@@ -14,13 +14,13 @@ import (
 )
 
 // createTestFlow creates a test WhatsApp flow in the database.
-func createTestFlow(t *testing.T, app *handlers.App, orgID uuid.UUID, accountName, name string) *models.WhatsAppFlow {
+func createTestFlow(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID *uuid.UUID, name string) *models.WhatsAppFlow {
 	t.Helper()
 
 	flow := &models.WhatsAppFlow{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  orgID,
-		WhatsAppAccount: accountName,
+		WhatsAppAccountID: accountID,
 		Name:            name,
 		Status:          "DRAFT",
 		Category:        "SIGN_UP",
@@ -40,8 +40,8 @@ func TestApp_ListFlows_Success(t *testing.T) {
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	createTestFlow(t, app, org.ID, account.Name, "Flow 1")
-	createTestFlow(t, app, org.ID, account.Name, "Flow 2")
+	createTestFlow(t, app, org.ID, &account.ID, "Flow 1")
+	createTestFlow(t, app, org.ID, &account.ID, "Flow 2")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -93,9 +93,9 @@ func TestApp_ListFlows_FilterByAccount(t *testing.T) {
 	account1 := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 	account2 := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
 
-	createTestFlow(t, app, org.ID, account1.Name, "Flow A1")
-	createTestFlow(t, app, org.ID, account1.Name, "Flow A2")
-	createTestFlow(t, app, org.ID, account2.Name, "Flow B1")
+	createTestFlow(t, app, org.ID, &account1.ID, "Flow A1")
+	createTestFlow(t, app, org.ID, &account1.ID, "Flow A2")
+	createTestFlow(t, app, org.ID, &account2.ID, "Flow B1")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -114,7 +114,7 @@ func TestApp_ListFlows_FilterByAccount(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, resp.Data.Flows, 2)
 	for _, f := range resp.Data.Flows {
-		assert.Equal(t, account1.Name, f.WhatsAppAccount)
+		assert.Equal(t, account1.Name, f.WhatsAppAccountID)
 	}
 }
 
@@ -161,7 +161,7 @@ func TestApp_CreateFlow_Success(t *testing.T) {
 	err = json.Unmarshal(testutil.GetResponseBody(req), &resp)
 	require.NoError(t, err)
 	assert.Equal(t, "My New Flow", resp.Data.Flow.Name)
-	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccount)
+	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccountID)
 	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
 	assert.Equal(t, "SIGN_UP", resp.Data.Flow.Category)
 	assert.Equal(t, "6.0", resp.Data.Flow.JSONVersion)
@@ -214,7 +214,7 @@ func TestApp_CreateFlow_MissingName(t *testing.T) {
 	assert.Equal(t, fasthttp.StatusBadRequest, testutil.GetResponseStatusCode(req))
 }
 
-func TestApp_CreateFlow_MissingWhatsAppAccount(t *testing.T) {
+func TestApp_CreateFlow_MissingWhatsAppAccountID(t *testing.T) {
 	t.Parallel()
 
 	app := newTestApp(t)
@@ -274,7 +274,7 @@ func TestApp_GetFlow_Success(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-	flow := createTestFlow(t, app, org.ID, account.Name, "Test Flow")
+	flow := createTestFlow(t, app, org.ID, &account.ID, "Test Flow")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -293,7 +293,7 @@ func TestApp_GetFlow_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, flow.ID, resp.Data.Flow.ID)
 	assert.Equal(t, "Test Flow", resp.Data.Flow.Name)
-	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccount)
+	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccountID)
 	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
 }
 
@@ -337,7 +337,7 @@ func TestApp_GetFlow_CrossOrgIsolation(t *testing.T) {
 	org2 := testutil.CreateTestOrganization(t, app.DB)
 	user2 := testutil.CreateTestUser(t, app.DB, org2.ID)
 	account1 := testutil.CreateTestWhatsAppAccount(t, app.DB, org1.ID)
-	flow := createTestFlow(t, app, org1.ID, account1.Name, "Org1 Flow")
+	flow := createTestFlow(t, app, org1.ID, &account1.ID, "Org1 Flow")
 
 	// User from org2 tries to access org1's flow
 	req := testutil.NewGETRequest(t)
@@ -358,7 +358,7 @@ func TestApp_UpdateFlow_Success(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-	flow := createTestFlow(t, app, org.ID, account.Name, "Original Flow")
+	flow := createTestFlow(t, app, org.ID, &account.ID, "Original Flow")
 
 	req := testutil.NewJSONRequest(t, map[string]any{
 		"name":     "Updated Flow",
@@ -445,7 +445,7 @@ func TestApp_DeleteFlow_Success(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-	flow := createTestFlow(t, app, org.ID, account.Name, "Flow To Delete")
+	flow := createTestFlow(t, app, org.ID, &account.ID, "Flow To Delete")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -510,7 +510,7 @@ func TestApp_DeleteFlow_CrossOrgIsolation(t *testing.T) {
 	org2 := testutil.CreateTestOrganization(t, app.DB)
 	user2 := testutil.CreateTestUser(t, app.DB, org2.ID)
 	account1 := testutil.CreateTestWhatsAppAccount(t, app.DB, org1.ID)
-	flow := createTestFlow(t, app, org1.ID, account1.Name, "Org1 Flow")
+	flow := createTestFlow(t, app, org1.ID, &account1.ID, "Org1 Flow")
 
 	// User from org2 tries to delete org1's flow
 	req := testutil.NewGETRequest(t)
@@ -550,7 +550,7 @@ func TestApp_DuplicateFlow_Success(t *testing.T) {
 	org := testutil.CreateTestOrganization(t, app.DB)
 	user := testutil.CreateTestUser(t, app.DB, org.ID)
 	account := testutil.CreateTestWhatsAppAccount(t, app.DB, org.ID)
-	flow := createTestFlow(t, app, org.ID, account.Name, "Original Flow")
+	flow := createTestFlow(t, app, org.ID, &account.ID, "Original Flow")
 
 	req := testutil.NewGETRequest(t)
 	testutil.SetAuthContext(req, org.ID, user.ID)
@@ -580,7 +580,7 @@ func TestApp_DuplicateFlow_Success(t *testing.T) {
 	assert.Equal(t, "DRAFT", resp.Data.Flow.Status)
 
 	// Duplicated flow should keep the same account
-	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccount)
+	assert.Equal(t, account.Name, resp.Data.Flow.WhatsAppAccountID)
 
 	// Duplicated flow should keep the same category
 	assert.Equal(t, flow.Category, resp.Data.Flow.Category)
@@ -632,7 +632,7 @@ func TestApp_DuplicateFlow_CrossOrgIsolation(t *testing.T) {
 	org2 := testutil.CreateTestOrganization(t, app.DB)
 	user2 := testutil.CreateTestUser(t, app.DB, org2.ID)
 	account1 := testutil.CreateTestWhatsAppAccount(t, app.DB, org1.ID)
-	flow := createTestFlow(t, app, org1.ID, account1.Name, "Org1 Flow")
+	flow := createTestFlow(t, app, org1.ID, &account1.ID, "Org1 Flow")
 
 	// User from org2 tries to duplicate org1's flow
 	req := testutil.NewGETRequest(t)
@@ -670,7 +670,7 @@ func TestApp_DuplicateFlow_PreservesFlowJSON(t *testing.T) {
 	flow := &models.WhatsAppFlow{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "Flow With JSON",
 		Status:          "PUBLISHED",
 		Category:        "SIGN_UP",

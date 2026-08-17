@@ -170,7 +170,7 @@ func TestApp_SendOutgoingMessage_TextMessage_Success(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -222,7 +222,7 @@ func TestApp_SendOutgoingMessage_TextMessage_APIError(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -255,7 +255,7 @@ func TestApp_SendOutgoingMessage_ImageMessage_WithMediaID(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -295,7 +295,7 @@ func TestApp_SendOutgoingMessage_ImageMessage_WithMediaData(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -335,7 +335,7 @@ func TestApp_SendOutgoingMessage_DocumentMessage(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -374,7 +374,7 @@ func TestApp_SendOutgoingMessage_VideoMessage(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -410,7 +410,7 @@ func TestApp_SendOutgoingMessage_AudioMessage(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -444,7 +444,7 @@ func TestApp_SendOutgoingMessage_InteractiveButtons(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -494,7 +494,7 @@ func TestApp_SendOutgoingMessage_InteractiveCTAURL(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -536,13 +536,13 @@ func TestApp_SendOutgoingMessage_TemplateMessage(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	// Create a test template
 	template := &models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: account.Name,
+		WhatsAppAccountID: &account.ID,
 		Name:            "hello_world",
 		DisplayName:     "Hello World Template",
 		MetaTemplateID:  "meta-123",
@@ -595,7 +595,7 @@ func TestApp_SendOutgoingMessage_TemplateMessage_MissingTemplate(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -629,7 +629,7 @@ func TestApp_SendOutgoingMessage_AsyncOption(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -666,7 +666,7 @@ func TestApp_SendOutgoingMessage_SyncOption(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -699,7 +699,7 @@ func TestApp_SendOutgoingMessage_WithSentByUser(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	// Create a test user (required due to foreign key constraint)
 	user := &models.User{
@@ -746,7 +746,7 @@ func TestApp_SendOutgoingMessage_UnsupportedType(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -822,7 +822,7 @@ func TestApp_SendOutgoingMessage_ContactLastMessageUpdated(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -852,7 +852,7 @@ func TestApp_SendOutgoingMessage_MediaPreview(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 
@@ -882,7 +882,7 @@ func TestApp_SendOutgoingMessage_DocumentPreview(t *testing.T) {
 	app := newMsgTestApp(t, mockServer)
 	org := testutil.CreateTestOrganization(t, app.DB)
 	account := createTestAccount(t, app, org.ID)
-	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(account.Name))
+	contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 	ctx := t.Context()
 

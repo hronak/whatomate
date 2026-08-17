@@ -203,7 +203,7 @@ func webhookTestData(t *testing.T, app *App, msgStatus models.MessageStatus) (mo
 	tmpl := models.Template{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: waAccount.Name,
+		WhatsAppAccountID: &waAccount.ID,
 		Name:            "tmpl-" + uid,
 		Language:        "en",
 		BodyContent:     "Hello {{1}}",
@@ -222,7 +222,7 @@ func webhookTestData(t *testing.T, app *App, msgStatus models.MessageStatus) (mo
 	campaign := models.BulkMessageCampaign{
 		BaseModel:       models.BaseModel{ID: uuid.New()},
 		OrganizationID:  org.ID,
-		WhatsAppAccount: waAccount.Name,
+		WhatsAppAccountID: &waAccount.ID,
 		Name:            "test-campaign-" + uid,
 		TemplateID:      tmpl.ID,
 		Status:          models.CampaignStatusCompleted,
@@ -235,7 +235,7 @@ func webhookTestData(t *testing.T, app *App, msgStatus models.MessageStatus) (mo
 	msg := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    org.ID,
-		WhatsAppAccount:   "test-account",
+		WhatsAppAccountID: nil,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: waMsgID,
 		Direction:         models.DirectionOutgoing,
@@ -320,7 +320,7 @@ func TestUpdateMessageStatus_NonCampaignMessageIgnoresRecipient(t *testing.T) {
 	msg := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    org.ID,
-		WhatsAppAccount:   "test-account",
+		WhatsAppAccountID: nil,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: waMsgID,
 		Direction:         models.DirectionOutgoing,
@@ -412,7 +412,7 @@ func TestUpdateMessageStatus_FailedBroadcastsErrorMessageViaWebSocket(t *testing
 	msg := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    org.ID,
-		WhatsAppAccount:   "test-account",
+		WhatsAppAccountID: nil,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: waMsgID,
 		Direction:         models.DirectionOutgoing,
@@ -493,7 +493,7 @@ func TestUpdateMessageStatus_DeliveredBroadcastsViaWebSocket_NoErrorMessage(t *t
 	msg := models.Message{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    org.ID,
-		WhatsAppAccount:   "test-account",
+		WhatsAppAccountID: nil,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: waMsgID,
 		Direction:         models.DirectionOutgoing,
