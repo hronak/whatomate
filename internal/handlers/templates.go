@@ -14,7 +14,7 @@ import (
 
 // TemplateRequest represents the request body for creating/updating a template
 type TemplateRequest struct {
-	WhatsAppAccountID string `json:"whatsapp_account" validate:"required"` // WhatsApp account name
+	WhatsAppAccountID string `json:"whatsapp_account_id" validate:"required"` // WhatsApp account UUID
 	Name              string `json:"name" validate:"required"`
 	DisplayName       string `json:"display_name"`
 	Language          string `json:"language" validate:"required"`
@@ -66,15 +66,18 @@ func (a *App) ListTemplates(r *fastglue.Request) error {
 	pg := parsePagination(r)
 
 	// Optional filters
-	accountName := string(r.RequestCtx.QueryArgs().Peek("account")) // Filter by account name
+	accountID, err := a.accountIDFilter(r, "account")
+	if err != nil {
+		return nil
+	}
 	status := string(r.RequestCtx.QueryArgs().Peek("status"))
 	category := string(r.RequestCtx.QueryArgs().Peek("category"))
 	search := string(r.RequestCtx.QueryArgs().Peek("search"))
 
 	query := a.DB.Where("organization_id = ?", orgID)
 
-	if accountName != "" {
-		query = query.Where("whatsapp_account_id = ?", accountName)
+	if accountID != nil {
+		query = query.Where("whatsapp_account_id = ?", accountID)
 	}
 	if status != "" {
 		query = query.Where("status = ?", status)
@@ -338,12 +341,7 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 
 	// If template exists on Meta, delete it there too
 	if template.MetaTemplateID != "" {
-		if account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-			if u == nil {
-				return ""
-			}
-			return u.String()
-		}(template.WhatsAppAccountID)); err == nil {
+		if account, err := a.resolveWhatsAppAccountRef(orgID, template.WhatsAppAccountID); err == nil {
 			// Delete from Meta API
 			templateName := template.Name
 			a.spawn("delete_template_from_meta", func(context.Context) {
@@ -394,12 +392,7 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(template.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, template.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}

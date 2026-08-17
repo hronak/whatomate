@@ -267,14 +267,17 @@ func (a *App) Register(r *fastglue.Request) error {
 // The old refresh token is invalidated (single-use) and a new one is issued.
 func (a *App) RefreshToken(r *fastglue.Request) error {
 	// Read refresh token from cookie first, fall back to JSON body.
+	//
+	// The body is only a fallback, so a malformed one is not reported as a 400:
+	// it carries no usable token, which is the same situation as sending no body
+	// at all, and the caller gets the 401 below either way.
 	refreshTokenStr := string(r.RequestCtx.Request.Header.Cookie(cookieRefreshName))
 	if refreshTokenStr == "" {
 		var req RefreshRequest
 		if len(r.RequestCtx.PostBody()) > 0 {
-			if err := a.decodeRequest(r, &req); err != nil {
-				return nil
+			if err := r.Decode(&req, "json"); err == nil {
+				refreshTokenStr = req.RefreshToken
 			}
-			refreshTokenStr = req.RefreshToken
 		}
 	}
 	if refreshTokenStr == "" {

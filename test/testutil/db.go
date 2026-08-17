@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/shridarpatil/whatomate/internal/database"
 	"github.com/shridarpatil/whatomate/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -61,6 +62,14 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 
 // runMigrations runs all model migrations.
 func runMigrations(db *gorm.DB) error {
+	// Mirrors the production migration order — see
+	// database.RenameWhatsAppAccountIDColumns. A test database created before
+	// the models pinned `column:whatsapp_account_id` still has the
+	// GORM-derived name, and without the rename AutoMigrate would add an
+	// empty second column here too.
+	if err := database.RenameWhatsAppAccountIDColumns(db); err != nil {
+		return err
+	}
 	return db.AutoMigrate(
 		// Core models
 		&models.Organization{},

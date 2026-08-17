@@ -316,12 +316,7 @@ func (p *SLAProcessor) notifyEscalation(transfer models.AgentTransfer, settings 
 
 // sendSLATextToCustomer sends an SLA-related text message to the customer.
 func (p *SLAProcessor) sendSLATextToCustomer(transfer models.AgentTransfer, label, message string) {
-	account, err := p.app.resolveWhatsAppAccount(transfer.OrganizationID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(transfer.WhatsAppAccountID))
+	account, err := p.app.resolveWhatsAppAccountRef(transfer.OrganizationID, transfer.WhatsAppAccountID)
 	if err != nil {
 		p.app.Log.Error("Failed to load WhatsApp account for "+label, "error", err)
 		return
@@ -514,12 +509,7 @@ func (p *SLAProcessor) sendChatbotReminder(contact models.Contact, settings mode
 	}
 
 	// Get WhatsApp account
-	account, err := p.app.resolveWhatsAppAccount(contact.OrganizationID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(contact.WhatsAppAccountID))
+	account, err := p.app.resolveWhatsAppAccountRef(contact.OrganizationID, contact.WhatsAppAccountID)
 	if err != nil {
 		p.app.Log.Error("Failed to load WhatsApp account for chatbot reminder", "error", err)
 		return
@@ -563,12 +553,7 @@ func (p *SLAProcessor) autoCloseChatbotSession(contact models.Contact, settings 
 
 	// Send auto-close message if configured
 	if settings.ClientInactivity.AutoCloseMessage != "" {
-		if account, err := p.app.resolveWhatsAppAccount(contact.OrganizationID, func(u *uuid.UUID) string {
-			if u == nil {
-				return ""
-			}
-			return u.String()
-		}(contact.WhatsAppAccountID)); err == nil {
+		if account, err := p.app.resolveWhatsAppAccountRef(contact.OrganizationID, contact.WhatsAppAccountID); err == nil {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 

@@ -49,14 +49,17 @@ func (a *App) ListFlows(r *fastglue.Request) error {
 	pg := parsePagination(r)
 
 	// Optional filters
-	accountName := string(r.RequestCtx.QueryArgs().Peek("account"))
+	accountID, err := a.accountIDFilter(r, "account")
+	if err != nil {
+		return nil
+	}
 	status := string(r.RequestCtx.QueryArgs().Peek("status"))
 	search := string(r.RequestCtx.QueryArgs().Peek("search"))
 
 	query := a.DB.Where("organization_id = ?", orgID)
 
-	if accountName != "" {
-		query = query.Where("whatsapp_account_id = ?", accountName)
+	if accountID != nil {
+		query = query.Where("whatsapp_account_id = ?", accountID)
 	}
 	if status != "" {
 		query = query.Where("status = ?", status)
@@ -273,12 +276,7 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(flow.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, flow.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -389,12 +387,7 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(flow.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, flow.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -462,12 +455,7 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 	// Call Meta API to deprecate the flow if we have a Meta flow ID
 	if flow.MetaFlowID != "" {
 		// Get the WhatsApp account
-		account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-			if u == nil {
-				return ""
-			}
-			return u.String()
-		}(flow.WhatsAppAccountID))
+		account, err := a.resolveWhatsAppAccountRef(orgID, flow.WhatsAppAccountID)
 		if err != nil {
 			return a.sendError(r, invalidRequest("WhatsApp account not found"))
 		}

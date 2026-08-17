@@ -23,7 +23,7 @@ import (
 // CampaignRequest represents campaign create/update request
 type CampaignRequest struct {
 	Name              string     `json:"name" validate:"required"`
-	WhatsAppAccountID string     `json:"whatsapp_account" validate:"required"`
+	WhatsAppAccountID string     `json:"whatsapp_account_id" validate:"required"`
 	TemplateID        string     `json:"template_id" validate:"required"`
 	HeaderMediaID     string     `json:"header_media_id"`
 	ScheduledAt       *time.Time `json:"scheduled_at"`
@@ -80,7 +80,10 @@ func (a *App) ListCampaigns(r *fastglue.Request) error {
 
 	// Get query params
 	status := string(r.RequestCtx.QueryArgs().Peek("status"))
-	whatsappAccount := string(r.RequestCtx.QueryArgs().Peek("whatsapp_account"))
+	accountID, err := a.accountIDFilter(r, "whatsapp_account")
+	if err != nil {
+		return nil
+	}
 	search := string(r.RequestCtx.QueryArgs().Peek("search"))
 
 	baseQuery := a.DB.Where("organization_id = ?", orgID)
@@ -92,8 +95,8 @@ func (a *App) ListCampaigns(r *fastglue.Request) error {
 	if status != "" {
 		baseQuery = baseQuery.Where("status = ?", status)
 	}
-	if whatsappAccount != "" {
-		baseQuery = baseQuery.Where("whatsapp_account_id = ?", whatsappAccount)
+	if accountID != nil {
+		baseQuery = baseQuery.Where("whatsapp_account_id = ?", accountID)
 	}
 	if from, ok := parseDateParam(r, "from"); ok {
 		baseQuery = baseQuery.Where("created_at >= ?", from)
@@ -915,12 +918,7 @@ func (a *App) UploadCampaignMedia(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(campaign.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, campaign.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}

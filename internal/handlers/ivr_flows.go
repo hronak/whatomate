@@ -37,11 +37,14 @@ func (a *App) ListIVRFlows(r *fastglue.Request) error {
 	}
 
 	pg := parsePagination(r)
-	account := string(r.RequestCtx.QueryArgs().Peek("account"))
+	accountID, err := a.accountIDFilter(r, "account")
+	if err != nil {
+		return nil
+	}
 
 	query := a.DB.Where("organization_id = ?", orgID).Order("created_at DESC")
-	if account != "" {
-		query = query.Where("whatsapp_account_id = ?", account)
+	if accountID != nil {
+		query = query.Where("whatsapp_account_id = ?", accountID)
 	}
 
 	var total int64

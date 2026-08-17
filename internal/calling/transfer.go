@@ -15,6 +15,17 @@ import (
 	"github.com/shridarpatil/whatomate/internal/websocket"
 )
 
+// uuidStr renders a nullable UUID for a JSON/WebSocket payload, yielding "" for
+// nil rather than panicking the way (*uuid.UUID).String() would. The WhatsApp
+// account on a call transfer is nullable, and a panic here would take down the
+// goroutine handling a live call.
+func uuidStr(u *uuid.UUID) string {
+	if u == nil {
+		return ""
+	}
+	return u.String()
+}
+
 // initiateTransfer starts the transfer flow: puts caller on hold, notifies agents via WebSocket.
 func (m *Manager) initiateTransfer(session *CallSession, waAccountID *uuid.UUID, teamTarget string, ivrPath []map[string]string) {
 	// Load org-level calling overrides once
@@ -139,7 +150,7 @@ func (m *Manager) initiateTransfer(session *CallSession, waAccountID *uuid.UUID,
 			"whatsapp_call_id":    transfer.WhatsAppCallID,
 			"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
 			"contact_id":          transfer.ContactID.String(),
-			"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
+			"whatsapp_account_id": uuidStr(transfer.WhatsAppAccountID),
 			"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 		}
 		m.wsHub.BroadcastToUser(session.OrganizationID, *assignedAgentID, websocket.WSMessage{
@@ -214,7 +225,7 @@ func (m *Manager) initiateTransfer(session *CallSession, waAccountID *uuid.UUID,
 			"whatsapp_call_id":    transfer.WhatsAppCallID,
 			"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
 			"contact_id":          transfer.ContactID.String(),
-			"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
+			"whatsapp_account_id": uuidStr(transfer.WhatsAppAccountID),
 			"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 		}
 		m.broadcastEvent(transfer.OrganizationID, websocket.TypeCallTransferWaiting, payload)
@@ -396,7 +407,7 @@ func (m *Manager) InitiateAgentTransfer(callLogID, initiatingAgentID uuid.UUID, 
 			"whatsapp_call_id":    transfer.WhatsAppCallID,
 			"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
 			"contact_id":          transfer.ContactID.String(),
-			"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
+			"whatsapp_account_id": uuidStr(transfer.WhatsAppAccountID),
 			"initiating_agent_id": initiatingAgentID.String(),
 			"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 		}
@@ -426,7 +437,7 @@ func (m *Manager) InitiateAgentTransfer(callLogID, initiatingAgentID uuid.UUID, 
 			"whatsapp_call_id":    transfer.WhatsAppCallID,
 			"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
 			"contact_id":          transfer.ContactID.String(),
-			"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
+			"whatsapp_account_id": uuidStr(transfer.WhatsAppAccountID),
 			"initiating_agent_id": initiatingAgentID.String(),
 			"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 		}
@@ -850,7 +861,7 @@ func (m *Manager) runTransferRotation(session *CallSession, transfer models.Call
 		"whatsapp_call_id":    transfer.WhatsAppCallID,
 		"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
 		"contact_id":          transfer.ContactID.String(),
-		"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
+		"whatsapp_account_id": uuidStr(transfer.WhatsAppAccountID),
 		"team_id":             teamID.String(),
 		"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 	}
@@ -1237,7 +1248,7 @@ func buildTransferVars(transfer *models.CallTransfer) map[string]string {
 		"contact_id":          transfer.ContactID.String(),
 		"call_log_id":         transfer.CallLogID.String(),
 		"transfer_id":         transfer.ID.String(),
-		"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
+		"whatsapp_account_id": uuidStr(transfer.WhatsAppAccountID),
 		"status":              string(transfer.Status),
 	}
 	if transfer.TeamID != nil {

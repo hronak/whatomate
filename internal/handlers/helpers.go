@@ -20,6 +20,48 @@ import (
 // written an error envelope to the response. Callers should return nil to the framework.
 var errEnvelopeSent = errors.New("error envelope sent")
 
+// accountIDFilter reads an optional WhatsApp-account filter from a query
+// parameter. The value is an account UUID, so a malformed one is a client error
+// and gets a 400 here — passed through to Postgres it would come back as a
+// 22P02 cast failure and surface to the caller as a 500.
+//
+// Returns (nil, nil) when the parameter is absent, meaning "no filter". On a
+// malformed value the error is errEnvelopeSent, so callers return nil.
+func (a *App) accountIDFilter(r *fastglue.Request, param string) (*uuid.UUID, error) {
+	raw := string(r.RequestCtx.QueryArgs().Peek(param))
+	if raw == "" {
+		return nil, nil
+	}
+	id, err := uuid.Parse(raw)
+	if err != nil {
+		return nil, a.failRequest(r, invalidRequest("Invalid "+param))
+	}
+	return &id, nil
+}
+
+// optionalUUID parses a UUID that a request may legitimately omit, returning nil
+// for an empty or unparseable value so it lands in a nullable column as NULL.
+func optionalUUID(s string) *uuid.UUID {
+	u, err := uuid.Parse(s)
+	if err != nil {
+		return nil
+	}
+	return &u
+}
+
+// sameAccount reports whether two optional WhatsApp account references point at
+// the same account, treating two nil (organization-wide) references as equal.
+//
+// Nullable account columns are *uuid.UUID, so a bare == compares pointer
+// identity — two pointers to the same UUID loaded in separate queries would
+// compare unequal.
+func sameAccount(a, b *uuid.UUID) bool {
+	if a == nil || b == nil {
+		return a == nil && b == nil
+	}
+	return *a == *b
+}
+
 // parsePathUUID extracts a UUID from a path parameter. On failure, it sends a
 // 400 error envelope and returns uuid.Nil plus an error.
 func parsePathUUID(r *fastglue.Request, param, label string) (uuid.UUID, error) {

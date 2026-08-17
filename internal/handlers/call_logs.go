@@ -19,7 +19,10 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 
 	pg := parsePagination(r)
 	status := string(r.RequestCtx.QueryArgs().Peek("status"))
-	account := string(r.RequestCtx.QueryArgs().Peek("account"))
+	accountID, err := a.accountIDFilter(r, "account")
+	if err != nil {
+		return nil
+	}
 	contactIDStr := string(r.RequestCtx.QueryArgs().Peek("contact_id"))
 	direction := string(r.RequestCtx.QueryArgs().Peek("direction"))
 	ivrFlowID := string(r.RequestCtx.QueryArgs().Peek("ivr_flow_id"))
@@ -43,9 +46,9 @@ func (a *App) ListCallLogs(r *fastglue.Request) error {
 		query = query.Where("call_logs.status = ?", status)
 		countQuery = countQuery.Where("status = ?", status)
 	}
-	if account != "" {
-		query = query.Where("call_logs.whatsapp_account_id = ?", account)
-		countQuery = countQuery.Where("whatsapp_account_id = ?", account)
+	if accountID != nil {
+		query = query.Where("call_logs.whatsapp_account_id = ?", accountID)
+		countQuery = countQuery.Where("whatsapp_account_id = ?", accountID)
 	}
 	if contactIDStr != "" {
 		query = query.Where("call_logs.contact_id = ?", contactIDStr)

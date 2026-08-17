@@ -37,7 +37,7 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 
 	// Look up account
 	var account models.WhatsAppAccount
-	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccountID).
+	if err := a.DB.Where("organization_id = ? AND id = ?", orgID, req.WhatsAppAccountID).
 		First(&account).Error; err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -135,7 +135,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 
 	// Look up account
 	var account models.WhatsAppAccount
-	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, req.WhatsAppAccountID).
+	if err := a.DB.Where("organization_id = ? AND id = ?", orgID, req.WhatsAppAccountID).
 		First(&account).Error; err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -214,8 +214,8 @@ func (a *App) GetCallPermission(r *fastglue.Request) error {
 		return nil
 	}
 
-	accountName := string(r.RequestCtx.QueryArgs().Peek("whatsapp_account"))
-	if accountName == "" {
+	accountID := string(r.RequestCtx.QueryArgs().Peek("whatsapp_account"))
+	if accountID == "" {
 		return a.sendError(r, invalidRequest("whatsapp_account query param is required"))
 	}
 
@@ -227,7 +227,7 @@ func (a *App) GetCallPermission(r *fastglue.Request) error {
 
 	// Look up WhatsApp account
 	var account models.WhatsAppAccount
-	if err := a.DB.Where("organization_id = ? AND name = ?", orgID, accountName).First(&account).Error; err != nil {
+	if err := a.DB.Where("organization_id = ? AND id = ?", orgID, accountID).First(&account).Error; err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
 

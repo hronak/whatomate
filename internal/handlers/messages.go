@@ -631,7 +631,10 @@ type SendTemplateMessageRequest struct {
 	TemplateID     string            `json:"template_id"`     // Alternative: template UUID
 	TemplateParams map[string]string `json:"template_params"` // Named or positional params
 	ButtonParams   map[string]string `json:"button_params"`   // Button index -> dynamic URL param value
-	AccountName    string            `json:"account_name"`    // Optional: specific WhatsApp account
+	// AccountName holds the WhatsApp account UUID, not a name. The key is kept
+	// for wire compatibility — the frontend and API clients already send the ID
+	// under it (see stores/contacts.ts sendTemplate).
+	AccountName string `json:"account_name"`
 
 	// Header media for templates with IMAGE/VIDEO/DOCUMENT headers.
 	// Three options (in priority order):
@@ -811,26 +814,17 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		contact = &c
 	}
 
-	// Determine which WhatsApp account to use (explicit > template > contact > default)
-	accountName := req.AccountName
-	if accountName == "" {
-		accountName = func(u *uuid.UUID) string {
-			if u == nil {
-				return ""
-			}
-			return u.String()
-		}(template.WhatsAppAccountID)
+	// Determine which WhatsApp account to use (explicit > template > contact > default).
+	// req.AccountName carries an account UUID despite its name — see the field.
+	accountID := optionalUUID(req.AccountName)
+	if accountID == nil {
+		accountID = template.WhatsAppAccountID
 	}
-	if accountName == "" && contact != nil {
-		accountName = func(u *uuid.UUID) string {
-			if u == nil {
-				return ""
-			}
-			return u.String()
-		}(contact.WhatsAppAccountID)
+	if accountID == nil && contact != nil {
+		accountID = contact.WhatsAppAccountID
 	}
 
-	account, err := a.resolveWhatsAppAccount(orgID, accountName)
+	account, err := a.resolveWhatsAppAccountRef(orgID, accountID)
 	if err != nil {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}

@@ -85,7 +85,7 @@ type PanelConfig struct {
 type ChatbotSettings struct {
 	BaseModel
 	OrganizationID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	IsEnabled         bool       `gorm:"default:false" json:"is_enabled"`
 
 	// Response settings
@@ -117,7 +117,7 @@ func (ChatbotSettings) TableName() string {
 type KeywordRule struct {
 	BaseModel
 	OrganizationID    uuid.UUID    `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID   `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID   `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	Name              string       `gorm:"size:255;not null" json:"name"`
 	IsEnabled         bool         `gorm:"default:true" json:"is_enabled"`
 	Priority          int          `gorm:"default:10" json:"priority"`
@@ -146,7 +146,7 @@ func (KeywordRule) TableName() string {
 type ChatbotFlow struct {
 	BaseModel
 	OrganizationID     uuid.UUID    `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID  *uuid.UUID   `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID  *uuid.UUID   `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	Name               string       `gorm:"size:255;not null" json:"name"`
 	IsEnabled          bool         `gorm:"default:true" json:"is_enabled"`
 	Description        string       `gorm:"type:text" json:"description"`
@@ -213,7 +213,7 @@ type ChatbotSession struct {
 	BaseModel
 	OrganizationID    uuid.UUID     `gorm:"type:uuid;index;not null" json:"organization_id"`
 	ContactID         uuid.UUID     `gorm:"type:uuid;index;not null" json:"contact_id"`
-	WhatsAppAccountID *uuid.UUID    `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID    `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	PhoneNumber       string        `gorm:"size:50;not null" json:"phone_number"`
 	Status            SessionStatus `gorm:"size:20;default:'active'" json:"status"` // active, completed, cancelled, timeout
 	CurrentFlowID     *uuid.UUID    `gorm:"type:uuid" json:"current_flow_id,omitempty"`
@@ -255,7 +255,7 @@ func (ChatbotSessionMessage) TableName() string {
 type AIContext struct {
 	BaseModel
 	OrganizationID    uuid.UUID   `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID  `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID  `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	Name              string      `gorm:"size:255;not null" json:"name"`
 	IsEnabled         bool        `gorm:"default:true" json:"is_enabled"`
 	Priority          int         `gorm:"default:10" json:"priority"`
@@ -295,7 +295,7 @@ type AgentTransfer struct {
 	BaseModel
 	OrganizationID      uuid.UUID      `gorm:"type:uuid;index;not null" json:"organization_id"`
 	ContactID           uuid.UUID      `gorm:"type:uuid;index;not null" json:"contact_id"`
-	WhatsAppAccountID   *uuid.UUID     `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID   *uuid.UUID     `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	PhoneNumber         string         `gorm:"size:50;not null" json:"phone_number"`
 	Status              TransferStatus `gorm:"size:20;default:'active'" json:"status"` // active, resumed
 	Source              TransferSource `gorm:"size:20;default:'manual'" json:"source"` // manual, flow, keyword, chatbot_disabled

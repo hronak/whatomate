@@ -282,14 +282,17 @@ func (a *App) GetMessages(r *fastglue.Request) error {
 	msgQuery := a.DB.Where("contact_id = ?", contactID)
 
 	// Filter by WhatsApp account if specified
-	accountFilter := string(r.RequestCtx.QueryArgs().Peek("account"))
-	if accountFilter != "" {
+	accountFilter, err := a.accountIDFilter(r, "account")
+	if err != nil {
+		return nil
+	}
+	if accountFilter != nil {
 		msgQuery = msgQuery.Where("whatsapp_account_id = ?", accountFilter)
 	}
 
 	// Check if user without contacts:read should only see current conversation
 	if !hasContactsReadPermission {
-		settings, err := a.getChatbotSettingsCached(orgID, "")
+		settings, err := a.getChatbotSettingsCached(orgID, nil)
 		if err == nil {
 			if settings.AgentAssignment.CurrentConversationOnly {
 				// Find the most recent session for this contact
@@ -482,7 +485,7 @@ func (a *App) markMessagesAsRead(orgID uuid.UUID, contactID uuid.UUID, contact *
 	a.logWrite("contact read flag", a.DB.Model(contact).Update("is_read", true))
 
 	if len(unreadMessages) > 0 && contact.WhatsAppAccountID != nil {
-		if account, err := a.resolveWhatsAppAccount(orgID, contact.WhatsAppAccountID.String()); err == nil {
+		if account, err := a.resolveWhatsAppAccountRef(orgID, contact.WhatsAppAccountID); err == nil {
 			if account.AutoReadReceipt {
 				a.wg.Go(func() {
 					// Use timeout context for external API calls
@@ -579,7 +582,7 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 		u, _ := uuid.Parse(req.WhatsAppAccountID)
 		accountName = &u
 	}
-	account, err := a.resolveWhatsAppAccount(orgID, accountName.String())
+	account, err := a.resolveWhatsAppAccountRef(orgID, accountName)
 	if err != nil {
 		return a.sendError(r, invalidRequest("Failed to resolve WhatsApp account"))
 	}
@@ -714,12 +717,20 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 	return a.sendJSON(r, response)
 }
 
-// resolveWhatsAppAccount gets the WhatsApp account for sending messages
-func (a *App) resolveWhatsAppAccount(orgID uuid.UUID, accountName string) (*models.WhatsAppAccount, error) {
+// resolveWhatsAppAccount gets the WhatsApp account for sending messages.
+//
+// accountID is the account's UUID as a string — every caller now threads through
+// WhatsAppAccountID, and the frontend sends account IDs. An empty string means
+// "no preference" and falls back to the org's default outgoing account.
+func (a *App) resolveWhatsAppAccount(orgID uuid.UUID, accountID string) (*models.WhatsAppAccount, error) {
 	var account models.WhatsAppAccount
 
-	if accountName != "" {
-		if err := a.DB.Where("name = ? AND organization_id = ?", accountName, orgID).First(&account).Error; err != nil {
+	if accountID != "" {
+		id, err := uuid.Parse(accountID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid WhatsApp account ID")
+		}
+		if err := a.DB.Where("id = ? AND organization_id = ?", id, orgID).First(&account).Error; err != nil {
 			return nil, fmt.Errorf("WhatsApp account not found")
 		}
 		a.decryptAccountSecrets(&account)
@@ -735,6 +746,16 @@ func (a *App) resolveWhatsAppAccount(orgID uuid.UUID, accountName string) (*mode
 	}
 	a.decryptAccountSecrets(&account)
 	return &account, nil
+}
+
+// resolveWhatsAppAccountRef is resolveWhatsAppAccount for the nullable
+// WhatsAppAccountID columns. A nil ref means the row has no account pinned, so
+// it falls back to the org default rather than dereferencing the pointer.
+func (a *App) resolveWhatsAppAccountRef(orgID uuid.UUID, ref *uuid.UUID) (*models.WhatsAppAccount, error) {
+	if ref == nil {
+		return a.resolveWhatsAppAccount(orgID, "")
+	}
+	return a.resolveWhatsAppAccount(orgID, ref.String())
 }
 
 // resolveWhatsAppAccountByID fetches a WhatsApp account by UUID and org, decrypts secrets.
@@ -835,7 +856,7 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 	if formWhatsAppAccount != "" {
 		mediaAccountName = func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(formWhatsAppAccount)
 	}
-	account, err := a.resolveWhatsAppAccount(orgID, mediaAccountName.String())
+	account, err := a.resolveWhatsAppAccountRef(orgID, mediaAccountName)
 	if err != nil {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}
@@ -985,7 +1006,7 @@ func (a *App) SendReaction(r *fastglue.Request) error {
 	if reactionAccountName == nil {
 		reactionAccountName = contact.WhatsAppAccountID
 	}
-	account, err := a.resolveWhatsAppAccount(orgID, reactionAccountName.String())
+	account, err := a.resolveWhatsAppAccountRef(orgID, reactionAccountName)
 	if err != nil {
 		return a.sendError(r, invalidRequest(err.Error()))
 	}

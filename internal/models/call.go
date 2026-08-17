@@ -42,7 +42,7 @@ const (
 type CallLog struct {
 	BaseModel
 	OrganizationID    uuid.UUID      `gorm:"type:uuid;not null;index" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID     `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID     `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	ContactID         uuid.UUID      `gorm:"type:uuid;index" json:"contact_id"`
 	WhatsAppCallID    string         `gorm:"column:whatsapp_call_id;size:255;index" json:"whatsapp_call_id"`
 	CallerPhone       string         `gorm:"size:50;not null" json:"caller_phone"`
@@ -75,7 +75,7 @@ func (CallLog) TableName() string {
 type IVRFlow struct {
 	BaseModel
 	OrganizationID    uuid.UUID  `gorm:"type:uuid;not null;index" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	Name              string     `gorm:"size:255;not null" json:"name"`
 	Description       string     `gorm:"type:text" json:"description"`
 	IsActive          bool       `gorm:"default:true" json:"is_active"`
@@ -115,7 +115,7 @@ type CallTransfer struct {
 	WhatsAppCallID    string             `gorm:"size:255;not null;index" json:"whatsapp_call_id"`
 	CallerPhone       string             `gorm:"size:50;not null" json:"caller_phone"`
 	ContactID         uuid.UUID          `gorm:"type:uuid;index" json:"contact_id"`
-	WhatsAppAccountID *uuid.UUID         `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID         `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	Status            CallTransferStatus `gorm:"size:20;not null;default:'waiting'" json:"status"`
 	TeamID            *uuid.UUID         `gorm:"type:uuid;index" json:"team_id,omitempty"`
 	AgentID           *uuid.UUID         `gorm:"type:uuid" json:"agent_id,omitempty"`
@@ -154,7 +154,7 @@ type CallPermission struct {
 	BaseModel
 	OrganizationID    uuid.UUID            `gorm:"type:uuid;not null;index" json:"organization_id"`
 	ContactID         uuid.UUID            `gorm:"type:uuid;not null;index" json:"contact_id"`
-	WhatsAppAccountID *uuid.UUID           `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID           `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	Status            CallPermissionStatus `gorm:"size:20;not null;default:'pending'" json:"status"`
 	MessageID         string               `gorm:"size:255" json:"message_id"`
 	RequestedAt       time.Time            `gorm:"autoCreateTime" json:"requested_at"`

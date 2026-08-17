@@ -208,7 +208,7 @@ func (a *App) processIncomingMessageFull(phoneNumberID string, msg IncomingTextM
 	}
 
 	// Check if chatbot is enabled for this account (use cache)
-	settings, err := a.getChatbotSettingsCached(account.OrganizationID, account.Name)
+	settings, err := a.getChatbotSettingsCached(account.OrganizationID, &account.ID)
 	if err != nil {
 		a.Log.Error("Failed to load chatbot settings", "error", err, "account", account.Name, "org_id", account.OrganizationID)
 		return
@@ -248,13 +248,13 @@ func (a *App) processIncomingMessageFull(phoneNumberID string, msg IncomingTextM
 	a.Log.Info("Processing message", "text", messageText, "buttonID", buttonID, "from", msg.From)
 
 	// Get or create active session for this contact
-	session, isNewSession := a.getOrCreateSession(account.OrganizationID, contact.ID, account.Name, msg.From, settings.SessionTimeoutMins)
+	session, isNewSession := a.getOrCreateSession(account.OrganizationID, contact.ID, &account.ID, msg.From, settings.SessionTimeoutMins)
 
 	// Log incoming message to session
 	a.logSessionMessage(session.ID, models.DirectionIncoming, messageText, "keyword_check")
 
 	// Check for transfer keyword BEFORE sending greeting (transfer takes priority)
-	keywordResponse, keywordMatched := a.matchKeywordRules(account.OrganizationID, account.Name, messageText)
+	keywordResponse, keywordMatched := a.matchKeywordRules(account.OrganizationID, &account.ID, messageText)
 	if keywordMatched && keywordResponse.ResponseType == models.ResponseTypeTransfer {
 		a.Log.Info("Transfer keyword matched", "response", keywordResponse.Body)
 		// Check business hours - if outside hours, send out of hours message instead
@@ -425,10 +425,12 @@ type KeywordResponse struct {
 	ResponseType models.ResponseType // text, transfer
 }
 
-// matchKeywordRules checks if the message matches any keyword rules
-func (a *App) matchKeywordRules(orgID uuid.UUID, accountName, messageText string) (*KeywordResponse, bool) {
+// matchKeywordRules checks if the message matches any keyword rules.
+//
+// A nil accountID considers only the organization's global rules.
+func (a *App) matchKeywordRules(orgID uuid.UUID, accountID *uuid.UUID, messageText string) (*KeywordResponse, bool) {
 	// Use cached keyword rules (includes both account-specific and global rules)
-	rules, err := a.getKeywordRulesCached(orgID, accountName)
+	rules, err := a.getKeywordRulesCached(orgID, accountID)
 	if err != nil {
 		a.Log.Error("Failed to fetch keyword rules", "error", err)
 		return nil, false
@@ -657,14 +659,14 @@ func (a *App) sendAndSaveFlowMessage(account *models.WhatsAppAccount, contact *m
 
 // getOrCreateSession finds an active session or creates a new one
 // Returns the session and a boolean indicating if it's a new session
-func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountName, phoneNumber string, timeoutMins int) (*models.ChatbotSession, bool) {
+func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountID *uuid.UUID, phoneNumber string, timeoutMins int) (*models.ChatbotSession, bool) {
 	now := time.Now()
 
 	// Look for an active session that hasn't timed out
 	var session models.ChatbotSession
 	timeout := now.Add(-time.Duration(timeoutMins) * time.Minute)
 	result := a.DB.Where("organization_id = ? AND contact_id = ? AND whatsapp_account_id = ? AND status = ? AND last_activity_at > ?",
-		orgID, contactID, accountName, models.SessionStatusActive, timeout).First(&session)
+		orgID, contactID, accountID, models.SessionStatusActive, timeout).First(&session)
 
 	if result.Error == nil {
 		// Update last activity
@@ -672,12 +674,13 @@ func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountName, phoneN
 		return &session, false // existing session
 	}
 
-	// Create new session
+	// Create new session. The account comes from the parameter, not from
+	// `session` — the lookup above missed, so that struct is still zero.
 	session = models.ChatbotSession{
 		BaseModel:         models.BaseModel{ID: uuid.New()},
 		OrganizationID:    orgID,
 		ContactID:         contactID,
-		WhatsAppAccountID: session.WhatsAppAccountID,
+		WhatsAppAccountID: accountID,
 		PhoneNumber:       phoneNumber,
 		Status:            models.SessionStatusActive,
 		SessionData:       models.JSONB{},
@@ -862,18 +865,13 @@ const aiRequestTimeout = 2 * time.Minute
 // buildAIContext fetches and combines all AI context data
 func (a *App) buildAIContext(orgID uuid.UUID, session *models.ChatbotSession, userMessage string) string {
 	// Get WhatsApp account for cache key
-	whatsAppAccount := ""
+	var accountID *uuid.UUID
 	if session != nil {
-		whatsAppAccount = func(u *uuid.UUID) string {
-			if u == nil {
-				return ""
-			}
-			return u.String()
-		}(session.WhatsAppAccountID)
+		accountID = session.WhatsAppAccountID
 	}
 
 	// Use cached AI contexts
-	contexts, err := a.getAIContextsCached(orgID, whatsAppAccount)
+	contexts, err := a.getAIContextsCached(orgID, accountID)
 	if err != nil || len(contexts) == 0 {
 		return ""
 	}
@@ -1659,7 +1657,7 @@ func (a *App) saveIncomingMessage(account *models.WhatsAppAccount, contact *mode
 		"last_message_at":      now,
 		"last_message_preview": preview,
 		"is_read":              false,
-		"whatsapp_account_id":    account.Name,
+		"whatsapp_account_id":  account.ID,
 		"last_inbound_at":      now,
 	}))
 

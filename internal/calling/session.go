@@ -665,7 +665,7 @@ func (m *Manager) terminateCall(session *CallSession, waAccount *whatsapp.Accoun
 // terminates the call. Used when only the session is available.
 func (m *Manager) terminateCallBySession(session *CallSession) {
 	var account models.WhatsAppAccount
-	if err := m.db.Where("organization_id = ? AND name = ?", session.OrganizationID, session.WhatsAppAccountID).
+	if err := m.db.Where("organization_id = ? AND id = ?", session.OrganizationID, session.WhatsAppAccountID).
 		First(&account).Error; err != nil {
 		m.log.Error("Failed to look up account for call termination", "error", err, "call_id", session.ID)
 		return

@@ -729,7 +729,7 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 		"last_message_at":      now,
 		"last_message_preview": preview,
 		"is_read":              true, // Echoes from mobile app are outgoing, so conversation is read
-		"whatsapp_account_id":    account.Name,
+		"whatsapp_account_id":  account.ID,
 	}))
 
 	// Broadcast new message via WebSocket to keep UI updated

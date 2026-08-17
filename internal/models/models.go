@@ -350,7 +350,7 @@ type Contact struct {
 	OrganizationID     uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
 	PhoneNumber        string     `gorm:"size:50;not null" json:"phone_number"`
 	ProfileName        string     `gorm:"size:255" json:"profile_name"`
-	WhatsAppAccountID  *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID  *uuid.UUID `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	AssignedUserID     *uuid.UUID `gorm:"type:uuid;index" json:"assigned_user_id,omitempty"`
 	LastMessageAt      *time.Time `json:"last_message_at,omitempty"`
 	LastMessagePreview string     `gorm:"type:text" json:"last_message_preview"`
@@ -383,7 +383,7 @@ func (Contact) TableName() string {
 type Message struct {
 	BaseModel
 	OrganizationID    uuid.UUID     `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID    `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID    `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	ContactID         uuid.UUID     `gorm:"type:uuid;index;not null" json:"contact_id"`
 	WhatsAppMessageID string        `gorm:"column:whats_app_message_id;size:255;index" json:"whatsapp_message_id"`
 	ConversationID    string        `gorm:"size:255;index" json:"conversation_id"`
@@ -419,7 +419,7 @@ func (Message) TableName() string {
 type Template struct {
 	BaseModel
 	OrganizationID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	MetaTemplateID    string     `gorm:"size:100" json:"meta_template_id"`
 	Name              string     `gorm:"size:255;not null" json:"name"`
 	DisplayName       string     `gorm:"size:255" json:"display_name"`
@@ -455,7 +455,7 @@ func (Template) TableName() string {
 type WhatsAppFlow struct {
 	BaseModel
 	OrganizationID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID `gorm:"column:whatsapp_account_id;type:uuid;index" json:"whatsapp_account_id"`
 	MetaFlowID        string     `gorm:"size:100" json:"meta_flow_id"`
 	Name              string     `gorm:"size:255;not null" json:"name"`
 	Status            string     `gorm:"size:20;default:'DRAFT'" json:"status"` // DRAFT, PUBLISHED, DEPRECATED, BLOCKED

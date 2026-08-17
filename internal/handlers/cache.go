@@ -43,11 +43,22 @@ type chatbotSettingsCache struct {
 	AIAPIKey string `json:"ai_api_key_cache"`
 }
 
-// getChatbotSettingsCached retrieves chatbot settings from cache or database
-func (a *App) getChatbotSettingsCached(orgID uuid.UUID, whatsAppAccount string) (*models.ChatbotSettings, error) {
+// accountCacheKeyPart renders a nullable WhatsApp account reference for use in a
+// cache key. A nil reference is the organization-wide default, keyed as "".
+func accountCacheKeyPart(accountID *uuid.UUID) string {
+	if accountID == nil {
+		return ""
+	}
+	return accountID.String()
+}
+
+// getChatbotSettingsCached retrieves chatbot settings from cache or database.
+//
+// A nil accountID asks for the organization-wide default settings.
+func (a *App) getChatbotSettingsCached(orgID uuid.UUID, accountID *uuid.UUID) (*models.ChatbotSettings, error) {
 	ctx, cancel := cacheContext()
 	defer cancel()
-	cacheKey := fmt.Sprintf("%s%s:%s", settingsCachePrefix, orgID.String(), whatsAppAccount)
+	cacheKey := fmt.Sprintf("%s%s:%s", settingsCachePrefix, orgID.String(), accountCacheKeyPart(accountID))
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -63,7 +74,7 @@ func (a *App) getChatbotSettingsCached(orgID uuid.UUID, whatsAppAccount string) 
 	// Cache miss - fetch from database
 	var settings models.ChatbotSettings
 	result := a.DB.Where("organization_id = ? AND (whatsapp_account_id = ? OR whatsapp_account_id IS NULL)",
-		orgID, whatsAppAccount).
+		orgID, accountID).
 		Order("CASE WHEN whatsapp_account_id IS NULL THEN 1 ELSE 0 END"). // Prefer account-specific settings
 		First(&settings)
 
@@ -129,11 +140,13 @@ func (a *App) getChatbotFlowByIDCached(orgID uuid.UUID, flowID uuid.UUID) (*mode
 	return nil, gorm.ErrRecordNotFound
 }
 
-// getKeywordRulesCached retrieves keyword rules from cache or database
-func (a *App) getKeywordRulesCached(orgID uuid.UUID, whatsAppAccount string) ([]models.KeywordRule, error) {
+// getKeywordRulesCached retrieves keyword rules from cache or database.
+//
+// A nil accountID yields the organization's global rules only.
+func (a *App) getKeywordRulesCached(orgID uuid.UUID, accountID *uuid.UUID) ([]models.KeywordRule, error) {
 	ctx, cancel := cacheContext()
 	defer cancel()
-	cacheKey := fmt.Sprintf("%s%s:%s", keywordRulesCachePrefix, orgID.String(), whatsAppAccount)
+	cacheKey := fmt.Sprintf("%s%s:%s", keywordRulesCachePrefix, orgID.String(), accountCacheKeyPart(accountID))
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -149,11 +162,13 @@ func (a *App) getKeywordRulesCached(orgID uuid.UUID, whatsAppAccount string) ([]
 
 	// Get account-specific rules
 	var accountRules []models.KeywordRule
-	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND is_enabled = true",
-		orgID, whatsAppAccount).
-		Order("priority DESC").
-		Find(&accountRules).Error; err != nil {
-		a.Log.Error("Failed to fetch account keyword rules", "error", err, "org_id", orgID)
+	if accountID != nil {
+		if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND is_enabled = true",
+			orgID, accountID).
+			Order("priority DESC").
+			Find(&accountRules).Error; err != nil {
+			a.Log.Error("Failed to fetch account keyword rules", "error", err, "org_id", orgID)
+		}
 	}
 
 	// Get global rules (whatsapp_account_id IS NULL)
@@ -377,11 +392,13 @@ func (a *App) InvalidateSLASettingsCache() {
 	a.invalidate(ctx, "sla_settings", slaSettingsCacheKey)
 }
 
-// getAIContextsCached retrieves AI contexts from cache or database
-func (a *App) getAIContextsCached(orgID uuid.UUID, whatsAppAccount string) ([]models.AIContext, error) {
+// getAIContextsCached retrieves AI contexts from cache or database.
+//
+// A nil accountID yields the organization's global contexts only.
+func (a *App) getAIContextsCached(orgID uuid.UUID, accountID *uuid.UUID) ([]models.AIContext, error) {
 	ctx, cancel := cacheContext()
 	defer cancel()
-	cacheKey := fmt.Sprintf("%s%s:%s", aiContextsCachePrefix, orgID.String(), whatsAppAccount)
+	cacheKey := fmt.Sprintf("%s%s:%s", aiContextsCachePrefix, orgID.String(), accountCacheKeyPart(accountID))
 
 	// Try cache first
 	cached, err := a.Redis.Get(ctx, cacheKey).Result()
@@ -397,11 +414,13 @@ func (a *App) getAIContextsCached(orgID uuid.UUID, whatsAppAccount string) ([]mo
 
 	// Get account-specific contexts
 	var accountContexts []models.AIContext
-	if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND is_enabled = true",
-		orgID, whatsAppAccount).
-		Order("priority DESC").
-		Find(&accountContexts).Error; err != nil {
-		a.Log.Error("Failed to fetch account AI contexts", "error", err, "org_id", orgID)
+	if accountID != nil {
+		if err := a.DB.Where("organization_id = ? AND whatsapp_account_id = ? AND is_enabled = true",
+			orgID, accountID).
+			Order("priority DESC").
+			Find(&accountContexts).Error; err != nil {
+			a.Log.Error("Failed to fetch account AI contexts", "error", err, "org_id", orgID)
+		}
 	}
 
 	// Get global contexts (whatsapp_account_id IS NULL)

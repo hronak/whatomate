@@ -651,7 +651,7 @@ func (a *App) execChatSetVariable(node *ChatNode, ctx *chatNodeCtx) (nodeOutcome
 // disabled all advance via the default edge and log a warning — the
 // graph author can route to a fallback message there.
 func (a *App) execChatAIResponse(node *ChatNode, ctx *chatNodeCtx) (nodeOutcome, error) {
-	settings, err := a.getChatbotSettingsCached(ctx.account.OrganizationID, ctx.account.Name)
+	settings, err := a.getChatbotSettingsCached(ctx.account.OrganizationID, &ctx.account.ID)
 	if err != nil {
 		a.Log.Error("ai_response node failed to load chatbot settings",
 			"node", node.ID, "session", ctx.session.ID, "error", err)
@@ -817,7 +817,9 @@ func (a *App) execChatGotoFlow(node *ChatNode, ctx *chatNodeCtx) (nodeOutcome, e
 			"node", node.ID, "flow_id", targetID)
 		return nodeOutcome{}, nil
 	}
-	if target.WhatsAppAccountID != ctx.session.WhatsAppAccountID {
+	// Compare by value — both sides are *uuid.UUID, so == would compare
+	// pointer identity and reject every jump.
+	if !sameAccount(target.WhatsAppAccountID, ctx.session.WhatsAppAccountID) {
 		a.Log.Warn("goto_flow target belongs to a different WA account; refusing",
 			"node", node.ID, "target_account", target.WhatsAppAccountID,
 			"session_account", ctx.session.WhatsAppAccountID)

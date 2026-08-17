@@ -435,7 +435,7 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	}
 
 	// Get chatbot settings to check AssignToSameAgent (use cache)
-	settings, _ := a.getChatbotSettingsCached(orgID, req.WhatsAppAccountID)
+	settings, _ := a.getChatbotSettingsCached(orgID, optionalUUID(req.WhatsAppAccountID))
 
 	// Parse team_id if provided
 	var teamID *uuid.UUID
@@ -491,16 +491,10 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 
 	// Create transfer
 	transfer := models.AgentTransfer{
-		BaseModel:      models.BaseModel{ID: uuid.New()},
-		OrganizationID: orgID,
-		ContactID:      contactID,
-		WhatsAppAccountID: func(s string) *uuid.UUID {
-			u, err := uuid.Parse(s)
-			if err != nil {
-				return nil
-			}
-			return &u
-		}(req.WhatsAppAccountID),
+		BaseModel:           models.BaseModel{ID: uuid.New()},
+		OrganizationID:      orgID,
+		ContactID:           contactID,
+		WhatsAppAccountID:   optionalUUID(req.WhatsAppAccountID),
 		PhoneNumber:         contact.PhoneNumber,
 		Status:              models.TransferStatusActive,
 		Source:              source,
@@ -808,7 +802,7 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 		// the contact has no existing manager. Active transfers already grant the
 		// assigned agent visibility, so we don't need to over-write contact.AssignedUserID.
 		if targetAgentID != nil && transfer.Contact != nil {
-			settings, _ := a.getChatbotSettingsCached(orgID, "")
+			settings, _ := a.getChatbotSettingsCached(orgID, nil)
 			if settings != nil && settings.AgentAssignment.AssignToSameAgent && transfer.Contact.AssignedUserID == nil {
 				if err := tx.Model(transfer.Contact).Update("assigned_user_id", targetAgentID).Error; err != nil {
 					return err
@@ -887,7 +881,7 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	hasPickupPermission := a.HasPermission(userID, models.ResourceTransfers, models.ActionPickup, orgID)
 
 	// Check if agent queue pickup is allowed (use cache)
-	settings, err := a.getChatbotSettingsCached(orgID, "")
+	settings, err := a.getChatbotSettingsCached(orgID, nil)
 	if err != nil {
 		a.Log.Error("Failed to load chatbot settings for queue pickup check", "error", err, "org_id", orgID)
 	}
@@ -1127,7 +1121,7 @@ func (a *App) willChatbotHandle(account *models.WhatsAppAccount, contact *models
 	if a.hasActiveAgentTransfer(account.OrganizationID, contact.ID) {
 		return false
 	}
-	settings, err := a.getChatbotSettingsCached(account.OrganizationID, account.Name)
+	settings, err := a.getChatbotSettingsCached(account.OrganizationID, &account.ID)
 	if err != nil || !settings.IsEnabled {
 		return false
 	}
@@ -1269,7 +1263,7 @@ func (a *App) createTransferToQueue(account *models.WhatsAppAccount, contact *mo
 		return
 	}
 
-	settings, _ := a.getChatbotSettingsCached(account.OrganizationID, account.Name)
+	settings, _ := a.getChatbotSettingsCached(account.OrganizationID, &account.ID)
 
 	// Suppress transfers outside business hours — flow steps and the
 	// chatbot-disabled fallback would otherwise hand off to a human at
@@ -1310,7 +1304,7 @@ func (a *App) createTransferFromKeyword(account *models.WhatsAppAccount, contact
 		return
 	}
 
-	settings, _ := a.getChatbotSettingsCached(account.OrganizationID, account.Name)
+	settings, _ := a.getChatbotSettingsCached(account.OrganizationID, &account.ID)
 
 	// Check business hours - if outside hours, send out of hours message instead of transfer
 	if settings != nil && settings.BusinessHours.Enabled && len(settings.BusinessHours.Hours) > 0 {
@@ -1367,7 +1361,7 @@ func (a *App) createTransferToTeam(account *models.WhatsAppAccount, contact *mod
 		return
 	}
 
-	settings, _ := a.getChatbotSettingsCached(account.OrganizationID, account.Name)
+	settings, _ := a.getChatbotSettingsCached(account.OrganizationID, &account.ID)
 
 	// Suppress transfers outside business hours (same reason as
 	// createTransferToQueue / createTransferFromKeyword).

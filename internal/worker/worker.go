@@ -95,8 +95,8 @@ func (w *Worker) HandleRecipientJob(ctx context.Context, job *queue.RecipientJob
 
 	// Get WhatsApp account
 	var account models.WhatsAppAccount
-	if err := w.DB.Where("name = ? AND organization_id = ?", campaign.WhatsAppAccountID, job.OrganizationID).First(&account).Error; err != nil {
-		w.Log.Error("Failed to load WhatsApp account", "error", err, "account_name", campaign.WhatsAppAccountID)
+	if err := w.DB.Where("id = ? AND organization_id = ?", campaign.WhatsAppAccountID, job.OrganizationID).First(&account).Error; err != nil {
+		w.Log.Error("Failed to load WhatsApp account", "error", err, "account_id", campaign.WhatsAppAccountID)
 		w.updateRecipientStatus(job.RecipientID, models.MessageStatusFailed, "", "WhatsApp account not found")
 		w.incrementCampaignCount(job.CampaignID, "failed_count")
 		return nil // Don't retry, mark as failed

@@ -377,8 +377,10 @@ func (a *App) TestWebhook(r *fastglue.Request) error {
 	defer cancel()
 
 	if err := a.sendWebhookRequest(ctx, *webhook, jsonData); err != nil {
+		// The caller's endpoint rejected or refused the delivery — that is a
+		// failure of their server, not ours, so 502 rather than 500.
 		a.Log.Error("Webhook test failed", "error", err, "webhook_id", webhook.ID)
-		return a.sendError(r, internalError("Webhook test failed", err))
+		return a.sendError(r, upstreamError("Webhook test failed", err))
 	}
 
 	return a.sendJSON(r, map[string]string{"message": "Test webhook sent successfully"})

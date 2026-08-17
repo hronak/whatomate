@@ -99,6 +99,17 @@ func invalidRequestf(format string, args ...any) error {
 	return invalidRequest(fmt.Sprintf(format, args...))
 }
 
+// upstreamError reports that a service we called on the caller's behalf failed.
+// The fault is not ours, so it must not be reported as a 500 — 502 tells the
+// caller (and any monitoring) that the dependency broke, not this server.
+func upstreamError(message string, cause error) error {
+	return &apiError{
+		status:  fasthttp.StatusBadGateway,
+		message: message,
+		cause:   cause,
+	}
+}
+
 // internalError wraps an unexpected failure. The caller sees a generic message;
 // cause reaches the log only.
 func internalError(message string, cause error) error {

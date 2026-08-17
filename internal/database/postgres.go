@@ -123,10 +123,68 @@ func GetMigrationModels() []MigrationModel {
 
 // AutoMigrate runs auto migration for all models (silent mode)
 func AutoMigrate(db *gorm.DB) error {
+	if err := RenameWhatsAppAccountIDColumns(db); err != nil {
+		return err
+	}
 	migrationModels := GetMigrationModels()
 	for _, m := range migrationModels {
 		if err := db.AutoMigrate(m.Model); err != nil {
 			return fmt.Errorf("failed to migrate %s: %w", m.Name, err)
+		}
+	}
+	return nil
+}
+
+// whatsAppAccountIDTables are the tables whose WhatsApp-account foreign key was
+// created as whats_app_account_id before the column was pinned explicitly.
+var whatsAppAccountIDTables = []string{
+	"agent_transfers",
+	"ai_contexts",
+	"bulk_message_campaigns",
+	"call_logs",
+	"call_permissions",
+	"call_transfers",
+	"catalogs",
+	"chatbot_flows",
+	"chatbot_sessions",
+	"chatbot_settings",
+	"contacts",
+	"ivr_flows",
+	"keyword_rules",
+	"messages",
+	"notification_rules",
+	"templates",
+	"whatsapp_flows",
+}
+
+// RenameWhatsAppAccountIDColumns renames whats_app_account_id to
+// whatsapp_account_id on every table that carries it.
+//
+// The models spell the field WhatsAppAccountID, which GORM's default naming
+// strategy turns into whats_app_account_id — but all the hand-written SQL in the
+// codebase (query filters, updates, the index list) says whatsapp_account_id.
+// v0.3.1–v0.3.4 shipped the GORM-derived name, so the models now pin
+// `column:whatsapp_account_id` and this renames the deployed column in place.
+// Without it AutoMigrate would simply add a second, empty column and orphan the
+// existing account links.
+//
+// Idempotent: each rename is skipped unless the old column exists and the new
+// one does not, so it is a no-op on fresh databases and on already-renamed ones.
+func RenameWhatsAppAccountIDColumns(db *gorm.DB) error {
+	for _, table := range whatsAppAccountIDTables {
+		if !db.Migrator().HasTable(table) {
+			continue
+		}
+		if !db.Migrator().HasColumn(table, "whats_app_account_id") {
+			continue
+		}
+		if db.Migrator().HasColumn(table, "whatsapp_account_id") {
+			continue
+		}
+		stmt := fmt.Sprintf(
+			`ALTER TABLE %q RENAME COLUMN "whats_app_account_id" TO "whatsapp_account_id"`, table)
+		if err := db.Exec(stmt).Error; err != nil {
+			return fmt.Errorf("failed to rename whats_app_account_id on %s: %w", table, err)
 		}
 	}
 	return nil
@@ -142,6 +200,13 @@ func AutoMigrate(db *gorm.DB) error {
 func RunMigrationWithProgress(db *gorm.DB, adminCfg *config.DefaultAdminConfig, lo logf.Logger, out io.Writer) error {
 	// Silence GORM logging during migration
 	silentDB := db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)})
+
+	// Must run before AutoMigrate, or AutoMigrate adds an empty
+	// whatsapp_account_id alongside the deployed whats_app_account_id.
+	if err := RenameWhatsAppAccountIDColumns(silentDB); err != nil {
+		lo.Error("Migration step failed", "step", "rename_whatsapp_account_id", "error", err)
+		return err
+	}
 
 	migrationModels := GetMigrationModels()
 	indexes := getIndexes()

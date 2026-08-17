@@ -67,11 +67,14 @@ func (a *App) ListCatalogs(r *fastglue.Request) error {
 		return a.sendError(r, unauthorized("Unauthorized"))
 	}
 
-	whatsAppAccount := string(r.RequestCtx.QueryArgs().Peek("whatsapp_account"))
+	accountID, err := a.accountIDFilter(r, "whatsapp_account")
+	if err != nil {
+		return nil
+	}
 
 	query := a.DB.Where("organization_id = ?", orgID)
-	if whatsAppAccount != "" {
-		query = query.Where("whatsapp_account_id = ?", whatsAppAccount)
+	if accountID != nil {
+		query = query.Where("whatsapp_account_id = ?", accountID)
 	}
 
 	var catalogs []models.Catalog
@@ -187,12 +190,7 @@ func (a *App) DeleteCatalog(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(catalog.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, catalog.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -347,12 +345,7 @@ func (a *App) CreateCatalogProduct(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(catalog.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, catalog.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -454,12 +447,7 @@ func (a *App) UpdateCatalogProduct(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(catalog.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, catalog.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}
@@ -537,12 +525,7 @@ func (a *App) DeleteCatalogProduct(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
-		if u == nil {
-			return ""
-		}
-		return u.String()
-	}(catalog.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccountRef(orgID, catalog.WhatsAppAccountID)
 	if err != nil {
 		return a.sendError(r, notFound("WhatsApp account"))
 	}

@@ -48,14 +48,14 @@ var exportConfigs = map[string]ExportConfig{
 		},
 		DefaultColumns: []string{"phone_number", "profile_name", "tags"},
 		ColumnLabels: map[string]string{
-			"phone_number":      "Phone Number",
-			"profile_name":      "Name",
+			"phone_number":        "Phone Number",
+			"profile_name":        "Name",
 			"whatsapp_account_id": "WhatsApp Account",
-			"tags":              "Tags",
-			"assigned_user_id":  "Assigned User ID",
-			"last_message_at":   "Last Message At",
-			"created_at":        "Created At",
-			"updated_at":        "Updated At",
+			"tags":                "Tags",
+			"assigned_user_id":    "Assigned User ID",
+			"last_message_at":     "Last Message At",
+			"created_at":          "Created At",
+			"updated_at":          "Updated At",
 		},
 		ColumnTransform: map[string]func(any) string{
 			"tags": func(v any) string {
