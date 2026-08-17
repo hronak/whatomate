@@ -103,6 +103,84 @@ make build-prod
 
 
 
+## Upgrading
+
+Schema migrations are **applied by the app itself, not by a separate command** —
+both Docker images default to `CMD ["server", "-migrate"]` and the shipped
+`docker-compose.yml` passes `-migrate` explicitly, so a normal
+`docker compose pull && docker compose up -d` migrates on boot. Every step is
+idempotent. There is no manual migration step *unless* your deployment overrides
+the container command (a Nomad/Kubernetes spec with a bare `server`) — then add
+`-migrate` back, or migrations are silently skipped.
+
+Two rules for any upgrade that crosses a schema change:
+
+- **Back up PostgreSQL first.** Migrations drop columns, which is irreversible.
+- **Migrate with one instance.** There is no advisory lock around
+  `AutoMigrate`, so bring up a single `server -migrate` and scale extra app or
+  `worker` containers out only after it is healthy.
+
+### 0.2.0 → 0.3.5
+
+```bash
+pg_dump ... > whatomate-0.2.0.sql     # do this first
+docker compose pull
+docker compose up -d
+docker compose logs -f app            # watch the migration run
+```
+
+`.env` needs no changes — its keys are unchanged since 0.2.0.
+
+**`config.toml`: the `[tts]` section changed shape.** IVR greeting synthesis
+moved from local Piper to cloud providers, so the old keys are gone:
+
+| 0.2.0 (remove) | 0.3.5 |
+| --- | --- |
+| `piper_binary` | `provider = "openai"`, `"elevenlabs"` or `"google"` |
+| `piper_model` | `openai_key`, `openai_voice` |
+| `opusenc_binary` | `elevenlabs_key`, `elevenlabs_voice_id` |
+| | `google_credentials_json`, `google_voice_name` |
+
+This is the one edit an upgrade may require, and it **fails quietly**: unknown
+TOML keys are ignored and an empty `provider` only logs a warning, so the server
+starts normally with text-to-speech disabled. If your IVR flows use synthesized
+greetings, configure a provider; if you don't use IVR, just delete the old keys.
+
+Two keys are new, both with working defaults — nothing to add:
+
+- `[server] read_buffer_size` (default 16384) caps the request line plus
+  headers. fasthttp's old 4KB default was tight for cookie auth behind a reverse
+  proxy, which surfaced as dropped connections logging `small read buffer`.
+- `[app] frontend_dir` serves the SPA from disk instead of from the copy
+  embedded in the binary. Leave it unset in production.
+
+No other key changed name, type, or default, and none became required.
+`enforce_route_permissions` already existed in 0.2.0, so route permissions stay
+in shadow mode across the upgrade unless you flip it yourself.
+
+**What the migration does.** 0.2.0 linked most rows to a WhatsApp account by
+*name*; 0.3.x links by ID. On `-migrate` the app adds `whatsapp_account_id`,
+resolves each legacy name against `whatsapp_accounts` within the owning
+organization, then drops the name column. An empty name meant
+"organization-wide" and is left NULL, which is how current queries spell the same
+thing. Soft-deleted accounts still match. Don't run
+`scripts/migrations/issue_16_whatsapp_account_fk.sql` — it is the hand-written
+precursor, superseded by this migration.
+
+A column is only dropped once **every** row resolved. If some name matches no
+account, the migration aborts with `Migration failed` and names the table and row
+count:
+
+```
+messages: 3 row(s) name a WhatsApp account that is not in whatsapp_accounts;
+recreate the account or clear whats_app_account on those rows, then re-run the migration
+```
+
+Nothing is lost when that happens — the old column is still there and the
+container just exits, so it will crash-loop until you either recreate the missing
+account with its original name or clear that column on the affected rows. Then
+restart; the migration picks up where it left off.
+
 ## CLI Usage
 
 ```bash
