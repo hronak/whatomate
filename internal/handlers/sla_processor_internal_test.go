@@ -35,14 +35,14 @@ func newSLATestApp(t *testing.T) *App {
 func createSLATestTransfer(t *testing.T, app *App, orgID, contactID, agentID uuid.UUID, accountID *uuid.UUID, sla models.SLATracking) *models.AgentTransfer {
 	t.Helper()
 	transfer := &models.AgentTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
-		AgentID:         &agentID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
+		AgentID:           &agentID,
 		WhatsAppAccountID: accountID,
-		PhoneNumber:     "+1234567890",
-		Status:          models.TransferStatusActive,
-		SLA:             sla,
+		PhoneNumber:       "+1234567890",
+		Status:            models.TransferStatusActive,
+		SLA:               sla,
 	}
 	require.NoError(t, app.DB.Create(transfer).Error)
 	return transfer
@@ -52,15 +52,15 @@ func createSLATestTransfer(t *testing.T, app *App, orgID, contactID, agentID uui
 func createTestAgentMessage(t *testing.T, app *App, orgID, contactID, agentID uuid.UUID, accountID *uuid.UUID, sentAt time.Time) {
 	t.Helper()
 	msg := &models.Message{
-		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: sentAt},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: sentAt},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: accountID,
-		Direction:       models.DirectionOutgoing,
-		MessageType:     models.MessageTypeText,
-		Content:         "agent reply",
-		SentByUserID:    &agentID,
-		Status:          models.MessageStatusSent,
+		Direction:         models.DirectionOutgoing,
+		MessageType:       models.MessageTypeText,
+		Content:           "agent reply",
+		SentByUserID:      &agentID,
+		Status:            models.MessageStatusSent,
 	}
 	require.NoError(t, app.DB.Create(msg).Error)
 }

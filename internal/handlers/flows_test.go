@@ -18,13 +18,13 @@ func createTestFlow(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID 
 	t.Helper()
 
 	flow := &models.WhatsAppFlow{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: accountID,
-		Name:            name,
-		Status:          "DRAFT",
-		Category:        "SIGN_UP",
-		JSONVersion:     "6.0",
+		Name:              name,
+		Status:            "DRAFT",
+		Category:          "SIGN_UP",
+		JSONVersion:       "6.0",
 	}
 	require.NoError(t, app.DB.Create(flow).Error)
 	return flow
@@ -668,15 +668,15 @@ func TestApp_DuplicateFlow_PreservesFlowJSON(t *testing.T) {
 
 	// Create a flow with flow_json and screens
 	flow := &models.WhatsAppFlow{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "Flow With JSON",
-		Status:          "PUBLISHED",
-		Category:        "SIGN_UP",
-		JSONVersion:     "6.0",
-		MetaFlowID:      "meta-flow-123",
-		FlowJSON:        models.JSONB{"version": "6.0"},
+		Name:              "Flow With JSON",
+		Status:            "PUBLISHED",
+		Category:          "SIGN_UP",
+		JSONVersion:       "6.0",
+		MetaFlowID:        "meta-flow-123",
+		FlowJSON:          models.JSONB{"version": "6.0"},
 		Screens: models.JSONBArray{
 			map[string]any{
 				"id":    "SCREEN_ONE",

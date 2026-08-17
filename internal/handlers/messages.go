@@ -272,14 +272,14 @@ func (a *App) toWhatsAppAccount(account *models.WhatsAppAccount) *whatsapp.Accou
 // createOutgoingMessage creates a Message model from the request
 func (a *App) createOutgoingMessage(req OutgoingMessageRequest, opts MessageSendOptions) *models.Message {
 	msg := &models.Message{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  req.Account.OrganizationID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    req.Account.OrganizationID,
 		WhatsAppAccountID: &req.Account.ID,
-		ContactID:       req.Contact.ID,
-		Direction:       models.DirectionOutgoing,
-		MessageType:     req.Type,
-		Status:          models.MessageStatusPending,
-		SentByUserID:    opts.SentByUserID,
+		ContactID:         req.Contact.ID,
+		Direction:         models.DirectionOutgoing,
+		MessageType:       req.Type,
+		Status:            models.MessageStatusPending,
+		SentByUserID:      opts.SentByUserID,
 	}
 
 	// Set content based on message type
@@ -563,15 +563,15 @@ func (a *App) dispatchMessageSentWebhook(account *models.WhatsAppAccount, contac
 	}
 
 	a.DispatchWebhook(account.OrganizationID, models.WebhookEventMessageSent, MessageEventData{
-		MessageID:       msg.ID.String(),
-		ContactID:       contact.ID.String(),
-		ContactPhone:    contact.PhoneNumber,
-		ContactName:     contact.ProfileName,
-		MessageType:     msg.MessageType,
-		Content:         msg.Content,
+		MessageID:         msg.ID.String(),
+		ContactID:         contact.ID.String(),
+		ContactPhone:      contact.PhoneNumber,
+		ContactName:       contact.ProfileName,
+		MessageType:       msg.MessageType,
+		Content:           msg.Content,
 		WhatsAppAccountID: account.ID.String(),
-		Direction:       models.DirectionOutgoing,
-		SentByUserID:    sentByUserID,
+		Direction:         models.DirectionOutgoing,
+		SentByUserID:      sentByUserID,
 	})
 }
 
@@ -814,10 +814,20 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 	// Determine which WhatsApp account to use (explicit > template > contact > default)
 	accountName := req.AccountName
 	if accountName == "" {
-		accountName = func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(template.WhatsAppAccountID)
+		accountName = func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(template.WhatsAppAccountID)
 	}
 	if accountName == "" && contact != nil {
-		accountName = func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(contact.WhatsAppAccountID)
+		accountName = func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(contact.WhatsAppAccountID)
 	}
 
 	account, err := a.resolveWhatsAppAccount(orgID, accountName)
@@ -997,9 +1007,14 @@ func (a *App) SendTemplateMessage(r *fastglue.Request) error {
 		InteractiveData: message.InteractiveData,
 		Status:          message.Status,
 		IsReply:         message.IsReply,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(message.WhatsAppAccountID),
-		CreatedAt:       message.CreatedAt,
-		UpdatedAt:       message.UpdatedAt,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(message.WhatsAppAccountID),
+		CreatedAt: message.CreatedAt,
+		UpdatedAt: message.UpdatedAt,
 	}
 	return a.sendJSON(r, response)
 }

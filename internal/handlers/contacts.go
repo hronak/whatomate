@@ -33,7 +33,7 @@ type ContactResponse struct {
 	LastMessagePreview string     `json:"last_message_preview"`
 	UnreadCount        int        `json:"unread_count"`
 	AssignedUserID     *uuid.UUID `json:"assigned_user_id,omitempty"`
-	WhatsAppAccountID string     `json:"whatsapp_account,omitempty"`
+	WhatsAppAccountID  string     `json:"whatsapp_account,omitempty"`
 	LastInboundAt      *time.Time `json:"last_inbound_at,omitempty"`
 	ServiceWindowOpen  bool       `json:"service_window_open"`
 	MarketingOptOut    bool       `json:"marketing_opt_out"`
@@ -43,25 +43,25 @@ type ContactResponse struct {
 
 // MessageResponse represents a message for the frontend
 type MessageResponse struct {
-	ID               uuid.UUID            `json:"id"`
-	ContactID        uuid.UUID            `json:"contact_id"`
-	Direction        models.Direction     `json:"direction"`
-	MessageType      models.MessageType   `json:"message_type"`
-	Content          any                  `json:"content"`
-	MediaURL         string               `json:"media_url,omitempty"`
-	MediaMimeType    string               `json:"media_mime_type,omitempty"`
-	MediaFilename    string               `json:"media_filename,omitempty"`
-	InteractiveData  models.JSONB         `json:"interactive_data,omitempty"`
-	Status           models.MessageStatus `json:"status"`
-	WAMID            string               `json:"wamid"`
-	Error            string               `json:"error_message"`
-	IsReply          bool                 `json:"is_reply"`
-	ReplyToMessageID *string              `json:"reply_to_message_id,omitempty"`
-	ReplyToMessage   *ReplyPreview        `json:"reply_to_message,omitempty"`
-	Reactions        []ReactionInfo       `json:"reactions,omitempty"`
+	ID                uuid.UUID            `json:"id"`
+	ContactID         uuid.UUID            `json:"contact_id"`
+	Direction         models.Direction     `json:"direction"`
+	MessageType       models.MessageType   `json:"message_type"`
+	Content           any                  `json:"content"`
+	MediaURL          string               `json:"media_url,omitempty"`
+	MediaMimeType     string               `json:"media_mime_type,omitempty"`
+	MediaFilename     string               `json:"media_filename,omitempty"`
+	InteractiveData   models.JSONB         `json:"interactive_data,omitempty"`
+	Status            models.MessageStatus `json:"status"`
+	WAMID             string               `json:"wamid"`
+	Error             string               `json:"error_message"`
+	IsReply           bool                 `json:"is_reply"`
+	ReplyToMessageID  *string              `json:"reply_to_message_id,omitempty"`
+	ReplyToMessage    *ReplyPreview        `json:"reply_to_message,omitempty"`
+	Reactions         []ReactionInfo       `json:"reactions,omitempty"`
 	WhatsAppAccountID string               `json:"whatsapp_account,omitempty"`
-	CreatedAt        time.Time            `json:"created_at"`
-	UpdatedAt        time.Time            `json:"updated_at"`
+	CreatedAt         time.Time            `json:"created_at"`
+	UpdatedAt         time.Time            `json:"updated_at"`
 }
 
 // ReplyPreview contains a preview of the replied-to message
@@ -183,12 +183,17 @@ func (a *App) ListContacts(r *fastglue.Request) error {
 			LastMessagePreview: c.LastMessagePreview,
 			UnreadCount:        int(unreadCount),
 			AssignedUserID:     c.AssignedUserID,
-			WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(c.WhatsAppAccountID),
-			LastInboundAt:      c.LastInboundAt,
-			ServiceWindowOpen:  serviceWindowOpen,
-			MarketingOptOut:    c.MarketingOptOut,
-			CreatedAt:          c.CreatedAt,
-			UpdatedAt:          c.UpdatedAt,
+			WhatsAppAccountID: func(u *uuid.UUID) string {
+				if u == nil {
+					return ""
+				}
+				return u.String()
+			}(c.WhatsAppAccountID),
+			LastInboundAt:     c.LastInboundAt,
+			ServiceWindowOpen: serviceWindowOpen,
+			MarketingOptOut:   c.MarketingOptOut,
+			CreatedAt:         c.CreatedAt,
+			UpdatedAt:         c.UpdatedAt,
 		}
 	}
 
@@ -393,9 +398,14 @@ func (a *App) buildMessagesResponse(messages []models.Message) []MessageResponse
 			WAMID:           m.WhatsAppMessageID,
 			Error:           m.ErrorMessage,
 			IsReply:         m.IsReply,
-			WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(m.WhatsAppAccountID),
-			CreatedAt:       m.CreatedAt,
-			UpdatedAt:       m.UpdatedAt,
+			WhatsAppAccountID: func(u *uuid.UUID) string {
+				if u == nil {
+					return ""
+				}
+				return u.String()
+			}(m.WhatsAppAccountID),
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		}
 
 		if m.IsReply && m.ReplyToMessageID != nil {
@@ -504,7 +514,7 @@ type SendMessageRequest struct {
 	Content struct {
 		Body string `json:"body"`
 	} `json:"content"`
-	ReplyToMessageID string `json:"reply_to_message_id,omitempty"`
+	ReplyToMessageID  string `json:"reply_to_message_id,omitempty"`
 	WhatsAppAccountID string `json:"whatsapp_account,omitempty"`
 
 	// Interactive message fields (for type="interactive")
@@ -679,9 +689,14 @@ func (a *App) SendMessage(r *fastglue.Request) error {
 		InteractiveData: message.InteractiveData,
 		Status:          message.Status,
 		IsReply:         message.IsReply,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(message.WhatsAppAccountID),
-		CreatedAt:       message.CreatedAt,
-		UpdatedAt:       message.UpdatedAt,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(message.WhatsAppAccountID),
+		CreatedAt: message.CreatedAt,
+		UpdatedAt: message.UpdatedAt,
 	}
 
 	// Add reply context to response
@@ -855,18 +870,23 @@ func (a *App) SendMediaMessage(r *fastglue.Request) error {
 	}
 
 	response := MessageResponse{
-		ID:              message.ID,
-		ContactID:       message.ContactID,
-		Direction:       message.Direction,
-		MessageType:     message.MessageType,
-		Content:         map[string]string{"body": message.Content},
-		MediaURL:        message.MediaURL,
-		MediaMimeType:   message.MediaMimeType,
-		MediaFilename:   message.MediaFilename,
-		Status:          message.Status,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(message.WhatsAppAccountID),
-		CreatedAt:       message.CreatedAt,
-		UpdatedAt:       message.UpdatedAt,
+		ID:            message.ID,
+		ContactID:     message.ContactID,
+		Direction:     message.Direction,
+		MessageType:   message.MessageType,
+		Content:       map[string]string{"body": message.Content},
+		MediaURL:      message.MediaURL,
+		MediaMimeType: message.MediaMimeType,
+		MediaFilename: message.MediaFilename,
+		Status:        message.Status,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(message.WhatsAppAccountID),
+		CreatedAt: message.CreatedAt,
+		UpdatedAt: message.UpdatedAt,
 	}
 
 	return a.sendJSON(r, response)
@@ -1282,11 +1302,11 @@ func (a *App) UpdateContactTags(r *fastglue.Request) error {
 
 // CreateContactRequest represents the request body for creating a contact
 type CreateContactRequest struct {
-	PhoneNumber     string         `json:"phone_number"`
-	ProfileName     string         `json:"profile_name"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
-	Tags            []string       `json:"tags"`
-	Metadata        map[string]any `json:"metadata"`
+	PhoneNumber       string         `json:"phone_number"`
+	ProfileName       string         `json:"profile_name"`
+	WhatsAppAccountID string         `json:"whatsapp_account_id"`
+	Tags              []string       `json:"tags"`
+	Metadata          map[string]any `json:"metadata"`
 }
 
 // CreateContact creates a new contact or restores a soft-deleted one
@@ -1355,10 +1375,10 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 
 	// Create new contact
 	contact := models.Contact{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		PhoneNumber:     normalizedPhone,
-		ProfileName:     req.ProfileName,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		PhoneNumber:       normalizedPhone,
+		ProfileName:       req.ProfileName,
 		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 	}
 
@@ -1390,7 +1410,7 @@ func (a *App) CreateContact(r *fastglue.Request) error {
 // "sent as null" (pointer to empty string) to allow clearing the field.
 type UpdateContactRequest struct {
 	ProfileName        *string         `json:"profile_name"`
-	WhatsAppAccountID    *string         `json:"whatsapp_account_id"`
+	WhatsAppAccountID  *string         `json:"whatsapp_account_id"`
 	Tags               []string        `json:"tags"`
 	Metadata           *map[string]any `json:"metadata"`
 	AssignedUserID     *uuid.UUID      `json:"assigned_user_id"`
@@ -1551,11 +1571,16 @@ func (a *App) buildContactResponse(contact *models.Contact, orgID uuid.UUID) Con
 		LastMessagePreview: contact.LastMessagePreview,
 		UnreadCount:        int(unreadCount),
 		AssignedUserID:     contact.AssignedUserID,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(contact.WhatsAppAccountID),
-		LastInboundAt:      contact.LastInboundAt,
-		ServiceWindowOpen:  serviceWindowOpen,
-		MarketingOptOut:    contact.MarketingOptOut,
-		CreatedAt:          contact.CreatedAt,
-		UpdatedAt:          contact.UpdatedAt,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(contact.WhatsAppAccountID),
+		LastInboundAt:     contact.LastInboundAt,
+		ServiceWindowOpen: serviceWindowOpen,
+		MarketingOptOut:   contact.MarketingOptOut,
+		CreatedAt:         contact.CreatedAt,
+		UpdatedAt:         contact.UpdatedAt,
 	}
 }

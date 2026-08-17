@@ -104,12 +104,12 @@ func createTestCatalog(t *testing.T, app *handlers.App, orgID uuid.UUID, account
 	t.Helper()
 
 	catalog := &models.Catalog{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: accountID,
-		MetaCatalogID:   "meta-catalog-" + uuid.New().String()[:8],
-		Name:            name,
-		IsActive:        true,
+		MetaCatalogID:     "meta-catalog-" + uuid.New().String()[:8],
+		Name:              name,
+		IsActive:          true,
 	}
 	require.NoError(t, app.DB.Create(catalog).Error)
 	return catalog

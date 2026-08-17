@@ -62,7 +62,7 @@ func (p *ElevenLabsTTS) Generate(ctx context.Context, text string) (string, erro
 	}
 
 	if _, err := io.Copy(out, resp.Body); err != nil {
-		out.Close()
+		_ = out.Close()
 		return "", err
 	}
 

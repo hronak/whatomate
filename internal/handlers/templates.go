@@ -15,16 +15,16 @@ import (
 // TemplateRequest represents the request body for creating/updating a template
 type TemplateRequest struct {
 	WhatsAppAccountID string `json:"whatsapp_account" validate:"required"` // WhatsApp account name
-	Name            string `json:"name" validate:"required"`
-	DisplayName     string `json:"display_name"`
-	Language        string `json:"language" validate:"required"`
-	Category        string `json:"category" validate:"required"` // MARKETING, UTILITY, AUTHENTICATION
-	HeaderType      string `json:"header_type"`                  // TEXT, IMAGE, DOCUMENT, VIDEO, NONE
-	HeaderContent   string `json:"header_content"`
-	BodyContent     string `json:"body_content"`
-	FooterContent   string `json:"footer_content"`
-	Buttons         []any  `json:"buttons"`
-	SampleValues    []any  `json:"sample_values"`
+	Name              string `json:"name" validate:"required"`
+	DisplayName       string `json:"display_name"`
+	Language          string `json:"language" validate:"required"`
+	Category          string `json:"category" validate:"required"` // MARKETING, UTILITY, AUTHENTICATION
+	HeaderType        string `json:"header_type"`                  // TEXT, IMAGE, DOCUMENT, VIDEO, NONE
+	HeaderContent     string `json:"header_content"`
+	BodyContent       string `json:"body_content"`
+	FooterContent     string `json:"footer_content"`
+	Buttons           []any  `json:"buttons"`
+	SampleValues      []any  `json:"sample_values"`
 
 	// Authentication template fields
 	AddSecurityRecommendation bool `json:"add_security_recommendation"` // Add "For your security, do not share this code."
@@ -34,7 +34,7 @@ type TemplateRequest struct {
 // TemplateResponse represents the response for a template
 type TemplateResponse struct {
 	ID                        uuid.UUID `json:"id"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"` // WhatsApp account name
+	WhatsAppAccountID         string    `json:"whatsapp_account_id"` // WhatsApp account name
 	MetaTemplateID            string    `json:"meta_template_id"`
 	Name                      string    `json:"name"`
 	DisplayName               string    `json:"display_name"`
@@ -164,7 +164,7 @@ func (a *App) CreateTemplate(r *fastglue.Request) error {
 
 	template := models.Template{
 		OrganizationID:            orgID,
-		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
+		WhatsAppAccountID:         func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
 		Name:                      templateName,
 		DisplayName:               displayName,
 		Language:                  req.Language,
@@ -338,7 +338,12 @@ func (a *App) DeleteTemplate(r *fastglue.Request) error {
 
 	// If template exists on Meta, delete it there too
 	if template.MetaTemplateID != "" {
-		if account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(template.WhatsAppAccountID)); err == nil {
+		if account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(template.WhatsAppAccountID)); err == nil {
 			// Delete from Meta API
 			templateName := template.Name
 			a.spawn("delete_template_from_meta", func(context.Context) {
@@ -389,7 +394,12 @@ func (a *App) SubmitTemplate(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(template.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
+		if u == nil {
+			return ""
+		}
+		return u.String()
+	}(template.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -504,15 +514,15 @@ func (a *App) SyncTemplates(r *fastglue.Request) error {
 		}
 
 		template := models.Template{
-			OrganizationID:  orgID,
+			OrganizationID:    orgID,
 			WhatsAppAccountID: &account.ID,
-			MetaTemplateID:  metaTemplate.ID,
-			Name:            metaTemplate.Name,
-			DisplayName:     metaTemplate.Name,
-			Language:        metaTemplate.Language,
-			Category:        string(metaTemplate.Category),
-			Status:          string(metaTemplate.Status),
-			QualityRating:   qualityRating,
+			MetaTemplateID:    metaTemplate.ID,
+			Name:              metaTemplate.Name,
+			DisplayName:       metaTemplate.Name,
+			Language:          metaTemplate.Language,
+			Category:          string(metaTemplate.Category),
+			Status:            string(metaTemplate.Status),
+			QualityRating:     qualityRating,
 		}
 
 		// Parse components
@@ -594,8 +604,13 @@ func (a *App) deleteTemplateFromMeta(account *models.WhatsAppAccount, templateNa
 
 func templateToResponse(t models.Template) TemplateResponse {
 	return TemplateResponse{
-		ID:                        t.ID,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(t.WhatsAppAccountID),
+		ID: t.ID,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(t.WhatsAppAccountID),
 		MetaTemplateID:            t.MetaTemplateID,
 		Name:                      t.Name,
 		DisplayName:               t.DisplayName,

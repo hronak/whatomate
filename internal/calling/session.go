@@ -60,21 +60,21 @@ func (s *signal) Done() <-chan struct{} {
 
 // CallSession represents an active call with its WebRTC state
 type CallSession struct {
-	ID             string // WhatsApp call_id
-	OrganizationID uuid.UUID
+	ID                string // WhatsApp call_id
+	OrganizationID    uuid.UUID
 	WhatsAppAccountID *uuid.UUID
-	CallerPhone    string
-	ContactID      uuid.UUID
-	CallLogID      uuid.UUID
-	Status         models.CallStatus
-	PeerConnection *webrtc.PeerConnection
-	AudioTrack     *webrtc.TrackLocalStaticRTP
-	IVRGraph       *IVRFlowGraph
-	IVRCtx         *IVRContext
-	IVRFlow        *models.IVRFlow
-	IVRPlayer      *AudioPlayer // persists across goto_flow for RTP continuity
-	DTMFBuffer     chan byte
-	StartedAt      time.Time
+	CallerPhone       string
+	ContactID         uuid.UUID
+	CallLogID         uuid.UUID
+	Status            models.CallStatus
+	PeerConnection    *webrtc.PeerConnection
+	AudioTrack        *webrtc.TrackLocalStaticRTP
+	IVRGraph          *IVRFlowGraph
+	IVRCtx            *IVRContext
+	IVRFlow           *models.IVRFlow
+	IVRPlayer         *AudioPlayer // persists across goto_flow for RTP continuity
+	DTMFBuffer        chan byte
+	StartedAt         time.Time
 
 	// Recording (one per direction for correct OGG/Opus playback)
 	CallerRecorder *CallRecorder // caller's audio stream
@@ -294,18 +294,18 @@ func NewManager(cfg *config.CallingConfig, s3Client *storage.S3Client, db *gorm.
 // agent directly instead of running runIVRFlow.
 func (m *Manager) HandleIncomingCall(account *models.WhatsAppAccount, contact *models.Contact, callLog *models.CallLog, sdpOffer string, stickyAgentID *uuid.UUID) {
 	session := &CallSession{
-		ID:             callLog.WhatsAppCallID,
-		OrganizationID: account.OrganizationID,
+		ID:                callLog.WhatsAppCallID,
+		OrganizationID:    account.OrganizationID,
 		WhatsAppAccountID: &account.ID,
-		CallerPhone:    contact.PhoneNumber,
-		ContactID:      contact.ID,
-		CallLogID:      callLog.ID,
-		Status:         models.CallStatusRinging,
-		DTMFBuffer:     make(chan byte, 32),
-		StartedAt:      time.Now(),
-		BridgeStarted:  newSignal(),
-		StickyAgentID:  stickyAgentID,
-		done:           newSignal(),
+		CallerPhone:       contact.PhoneNumber,
+		ContactID:         contact.ID,
+		CallLogID:         callLog.ID,
+		Status:            models.CallStatusRinging,
+		DTMFBuffer:        make(chan byte, 32),
+		StartedAt:         time.Now(),
+		BridgeStarted:     newSignal(),
+		StickyAgentID:     stickyAgentID,
+		done:              newSignal(),
 	}
 
 	// Load IVR flow if assigned (cached). Skipped for sticky-routed calls —

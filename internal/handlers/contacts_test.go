@@ -292,14 +292,14 @@ func TestApp_GetContact(t *testing.T) {
 
 		// Create an incoming unread message
 		msg := &models.Message{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			ContactID:       contact.ID,
-			Direction:       models.DirectionIncoming,
-			MessageType:     models.MessageTypeText,
-			Content:         "Hello",
-			Status:          models.MessageStatusDelivered,
+			ContactID:         contact.ID,
+			Direction:         models.DirectionIncoming,
+			MessageType:       models.MessageTypeText,
+			Content:           "Hello",
+			Status:            models.MessageStatusDelivered,
 		}
 		require.NoError(t, app.DB.Create(msg).Error)
 
@@ -358,15 +358,15 @@ func TestApp_GetContactSessionData(t *testing.T) {
 
 		// Create an active chatbot session
 		session := &models.ChatbotSession{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
-			ContactID:       contact.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
+			ContactID:         contact.ID,
 			WhatsAppAccountID: &account.ID,
-			PhoneNumber:     contact.PhoneNumber,
-			Status:          models.SessionStatusActive,
-			SessionData:     models.JSONB{"name": "Test User", "email": "test@example.com"},
-			StartedAt:       time.Now(),
-			LastActivityAt:  time.Now(),
+			PhoneNumber:       contact.PhoneNumber,
+			Status:            models.SessionStatusActive,
+			SessionData:       models.JSONB{"name": "Test User", "email": "test@example.com"},
+			StartedAt:         time.Now(),
+			LastActivityAt:    time.Now(),
 		}
 		require.NoError(t, app.DB.Create(session).Error)
 
@@ -631,14 +631,14 @@ func TestApp_GetMessages(t *testing.T) {
 		now := time.Now()
 		for i := range 3 {
 			msg := &models.Message{
-				BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
-				OrganizationID:  org.ID,
+				BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
+				OrganizationID:    org.ID,
 				WhatsAppAccountID: &account.ID,
-				ContactID:       contact.ID,
-				Direction:       models.DirectionIncoming,
-				MessageType:     models.MessageTypeText,
-				Content:         "Hello " + string(rune('A'+i)),
-				Status:          models.MessageStatusDelivered,
+				ContactID:         contact.ID,
+				Direction:         models.DirectionIncoming,
+				MessageType:       models.MessageTypeText,
+				Content:           "Hello " + string(rune('A'+i)),
+				Status:            models.MessageStatusDelivered,
 			}
 			require.NoError(t, app.DB.Create(msg).Error)
 		}
@@ -788,14 +788,14 @@ func TestApp_GetMessages(t *testing.T) {
 		var msgIDs []uuid.UUID
 		for i := range 5 {
 			msg := &models.Message{
-				BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
-				OrganizationID:  org.ID,
+				BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: now.Add(time.Duration(i) * time.Minute)},
+				OrganizationID:    org.ID,
 				WhatsAppAccountID: &account.ID,
-				ContactID:       contact.ID,
-				Direction:       models.DirectionIncoming,
-				MessageType:     models.MessageTypeText,
-				Content:         "Message " + string(rune('A'+i)),
-				Status:          models.MessageStatusDelivered,
+				ContactID:         contact.ID,
+				Direction:         models.DirectionIncoming,
+				MessageType:       models.MessageTypeText,
+				Content:           "Message " + string(rune('A'+i)),
+				Status:            models.MessageStatusDelivered,
 			}
 			require.NoError(t, app.DB.Create(msg).Error)
 			msgIDs = append(msgIDs, msg.ID)
@@ -836,14 +836,14 @@ func TestApp_GetMessages(t *testing.T) {
 
 		// Create an unread incoming message
 		msg := &models.Message{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			ContactID:       contact.ID,
-			Direction:       models.DirectionIncoming,
-			MessageType:     models.MessageTypeText,
-			Content:         "Hello",
-			Status:          models.MessageStatusDelivered,
+			ContactID:         contact.ID,
+			Direction:         models.DirectionIncoming,
+			MessageType:       models.MessageTypeText,
+			Content:           "Hello",
+			Status:            models.MessageStatusDelivered,
 		}
 		require.NoError(t, app.DB.Create(msg).Error)
 
@@ -1443,14 +1443,14 @@ func TestApp_GetMessages_AssignedViaActiveTransfer(t *testing.T) {
 	// assigned_user_id intentionally nil — assignment is via the transfer only.
 
 	msg := &models.Message{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		ContactID:       contact.ID,
-		Direction:       models.DirectionIncoming,
-		MessageType:     models.MessageTypeText,
-		Content:         "Hi",
-		Status:          models.MessageStatusDelivered,
+		ContactID:         contact.ID,
+		Direction:         models.DirectionIncoming,
+		MessageType:       models.MessageTypeText,
+		Content:           "Hi",
+		Status:            models.MessageStatusDelivered,
 	}
 	require.NoError(t, app.DB.Create(msg).Error)
 
@@ -1521,41 +1521,41 @@ func TestApp_GetContact_MultipleUnreadMessages(t *testing.T) {
 	// Create 3 unread incoming messages
 	for range 3 {
 		msg := &models.Message{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			ContactID:       contact.ID,
-			Direction:       models.DirectionIncoming,
-			MessageType:     models.MessageTypeText,
-			Content:         "Unread message",
-			Status:          models.MessageStatusDelivered,
+			ContactID:         contact.ID,
+			Direction:         models.DirectionIncoming,
+			MessageType:       models.MessageTypeText,
+			Content:           "Unread message",
+			Status:            models.MessageStatusDelivered,
 		}
 		require.NoError(t, app.DB.Create(msg).Error)
 	}
 
 	// Create 1 read incoming message
 	readMsg := &models.Message{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		ContactID:       contact.ID,
-		Direction:       models.DirectionIncoming,
-		MessageType:     models.MessageTypeText,
-		Content:         "Read message",
-		Status:          models.MessageStatusRead,
+		ContactID:         contact.ID,
+		Direction:         models.DirectionIncoming,
+		MessageType:       models.MessageTypeText,
+		Content:           "Read message",
+		Status:            models.MessageStatusRead,
 	}
 	require.NoError(t, app.DB.Create(readMsg).Error)
 
 	// Create 1 outgoing message (should not count as unread)
 	outMsg := &models.Message{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		ContactID:       contact.ID,
-		Direction:       models.DirectionOutgoing,
-		MessageType:     models.MessageTypeText,
-		Content:         "Outgoing message",
-		Status:          models.MessageStatusSent,
+		ContactID:         contact.ID,
+		Direction:         models.DirectionOutgoing,
+		MessageType:       models.MessageTypeText,
+		Content:           "Outgoing message",
+		Status:            models.MessageStatusSent,
 	}
 	require.NoError(t, app.DB.Create(outMsg).Error)
 
@@ -1589,16 +1589,16 @@ func TestApp_GetContactSessionData_CompletedSession(t *testing.T) {
 
 	completedAt := time.Now()
 	session := &models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusCompleted,
-		SessionData:     models.JSONB{"order_id": "ORD-123", "amount": 99.99},
-		StartedAt:       time.Now().Add(-1 * time.Hour),
-		LastActivityAt:  time.Now(),
-		CompletedAt:     &completedAt,
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusCompleted,
+		SessionData:       models.JSONB{"order_id": "ORD-123", "amount": 99.99},
+		StartedAt:         time.Now().Add(-1 * time.Hour),
+		LastActivityAt:    time.Now(),
+		CompletedAt:       &completedAt,
 	}
 	require.NoError(t, app.DB.Create(session).Error)
 
@@ -1630,29 +1630,29 @@ func TestApp_GetContactSessionData_MostRecentSessionReturned(t *testing.T) {
 
 	// Create an older completed session
 	oldSession := &models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: time.Now().Add(-2 * time.Hour)},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: time.Now().Add(-2 * time.Hour)},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusCompleted,
-		SessionData:     models.JSONB{"key": "old"},
-		StartedAt:       time.Now().Add(-2 * time.Hour),
-		LastActivityAt:  time.Now().Add(-2 * time.Hour),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusCompleted,
+		SessionData:       models.JSONB{"key": "old"},
+		StartedAt:         time.Now().Add(-2 * time.Hour),
+		LastActivityAt:    time.Now().Add(-2 * time.Hour),
 	}
 	require.NoError(t, app.DB.Create(oldSession).Error)
 
 	// Create a newer active session
 	newSession := &models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: time.Now()},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: time.Now()},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusActive,
-		SessionData:     models.JSONB{"key": "new"},
-		StartedAt:       time.Now(),
-		LastActivityAt:  time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusActive,
+		SessionData:       models.JSONB{"key": "new"},
+		StartedAt:         time.Now(),
+		LastActivityAt:    time.Now(),
 	}
 	require.NoError(t, app.DB.Create(newSession).Error)
 

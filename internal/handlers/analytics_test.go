@@ -21,14 +21,14 @@ func createTestMessage(t *testing.T, app *handlers.App, orgID, contactID uuid.UU
 	t.Helper()
 
 	msg := &models.Message{
-		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: createdAt},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: createdAt},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: nil,
-		Direction:       direction,
-		MessageType:     models.MessageTypeText,
-		Content:         "Test message",
-		Status:          models.MessageStatusSent,
+		Direction:         direction,
+		MessageType:       models.MessageTypeText,
+		Content:           "Test message",
+		Status:            models.MessageStatusSent,
 	}
 	require.NoError(t, app.DB.Create(msg).Error)
 	return msg
@@ -39,14 +39,14 @@ func createTestChatbotSession(t *testing.T, app *handlers.App, orgID, contactID 
 	t.Helper()
 
 	session := &models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: createdAt},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: createdAt},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: nil,
-		PhoneNumber:     "+1234567890",
-		Status:          "active",
-		StartedAt:       createdAt,
-		LastActivityAt:  createdAt,
+		PhoneNumber:       "+1234567890",
+		Status:            "active",
+		StartedAt:         createdAt,
+		LastActivityAt:    createdAt,
 	}
 	require.NoError(t, app.DB.Create(session).Error)
 	return session
@@ -59,26 +59,26 @@ func createAnalyticsTestCampaign(t *testing.T, app *handlers.App, orgID, created
 	templateID := uuid.New()
 	// Create a minimal template for the foreign key
 	tmpl := &models.Template{
-		BaseModel:       models.BaseModel{ID: templateID},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: templateID},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: nil,
-		Name:            "campaign-template-" + uuid.New().String()[:8],
-		MetaTemplateID:  "meta-" + uuid.New().String()[:8],
-		Category:        "MARKETING",
-		Language:        "en",
-		Status:          string(models.TemplateStatusApproved),
-		BodyContent:     "Hello",
+		Name:              "campaign-template-" + uuid.New().String()[:8],
+		MetaTemplateID:    "meta-" + uuid.New().String()[:8],
+		Category:          "MARKETING",
+		Language:          "en",
+		Status:            string(models.TemplateStatusApproved),
+		BodyContent:       "Hello",
 	}
 	require.NoError(t, app.DB.Create(tmpl).Error)
 
 	campaign := &models.BulkMessageCampaign{
-		BaseModel:       models.BaseModel{ID: uuid.New(), CreatedAt: createdAt},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New(), CreatedAt: createdAt},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: nil,
-		Name:            "Test Campaign " + uuid.New().String()[:8],
-		TemplateID:      templateID,
-		Status:          models.CampaignStatus(status),
-		CreatedBy:       createdBy,
+		Name:              "Test Campaign " + uuid.New().String()[:8],
+		TemplateID:        templateID,
+		Status:            models.CampaignStatus(status),
+		CreatedBy:         createdBy,
 	}
 	require.NoError(t, app.DB.Create(campaign).Error)
 	return campaign
@@ -89,16 +89,16 @@ func createTestAgentTransfer(t *testing.T, app *handlers.App, orgID, contactID u
 	t.Helper()
 
 	transfer := &models.AgentTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: nil,
-		PhoneNumber:     "+1234567890",
-		Status:          status,
-		Source:          source,
-		AgentID:         agentID,
-		TransferredAt:   transferredAt,
-		ResumedAt:       resumedAt,
+		PhoneNumber:       "+1234567890",
+		Status:            status,
+		Source:            source,
+		AgentID:           agentID,
+		TransferredAt:     transferredAt,
+		ResumedAt:         resumedAt,
 	}
 	require.NoError(t, app.DB.Create(transfer).Error)
 	return transfer

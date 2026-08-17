@@ -15,28 +15,28 @@ import (
 // FlowRequest represents the request body for creating/updating a flow
 type FlowRequest struct {
 	WhatsAppAccountID string         `json:"whatsapp_account_id" validate:"required"`
-	Name            string         `json:"name" validate:"required"`
-	Category        string         `json:"category"`
-	JSONVersion     string         `json:"json_version"`
-	FlowJSON        map[string]any `json:"flow_json"`
-	Screens         []any          `json:"screens"`
+	Name              string         `json:"name" validate:"required"`
+	Category          string         `json:"category"`
+	JSONVersion       string         `json:"json_version"`
+	FlowJSON          map[string]any `json:"flow_json"`
+	Screens           []any          `json:"screens"`
 }
 
 // FlowResponse represents the response for a flow
 type FlowResponse struct {
-	ID              uuid.UUID      `json:"id"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
-	MetaFlowID      string         `json:"meta_flow_id"`
-	Name            string         `json:"name"`
-	Status          string         `json:"status"`
-	Category        string         `json:"category"`
-	JSONVersion     string         `json:"json_version"`
-	FlowJSON        map[string]any `json:"flow_json"`
-	Screens         []any          `json:"screens"`
-	PreviewURL      string         `json:"preview_url"`
-	HasLocalChanges bool           `json:"has_local_changes"`
-	CreatedAt       string         `json:"created_at"`
-	UpdatedAt       string         `json:"updated_at"`
+	ID                uuid.UUID      `json:"id"`
+	WhatsAppAccountID string         `json:"whatsapp_account_id"`
+	MetaFlowID        string         `json:"meta_flow_id"`
+	Name              string         `json:"name"`
+	Status            string         `json:"status"`
+	Category          string         `json:"category"`
+	JSONVersion       string         `json:"json_version"`
+	FlowJSON          map[string]any `json:"flow_json"`
+	Screens           []any          `json:"screens"`
+	PreviewURL        string         `json:"preview_url"`
+	HasLocalChanges   bool           `json:"has_local_changes"`
+	CreatedAt         string         `json:"created_at"`
+	UpdatedAt         string         `json:"updated_at"`
 }
 
 // ListFlows returns all flows for the organization
@@ -117,14 +117,14 @@ func (a *App) CreateFlow(r *fastglue.Request) error {
 	}
 
 	flow := models.WhatsAppFlow{
-		OrganizationID:  orgID,
+		OrganizationID:    orgID,
 		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
-		Name:            req.Name,
-		Status:          "DRAFT",
-		Category:        req.Category,
-		JSONVersion:     jsonVersion,
-		FlowJSON:        models.JSONB(req.FlowJSON),
-		Screens:         models.JSONBArray(req.Screens),
+		Name:              req.Name,
+		Status:            "DRAFT",
+		Category:          req.Category,
+		JSONVersion:       jsonVersion,
+		FlowJSON:          models.JSONB(req.FlowJSON),
+		Screens:           models.JSONBArray(req.Screens),
 	}
 
 	if err := a.DB.Create(&flow).Error; err != nil {
@@ -273,7 +273,12 @@ func (a *App) SaveFlowToMeta(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(flow.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
+		if u == nil {
+			return ""
+		}
+		return u.String()
+	}(flow.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -384,7 +389,12 @@ func (a *App) PublishFlow(r *fastglue.Request) error {
 	}
 
 	// Get the WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(flow.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
+		if u == nil {
+			return ""
+		}
+		return u.String()
+	}(flow.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}
@@ -452,7 +462,12 @@ func (a *App) DeprecateFlow(r *fastglue.Request) error {
 	// Call Meta API to deprecate the flow if we have a Meta flow ID
 	if flow.MetaFlowID != "" {
 		// Get the WhatsApp account
-		account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(flow.WhatsAppAccountID))
+		account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(flow.WhatsAppAccountID))
 		if err != nil {
 			return a.sendError(r, invalidRequest("WhatsApp account not found"))
 		}
@@ -504,14 +519,14 @@ func (a *App) DuplicateFlow(r *fastglue.Request) error {
 
 	// Create a duplicate with a new name
 	newFlow := models.WhatsAppFlow{
-		OrganizationID:  orgID,
+		OrganizationID:    orgID,
 		WhatsAppAccountID: flow.WhatsAppAccountID,
-		Name:            flow.Name + " (Copy)",
-		Status:          "DRAFT",
-		Category:        flow.Category,
-		JSONVersion:     flow.JSONVersion,
-		FlowJSON:        flow.FlowJSON,
-		Screens:         flow.Screens,
+		Name:              flow.Name + " (Copy)",
+		Status:            "DRAFT",
+		Category:          flow.Category,
+		JSONVersion:       flow.JSONVersion,
+		FlowJSON:          flow.FlowJSON,
+		Screens:           flow.Screens,
 		// MetaFlowID is intentionally left empty - this is a new flow
 	}
 
@@ -603,16 +618,16 @@ func (a *App) SyncFlows(r *fastglue.Request) error {
 		if err != nil {
 			// Flow doesn't exist locally, create it
 			newFlow := models.WhatsAppFlow{
-				OrganizationID:  orgID,
+				OrganizationID:    orgID,
 				WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
-				MetaFlowID:      mf.ID,
-				Name:            mf.Name,
-				Status:          string(mf.Status),
-				Category:        category,
-				PreviewURL:      mf.PreviewURL,
-				FlowJSON:        flowJSON,
-				Screens:         screens,
-				JSONVersion:     jsonVersion,
+				MetaFlowID:        mf.ID,
+				Name:              mf.Name,
+				Status:            string(mf.Status),
+				Category:          category,
+				PreviewURL:        mf.PreviewURL,
+				FlowJSON:          flowJSON,
+				Screens:           screens,
+				JSONVersion:       jsonVersion,
 			}
 			if err := a.DB.Create(&newFlow).Error; err != nil {
 				a.Log.Error("Failed to create flow from Meta", "error", err, "meta_flow_id", mf.ID)
@@ -1043,8 +1058,13 @@ func sanitizeComponentsWithPayload(children []any, allFieldNames []string, field
 // flowToResponse converts a flow model to response
 func flowToResponse(f models.WhatsAppFlow) FlowResponse {
 	return FlowResponse{
-		ID:              f.ID,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(f.WhatsAppAccountID),
+		ID: f.ID,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(f.WhatsAppAccountID),
 		MetaFlowID:      f.MetaFlowID,
 		Name:            f.Name,
 		Status:          f.Status,

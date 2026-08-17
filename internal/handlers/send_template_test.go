@@ -17,16 +17,16 @@ import (
 func createTestTemplate(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID *uuid.UUID) *models.Template {
 	t.Helper()
 	tpl := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: accountID,
-		Name:            "order_confirm_" + uuid.New().String()[:8],
-		DisplayName:     "Order Confirmation",
-		MetaTemplateID:  "meta-" + uuid.New().String()[:8],
-		Category:        "UTILITY",
-		Language:        "en",
-		Status:          string(models.TemplateStatusApproved),
-		BodyContent:     "Hello {{name}}! Your order {{order_id}} has been confirmed.",
+		Name:              "order_confirm_" + uuid.New().String()[:8],
+		DisplayName:       "Order Confirmation",
+		MetaTemplateID:    "meta-" + uuid.New().String()[:8],
+		Category:          "UTILITY",
+		Language:          "en",
+		Status:            string(models.TemplateStatusApproved),
+		BodyContent:       "Hello {{name}}! Your order {{order_id}} has been confirmed.",
 	}
 	require.NoError(t, app.DB.Create(tpl).Error)
 	return tpl
@@ -106,14 +106,14 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 
 		// Template with no params
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			Name:            "simple_greeting_" + uuid.New().String()[:8],
-			DisplayName:     "Simple Greeting",
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Welcome to our service!",
+			Name:              "simple_greeting_" + uuid.New().String()[:8],
+			DisplayName:       "Simple Greeting",
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Welcome to our service!",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -273,13 +273,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: nil,
-			Name:            "pending_template_" + uuid.New().String()[:8],
-			Language:        "en",
-			Status:          string(models.TemplateStatusPending),
-			BodyContent:     "Some content",
+			Name:              "pending_template_" + uuid.New().String()[:8],
+			Language:          "en",
+			Status:            string(models.TemplateStatusPending),
+			BodyContent:       "Some content",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -370,13 +370,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		user := testutil.CreateTestUser(t, app.DB, org.ID, testutil.WithRoleID(&adminRole.ID))
 
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: nil,
-			Name:            "test_tpl_" + uuid.New().String()[:8],
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Hello",
+			Name:              "test_tpl_" + uuid.New().String()[:8],
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Hello",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -402,13 +402,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 
 		// Template belongs to org2
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org2.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org2.ID,
 			WhatsAppAccountID: nil,
-			Name:            "other_org_tpl_" + uuid.New().String()[:8],
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Hello",
+			Name:              "other_org_tpl_" + uuid.New().String()[:8],
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Hello",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -459,13 +459,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: nil,
-			Name:            "tpl_" + uuid.New().String()[:8],
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Hello",
+			Name:              "tpl_" + uuid.New().String()[:8],
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Hello",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -494,13 +494,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			Name:            "shape_test_" + uuid.New().String()[:8],
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Hello there!",
+			Name:              "shape_test_" + uuid.New().String()[:8],
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Hello there!",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -542,14 +542,14 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 
 		// Create template with buttons
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			Name:            "btn_tpl_" + uuid.New().String()[:8],
-			DisplayName:     "Button Template",
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Would you like to proceed?",
+			Name:              "btn_tpl_" + uuid.New().String()[:8],
+			DisplayName:       "Button Template",
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Would you like to proceed?",
 			Buttons: models.JSONBArray{
 				map[string]any{"type": "QUICK_REPLY", "text": "Yes"},
 				map[string]any{"type": "QUICK_REPLY", "text": "No"},
@@ -602,18 +602,18 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 	createTestTemplateWithHeader := func(t *testing.T, app *handlers.App, orgID uuid.UUID, accountID *uuid.UUID) *models.Template {
 		t.Helper()
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  orgID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    orgID,
 			WhatsAppAccountID: accountID,
-			Name:            "seasonal_" + uuid.New().String()[:8],
-			DisplayName:     "Seasonal Promo",
-			MetaTemplateID:  "meta-" + uuid.New().String()[:8],
-			Category:        "MARKETING",
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			HeaderType:      "TEXT",
-			HeaderContent:   "Our {{season}} sale",
-			BodyContent:     "Hi {{name}}, use code {{code}}.",
+			Name:              "seasonal_" + uuid.New().String()[:8],
+			DisplayName:       "Seasonal Promo",
+			MetaTemplateID:    "meta-" + uuid.New().String()[:8],
+			Category:          "MARKETING",
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			HeaderType:        "TEXT",
+			HeaderContent:     "Our {{season}} sale",
+			BodyContent:       "Hi {{name}}, use code {{code}}.",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 		return tpl
@@ -759,13 +759,13 @@ func TestApp_SendTemplateMessage(t *testing.T) {
 		contact := testutil.CreateTestContactWith(t, app.DB, org.ID, testutil.WithContactAccount(&account.ID))
 
 		tpl := &models.Template{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    org.ID,
 			WhatsAppAccountID: &account.ID,
-			Name:            "no_btn_tpl_" + uuid.New().String()[:8],
-			Language:        "en",
-			Status:          string(models.TemplateStatusApproved),
-			BodyContent:     "Simple message",
+			Name:              "no_btn_tpl_" + uuid.New().String()[:8],
+			Language:          "en",
+			Status:            string(models.TemplateStatusApproved),
+			BodyContent:       "Simple message",
 		}
 		require.NoError(t, app.DB.Create(tpl).Error)
 

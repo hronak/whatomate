@@ -350,7 +350,7 @@ type Contact struct {
 	OrganizationID     uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
 	PhoneNumber        string     `gorm:"size:50;not null" json:"phone_number"`
 	ProfileName        string     `gorm:"size:255" json:"profile_name"`
-	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID  *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
 	AssignedUserID     *uuid.UUID `gorm:"type:uuid;index" json:"assigned_user_id,omitempty"`
 	LastMessageAt      *time.Time `json:"last_message_at,omitempty"`
 	LastMessagePreview string     `gorm:"type:text" json:"last_message_preview"`
@@ -383,7 +383,7 @@ func (Contact) TableName() string {
 type Message struct {
 	BaseModel
 	OrganizationID    uuid.UUID     `gorm:"type:uuid;index;not null" json:"organization_id"`
-	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
+	WhatsAppAccountID *uuid.UUID    `gorm:"type:uuid;index" json:"whatsapp_account_id"`
 	ContactID         uuid.UUID     `gorm:"type:uuid;index;not null" json:"contact_id"`
 	WhatsAppMessageID string        `gorm:"column:whats_app_message_id;size:255;index" json:"whatsapp_message_id"`
 	ConversationID    string        `gorm:"size:255;index" json:"conversation_id"`
@@ -418,21 +418,21 @@ func (Message) TableName() string {
 // Template represents a WhatsApp message template
 type Template struct {
 	BaseModel
-	OrganizationID  uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
+	OrganizationID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
 	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
-	MetaTemplateID  string     `gorm:"size:100" json:"meta_template_id"`
-	Name            string     `gorm:"size:255;not null" json:"name"`
-	DisplayName     string     `gorm:"size:255" json:"display_name"`
-	Language        string     `gorm:"size:10;not null" json:"language"`
-	Category        string     `gorm:"size:50" json:"category"`                 // MARKETING, UTILITY, AUTHENTICATION
-	Status          string     `gorm:"size:20;default:'PENDING'" json:"status"` // PENDING, APPROVED, REJECTED
-	QualityRating   string     `gorm:"size:50;default:'UNKNOWN'" json:"quality_rating"`
-	HeaderType      string     `gorm:"size:20" json:"header_type"` // TEXT, IMAGE, DOCUMENT, VIDEO
-	HeaderContent   string     `gorm:"type:text" json:"header_content"`
-	BodyContent     string     `gorm:"type:text;not null" json:"body_content"`
-	FooterContent   string     `gorm:"type:text" json:"footer_content"`
-	Buttons         JSONBArray `gorm:"type:jsonb;default:'[]'" json:"buttons"`
-	SampleValues    JSONBArray `gorm:"type:jsonb;default:'[]'" json:"sample_values"`
+	MetaTemplateID    string     `gorm:"size:100" json:"meta_template_id"`
+	Name              string     `gorm:"size:255;not null" json:"name"`
+	DisplayName       string     `gorm:"size:255" json:"display_name"`
+	Language          string     `gorm:"size:10;not null" json:"language"`
+	Category          string     `gorm:"size:50" json:"category"`                 // MARKETING, UTILITY, AUTHENTICATION
+	Status            string     `gorm:"size:20;default:'PENDING'" json:"status"` // PENDING, APPROVED, REJECTED
+	QualityRating     string     `gorm:"size:50;default:'UNKNOWN'" json:"quality_rating"`
+	HeaderType        string     `gorm:"size:20" json:"header_type"` // TEXT, IMAGE, DOCUMENT, VIDEO
+	HeaderContent     string     `gorm:"type:text" json:"header_content"`
+	BodyContent       string     `gorm:"type:text;not null" json:"body_content"`
+	FooterContent     string     `gorm:"type:text" json:"footer_content"`
+	Buttons           JSONBArray `gorm:"type:jsonb;default:'[]'" json:"buttons"`
+	SampleValues      JSONBArray `gorm:"type:jsonb;default:'[]'" json:"sample_values"`
 
 	// Authentication template fields
 	AddSecurityRecommendation bool `gorm:"default:false" json:"add_security_recommendation"`
@@ -454,17 +454,17 @@ func (Template) TableName() string {
 // WhatsAppFlow represents a WhatsApp interactive flow
 type WhatsAppFlow struct {
 	BaseModel
-	OrganizationID  uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
+	OrganizationID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
 	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
-	MetaFlowID      string     `gorm:"size:100" json:"meta_flow_id"`
-	Name            string     `gorm:"size:255;not null" json:"name"`
-	Status          string     `gorm:"size:20;default:'DRAFT'" json:"status"` // DRAFT, PUBLISHED, DEPRECATED, BLOCKED
-	Category        string     `gorm:"size:50" json:"category"`
-	JSONVersion     string     `gorm:"size:10;default:'6.0'" json:"json_version"`
-	FlowJSON        JSONB      `gorm:"type:jsonb" json:"flow_json"`
-	Screens         JSONBArray `gorm:"type:jsonb;default:'[]'" json:"screens"`
-	PreviewURL      string     `gorm:"type:text" json:"preview_url"`
-	HasLocalChanges bool       `gorm:"default:true" json:"has_local_changes"` // True when local changes need to be synced to Meta
+	MetaFlowID        string     `gorm:"size:100" json:"meta_flow_id"`
+	Name              string     `gorm:"size:255;not null" json:"name"`
+	Status            string     `gorm:"size:20;default:'DRAFT'" json:"status"` // DRAFT, PUBLISHED, DEPRECATED, BLOCKED
+	Category          string     `gorm:"size:50" json:"category"`
+	JSONVersion       string     `gorm:"size:10;default:'6.0'" json:"json_version"`
+	FlowJSON          JSONB      `gorm:"type:jsonb" json:"flow_json"`
+	Screens           JSONBArray `gorm:"type:jsonb;default:'[]'" json:"screens"`
+	PreviewURL        string     `gorm:"type:text" json:"preview_url"`
+	HasLocalChanges   bool       `gorm:"default:true" json:"has_local_changes"` // True when local changes need to be synced to Meta
 
 	// Relations
 	Organization *Organization `gorm:"foreignKey:OrganizationID" json:"organization,omitempty"`

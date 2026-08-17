@@ -116,25 +116,25 @@ func createTestCampaignData(t *testing.T, w *Worker) (*models.Organization, *mod
 
 	// Create template
 	template := &models.Template{
-		OrganizationID:  org.ID,
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "test_template_" + uniqueID,
-		Language:        "en",
-		Category:        "MARKETING",
-		Status:          "APPROVED",
-		BodyContent:     "Hello {{1}}, your order {{2}} is ready!",
+		Name:              "test_template_" + uniqueID,
+		Language:          "en",
+		Category:          "MARKETING",
+		Status:            "APPROVED",
+		BodyContent:       "Hello {{1}}, your order {{2}} is ready!",
 	}
 	require.NoError(t, w.DB.Create(template).Error)
 
 	// Create campaign with CreatedBy
 	campaign := &models.BulkMessageCampaign{
-		OrganizationID:  org.ID,
-		Name:            "Test Campaign " + uniqueID,
+		OrganizationID:    org.ID,
+		Name:              "Test Campaign " + uniqueID,
 		WhatsAppAccountID: &account.ID,
-		TemplateID:      template.ID,
-		Status:          models.CampaignStatusProcessing,
-		TotalRecipients: 1,
-		CreatedBy:       user.ID,
+		TemplateID:        template.ID,
+		Status:            models.CampaignStatusProcessing,
+		TotalRecipients:   1,
+		CreatedBy:         user.ID,
 	}
 	require.NoError(t, w.DB.Create(campaign).Error)
 
@@ -288,23 +288,23 @@ func createMinimalCampaignData(t *testing.T, w *Worker, status models.CampaignSt
 	require.NoError(t, w.DB.Create(account).Error)
 
 	template := &models.Template{
-		OrganizationID:  org.ID,
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "test_template_" + uniqueID,
-		Language:        "en",
-		Category:        string(models.TemplateCategoryMarketing),
-		Status:          string(models.TemplateStatusApproved),
-		BodyContent:     "Hello {{1}}!",
+		Name:              "test_template_" + uniqueID,
+		Language:          "en",
+		Category:          string(models.TemplateCategoryMarketing),
+		Status:            string(models.TemplateStatusApproved),
+		BodyContent:       "Hello {{1}}!",
 	}
 	require.NoError(t, w.DB.Create(template).Error)
 
 	campaign := &models.BulkMessageCampaign{
-		OrganizationID:  org.ID,
-		Name:            "Test Campaign " + uniqueID,
+		OrganizationID:    org.ID,
+		Name:              "Test Campaign " + uniqueID,
 		WhatsAppAccountID: &account.ID,
-		TemplateID:      template.ID,
-		Status:          status,
-		CreatedBy:       user.ID,
+		TemplateID:        template.ID,
+		Status:            status,
+		CreatedBy:         user.ID,
 	}
 	require.NoError(t, w.DB.Create(campaign).Error)
 

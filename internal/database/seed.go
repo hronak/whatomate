@@ -192,14 +192,14 @@ func seedStarterFlow(db *gorm.DB, orgID uuid.UUID) (bool, error) {
 	}
 
 	flow := models.ChatbotFlow{
-		OrganizationID:  orgID,
+		OrganizationID:    orgID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "Demo: welcome menu",
-		Description:     "Sample flow created by `whatomate install -seed` (" + seedMarker + "). Safe to delete.",
-		TriggerKeywords: models.StringArray{"hi", "hello", "menu"},
-		CancelKeywords:  models.StringArray{"cancel", "stop"},
-		Graph:           graph,
-		PanelConfig:     models.JSONB{},
+		Name:              "Demo: welcome menu",
+		Description:       "Sample flow created by `whatomate install -seed` (" + seedMarker + "). Safe to delete.",
+		TriggerKeywords:   models.StringArray{"hi", "hello", "menu"},
+		CancelKeywords:    models.StringArray{"cancel", "stop"},
+		Graph:             graph,
+		PanelConfig:       models.JSONB{},
 	}
 	if err := db.Create(&flow).Error; err != nil {
 		return false, fmt.Errorf("seed starter flow: %w", err)

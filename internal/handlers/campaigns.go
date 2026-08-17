@@ -22,18 +22,18 @@ import (
 
 // CampaignRequest represents campaign create/update request
 type CampaignRequest struct {
-	Name            string     `json:"name" validate:"required"`
+	Name              string     `json:"name" validate:"required"`
 	WhatsAppAccountID string     `json:"whatsapp_account" validate:"required"`
-	TemplateID      string     `json:"template_id" validate:"required"`
-	HeaderMediaID   string     `json:"header_media_id"`
-	ScheduledAt     *time.Time `json:"scheduled_at"`
+	TemplateID        string     `json:"template_id" validate:"required"`
+	HeaderMediaID     string     `json:"header_media_id"`
+	ScheduledAt       *time.Time `json:"scheduled_at"`
 }
 
 // CampaignResponse represents campaign in API responses
 type CampaignResponse struct {
 	ID                  uuid.UUID             `json:"id"`
 	Name                string                `json:"name"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
+	WhatsAppAccountID   string                `json:"whatsapp_account_id"`
 	TemplateID          uuid.UUID             `json:"template_id"`
 	TemplateName        string                `json:"template_name,omitempty"`
 	HeaderMediaID       string                `json:"header_media_id,omitempty"`
@@ -119,9 +119,14 @@ func (a *App) ListCampaigns(r *fastglue.Request) error {
 	response := make([]CampaignResponse, len(campaigns))
 	for i, c := range campaigns {
 		response[i] = CampaignResponse{
-			ID:                  c.ID,
-			Name:                c.Name,
-			WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(c.WhatsAppAccountID),
+			ID:   c.ID,
+			Name: c.Name,
+			WhatsAppAccountID: func(u *uuid.UUID) string {
+				if u == nil {
+					return ""
+				}
+				return u.String()
+			}(c.WhatsAppAccountID),
 			TemplateID:          c.TemplateID,
 			HeaderMediaID:       c.HeaderMediaID,
 			HeaderMediaFilename: c.HeaderMediaFilename,
@@ -179,15 +184,15 @@ func (a *App) CreateCampaign(r *fastglue.Request) error {
 	}
 
 	campaign := models.BulkMessageCampaign{
-		OrganizationID:  orgID,
+		OrganizationID:    orgID,
 		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
-		Name:            req.Name,
-		TemplateID:      templateID,
-		HeaderMediaID:   req.HeaderMediaID,
-		Status:          models.CampaignStatusDraft,
-		ScheduledAt:     req.ScheduledAt,
-		CreatedBy:       userID,
-		UpdatedByID:     &userID,
+		Name:              req.Name,
+		TemplateID:        templateID,
+		HeaderMediaID:     req.HeaderMediaID,
+		Status:            models.CampaignStatusDraft,
+		ScheduledAt:       req.ScheduledAt,
+		CreatedBy:         userID,
+		UpdatedByID:       &userID,
 	}
 
 	if err := a.DB.Create(&campaign).Error; err != nil {
@@ -201,9 +206,14 @@ func (a *App) CreateCampaign(r *fastglue.Request) error {
 	a.Log.Info("Campaign created", "campaign_id", campaign.ID, "name", campaign.Name)
 
 	return a.sendJSON(r, CampaignResponse{
-		ID:                  campaign.ID,
-		Name:                campaign.Name,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(campaign.WhatsAppAccountID),
+		ID:   campaign.ID,
+		Name: campaign.Name,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(campaign.WhatsAppAccountID),
 		TemplateID:          campaign.TemplateID,
 		TemplateName:        template.Name,
 		HeaderMediaID:       campaign.HeaderMediaID,
@@ -247,9 +257,14 @@ func (a *App) GetCampaign(r *fastglue.Request) error {
 	}
 
 	response := CampaignResponse{
-		ID:                  campaign.ID,
-		Name:                campaign.Name,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(campaign.WhatsAppAccountID),
+		ID:   campaign.ID,
+		Name: campaign.Name,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(campaign.WhatsAppAccountID),
 		TemplateID:          campaign.TemplateID,
 		HeaderMediaID:       campaign.HeaderMediaID,
 		HeaderMediaFilename: campaign.HeaderMediaFilename,
@@ -343,9 +358,14 @@ func (a *App) UpdateCampaign(r *fastglue.Request) error {
 		"campaign", campaign.ID, models.AuditActionUpdated, &oldCampaign, campaign)
 
 	response := CampaignResponse{
-		ID:                  campaign.ID,
-		Name:                campaign.Name,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(campaign.WhatsAppAccountID),
+		ID:   campaign.ID,
+		Name: campaign.Name,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(campaign.WhatsAppAccountID),
 		TemplateID:          campaign.TemplateID,
 		HeaderMediaID:       campaign.HeaderMediaID,
 		HeaderMediaFilename: campaign.HeaderMediaFilename,
@@ -895,7 +915,12 @@ func (a *App) UploadCampaignMedia(r *fastglue.Request) error {
 	}
 
 	// Get WhatsApp account
-	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(campaign.WhatsAppAccountID))
+	account, err := a.resolveWhatsAppAccount(orgID, func(u *uuid.UUID) string {
+		if u == nil {
+			return ""
+		}
+		return u.String()
+	}(campaign.WhatsAppAccountID))
 	if err != nil {
 		return a.sendError(r, invalidRequest("WhatsApp account not found"))
 	}

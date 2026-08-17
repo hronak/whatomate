@@ -201,12 +201,12 @@ func webhookTestData(t *testing.T, app *App, msgStatus models.MessageStatus) (mo
 	require.NoError(t, app.DB.Create(&waAccount).Error)
 
 	tmpl := models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &waAccount.ID,
-		Name:            "tmpl-" + uid,
-		Language:        "en",
-		BodyContent:     "Hello {{1}}",
+		Name:              "tmpl-" + uid,
+		Language:          "en",
+		BodyContent:       "Hello {{1}}",
 	}
 	require.NoError(t, app.DB.Create(&tmpl).Error)
 
@@ -220,13 +220,13 @@ func webhookTestData(t *testing.T, app *App, msgStatus models.MessageStatus) (mo
 	require.NoError(t, app.DB.Create(&user).Error)
 
 	campaign := models.BulkMessageCampaign{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &waAccount.ID,
-		Name:            "test-campaign-" + uid,
-		TemplateID:      tmpl.ID,
-		Status:          models.CampaignStatusCompleted,
-		CreatedBy:       user.ID,
+		Name:              "test-campaign-" + uid,
+		TemplateID:        tmpl.ID,
+		Status:            models.CampaignStatusCompleted,
+		CreatedBy:         user.ID,
 	}
 	require.NoError(t, app.DB.Create(&campaign).Error)
 

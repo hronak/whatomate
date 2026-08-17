@@ -174,9 +174,9 @@ func (a *App) processIncomingMessageFull(phoneNumberID string, msg IncomingTextM
 	// Dispatch webhook if new contact was created
 	if isNewContact {
 		a.DispatchWebhook(account.OrganizationID, models.WebhookEventContactCreated, ContactEventData{
-			ContactID:       contact.ID.String(),
-			ContactPhone:    contact.PhoneNumber,
-			ContactName:     contact.ProfileName,
+			ContactID:         contact.ID.String(),
+			ContactPhone:      contact.PhoneNumber,
+			ContactName:       contact.ProfileName,
 			WhatsAppAccountID: account.ID.String(),
 		})
 	}
@@ -674,15 +674,15 @@ func (a *App) getOrCreateSession(orgID, contactID uuid.UUID, accountName, phoneN
 
 	// Create new session
 	session = models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: session.WhatsAppAccountID,
-		PhoneNumber:     phoneNumber,
-		Status:          models.SessionStatusActive,
-		SessionData:     models.JSONB{},
-		StartedAt:       now,
-		LastActivityAt:  now,
+		PhoneNumber:       phoneNumber,
+		Status:            models.SessionStatusActive,
+		SessionData:       models.JSONB{},
+		StartedAt:         now,
+		LastActivityAt:    now,
 	}
 	if err := a.DB.Create(&session).Error; err != nil {
 		a.Log.Error("Failed to create session", "error", err)
@@ -864,7 +864,12 @@ func (a *App) buildAIContext(orgID uuid.UUID, session *models.ChatbotSession, us
 	// Get WhatsApp account for cache key
 	whatsAppAccount := ""
 	if session != nil {
-		whatsAppAccount = func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(session.WhatsAppAccountID)
+		whatsAppAccount = func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(session.WhatsAppAccountID)
 	}
 
 	// Use cached AI contexts
@@ -1665,14 +1670,14 @@ func (a *App) saveIncomingMessage(account *models.WhatsAppAccount, contact *mode
 
 	// Dispatch webhook for incoming message
 	a.DispatchWebhook(account.OrganizationID, models.WebhookEventMessageIncoming, MessageEventData{
-		MessageID:       message.ID.String(),
-		ContactID:       contact.ID.String(),
-		ContactPhone:    contact.PhoneNumber,
-		ContactName:     contact.ProfileName,
-		MessageType:     models.MessageType(msgType),
-		Content:         content,
+		MessageID:         message.ID.String(),
+		ContactID:         contact.ID.String(),
+		ContactPhone:      contact.PhoneNumber,
+		ContactName:       contact.ProfileName,
+		MessageType:       models.MessageType(msgType),
+		Content:           content,
 		WhatsAppAccountID: account.ID.String(),
-		Direction:       models.DirectionIncoming,
+		Direction:         models.DirectionIncoming,
 	})
 }
 

@@ -70,15 +70,15 @@ func createTestTemplateInDB(t *testing.T, app *handlers.App, orgID uuid.UUID, ac
 	t.Helper()
 
 	tmpl := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: accountID,
-		Name:            name,
-		DisplayName:     name,
-		Language:        "en",
-		Category:        "MARKETING",
-		Status:          status,
-		BodyContent:     "Hello {{1}}, welcome!",
+		Name:              name,
+		DisplayName:       name,
+		Language:          "en",
+		Category:          "MARKETING",
+		Status:            status,
+		BodyContent:       "Hello {{1}}, welcome!",
 	}
 	require.NoError(t, app.DB.Create(tmpl).Error)
 	return tmpl
@@ -283,15 +283,15 @@ func TestApp_ListTemplates_FilterByCategory(t *testing.T) {
 
 	// Create a UTILITY template directly
 	utilTmpl := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "utility_tmpl",
-		DisplayName:     "utility_tmpl",
-		Language:        "en",
-		Category:        "UTILITY",
-		Status:          "APPROVED",
-		BodyContent:     "Your OTP is {{1}}",
+		Name:              "utility_tmpl",
+		DisplayName:       "utility_tmpl",
+		Language:          "en",
+		Category:          "UTILITY",
+		Status:            "APPROVED",
+		BodyContent:       "Your OTP is {{1}}",
 	}
 	require.NoError(t, app.DB.Create(utilTmpl).Error)
 
@@ -567,17 +567,17 @@ func TestApp_UpdateTemplate_RejectsTooManyHeaderVariables(t *testing.T) {
 
 	// Seed a valid template, then try to update its header to >1 var.
 	tpl := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "single_var_header",
-		DisplayName:     "Single Var Header",
-		Language:        "en",
-		Category:        "MARKETING",
-		Status:          "DRAFT",
-		HeaderType:      "TEXT",
-		HeaderContent:   "Hi {{1}}",
-		BodyContent:     "Hello world",
+		Name:              "single_var_header",
+		DisplayName:       "Single Var Header",
+		Language:          "en",
+		Category:          "MARKETING",
+		Status:            "DRAFT",
+		HeaderType:        "TEXT",
+		HeaderContent:     "Hi {{1}}",
+		BodyContent:       "Hello world",
 	}
 	require.NoError(t, app.DB.Create(tpl).Error)
 
@@ -1046,16 +1046,16 @@ func TestApp_SubmitTemplate_AlreadySubmitted(t *testing.T) {
 
 	// Create a template that already has a MetaTemplateID and is PENDING
 	tmpl := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "already_submitted",
-		DisplayName:     "already_submitted",
-		Language:        "en",
-		Category:        "MARKETING",
-		Status:          "PENDING",
-		MetaTemplateID:  "meta-existing-123",
-		BodyContent:     "Hello!",
+		Name:              "already_submitted",
+		DisplayName:       "already_submitted",
+		Language:          "en",
+		Category:          "MARKETING",
+		Status:            "PENDING",
+		MetaTemplateID:    "meta-existing-123",
+		BodyContent:       "Hello!",
 	}
 	require.NoError(t, app.DB.Create(tmpl).Error)
 

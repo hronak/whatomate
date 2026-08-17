@@ -343,7 +343,7 @@ func runServer(args []string) {
 			}
 			lo.Info("Frontend dev server started (Vite)")
 			lo.Info(fmt.Sprintf("App      http://localhost:%s   <-- open this", frontendPort))
-			
+
 			go func() {
 				viteExited <- cmd.Wait()
 			}()

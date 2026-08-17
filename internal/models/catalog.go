@@ -5,11 +5,11 @@ import "github.com/google/uuid"
 // Catalog represents a WhatsApp product catalog
 type Catalog struct {
 	BaseModel
-	OrganizationID  uuid.UUID `gorm:"type:uuid;index;not null" json:"organization_id"`
+	OrganizationID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"organization_id"`
 	WhatsAppAccountID *uuid.UUID `gorm:"type:uuid;index" json:"whatsapp_account_id"`
-	MetaCatalogID   string    `gorm:"size:100;uniqueIndex" json:"meta_catalog_id"`
-	Name            string    `gorm:"size:255;not null" json:"name"`
-	IsActive        bool      `gorm:"default:true" json:"is_active"`
+	MetaCatalogID     string     `gorm:"size:100;uniqueIndex" json:"meta_catalog_id"`
+	Name              string     `gorm:"size:255;not null" json:"name"`
+	IsActive          bool       `gorm:"default:true" json:"is_active"`
 
 	// Relations
 	Organization *Organization    `gorm:"foreignKey:OrganizationID" json:"organization,omitempty"`

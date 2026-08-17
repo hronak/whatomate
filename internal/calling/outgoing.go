@@ -26,15 +26,15 @@ func (m *Manager) InitiateOutgoingCall(
 
 	// 1. Create CallLog
 	callLog := models.CallLog{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: &accountID,
-		ContactID:       contactID,
-		CallerPhone:     contactPhone,
-		Direction:       models.CallDirectionOutgoing,
-		Status:          models.CallStatusInitiating,
-		AgentID:         &agentID,
-		StartedAt:       &now,
+		ContactID:         contactID,
+		CallerPhone:       contactPhone,
+		Direction:         models.CallDirectionOutgoing,
+		Status:            models.CallStatusInitiating,
+		AgentID:           &agentID,
+		StartedAt:         &now,
 	}
 	if err := m.db.Create(&callLog).Error; err != nil {
 		return uuid.Nil, "", fmt.Errorf("failed to create call log: %w", err)
@@ -55,19 +55,19 @@ func (m *Manager) InitiateOutgoingCall(
 
 	// Create session early so OnTrack can reference it
 	session := &CallSession{
-		OrganizationID: orgID,
+		OrganizationID:    orgID,
 		WhatsAppAccountID: &accountID,
-		CallerPhone:    contactPhone,
-		ContactID:      contactID,
-		CallLogID:      callLog.ID,
-		Status:         models.CallStatusInitiating,
-		StartedAt:      now,
-		Direction:      models.CallDirectionOutgoing,
-		AgentID:        agentID,
-		TargetPhone:    contactPhone,
-		SDPAnswerReady: make(chan string, 1),
-		BridgeStarted:  newSignal(),
-		done:           newSignal(),
+		CallerPhone:       contactPhone,
+		ContactID:         contactID,
+		CallLogID:         callLog.ID,
+		Status:            models.CallStatusInitiating,
+		StartedAt:         now,
+		Direction:         models.CallDirectionOutgoing,
+		AgentID:           agentID,
+		TargetPhone:       contactPhone,
+		SDPAnswerReady:    make(chan string, 1),
+		BridgeStarted:     newSignal(),
+		done:              newSignal(),
 	}
 
 	// 4. Capture agent's remote track

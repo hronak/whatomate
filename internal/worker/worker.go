@@ -134,7 +134,7 @@ func (w *Worker) HandleRecipientJob(ctx context.Context, job *queue.RecipientJob
 	// Create Message record
 	message := models.Message{
 		OrganizationID:    job.OrganizationID,
-		WhatsAppAccountID:   campaign.WhatsAppAccountID,
+		WhatsAppAccountID: campaign.WhatsAppAccountID,
 		ContactID:         contact.ID,
 		WhatsAppMessageID: waMessageID,
 		Direction:         models.DirectionOutgoing,

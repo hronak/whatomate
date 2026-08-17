@@ -19,9 +19,9 @@ func (a *App) InitiateOutgoingCall(r *fastglue.Request) error {
 	}
 
 	var req struct {
-		ContactID       string `json:"contact_id"`
+		ContactID         string `json:"contact_id"`
 		WhatsAppAccountID string `json:"whatsapp_account_id"`
-		SDPOffer        string `json:"sdp_offer"`
+		SDPOffer          string `json:"sdp_offer"`
 	}
 	if err := a.decodeRequest(r, &req); err != nil {
 		return nil
@@ -107,7 +107,7 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 	}
 
 	var req struct {
-		ContactID       string `json:"contact_id"`
+		ContactID         string `json:"contact_id"`
 		WhatsAppAccountID string `json:"whatsapp_account_id"`
 	}
 	if err := a.decodeRequest(r, &req); err != nil {
@@ -153,13 +153,13 @@ func (a *App) SendCallPermissionRequest(r *fastglue.Request) error {
 
 	// Create CallPermission record
 	permission := models.CallPermission{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
-		Status:          models.CallPermissionPending,
-		MessageID:       messageID,
-		RequestedByID:   &userID,
+		Status:            models.CallPermissionPending,
+		MessageID:         messageID,
+		RequestedByID:     &userID,
 	}
 	if err := a.DB.Create(&permission).Error; err != nil {
 		a.Log.Error("Failed to create call permission record", "error", err)

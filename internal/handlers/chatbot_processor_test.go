@@ -62,16 +62,16 @@ func TestMatchKeywordRules_ExactMatch(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "exact-hello",
-		Keywords:        models.StringArray{"hello"},
-		MatchType:       models.MatchTypeExact,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Hello response"},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "exact-hello",
+		Keywords:          models.StringArray{"hello"},
+		MatchType:         models.MatchTypeExact,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Hello response"},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -96,17 +96,17 @@ func TestMatchKeywordRules_ExactMatch_CaseSensitive(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "exact-case",
-		Keywords:        models.StringArray{"Hello"},
-		MatchType:       models.MatchTypeExact,
-		CaseSensitive:   true,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Case match"},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "exact-case",
+		Keywords:          models.StringArray{"Hello"},
+		MatchType:         models.MatchTypeExact,
+		CaseSensitive:     true,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Case match"},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -122,16 +122,16 @@ func TestMatchKeywordRules_ContainsMatch(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "contains-help",
-		Keywords:        models.StringArray{"help"},
-		MatchType:       models.MatchTypeContains,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Help response"},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "contains-help",
+		Keywords:          models.StringArray{"help"},
+		MatchType:         models.MatchTypeContains,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Help response"},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -152,16 +152,16 @@ func TestMatchKeywordRules_StartsWithMatch(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "starts-with-hi",
-		Keywords:        models.StringArray{"hi"},
-		MatchType:       models.MatchTypeStartsWith,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Hi response"},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "starts-with-hi",
+		Keywords:          models.StringArray{"hi"},
+		MatchType:         models.MatchTypeStartsWith,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Hi response"},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -179,16 +179,16 @@ func TestMatchKeywordRules_RegexMatch(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "regex-order",
-		Keywords:        models.StringArray{`order\s*#?\d+`},
-		MatchType:       models.MatchTypeRegex,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Order lookup"},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "regex-order",
+		Keywords:          models.StringArray{`order\s*#?\d+`},
+		MatchType:         models.MatchTypeRegex,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Order lookup"},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -206,16 +206,16 @@ func TestMatchKeywordRules_NoMatch(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "nope",
-		Keywords:        models.StringArray{"specific-keyword"},
-		MatchType:       models.MatchTypeExact,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "reply"},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "nope",
+		Keywords:          models.StringArray{"specific-keyword"},
+		MatchType:         models.MatchTypeExact,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "reply"},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -230,31 +230,31 @@ func TestMatchKeywordRules_Priority(t *testing.T) {
 
 	// Lower priority rule
 	lowRule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "low-priority",
-		Keywords:        models.StringArray{"test"},
-		MatchType:       models.MatchTypeContains,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Low priority"},
-		Priority:        5,
-		IsEnabled:       true,
+		Name:              "low-priority",
+		Keywords:          models.StringArray{"test"},
+		MatchType:         models.MatchTypeContains,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Low priority"},
+		Priority:          5,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(lowRule).Error)
 
 	// Higher priority rule
 	highRule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "high-priority",
-		Keywords:        models.StringArray{"test"},
-		MatchType:       models.MatchTypeContains,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "High priority"},
-		Priority:        20,
-		IsEnabled:       true,
+		Name:              "high-priority",
+		Keywords:          models.StringArray{"test"},
+		MatchType:         models.MatchTypeContains,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "High priority"},
+		Priority:          20,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(highRule).Error)
 
@@ -270,16 +270,16 @@ func TestMatchKeywordRules_DisabledRuleIgnored(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "disabled",
-		Keywords:        models.StringArray{"disabled"},
-		MatchType:       models.MatchTypeExact,
-		ResponseType:    models.ResponseTypeText,
-		ResponseContent: models.JSONB{"body": "Should not match"},
-		Priority:        10,
-		IsEnabled:       true, // Create as enabled first
+		Name:              "disabled",
+		Keywords:          models.StringArray{"disabled"},
+		MatchType:         models.MatchTypeExact,
+		ResponseType:      models.ResponseTypeText,
+		ResponseContent:   models.JSONB{"body": "Should not match"},
+		Priority:          10,
+		IsEnabled:         true, // Create as enabled first
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 	// Explicitly disable: GORM skips zero-value bools with default:true on INSERT.
@@ -294,16 +294,16 @@ func TestMatchKeywordRules_TransferType(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "agent",
-		Keywords:        models.StringArray{"agent"},
-		MatchType:       models.MatchTypeExact,
-		ResponseType:    models.ResponseTypeTransfer,
-		ResponseContent: models.JSONB{"body": "Connecting you to an agent..."},
-		Priority:        10,
-		IsEnabled:       true,
+		Name:              "agent",
+		Keywords:          models.StringArray{"agent"},
+		MatchType:         models.MatchTypeExact,
+		ResponseType:      models.ResponseTypeTransfer,
+		ResponseContent:   models.JSONB{"body": "Connecting you to an agent..."},
+		Priority:          10,
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(rule).Error)
 
@@ -319,13 +319,13 @@ func TestMatchKeywordRules_WithButtons(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	rule := &models.KeywordRule{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "menu",
-		Keywords:        models.StringArray{"menu"},
-		MatchType:       models.MatchTypeExact,
-		ResponseType:    models.ResponseTypeText,
+		Name:              "menu",
+		Keywords:          models.StringArray{"menu"},
+		MatchType:         models.MatchTypeExact,
+		ResponseType:      models.ResponseTypeText,
 		ResponseContent: models.JSONB{
 			"body": "Choose an option:",
 			"buttons": []any{
@@ -375,15 +375,15 @@ func TestGetOrCreateSession_ExistingSession(t *testing.T) {
 
 	// Create an active session
 	existing := models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusActive,
-		SessionData:     models.JSONB{"key": "value"},
-		StartedAt:       time.Now(),
-		LastActivityAt:  time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusActive,
+		SessionData:       models.JSONB{"key": "value"},
+		StartedAt:         time.Now(),
+		LastActivityAt:    time.Now(),
 	}
 	require.NoError(t, app.DB.Create(&existing).Error)
 
@@ -400,15 +400,15 @@ func TestGetOrCreateSession_ExpiredSession(t *testing.T) {
 
 	// Create an expired session (last activity 60 minutes ago, timeout is 30 minutes)
 	expired := models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusActive,
-		SessionData:     models.JSONB{},
-		StartedAt:       time.Now().Add(-60 * time.Minute),
-		LastActivityAt:  time.Now().Add(-60 * time.Minute),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusActive,
+		SessionData:       models.JSONB{},
+		StartedAt:         time.Now().Add(-60 * time.Minute),
+		LastActivityAt:    time.Now().Add(-60 * time.Minute),
 	}
 	require.NoError(t, app.DB.Create(&expired).Error)
 
@@ -518,27 +518,27 @@ func TestExitFlow_UpdatesSession(t *testing.T) {
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 	flow := &models.ChatbotFlow{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "Exit Test Flow",
-		IsEnabled:       true,
+		Name:              "Exit Test Flow",
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(flow).Error)
 
 	session := &models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusActive,
-		CurrentFlowID:   &flow.ID,
-		CurrentStep:     "step2",
-		StepRetries:     2,
-		SessionData:     models.JSONB{},
-		StartedAt:       time.Now(),
-		LastActivityAt:  time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusActive,
+		CurrentFlowID:     &flow.ID,
+		CurrentStep:       "step2",
+		StepRetries:       2,
+		SessionData:       models.JSONB{},
+		StartedAt:         time.Now(),
+		LastActivityAt:    time.Now(),
 	}
 	require.NoError(t, app.DB.Create(session).Error)
 
@@ -692,15 +692,15 @@ func TestLogSessionMessage(t *testing.T) {
 	contact := testutil.CreateTestContact(t, app.DB, org.ID)
 
 	session := &models.ChatbotSession{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.SessionStatusActive,
-		SessionData:     models.JSONB{},
-		StartedAt:       time.Now(),
-		LastActivityAt:  time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.SessionStatusActive,
+		SessionData:       models.JSONB{},
+		StartedAt:         time.Now(),
+		LastActivityAt:    time.Now(),
 	}
 	require.NoError(t, app.DB.Create(session).Error)
 
@@ -723,12 +723,12 @@ func TestMatchFlowTrigger_Match(t *testing.T) {
 	org, account := createProcessorTestOrg(t, app)
 
 	flow := &models.ChatbotFlow{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "Order Flow",
-		TriggerKeywords: models.StringArray{"order", "buy"},
-		IsEnabled:       true,
+		Name:              "Order Flow",
+		TriggerKeywords:   models.StringArray{"order", "buy"},
+		IsEnabled:         true,
 	}
 	require.NoError(t, app.DB.Create(flow).Error)
 

@@ -53,16 +53,16 @@ func (m *Manager) initiateTransfer(session *CallSession, waAccountID *uuid.UUID,
 
 	// Create CallTransfer record
 	transfer := models.CallTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  session.OrganizationID,
-		CallLogID:       session.CallLogID,
-		WhatsAppCallID:  session.ID,
-		CallerPhone:     session.CallerPhone,
-		ContactID:       session.ContactID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    session.OrganizationID,
+		CallLogID:         session.CallLogID,
+		WhatsAppCallID:    session.ID,
+		CallerPhone:       session.CallerPhone,
+		ContactID:         session.ContactID,
 		WhatsAppAccountID: waAccountID,
-		Status:          models.CallTransferStatusWaiting,
-		TeamID:          teamID,
-		TransferredAt:   time.Now(),
+		Status:            models.CallTransferStatusWaiting,
+		TeamID:            teamID,
+		TransferredAt:     time.Now(),
 	}
 
 	// Save IVR path
@@ -134,13 +134,13 @@ func (m *Manager) initiateTransfer(session *CallSession, waAccountID *uuid.UUID,
 		session.mu.Unlock()
 
 		payload := map[string]any{
-			"id":               transfer.ID.String(),
-			"call_log_id":      transfer.CallLogID.String(),
-			"whatsapp_call_id": transfer.WhatsAppCallID,
-			"caller_phone":     m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
-			"contact_id":       transfer.ContactID.String(),
+			"id":                  transfer.ID.String(),
+			"call_log_id":         transfer.CallLogID.String(),
+			"whatsapp_call_id":    transfer.WhatsAppCallID,
+			"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
+			"contact_id":          transfer.ContactID.String(),
 			"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
-			"transferred_at":   transfer.TransferredAt.Format(time.RFC3339),
+			"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 		}
 		m.wsHub.BroadcastToUser(session.OrganizationID, *assignedAgentID, websocket.WSMessage{
 			Type:    websocket.TypeCallTransferWaiting,
@@ -209,13 +209,13 @@ func (m *Manager) initiateTransfer(session *CallSession, waAccountID *uuid.UUID,
 		go m.waitForTransferTimeout(ctx, session, transfer.ID)
 
 		payload := map[string]any{
-			"id":               transfer.ID.String(),
-			"call_log_id":      transfer.CallLogID.String(),
-			"whatsapp_call_id": transfer.WhatsAppCallID,
-			"caller_phone":     m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
-			"contact_id":       transfer.ContactID.String(),
+			"id":                  transfer.ID.String(),
+			"call_log_id":         transfer.CallLogID.String(),
+			"whatsapp_call_id":    transfer.WhatsAppCallID,
+			"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
+			"contact_id":          transfer.ContactID.String(),
 			"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
-			"transferred_at":   transfer.TransferredAt.Format(time.RFC3339),
+			"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 		}
 		m.broadcastEvent(transfer.OrganizationID, websocket.TypeCallTransferWaiting, payload)
 	}
@@ -845,14 +845,14 @@ func (m *Manager) runTransferRotation(session *CallSession, transfer models.Call
 
 	// Build the base WS payload once
 	basePayload := map[string]any{
-		"id":               transfer.ID.String(),
-		"call_log_id":      transfer.CallLogID.String(),
-		"whatsapp_call_id": transfer.WhatsAppCallID,
-		"caller_phone":     m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
-		"contact_id":       transfer.ContactID.String(),
+		"id":                  transfer.ID.String(),
+		"call_log_id":         transfer.CallLogID.String(),
+		"whatsapp_call_id":    transfer.WhatsAppCallID,
+		"caller_phone":        m.maybeMaskPhone(transfer.OrganizationID, transfer.CallerPhone),
+		"contact_id":          transfer.ContactID.String(),
 		"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
-		"team_id":          teamID.String(),
-		"transferred_at":   transfer.TransferredAt.Format(time.RFC3339),
+		"team_id":             teamID.String(),
+		"transferred_at":      transfer.TransferredAt.Format(time.RFC3339),
 	}
 	if transfer.InitiatingAgentID != nil {
 		basePayload["initiating_agent_id"] = transfer.InitiatingAgentID.String()
@@ -1233,12 +1233,12 @@ func (m *Manager) fireTransferCallback(session *CallSession, hook *TransferHTTPC
 // buildTransferVars builds the template variable map for transfer callbacks.
 func buildTransferVars(transfer *models.CallTransfer) map[string]string {
 	vars := map[string]string{
-		"caller_phone":     transfer.CallerPhone,
-		"contact_id":       transfer.ContactID.String(),
-		"call_log_id":      transfer.CallLogID.String(),
-		"transfer_id":      transfer.ID.String(),
+		"caller_phone":        transfer.CallerPhone,
+		"contact_id":          transfer.ContactID.String(),
+		"call_log_id":         transfer.CallLogID.String(),
+		"transfer_id":         transfer.ID.String(),
 		"whatsapp_account_id": transfer.WhatsAppAccountID.String(),
-		"status":           string(transfer.Status),
+		"status":              string(transfer.Status),
 	}
 	if transfer.TeamID != nil {
 		vars["team_id"] = transfer.TeamID.String()

@@ -273,12 +273,12 @@ func TestBackfillChatbotFlowGraph_FillsNullGraphsAndLeavesOthersAlone(t *testing
 		"edges": []any{},
 	}
 	v2flow := &models.ChatbotFlow{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "already-v2",
-		IsEnabled:       true,
-		Graph:           preExisting,
+		Name:              "already-v2",
+		IsEnabled:         true,
+		Graph:             preExisting,
 	}
 	require.NoError(t, app.DB.Create(v2flow).Error)
 

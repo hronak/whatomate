@@ -737,14 +737,14 @@ func (a *App) processMessageEcho(phoneNumberID string, msg IncomingTextMessage) 
 
 	// Dispatch webhook for outgoing message
 	a.DispatchWebhook(account.OrganizationID, models.WebhookEventMessageOutgoing, MessageEventData{
-		MessageID:       message.ID.String(),
-		ContactID:       contact.ID.String(),
-		ContactPhone:    contact.PhoneNumber,
-		ContactName:     contact.ProfileName,
-		MessageType:     models.MessageType(messageType),
-		Content:         messageText,
+		MessageID:         message.ID.String(),
+		ContactID:         contact.ID.String(),
+		ContactPhone:      contact.PhoneNumber,
+		ContactName:       contact.ProfileName,
+		MessageType:       models.MessageType(messageType),
+		Content:           messageText,
 		WhatsAppAccountID: account.ID.String(),
-		Direction:       models.DirectionOutgoing,
+		Direction:         models.DirectionOutgoing,
 	})
 }
 
@@ -775,9 +775,9 @@ func (a *App) processContactSync(phoneNumberID, contactPhone, contactName, actio
 
 		if isNewContact {
 			a.DispatchWebhook(account.OrganizationID, models.WebhookEventContactCreated, ContactEventData{
-				ContactID:       contact.ID.String(),
-				ContactPhone:    contact.PhoneNumber,
-				ContactName:     contact.ProfileName,
+				ContactID:         contact.ID.String(),
+				ContactPhone:      contact.PhoneNumber,
+				ContactName:       contact.ProfileName,
 				WhatsAppAccountID: account.ID.String(),
 			})
 		}

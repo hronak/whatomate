@@ -540,16 +540,16 @@ func TestApp_SendOutgoingMessage_TemplateMessage(t *testing.T) {
 
 	// Create a test template
 	template := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  org.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    org.ID,
 		WhatsAppAccountID: &account.ID,
-		Name:            "hello_world",
-		DisplayName:     "Hello World Template",
-		MetaTemplateID:  "meta-123",
-		Category:        "MARKETING",
-		Language:        "en",
-		Status:          string(models.TemplateStatusApproved),
-		BodyContent:     "Hello {{1}}! Your order {{2}} is ready.",
+		Name:              "hello_world",
+		DisplayName:       "Hello World Template",
+		MetaTemplateID:    "meta-123",
+		Category:          "MARKETING",
+		Language:          "en",
+		Status:            string(models.TemplateStatusApproved),
+		BodyContent:       "Hello {{1}}! Your order {{2}} is ready.",
 	}
 	require.NoError(t, app.DB.Create(template).Error)
 

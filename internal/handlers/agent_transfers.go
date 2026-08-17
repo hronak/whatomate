@@ -25,7 +25,7 @@ type agentTransferRow struct {
 	ID                    uuid.UUID             `gorm:"column:id"`
 	OrganizationID        uuid.UUID             `gorm:"column:organization_id"`
 	ContactID             uuid.UUID             `gorm:"column:contact_id"`
-	WhatsAppAccountID string                `gorm:"column:whatsapp_account"`
+	WhatsAppAccountID     string                `gorm:"column:whatsapp_account"`
 	PhoneNumber           string                `gorm:"column:phone_number"`
 	Status                models.TransferStatus `gorm:"column:status"`
 	Source                models.TransferSource `gorm:"column:source"`
@@ -55,12 +55,12 @@ type agentTransferRow struct {
 
 // CreateAgentTransferRequest represents the request to create an agent transfer
 type CreateAgentTransferRequest struct {
-	ContactID       string                `json:"contact_id"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
-	AgentID         *string               `json:"agent_id"`
-	TeamID          *string               `json:"team_id"` // Optional team queue
-	Notes           string                `json:"notes"`
-	Source          models.TransferSource `json:"source"` // manual, flow, keyword
+	ContactID         string                `json:"contact_id"`
+	WhatsAppAccountID string                `json:"whatsapp_account_id"`
+	AgentID           *string               `json:"agent_id"`
+	TeamID            *string               `json:"team_id"` // Optional team queue
+	Notes             string                `json:"notes"`
+	Source            models.TransferSource `json:"source"` // manual, flow, keyword
 }
 
 // AssignTransferRequest represents the request to assign a transfer to an agent
@@ -75,7 +75,7 @@ type AgentTransferResponse struct {
 	ContactID         string                `json:"contact_id"`
 	ContactName       string                `json:"contact_name"`
 	PhoneNumber       string                `json:"phone_number"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
+	WhatsAppAccountID string                `json:"whatsapp_account_id"`
 	Status            models.TransferStatus `json:"status"`
 	Source            models.TransferSource `json:"source"`
 	AgentID           *string               `json:"agent_id,omitempty"`
@@ -309,14 +309,14 @@ func (a *App) ListAgentTransfers(r *fastglue.Request) error {
 		}
 
 		resp := AgentTransferResponse{
-			ID:              t.ID.String(),
-			ContactID:       t.ContactID.String(),
-			PhoneNumber:     phoneNumber,
+			ID:                t.ID.String(),
+			ContactID:         t.ContactID.String(),
+			PhoneNumber:       phoneNumber,
 			WhatsAppAccountID: t.WhatsAppAccountID,
-			Status:          t.Status,
-			Source:          t.Source,
-			Notes:           t.Notes,
-			TransferredAt:   t.TransferredAt.Format(time.RFC3339),
+			Status:            t.Status,
+			Source:            t.Source,
+			Notes:             t.Notes,
+			TransferredAt:     t.TransferredAt.Format(time.RFC3339),
 		}
 
 		if t.ContactName != nil {
@@ -491,10 +491,16 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 
 	// Create transfer
 	transfer := models.AgentTransfer{
-		BaseModel:           models.BaseModel{ID: uuid.New()},
-		OrganizationID:      orgID,
-		ContactID:           contactID,
-		WhatsAppAccountID: func(s string) *uuid.UUID { u, err := uuid.Parse(s); if err != nil { return nil }; return &u }(req.WhatsAppAccountID),
+		BaseModel:      models.BaseModel{ID: uuid.New()},
+		OrganizationID: orgID,
+		ContactID:      contactID,
+		WhatsAppAccountID: func(s string) *uuid.UUID {
+			u, err := uuid.Parse(s)
+			if err != nil {
+				return nil
+			}
+			return &u
+		}(req.WhatsAppAccountID),
 		PhoneNumber:         contact.PhoneNumber,
 		Status:              models.TransferStatusActive,
 		Source:              source,
@@ -546,15 +552,20 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 		agentIDStr = &idStr
 	}
 	a.DispatchWebhook(orgID, models.WebhookEventTransferCreated, TransferEventData{
-		TransferID:      transfer.ID.String(),
-		ContactID:       contact.ID.String(),
-		ContactPhone:    contact.PhoneNumber,
-		ContactName:     contact.ProfileName,
-		Source:          transfer.Source,
-		Reason:          transfer.Notes,
-		AgentID:         agentIDStr,
-		AgentName:       agentName,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
+		TransferID:   transfer.ID.String(),
+		ContactID:    contact.ID.String(),
+		ContactPhone: contact.PhoneNumber,
+		ContactName:  contact.ProfileName,
+		Source:       transfer.Source,
+		Reason:       transfer.Notes,
+		AgentID:      agentIDStr,
+		AgentName:    agentName,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(transfer.WhatsAppAccountID),
 	})
 
 	// Load relations for response
@@ -564,15 +575,20 @@ func (a *App) CreateAgentTransfer(r *fastglue.Request) error {
 	contactName, phoneNumber := a.MaskContactFields(orgID, contact.ProfileName, transfer.PhoneNumber)
 
 	resp := AgentTransferResponse{
-		ID:              transfer.ID.String(),
-		ContactID:       transfer.ContactID.String(),
-		ContactName:     contactName,
-		PhoneNumber:     phoneNumber,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
-		Status:          transfer.Status,
-		Source:          transfer.Source,
-		Notes:           transfer.Notes,
-		TransferredAt:   transfer.TransferredAt.Format(time.RFC3339),
+		ID:          transfer.ID.String(),
+		ContactID:   transfer.ContactID.String(),
+		ContactName: contactName,
+		PhoneNumber: phoneNumber,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(transfer.WhatsAppAccountID),
+		Status:        transfer.Status,
+		Source:        transfer.Source,
+		Notes:         transfer.Notes,
+		TransferredAt: transfer.TransferredAt.Format(time.RFC3339),
 	}
 
 	if transfer.AgentID != nil {
@@ -669,12 +685,17 @@ func (a *App) ResumeFromTransfer(r *fastglue.Request) error {
 
 	// Dispatch webhook for transfer resumed
 	a.DispatchWebhook(orgID, models.WebhookEventTransferResumed, TransferEventData{
-		TransferID:      transfer.ID.String(),
-		ContactID:       contact.ID.String(),
-		ContactPhone:    contact.PhoneNumber,
-		ContactName:     contact.ProfileName,
-		Source:          transfer.Source,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
+		TransferID:   transfer.ID.String(),
+		ContactID:    contact.ID.String(),
+		ContactPhone: contact.PhoneNumber,
+		ContactName:  contact.ProfileName,
+		Source:       transfer.Source,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(transfer.WhatsAppAccountID),
 	})
 
 	return a.sendJSON(r, map[string]any{
@@ -833,14 +854,19 @@ func (a *App) AssignAgentTransfer(r *fastglue.Request) error {
 		contactName = transfer.Contact.ProfileName
 	}
 	a.DispatchWebhook(orgID, models.WebhookEventTransferAssigned, TransferEventData{
-		TransferID:      transfer.ID.String(),
-		ContactID:       transfer.ContactID.String(),
-		ContactPhone:    contactPhone,
-		ContactName:     contactName,
-		Source:          transfer.Source,
-		AgentID:         agentIDStr,
-		AgentName:       agentName,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
+		TransferID:   transfer.ID.String(),
+		ContactID:    transfer.ContactID.String(),
+		ContactPhone: contactPhone,
+		ContactName:  contactName,
+		Source:       transfer.Source,
+		AgentID:      agentIDStr,
+		AgentName:    agentName,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(transfer.WhatsAppAccountID),
 	})
 
 	return a.sendJSON(r, map[string]any{
@@ -1011,14 +1037,19 @@ func (a *App) PickNextTransfer(r *fastglue.Request) error {
 	}
 
 	resp := AgentTransferResponse{
-		ID:              transfer.ID.String(),
-		ContactID:       transfer.ContactID.String(),
-		PhoneNumber:     phoneNumber,
-		WhatsAppAccountID: func(u *uuid.UUID) string { if u == nil { return "" }; return u.String() }(transfer.WhatsAppAccountID),
-		Status:          transfer.Status,
-		Source:          transfer.Source,
-		Notes:           transfer.Notes,
-		TransferredAt:   transfer.TransferredAt.Format(time.RFC3339),
+		ID:          transfer.ID.String(),
+		ContactID:   transfer.ContactID.String(),
+		PhoneNumber: phoneNumber,
+		WhatsAppAccountID: func(u *uuid.UUID) string {
+			if u == nil {
+				return ""
+			}
+			return u.String()
+		}(transfer.WhatsAppAccountID),
+		Status:        transfer.Status,
+		Source:        transfer.Source,
+		Notes:         transfer.Notes,
+		TransferredAt: transfer.TransferredAt.Format(time.RFC3339),
 	}
 
 	if transfer.Contact != nil {
@@ -1254,14 +1285,14 @@ func (a *App) createTransferToQueue(account *models.WhatsAppAccount, contact *mo
 	}
 
 	transfer := models.AgentTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  account.OrganizationID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    account.OrganizationID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.TransferStatusActive,
-		Source:          source,
-		TransferredAt:   time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.TransferStatusActive,
+		Source:            source,
+		TransferredAt:     time.Now(),
 	}
 
 	if err := a.saveAndFinalizeTransfer(&transfer, account, contact, settings, false); err != nil {
@@ -1302,15 +1333,15 @@ func (a *App) createTransferFromKeyword(account *models.WhatsAppAccount, contact
 	}
 
 	transfer := models.AgentTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  account.OrganizationID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    account.OrganizationID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.TransferStatusActive,
-		Source:          models.TransferSourceKeyword,
-		AgentID:         agentID,
-		TransferredAt:   time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.TransferStatusActive,
+		Source:            models.TransferSourceKeyword,
+		AgentID:           agentID,
+		TransferredAt:     time.Now(),
 	}
 
 	if err := a.saveAndFinalizeTransfer(&transfer, account, contact, settings, true); err != nil {
@@ -1356,17 +1387,17 @@ func (a *App) createTransferToTeam(account *models.WhatsAppAccount, contact *mod
 	}
 
 	transfer := models.AgentTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  account.OrganizationID,
-		ContactID:       contact.ID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    account.OrganizationID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     contact.PhoneNumber,
-		Status:          models.TransferStatusActive,
-		Source:          source,
-		AgentID:         agentID,
-		TeamID:          &teamID,
-		Notes:           notes,
-		TransferredAt:   time.Now(),
+		PhoneNumber:       contact.PhoneNumber,
+		Status:            models.TransferStatusActive,
+		Source:            source,
+		AgentID:           agentID,
+		TeamID:            &teamID,
+		Notes:             notes,
+		TransferredAt:     time.Now(),
 	}
 
 	if err := a.saveAndFinalizeTransfer(&transfer, account, contact, settings, true); err != nil {

@@ -25,36 +25,36 @@ type OutboundWebhookPayload struct {
 
 // MessageEventData represents data for message events
 type MessageEventData struct {
-	MessageID       string             `json:"message_id"`
-	ContactID       string             `json:"contact_id"`
-	ContactPhone    string             `json:"contact_phone"`
-	ContactName     string             `json:"contact_name"`
-	MessageType     models.MessageType `json:"message_type"`
-	Content         string             `json:"content"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
-	Direction       models.Direction   `json:"direction,omitempty"`
-	SentByUserID    string             `json:"sent_by_user_id,omitempty"`
+	MessageID         string             `json:"message_id"`
+	ContactID         string             `json:"contact_id"`
+	ContactPhone      string             `json:"contact_phone"`
+	ContactName       string             `json:"contact_name"`
+	MessageType       models.MessageType `json:"message_type"`
+	Content           string             `json:"content"`
+	WhatsAppAccountID string             `json:"whatsapp_account_id"`
+	Direction         models.Direction   `json:"direction,omitempty"`
+	SentByUserID      string             `json:"sent_by_user_id,omitempty"`
 }
 
 // ContactEventData represents data for contact events
 type ContactEventData struct {
-	ContactID       string `json:"contact_id"`
-	ContactPhone    string `json:"contact_phone"`
-	ContactName     string `json:"contact_name"`
+	ContactID         string `json:"contact_id"`
+	ContactPhone      string `json:"contact_phone"`
+	ContactName       string `json:"contact_name"`
 	WhatsAppAccountID string `json:"whatsapp_account_id"`
 }
 
 // TransferEventData represents data for transfer events
 type TransferEventData struct {
-	TransferID      string                `json:"transfer_id"`
-	ContactID       string                `json:"contact_id"`
-	ContactPhone    string                `json:"contact_phone"`
-	ContactName     string                `json:"contact_name"`
-	Source          models.TransferSource `json:"source"`
-	Reason          string                `json:"reason,omitempty"`
-	AgentID         *string               `json:"agent_id,omitempty"`
-	AgentName       *string               `json:"agent_name,omitempty"`
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
+	TransferID        string                `json:"transfer_id"`
+	ContactID         string                `json:"contact_id"`
+	ContactPhone      string                `json:"contact_phone"`
+	ContactName       string                `json:"contact_name"`
+	Source            models.TransferSource `json:"source"`
+	Reason            string                `json:"reason,omitempty"`
+	AgentID           *string               `json:"agent_id,omitempty"`
+	AgentName         *string               `json:"agent_name,omitempty"`
+	WhatsAppAccountID string                `json:"whatsapp_account_id"`
 }
 
 // maxConcurrentWebhooks limits the number of concurrent webhook deliveries per dispatch

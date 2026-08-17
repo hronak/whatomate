@@ -19,13 +19,13 @@ func createTestCampaign(t *testing.T, app *handlers.App, orgID, templateID, user
 	t.Helper()
 
 	campaign := &models.BulkMessageCampaign{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		Name:            "Test Campaign " + uuid.New().String()[:8],
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		Name:              "Test Campaign " + uuid.New().String()[:8],
 		WhatsAppAccountID: whatsappAccountID,
-		TemplateID:      templateID,
-		Status:          status,
-		CreatedBy:       userID,
+		TemplateID:        templateID,
+		Status:            status,
+		CreatedBy:         userID,
 	}
 	require.NoError(t, app.DB.Create(campaign).Error)
 	return campaign

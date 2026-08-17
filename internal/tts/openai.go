@@ -61,7 +61,7 @@ func (p *OpenAITTS) Generate(ctx context.Context, text string) (string, error) {
 	}
 
 	if _, err := io.Copy(out, resp.Body); err != nil {
-		out.Close()
+		_ = out.Close()
 		return "", err
 	}
 

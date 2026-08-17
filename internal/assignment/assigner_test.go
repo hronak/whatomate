@@ -445,14 +445,14 @@ func TestCallLoadCounter_OnlyWaitingAndConnected(t *testing.T) {
 
 	mkTransfer := func(status models.CallTransferStatus) {
 		require.NoError(t, db.Create(&models.CallTransfer{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  org.ID,
-			CallLogID:       callLog.ID,
-			ContactID:       contact.ID,
-			WhatsAppCallID:  "wa-" + uuid.New().String()[:8],
-			CallerPhone:     contact.PhoneNumber,
-			AgentID:         &agent.ID,
-			Status:          status,
+			BaseModel:      models.BaseModel{ID: uuid.New()},
+			OrganizationID: org.ID,
+			CallLogID:      callLog.ID,
+			ContactID:      contact.ID,
+			WhatsAppCallID: "wa-" + uuid.New().String()[:8],
+			CallerPhone:    contact.PhoneNumber,
+			AgentID:        &agent.ID,
+			Status:         status,
 		}).Error)
 	}
 	mkTransfer(models.CallTransferStatusWaiting)

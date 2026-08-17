@@ -261,15 +261,15 @@ func CreateTestTemplate(t *testing.T, db *gorm.DB, orgID uuid.UUID, accountID *u
 	t.Helper()
 
 	template := &models.Template{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: accountID,
-		Name:            "test-template-" + uuid.New().String()[:8],
-		MetaTemplateID:  "meta-" + uuid.New().String()[:8],
-		Category:        "MARKETING",
-		Language:        "en",
-		Status:          string(models.TemplateStatusApproved),
-		BodyContent:     "Hello {{1}}",
+		Name:              "test-template-" + uuid.New().String()[:8],
+		MetaTemplateID:    "meta-" + uuid.New().String()[:8],
+		Category:          "MARKETING",
+		Language:          "en",
+		Status:            string(models.TemplateStatusApproved),
+		BodyContent:       "Hello {{1}}",
 	}
 	require.NoError(t, db.Create(template).Error)
 	return template

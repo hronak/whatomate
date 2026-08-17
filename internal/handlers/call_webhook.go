@@ -291,14 +291,14 @@ func (a *App) getOrCreateCallLog(account *models.WhatsAppAccount, contact *model
 
 	// Create a new call log
 	callLog = models.CallLog{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  account.OrganizationID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    account.OrganizationID,
 		WhatsAppAccountID: &account.ID,
-		ContactID:       contact.ID,
-		WhatsAppCallID:  callID,
-		CallerPhone:     callerPhone,
-		Status:          models.CallStatusRinging,
-		StartedAt:       &now,
+		ContactID:         contact.ID,
+		WhatsAppCallID:    callID,
+		CallerPhone:       callerPhone,
+		Status:            models.CallStatusRinging,
+		StartedAt:         &now,
 	}
 
 	// Find the call-start IVR flow for this account (cached)
@@ -426,11 +426,11 @@ func (a *App) processCallPermissionReply(phoneNumberID, fromPhone string, reply 
 		}
 		isNewPermission = true
 		permission = models.CallPermission{
-			BaseModel:       models.BaseModel{ID: uuid.New()},
-			OrganizationID:  account.OrganizationID,
-			ContactID:       contact.ID,
+			BaseModel:         models.BaseModel{ID: uuid.New()},
+			OrganizationID:    account.OrganizationID,
+			ContactID:         contact.ID,
 			WhatsAppAccountID: &account.ID,
-			Status:          models.CallPermissionPending,
+			Status:            models.CallPermissionPending,
 		}
 		a.Log.Info("No prior permission record for reply; creating one (out-of-band grant)", "contact_id", contact.ID)
 	}

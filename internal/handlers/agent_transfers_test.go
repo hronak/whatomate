@@ -30,15 +30,15 @@ func createTestTransfer(t *testing.T, app *handlers.App, orgID, contactID uuid.U
 	t.Helper()
 
 	transfer := &models.AgentTransfer{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
-		ContactID:       contactID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
+		ContactID:         contactID,
 		WhatsAppAccountID: accountID,
-		PhoneNumber:     "1234567890",
-		Status:          status,
-		Source:          models.TransferSourceManual,
-		AgentID:         agentID,
-		TransferredAt:   time.Now(),
+		PhoneNumber:       "1234567890",
+		Status:            status,
+		Source:            models.TransferSourceManual,
+		AgentID:           agentID,
+		TransferredAt:     time.Now(),
 	}
 	require.NoError(t, app.DB.Create(transfer).Error)
 	return transfer
@@ -678,24 +678,24 @@ func TestApp_PickNextTransfer_FIFO(t *testing.T) {
 
 	// Create multiple transfers with different times
 	transfer1 := &models.AgentTransfer{
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     "1111111111",
-		Status:          models.TransferStatusActive,
-		Source:          models.TransferSourceManual,
-		TransferredAt:   time.Now().Add(-2 * time.Hour), // Oldest
+		PhoneNumber:       "1111111111",
+		Status:            models.TransferStatusActive,
+		Source:            models.TransferSourceManual,
+		TransferredAt:     time.Now().Add(-2 * time.Hour), // Oldest
 	}
 	require.NoError(t, app.DB.Create(transfer1).Error)
 
 	transfer2 := &models.AgentTransfer{
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     "2222222222",
-		Status:          models.TransferStatusActive,
-		Source:          models.TransferSourceManual,
-		TransferredAt:   time.Now().Add(-1 * time.Hour), // Newer
+		PhoneNumber:       "2222222222",
+		Status:            models.TransferStatusActive,
+		Source:            models.TransferSourceManual,
+		TransferredAt:     time.Now().Add(-1 * time.Hour), // Newer
 	}
 	require.NoError(t, app.DB.Create(transfer2).Error)
 
@@ -731,14 +731,14 @@ func TestApp_PickNextTransfer_TeamFiltering(t *testing.T) {
 
 	// Create transfer in team queue
 	teamTransfer := &models.AgentTransfer{
-		OrganizationID:  org.ID,
-		ContactID:       contact.ID,
+		OrganizationID:    org.ID,
+		ContactID:         contact.ID,
 		WhatsAppAccountID: &account.ID,
-		PhoneNumber:     "1111111111",
-		Status:          models.TransferStatusActive,
-		Source:          models.TransferSourceManual,
-		TeamID:          &team.ID,
-		TransferredAt:   time.Now(),
+		PhoneNumber:       "1111111111",
+		Status:            models.TransferStatusActive,
+		Source:            models.TransferSourceManual,
+		TeamID:            &team.ID,
+		TransferredAt:     time.Now(),
 	}
 	require.NoError(t, app.DB.Create(teamTransfer).Error)
 

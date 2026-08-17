@@ -19,14 +19,14 @@ import (
 
 // IVRFlowRequest represents the request body for creating/updating an IVR flow
 type IVRFlowRequest struct {
-	WhatsAppAccountID string `json:"whatsapp_account_id"`
-	Name            string       `json:"name"`
-	Description     string       `json:"description"`
-	IsActive        bool         `json:"is_active"`
-	IsCallStart     bool         `json:"is_call_start"`
-	IsOutgoingEnd   bool         `json:"is_outgoing_end"`
-	Menu            models.JSONB `json:"menu"`
-	WelcomeAudioURL string       `json:"welcome_audio_url"`
+	WhatsAppAccountID string       `json:"whatsapp_account_id"`
+	Name              string       `json:"name"`
+	Description       string       `json:"description"`
+	IsActive          bool         `json:"is_active"`
+	IsCallStart       bool         `json:"is_call_start"`
+	IsOutgoingEnd     bool         `json:"is_outgoing_end"`
+	Menu              models.JSONB `json:"menu"`
+	WelcomeAudioURL   string       `json:"welcome_audio_url"`
 }
 
 // ListIVRFlows returns all IVR flows for the organization
@@ -127,18 +127,18 @@ func (a *App) CreateIVRFlow(r *fastglue.Request) error {
 	}
 
 	flow := models.IVRFlow{
-		BaseModel:       models.BaseModel{ID: uuid.New()},
-		OrganizationID:  orgID,
+		BaseModel:         models.BaseModel{ID: uuid.New()},
+		OrganizationID:    orgID,
 		WhatsAppAccountID: func(s string) *uuid.UUID { u, _ := uuid.Parse(s); return &u }(req.WhatsAppAccountID),
-		Name:            req.Name,
-		Description:     req.Description,
-		IsActive:        req.IsActive,
-		IsCallStart:     req.IsCallStart,
-		IsOutgoingEnd:   req.IsOutgoingEnd,
-		Menu:            req.Menu,
-		WelcomeAudioURL: req.WelcomeAudioURL,
-		CreatedByID:     &userID,
-		UpdatedByID:     &userID,
+		Name:              req.Name,
+		Description:       req.Description,
+		IsActive:          req.IsActive,
+		IsCallStart:       req.IsCallStart,
+		IsOutgoingEnd:     req.IsOutgoingEnd,
+		Menu:              req.Menu,
+		WelcomeAudioURL:   req.WelcomeAudioURL,
+		CreatedByID:       &userID,
+		UpdatedByID:       &userID,
 	}
 
 	if err := a.DB.Create(&flow).Error; err != nil {
