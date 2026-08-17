@@ -157,7 +157,7 @@ async function fetchAccounts() {
     accounts.value = response.data?.accounts || [];
     if (
       selectedAccount.value !== "all" &&
-      !accounts.value.some((a) => a.name === selectedAccount.value)
+      !accounts.value.some((a) => a.id === selectedAccount.value)
     ) {
       selectedAccount.value = "all";
       localStorage.setItem("flows_selected_account", "all");
@@ -203,7 +203,7 @@ function openCreateDialog() {
     whatsapp_account_id:
       selectedAccount.value && selectedAccount.value !== "all"
         ? selectedAccount.value
-        : accounts.value[0]?.name || "",
+        : accounts.value[0]?.id || "",
     name: "",
     category: "",
     json_version: "6.0",
@@ -666,7 +666,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
 
     <!-- Create Flow Dialog -->
     <Dialog v-model:open="showCreateDialog">
-      <DialogContent class="max-w-6xl h-[85vh] flex flex-col">
+      <DialogContent class="max-w-6xl sm:max-w-6xl h-[85vh] flex flex-col p-6">
         <DialogHeader
           ><DialogTitle>{{ $t("flows.createWhatsAppFlow") }}</DialogTitle
           ><DialogDescription>{{
@@ -737,7 +737,7 @@ function sanitizeScreensForMeta(screens: any[]): any[] {
 
     <!-- Edit Flow Dialog -->
     <Dialog v-model:open="showEditDialog">
-      <DialogContent class="max-w-6xl h-[85vh] flex flex-col">
+      <DialogContent class="max-w-6xl sm:max-w-6xl h-[85vh] flex flex-col p-6">
         <DialogHeader
           ><DialogTitle>{{ $t("flows.editWhatsAppFlow") }}</DialogTitle
           ><DialogDescription>{{
