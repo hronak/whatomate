@@ -1,9 +1,16 @@
 name: Test
 
+# Runs on branch pushes and PRs as well as tags, so a commit can be verified
+# *before* it is released. release.yml and develop-image.yml stay tag-only, and
+# a v* tag fires all three at once — without the triggers below, the first time
+# CI ever saw a commit was the tag that had already started publishing it.
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
+  pull_request:
 
 permissions:
   contents: read
