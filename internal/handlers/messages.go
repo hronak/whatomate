@@ -494,23 +494,31 @@ func (a *App) broadcastNewMessage(orgID uuid.UUID, msg *models.Message, contact 
 		profileName = privacy.MaskIfPhoneNumber(profileName)
 	}
 
+	var waAccountIDStr string
+	if msg.WhatsAppAccountID != nil {
+		waAccountIDStr = msg.WhatsAppAccountID.String()
+	} else if contact.WhatsAppAccountID != nil {
+		waAccountIDStr = contact.WhatsAppAccountID.String()
+	}
+
 	payload := map[string]any{
-		"id":               msg.ID.String(),
-		"contact_id":       contact.ID.String(),
-		"assigned_user_id": assignedUserIDStr,
-		"profile_name":     profileName,
-		"direction":        msg.Direction,
-		"message_type":     msg.MessageType,
-		"content":          map[string]string{"body": msg.Content},
-		"media_url":        msg.MediaURL,
-		"media_mime_type":  msg.MediaMimeType,
-		"media_filename":   msg.MediaFilename,
-		"interactive_data": msg.InteractiveData,
-		"status":           msg.Status,
-		"wamid":            msg.WhatsAppMessageID,
-		"created_at":       msg.CreatedAt,
-		"updated_at":       msg.UpdatedAt,
-		"is_reply":         msg.IsReply,
+		"id":                  msg.ID.String(),
+		"contact_id":          contact.ID.String(),
+		"assigned_user_id":    assignedUserIDStr,
+		"profile_name":        profileName,
+		"direction":           msg.Direction,
+		"message_type":        msg.MessageType,
+		"content":             map[string]string{"body": msg.Content},
+		"media_url":           msg.MediaURL,
+		"media_mime_type":     msg.MediaMimeType,
+		"media_filename":      msg.MediaFilename,
+		"interactive_data":    msg.InteractiveData,
+		"status":              msg.Status,
+		"wamid":               msg.WhatsAppMessageID,
+		"whatsapp_account_id": waAccountIDStr,
+		"created_at":          msg.CreatedAt,
+		"updated_at":          msg.UpdatedAt,
+		"is_reply":            msg.IsReply,
 	}
 
 	// Add interactive data

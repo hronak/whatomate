@@ -287,11 +287,6 @@ const messagesScroll = useInfiniteScroll({
         selectedAccount.value || undefined,
       );
       await nextTick();
-      // Load media for any new messages
-      try {
-      } catch (e) {
-        console.error("Error loading media:", e);
-      }
     });
   },
   hasMore: computed(() => contactsStore.hasMoreMessages),
@@ -500,7 +495,7 @@ onMounted(async () => {
   // Fetch org-level WhatsApp accounts for account tabs
   try {
     const res = await accountsService.list();
-    orgAccounts.value = res.data.data?.accounts || [];
+    orgAccounts.value = res.data?.accounts || res.data?.data?.accounts || [];
   } catch {
     orgAccounts.value = [];
   }
@@ -665,11 +660,6 @@ async function selectContact(id: string) {
     wsService.setCurrentContact(id);
     // Wait for DOM to render messages before scrolling
     await nextTick();
-    // Load media for messages after messages are fetched
-    try {
-    } catch (e) {
-      console.error("Error loading media:", e);
-    }
     // Scroll after a brief delay to ensure content is rendered (instant on initial load)
     setTimeout(() => {
       scrollToBottom(true);
@@ -728,18 +718,6 @@ watch(
   },
 );
 
-// Watch for messages changes to load media
-watch(
-  () => contactsStore.messages,
-  () => {
-    try {
-    } catch (e) {
-      console.error("Error loading media:", e);
-    }
-  },
-  { deep: true },
-);
-
 async function switchAccount(accountName: string) {
   if (!contactsStore.currentContact || accountName === selectedAccount.value)
     return;
@@ -749,10 +727,6 @@ async function switchAccount(accountName: string) {
     account: accountName,
   });
   await nextTick();
-  try {
-  } catch (e) {
-    console.error("Error loading media:", e);
-  }
   scrollToBottom(true);
 }
 

@@ -319,6 +319,7 @@ class WebSocketService {
         reply_to_message_id: payload.reply_to_message_id,
         reply_to_message: payload.reply_to_message,
         reactions: payload.reactions,
+        whatsapp_account_id: payload.whatsapp_account_id,
         created_at: payload.created_at,
         updated_at: payload.updated_at,
       });
@@ -721,6 +722,11 @@ class WebSocketService {
     // Refresh contacts list
     const contactsStore = useContactsStore();
     contactsStore.fetchContacts();
+
+    // Refresh current contact's messages if one is open
+    if (contactsStore.currentContact) {
+      contactsStore.fetchMessages(contactsStore.currentContact.id);
+    }
 
     // Refresh transfers
     const transfersStore = useTransfersStore();

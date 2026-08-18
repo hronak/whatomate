@@ -24,6 +24,7 @@ export interface Contact {
   tags: string[];
   metadata: Record<string, any>;
   last_message_at?: string;
+  last_message_preview?: string;
   last_inbound_at?: string;
   service_window_open?: boolean;
   unread_count: number;
@@ -327,6 +328,16 @@ export const useContactsStore = defineStore("contacts", () => {
     const contact = contacts.value.find((c) => c.id === message.contact_id);
     if (contact) {
       contact.last_message_at = message.created_at;
+      const previewText =
+        typeof message.content === "string"
+          ? message.content
+          : message.content?.body;
+      if (previewText) {
+        contact.last_message_preview =
+          previewText.length > 100
+            ? previewText.substring(0, 97) + "..."
+            : previewText;
+      }
       if (message.direction === "incoming") {
         contact.unread_count++;
         contact.last_inbound_at = message.created_at;
